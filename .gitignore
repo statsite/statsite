@@ -10,3 +10,9 @@
 *.lai
 *.la
 *.a
+
+.lvimrc
+.sconsign.dblite
+tests/build/
+test_runner
+statsite
