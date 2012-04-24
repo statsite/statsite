@@ -1,0 +1,5074 @@
+------------------------------------------------------------------------
+r563 | rbcollins | 2009-09-23 20:43:13 +1000 (Wed, 23 Sep 2009) | 1 line
+Changed paths:
+   A /tags/check-0.9.8 (from /trunk:562)
+
+Release check-0.9.8
+------------------------------------------------------------------------
+r562 | rbcollins | 2009-09-23 20:35:45 +1000 (Wed, 23 Sep 2009) | 1 line
+Changed paths:
+   M /trunk/Makefile.am
+
+Supply a commit message for the tag operation.
+------------------------------------------------------------------------
+r561 | rbcollins | 2009-09-23 20:25:22 +1000 (Wed, 23 Sep 2009) | 1 line
+Changed paths:
+   M /trunk/Makefile.am
+
+Fix another 'check log for stuff' action.
+------------------------------------------------------------------------
+r560 | rbcollins | 2009-09-23 20:22:51 +1000 (Wed, 23 Sep 2009) | 1 line
+Changed paths:
+   M /trunk/Makefile.am
+   M /trunk/NEWS
+
+Add NEWS for the macro fix, and remove SVNChangelog step from release process.
+------------------------------------------------------------------------
+r559 | rbcollins | 2009-09-23 17:59:17 +1000 (Wed, 23 Sep 2009) | 1 line
+Changed paths:
+   M /trunk/configure.ac
+
+Put all version numbers of check in configure.ac at the same place.
+------------------------------------------------------------------------
+r558 | rbcollins | 2009-09-22 10:39:57 +1000 (Tue, 22 Sep 2009) | 1 line
+Changed paths:
+   M /trunk/HACKING
+
+Document needed permissions to do releases.
+------------------------------------------------------------------------
+r557 | rbcollins | 2009-09-22 10:07:21 +1000 (Tue, 22 Sep 2009) | 1 line
+Changed paths:
+   M /trunk/Makefile.am
+   M /trunk/NEWS
+   M /trunk/configure.ac
+
+Merge back release 0.9.7
+------------------------------------------------------------------------
+r556 | rbcollins | 2009-09-22 09:52:45 +1000 (Tue, 22 Sep 2009) | 1 line
+Changed paths:
+   M /trunk/HACKING
+   M /trunk/Makefile.am
+
+More release automation tweaks.
+------------------------------------------------------------------------
+r552 | rbcollins | 2009-09-22 09:10:37 +1000 (Tue, 22 Sep 2009) | 1 line
+Changed paths:
+   M /trunk/HACKING
+   M /trunk/Makefile.am
+
+Escaping in shell commands - more Makefile.am release tweaking.
+------------------------------------------------------------------------
+r551 | rbcollins | 2009-09-22 09:00:51 +1000 (Tue, 22 Sep 2009) | 2 lines
+Changed paths:
+   M /trunk/Makefile.am
+
+Deal with automake wanting POSIX make only rules.
+
+------------------------------------------------------------------------
+r550 | rbcollins | 2009-09-22 08:34:26 +1000 (Tue, 22 Sep 2009) | 1 line
+Changed paths:
+   M /trunk/Makefile.am
+
+Polish.
+------------------------------------------------------------------------
+r549 | rbcollins | 2009-09-22 08:31:14 +1000 (Tue, 22 Sep 2009) | 1 line
+Changed paths:
+   M /trunk/Makefile.am
+
+Typo in prereleasecheck.
+------------------------------------------------------------------------
+r548 | rbcollins | 2009-09-22 08:29:47 +1000 (Tue, 22 Sep 2009) | 1 line
+Changed paths:
+   M /trunk/HACKING
+   M /trunk/Makefile.am
+   M /trunk/NEWS
+
+Hopefully automake releases.
+------------------------------------------------------------------------
+r547 | rbcollins | 2009-09-21 22:33:46 +1000 (Mon, 21 Sep 2009) | 1 line
+Changed paths:
+   M /trunk/configure.ac
+
+Note that we need tex to build docs.
+------------------------------------------------------------------------
+r546 | cpickett | 2009-09-21 14:40:43 +1000 (Mon, 21 Sep 2009) | 2 lines
+Changed paths:
+   M /trunk/doc/check.texi
+
+* fix autotools link
+
+------------------------------------------------------------------------
+r545 | cpickett | 2009-05-12 12:05:54 +1000 (Tue, 12 May 2009) | 2 lines
+Changed paths:
+   M /trunk/tests/check_stress.c
+
+* add comment about uselessness
+
+------------------------------------------------------------------------
+r544 | cpickett | 2009-05-12 11:34:55 +1000 (Tue, 12 May 2009) | 2 lines
+Changed paths:
+   M /trunk/tests/Makefile.am
+
+* comment out check_thread_stress from build per rob's request
+
+------------------------------------------------------------------------
+r543 | rbcollins | 2009-05-09 11:53:33 +1000 (Sat, 09 May 2009) | 1 line
+Changed paths:
+   M /trunk/AUTHORS
+   M /trunk/NEWS
+   M /trunk/configure.ac
+   M /trunk/doc/check.texi
+   M /trunk/src/check.h.in
+   M /trunk/src/check_impl.h
+   M /trunk/src/check_log.c
+   M /trunk/src/check_log.h
+   M /trunk/src/check_print.c
+   M /trunk/src/check_run.c
+   M /trunk/src/check_str.c
+   M /trunk/src/check_str.h
+   M /trunk/tests/Makefile.am
+   M /trunk/tests/check_check.h
+   A /trunk/tests/check_check_log_internal.c
+   M /trunk/tests/check_check_main.c
+   M /trunk/tests/ex_output.c
+   M /trunk/tests/test_output.sh
+   A /trunk/tests/test_vars.in
+
+Add CK_SUBUNIT support for outputting subunit test activity. (Needs libsubunit).
+------------------------------------------------------------------------
+r542 | rbcollins | 2009-05-09 11:19:25 +1000 (Sat, 09 May 2009) | 1 line
+Changed paths:
+   M /trunk/doc/Makefile.am
+
+Fix target path failure for VPATH builds on check.texi.
+------------------------------------------------------------------------
+r541 | rbcollins | 2009-05-09 09:58:40 +1000 (Sat, 09 May 2009) | 1 line
+Changed paths:
+   M /trunk/tests/Makefile.am
+
+Set an include path for tests that includes builddir/src, for VPATH builds.
+------------------------------------------------------------------------
+r540 | hugo303 | 2009-03-18 09:33:18 +1100 (Wed, 18 Mar 2009) | 1 line
+Changed paths:
+   M /trunk/index.html
+
+ * Updated maintaining text on home page
+------------------------------------------------------------------------
+r539 | hugo303 | 2009-03-13 09:05:05 +1100 (Fri, 13 Mar 2009) | 1 line
+Changed paths:
+   M /trunk/doc/check.texi
+
+ * Added documentation for timeout scaling
+------------------------------------------------------------------------
+r538 | hugo303 | 2009-03-07 10:29:20 +1100 (Sat, 07 Mar 2009) | 5 lines
+Changed paths:
+   M /trunk/src/check.c
+   M /trunk/tests/check_check_master.c
+   M /trunk/tests/check_check_sub.c
+
+ * Added code and tests for timeout scaling via environment variable.
+   Feature requested in tracker item #1549835 on sourceforge. Docs
+   coming later.
+
+
+------------------------------------------------------------------------
+r537 | hugo303 | 2009-03-05 09:26:56 +1100 (Thu, 05 Mar 2009) | 3 lines
+Changed paths:
+   M /trunk/doc/check.texi
+
+ * Added documentation for testing exit values with tcase_add_exit_test().
+
+
+------------------------------------------------------------------------
+r536 | cpickett | 2009-02-23 14:32:58 +1100 (Mon, 23 Feb 2009) | 2 lines
+Changed paths:
+   A /trunk/contrib/make_macros
+
+* add make_macros perl script from somebody (who?)
+
+------------------------------------------------------------------------
+r535 | cpickett | 2009-02-19 09:46:18 +1100 (Thu, 19 Feb 2009) | 2 lines
+Changed paths:
+   M /trunk/src/check_pack.c
+
+* add type to check_type error message
+
+------------------------------------------------------------------------
+r534 | cpickett | 2009-02-10 03:30:26 +1100 (Tue, 10 Feb 2009) | 2 lines
+Changed paths:
+   D /trunk/inbox
+   A /trunk/patches (from /trunk/inbox:524)
+
+* rename inbox to patches
+
+------------------------------------------------------------------------
+r533 | cpickett | 2009-02-10 03:26:59 +1100 (Tue, 10 Feb 2009) | 2 lines
+Changed paths:
+   A /trunk/contrib
+   A /trunk/contrib/check_unittest.txt
+   A /trunk/contrib/check_unittest.xslt
+
+* add contrib dir with xslt thingy for now
+
+------------------------------------------------------------------------
+r532 | hugo303 | 2009-02-04 10:47:36 +1100 (Wed, 04 Feb 2009) | 2 lines
+Changed paths:
+   M /trunk/HACKING
+
+ * Added generation of web manual to release process.
+
+------------------------------------------------------------------------
+r531 | hugo303 | 2009-02-04 04:03:08 +1100 (Wed, 04 Feb 2009) | 2 lines
+Changed paths:
+   A /trunk/tests/check_check_exit.c
+
+ * New file for exit tests, forgot in previous checkin.
+
+------------------------------------------------------------------------
+r530 | hugo303 | 2009-02-04 00:38:12 +1100 (Wed, 04 Feb 2009) | 2 lines
+Changed paths:
+   M /trunk/AUTHORS
+
+ * Added Roy Merkel for exit test patch.
+
+------------------------------------------------------------------------
+r529 | hugo303 | 2009-02-04 00:36:16 +1100 (Wed, 04 Feb 2009) | 5 lines
+Changed paths:
+   M /trunk/src/check.c
+   M /trunk/src/check.h.in
+   M /trunk/src/check_impl.h
+   M /trunk/src/check_run.c
+   M /trunk/tests/Makefile.am
+   M /trunk/tests/check_check.h
+   M /trunk/tests/check_check_main.c
+
+ * Applied patch #1726574, with some modifications.
+   The idea is to create a mechanism to verify that functions exit
+   early with specific exit values, analogous to the existing signal
+   test mechanism.
+
+------------------------------------------------------------------------
+r528 | cpickett | 2009-02-03 05:55:58 +1100 (Tue, 03 Feb 2009) | 2 lines
+Changed paths:
+   M /trunk/index.html
+
+* use Date property for index.html
+
+------------------------------------------------------------------------
+r527 | hugo303 | 2009-02-02 23:45:08 +1100 (Mon, 02 Feb 2009) | 6 lines
+Changed paths:
+   M /trunk/tests/check_check.h
+   M /trunk/tests/check_check_master.c
+   M /trunk/tests/check_check_sub.c
+
+ * Fixed the irritating line number issue in the sub test suite. Using
+   preprocessor stuff the expected line numbers in the failure messages
+   are now autogenerated. It's not the most beautiful solution, but it
+   works lightyears better than the hardcoded code that was.
+ 
+
+------------------------------------------------------------------------
+r526 | cpickett | 2009-02-02 07:40:55 +1100 (Mon, 02 Feb 2009) | 2 lines
+Changed paths:
+   M /trunk/index.html
+
+* add GNUpdf to list of projects using Check
+
+------------------------------------------------------------------------
+r525 | hugo303 | 2009-01-30 22:46:36 +1100 (Fri, 30 Jan 2009) | 4 lines
+Changed paths:
+   M /trunk/src/check_run.c
+
+ * Removed unnecessary setting of fork status from
+   srunner_run_unchecked_teardown(). Folded common logic for both
+   teardown functions into a common function.
+
+------------------------------------------------------------------------
+r524 | cpickett | 2009-01-27 18:17:33 +1100 (Tue, 27 Jan 2009) | 2 lines
+Changed paths:
+   A /trunk/inbox
+   A /trunk/inbox/check_windows.patch
+
+* add inbox dir with remaining msvc patch
+
+------------------------------------------------------------------------
+r523 | cpickett | 2009-01-25 06:43:02 +1100 (Sun, 25 Jan 2009) | 2 lines
+Changed paths:
+   M /trunk/index.html
+
+* add Enlightenment Eet and Eina libs to list of projects using Check
+
+------------------------------------------------------------------------
+r522 | cpickett | 2009-01-13 18:53:31 +1100 (Tue, 13 Jan 2009) | 2 lines
+Changed paths:
+   M /trunk/tests
+
+* ignore check_thread_stress
+
+------------------------------------------------------------------------
+r521 | cpickett | 2009-01-01 13:52:11 +1100 (Thu, 01 Jan 2009) | 2 lines
+Changed paths:
+   M /trunk/lib/fileno.c
+   M /trunk/lib/libcompat.c
+   M /trunk/lib/putenv.c
+   M /trunk/lib/strdup.c
+
+* add more assert (0)'s to broken implementations
+
+------------------------------------------------------------------------
+r520 | cpickett | 2009-01-01 13:38:44 +1100 (Thu, 01 Jan 2009) | 5 lines
+Changed paths:
+   M /trunk/src/check_run.c
+
+* rearrange definitions and declarations in check_run.c so that all of
+  the forking stuff is grouped together, all the static functions are
+  grouped together, and all the non-static functions are grouped
+  together.
+
+------------------------------------------------------------------------
+r519 | cpickett | 2009-01-01 13:14:35 +1100 (Thu, 01 Jan 2009) | 2 lines
+Changed paths:
+   M /trunk/src/check_run.c
+
+* protect all unused declarations & definitions with _POSIX_VERSION
+
+------------------------------------------------------------------------
+r518 | cpickett | 2009-01-01 12:23:31 +1100 (Thu, 01 Jan 2009) | 2 lines
+Changed paths:
+   M /trunk/src/check_run.c
+
+* try to detect CK_FORK problem on non-POSIX right after getenv() call
+
+------------------------------------------------------------------------
+r517 | cpickett | 2009-01-01 12:13:21 +1100 (Thu, 01 Jan 2009) | 2 lines
+Changed paths:
+   M /trunk/src/check_run.c
+
+* align src/ more closely with Friedrich Beckmann's windows patch
+
+------------------------------------------------------------------------
+r516 | cpickett | 2009-01-01 11:33:24 +1100 (Thu, 01 Jan 2009) | 3 lines
+Changed paths:
+   M /trunk/AUTHORS
+   M /trunk/tests/check_check_main.c
+   M /trunk/tests/check_check_pack.c
+   M /trunk/tests/check_check_sub.c
+
+* protect files in tests/ per Friedrich Beckmann, using _POSIX_VERSION
+  instead of HAVE_FORK
+
+------------------------------------------------------------------------
+r515 | cpickett | 2009-01-01 11:06:54 +1100 (Thu, 01 Jan 2009) | 2 lines
+Changed paths:
+   M /trunk/src/check.c
+   M /trunk/src/check_run.c
+   M /trunk/tests/check_check_master.c
+   M /trunk/tests/check_check_sub.c
+
+* protect all calls to exit with _POSIX_VERSION, except in eprintf
+
+------------------------------------------------------------------------
+r514 | cpickett | 2009-01-01 10:45:29 +1100 (Thu, 01 Jan 2009) | 2 lines
+Changed paths:
+   M /trunk/lib/libcompat.h
+   M /trunk/tests/check_check_sub.c
+
+* introduce HAVE_WORKING_SETENV to protect tc_timeout_env usage
+
+------------------------------------------------------------------------
+r513 | cpickett | 2009-01-01 10:14:25 +1100 (Thu, 01 Jan 2009) | 3 lines
+Changed paths:
+   M /trunk/lib/libcompat.h
+   M /trunk/lib/pipe.c
+   M /trunk/lib/setenv.c
+   M /trunk/lib/sleep.c
+   M /trunk/lib/unsetenv.c
+
+* add `assert (0)' to unimplemented functions to make them fail
+  with filename and hence function information
+
+------------------------------------------------------------------------
+r512 | cpickett | 2009-01-01 09:56:53 +1100 (Thu, 01 Jan 2009) | 2 lines
+Changed paths:
+   M /trunk/tests/check_thread_stress.c
+
+* define sendinfo() conditionally to silence warning
+
+------------------------------------------------------------------------
+r511 | cpickett | 2009-01-01 09:53:50 +1100 (Thu, 01 Jan 2009) | 2 lines
+Changed paths:
+   M /trunk/lib/localtime_r.c
+
+* implement localtime_r
+
+------------------------------------------------------------------------
+r510 | cpickett | 2009-01-01 09:41:27 +1100 (Thu, 01 Jan 2009) | 2 lines
+Changed paths:
+   M /trunk/lib/libcompat.h
+   M /trunk/src/check_log.c
+   M /trunk/tests/check_stress.c
+   M /trunk/tests/check_thread_stress.c
+
+* move #include <sys/time.h> and <time.h> to libcompat.h
+
+------------------------------------------------------------------------
+r509 | cpickett | 2009-01-01 09:33:45 +1100 (Thu, 01 Jan 2009) | 2 lines
+Changed paths:
+   M /trunk/lib/libcompat.h
+   M /trunk/src/check_run.c
+   M /trunk/tests/check_check_sub.c
+
+* move #include <sys/wait.h> to libcompat.h
+
+------------------------------------------------------------------------
+r508 | cpickett | 2009-01-01 08:39:41 +1100 (Thu, 01 Jan 2009) | 2 lines
+Changed paths:
+   M /trunk/lib
+   M /trunk/m4
+   M /trunk/tests
+
+* set svn:ignore to include more generated stuff
+
+------------------------------------------------------------------------
+r507 | cpickett | 2008-12-31 15:41:02 +1100 (Wed, 31 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/tests/check_thread_stress.c
+
+* ensure XFAIL without _POSIX_VERSION
+
+------------------------------------------------------------------------
+r506 | cpickett | 2008-12-31 15:38:16 +1100 (Wed, 31 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/tests/Makefile.am
+
+* add check_thread_stress to tests and XFAIL_TESTS
+
+------------------------------------------------------------------------
+r505 | cpickett | 2008-12-31 15:37:35 +1100 (Wed, 31 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/tests/check_check_sub.c
+
+* add blank line to fix line numbers
+
+------------------------------------------------------------------------
+r504 | cpickett | 2008-12-31 15:28:11 +1100 (Wed, 31 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/tests/check_thread_stress.c
+
+* fix indenting again
+
+------------------------------------------------------------------------
+r503 | cpickett | 2008-12-31 15:14:15 +1100 (Wed, 31 Dec 2008) | 5 lines
+Changed paths:
+   M /trunk/tests/check_thread_stress.c
+
+* use CK_VERBOSE instead of CK_SILENT (for now)
+* protect pthread test with HAVE_PTHREAD
+* protect fork test with _POSIX_VERSION
+* call exit() in fork test child
+
+------------------------------------------------------------------------
+r502 | cpickett | 2008-12-31 14:05:58 +1100 (Wed, 31 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/src/check.c
+   M /trunk/src/check_error.c
+   M /trunk/src/check_list.c
+   M /trunk/src/check_log.c
+   M /trunk/src/check_msg.c
+   M /trunk/src/check_pack.c
+   M /trunk/src/check_print.c
+   M /trunk/src/check_run.c
+   M /trunk/src/check_str.c
+   M /trunk/tests/check_thread_stress.c
+
+* depend exclusively on #include "../lib/libcompat.h" to provide config.h
+
+------------------------------------------------------------------------
+r501 | cpickett | 2008-12-31 14:01:37 +1100 (Wed, 31 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/lib/libcompat.h
+   M /trunk/src/check_msg.c
+   M /trunk/src/check_pack.c
+   M /trunk/src/check_run.c
+   M /trunk/tests/check_check_fork.c
+   M /trunk/tests/check_check_pack.c
+   M /trunk/tests/check_check_sub.c
+   M /trunk/tests/check_thread_stress.c
+
+* move #include <unistd.h> and <pthread.h> to libcompat.h
+
+------------------------------------------------------------------------
+r500 | cpickett | 2008-12-31 13:54:03 +1100 (Wed, 31 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/tests/check_thread_stress.c
+
+* run GNU indent on check_thread_stress.c, and then adjust whitespace
+
+------------------------------------------------------------------------
+r499 | cpickett | 2008-12-31 13:51:26 +1100 (Wed, 31 Dec 2008) | 3 lines
+Changed paths:
+   M /trunk/tests/check_thread_stress.c
+
+* convert check_thread_stress to run actual fork and pthread tests
+  - implementation again due to Daniel Gollub
+
+------------------------------------------------------------------------
+r498 | cpickett | 2008-12-31 13:23:58 +1100 (Wed, 31 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/tests/check_thread_stress.c
+
+* include config.h and ../lib/libcompat.h
+
+------------------------------------------------------------------------
+r497 | cpickett | 2008-12-31 13:23:32 +1100 (Wed, 31 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/configure.ac
+
+* set CC outside of ACX_PTHREAD
+
+------------------------------------------------------------------------
+r496 | cpickett | 2008-12-31 09:12:20 +1100 (Wed, 31 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/tests/check_thread_stress.c
+
+* silence check_thread_stress warnings
+
+------------------------------------------------------------------------
+r495 | cpickett | 2008-12-31 08:45:26 +1100 (Wed, 31 Dec 2008) | 7 lines
+Changed paths:
+   M /trunk/AUTHORS
+   M /trunk/configure.ac
+   M /trunk/src/Makefile.am
+   M /trunk/src/check_pack.c
+   M /trunk/tests/Makefile.am
+   A /trunk/tests/check_thread_stress.c
+
+* support running tests with multiple pthreads
+  - protect write in ppack() using a pthread mutex
+  - use ACX_PTHREAD for portability
+  - tests/check_thread_stress will test this for now
+  - fix due to Daniel Gollub
+  - closes 1391527 
+
+------------------------------------------------------------------------
+r494 | cpickett | 2008-12-31 08:20:48 +1100 (Wed, 31 Dec 2008) | 2 lines
+Changed paths:
+   A /trunk/m4/acx_pthread.html
+   A /trunk/m4/acx_pthread.m4
+
+* add ACX_PTHREAD files
+
+------------------------------------------------------------------------
+r493 | cpickett | 2008-12-30 20:15:08 +1100 (Tue, 30 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/TODO
+
+* add todo
+
+------------------------------------------------------------------------
+r492 | cpickett | 2008-12-30 18:14:50 +1100 (Tue, 30 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/tests/check_check_fixture.c
+
+* adjust line numbers to make all tests pass again
+
+------------------------------------------------------------------------
+r491 | cpickett | 2008-12-30 17:47:35 +1100 (Tue, 30 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/tests/test_log_output.sh
+   M /trunk/tests/test_output.sh
+   M /trunk/tests/test_xml_output.sh
+
+* adjust line numbers of expected output
+
+------------------------------------------------------------------------
+r490 | cpickett | 2008-12-30 17:21:44 +1100 (Tue, 30 Dec 2008) | 3 lines
+Changed paths:
+   M /trunk/configure.ac
+   M /trunk/lib/libcompat.h
+   A /trunk/lib/pipe.c
+
+* add pipe(2) stub
+  - now both src/ and tests/ compile and link properly on MSYS/MinGW!
+
+------------------------------------------------------------------------
+r489 | cpickett | 2008-12-30 16:31:43 +1100 (Tue, 30 Dec 2008) | 7 lines
+Changed paths:
+   M /trunk/lib/Makefile.am
+   M /trunk/src/Makefile.am
+   M /trunk/tests/Makefile.am
+
+* Various fixes towards building shared libraries on mingw:
+  - add -no-undefined flag to <lib>_LDFLAGS for mingw library creation
+  - add libcheckinternal_la_LIBADD
+  - don't use LIBADD by itself for src/Makefile.am since
+    libcheck_la_LIBADD clobbers it
+  - add libcompat.la to *_LDADD and *_LIBADD
+
+------------------------------------------------------------------------
+r488 | cpickett | 2008-12-30 13:50:52 +1100 (Tue, 30 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/configure.ac
+   M /trunk/lib/libcompat.h
+   A /trunk/lib/putenv.c
+
+* check for putenv as well
+
+------------------------------------------------------------------------
+r487 | cpickett | 2008-12-30 13:45:58 +1100 (Tue, 30 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/lib/libcompat.h
+
+* copy CK_ATTRIBUTE_UNUSED definition to libcompat.h (evil)
+
+------------------------------------------------------------------------
+r486 | cpickett | 2008-12-30 13:40:50 +1100 (Tue, 30 Dec 2008) | 3 lines
+Changed paths:
+   M /trunk/lib/libcompat.h
+   M /trunk/tests/check_check_export_main.c
+   M /trunk/tests/check_check_fixture.c
+   M /trunk/tests/check_check_fork.c
+   M /trunk/tests/check_check_limit.c
+   M /trunk/tests/check_check_log.c
+   M /trunk/tests/check_check_main.c
+   M /trunk/tests/check_check_master.c
+   M /trunk/tests/check_check_msg.c
+   M /trunk/tests/check_check_pack.c
+   M /trunk/tests/check_check_sub.c
+   M /trunk/tests/check_list.c
+   M /trunk/tests/check_stress.c
+   M /trunk/tests/ex_log_output.c
+   M /trunk/tests/ex_output.c
+   M /trunk/tests/ex_xml_output.c
+
+* #include "../lib/libcompat.h" in tests/*.c
+* don't include check.h in libcompat.h
+
+------------------------------------------------------------------------
+r485 | cpickett | 2008-12-30 13:26:56 +1100 (Tue, 30 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/src/check.c
+   M /trunk/src/check_error.c
+   M /trunk/src/check_list.c
+   M /trunk/src/check_log.c
+   M /trunk/src/check_msg.c
+   M /trunk/src/check_pack.c
+   M /trunk/src/check_print.c
+   M /trunk/src/check_run.c
+   M /trunk/src/check_str.c
+
+* #include "../lib/libcompat.h" everywhere
+
+------------------------------------------------------------------------
+r484 | cpickett | 2008-12-30 13:25:44 +1100 (Tue, 30 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/lib/libcompat.h
+
+* use #ifndef LIBCOMPAT_H ... #endif idiom
+
+------------------------------------------------------------------------
+r483 | cpickett | 2008-12-30 13:24:48 +1100 (Tue, 30 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/configure.ac
+
+* take malloc and realloc out of AC_CHECK_DECLS (they are always declared)
+
+------------------------------------------------------------------------
+r482 | cpickett | 2008-12-30 13:17:15 +1100 (Tue, 30 Dec 2008) | 4 lines
+Changed paths:
+   M /trunk/lib/fileno.c
+   M /trunk/lib/libcompat.h
+   M /trunk/lib/localtime_r.c
+   M /trunk/lib/malloc.c
+   M /trunk/lib/realloc.c
+   M /trunk/lib/setenv.c
+   M /trunk/lib/sleep.c
+   M /trunk/lib/strdup.c
+   M /trunk/lib/strsignal.c
+   M /trunk/lib/unsetenv.c
+
+* use HAVE_DECL_FUNCTION instead of HAVE_FUNCTION
+* add bodies for all lib/ .c files
+* rely on libcompat.h to provide common #includes
+
+------------------------------------------------------------------------
+r481 | cpickett | 2008-12-30 12:37:21 +1100 (Tue, 30 Dec 2008) | 5 lines
+Changed paths:
+   M /trunk/configure.ac
+   A /trunk/lib/fileno.c
+   M /trunk/lib/libcompat.h
+   A /trunk/lib/localtime_r.c
+   A /trunk/lib/setenv.c
+   A /trunk/lib/unsetenv.c
+
+* only check for those functions that we currently need to check for
+  to solve portability problems, and avoid checking for things where
+  we don't currently use the result generated in config.h
+* add stubs for setenv, unsetenv, localtime_r, and fileno
+
+------------------------------------------------------------------------
+r480 | cpickett | 2008-12-30 09:28:42 +1100 (Tue, 30 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/index.html
+
+* list OpenSync as client
+
+------------------------------------------------------------------------
+r479 | hugo303 | 2008-12-30 02:46:39 +1100 (Tue, 30 Dec 2008) | 4 lines
+Changed paths:
+   M /trunk
+   M /trunk/NEWS
+   M /trunk/TODO
+   M /trunk/configure.ac
+   M /trunk/lib/malloc.c
+   M /trunk/lib/realloc.c
+   M /trunk/lib/strsignal.c
+
+ * Merged release branch 0.9.6
+    svn merge -r476:477 ../tags/check-0.9.6
+
+
+------------------------------------------------------------------------
+r478 | hugo303 | 2008-12-30 02:34:22 +1100 (Tue, 30 Dec 2008) | 3 lines
+Changed paths:
+   M /trunk/HACKING
+
+ * Updated with more info on releases.
+
+
+------------------------------------------------------------------------
+r475 | cpickett | 2008-12-29 10:38:12 +1100 (Mon, 29 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/configure.ac
+   M /trunk/lib/libcompat.h
+   A /trunk/lib/strdup.c
+
+* add strdup.c to lib/ (there are problems on mingw with strdup)
+
+------------------------------------------------------------------------
+r474 | cpickett | 2008-12-29 10:24:25 +1100 (Mon, 29 Dec 2008) | 5 lines
+Changed paths:
+   M /trunk/configure.ac
+   A /trunk/m4/ax_cflags_warn_all_ansi.html
+   A /trunk/m4/ax_cflags_warn_all_ansi.m4
+   M /trunk/src/Makefile.am
+   M /trunk/tests/check_check_master.c
+   M /trunk/tests/check_check_sub.c
+
+* use AX_CFLAGS_WARN_ALL_ANSI
+* remove tests that support fail() and friends without NULL 
+  - otherwise GCC complains about this not being ISO C99
+* remove setting -ansi and -pedantic in src/Makefile.am
+
+------------------------------------------------------------------------
+r473 | cpickett | 2008-12-29 10:00:21 +1100 (Mon, 29 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/lib/libcompat.c
+   M /trunk/lib/libcompat.h
+
+* silence warning when nothing is included in libcompat
+
+------------------------------------------------------------------------
+r472 | cpickett | 2008-12-29 09:51:20 +1100 (Mon, 29 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/tests/ex_xml_output.c
+
+* add more CK_ATTRIBUTE_UNUSED's
+
+------------------------------------------------------------------------
+r471 | cpickett | 2008-12-29 09:16:00 +1100 (Mon, 29 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/src/check_log.c
+   M /trunk/src/check_print.c
+   M /trunk/tests/check_check_sub.c
+
+* silence some more unused parameter warnings
+
+------------------------------------------------------------------------
+r470 | cpickett | 2008-12-29 09:09:48 +1100 (Mon, 29 Dec 2008) | 4 lines
+Changed paths:
+   M /trunk/lib/sleep.c
+   M /trunk/src/check.c
+   M /trunk/src/check.h.in
+
+* move CK_ATTRIBUTE_UNUSED attribute after parameter name in sleep()
+  and __testname()
+* add CK_ATTRIBUTE_UNUSED to fname parameter in tcase_fn_start
+
+------------------------------------------------------------------------
+r469 | cpickett | 2008-12-29 08:30:16 +1100 (Mon, 29 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/src/check_run.c
+
+* mark print_mode parameter as unused in two cases
+
+------------------------------------------------------------------------
+r468 | cpickett | 2008-12-29 08:26:01 +1100 (Mon, 29 Dec 2008) | 5 lines
+Changed paths:
+   M /trunk/lib/libcompat.h
+   M /trunk/lib/malloc.c
+   M /trunk/lib/realloc.c
+   M /trunk/lib/sleep.c
+   M /trunk/lib/strsignal.c
+
+* include libcompat.h in each lib .c file and reduce boilerplate
+* mark sleep seconds parameter unused
+* make strsignal() non-static
+* include ../src/check.h in libcompat.h
+
+------------------------------------------------------------------------
+r467 | cpickett | 2008-12-29 08:05:31 +1100 (Mon, 29 Dec 2008) | 4 lines
+Changed paths:
+   M /trunk/src/Makefile.am
+   M /trunk/src/check_run.c
+   M /trunk/tests/Makefile.am
+   M /trunk/tests/check_check_sub.c
+
+* #include "../lib/libcompat.h" in two places
+* change .. in LDADD and LIBADD to $(top_builddir)
+
+
+------------------------------------------------------------------------
+r466 | cpickett | 2008-12-29 07:47:06 +1100 (Mon, 29 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/lib/Makefile.am
+   A /trunk/lib/libcompat.h
+   M /trunk/lib/malloc.c
+   M /trunk/lib/realloc.c
+   M /trunk/lib/sleep.c
+   M /trunk/lib/strsignal.c
+   M /trunk/src/check_run.c
+
+* add libcompat.h with prototypes for libcompat functions
+
+------------------------------------------------------------------------
+r465 | cpickett | 2008-12-29 06:58:42 +1100 (Mon, 29 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/configure.ac
+   M /trunk/src/check_run.c
+   M /trunk/tests/check_check_master.c
+
+* use AC_USE_SYSTEM_EXTENSIONS instead of #define _GNU_SOURCE
+
+------------------------------------------------------------------------
+r464 | cpickett | 2008-12-28 18:39:38 +1100 (Sun, 28 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/configure.ac
+   A /trunk/lib/sleep.c
+
+* replace sleep() as well
+
+------------------------------------------------------------------------
+r463 | cpickett | 2008-12-28 18:19:25 +1100 (Sun, 28 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/tests/Makefile.am
+
+* add libcompat.la to LDADD
+
+------------------------------------------------------------------------
+r462 | cpickett | 2008-12-28 18:16:08 +1100 (Sun, 28 Dec 2008) | 4 lines
+Changed paths:
+   M /trunk/tests/check_check_sub.c
+
+* msys/gcc portability:
+  - protect calls to fork/sleep/kill with _POSIX_VERSION
+  - protect inclusion of sys/wait.h with #if HAVE_SYS_WAIT_H
+
+------------------------------------------------------------------------
+r461 | cpickett | 2008-12-28 17:55:42 +1100 (Sun, 28 Dec 2008) | 2 lines
+Changed paths:
+   A /trunk/lib/libcompat.c
+
+* add missing libcompat.c
+
+------------------------------------------------------------------------
+r460 | cpickett | 2008-12-28 17:53:08 +1100 (Sun, 28 Dec 2008) | 2 lines
+Changed paths:
+   A /trunk/lib/Makefile.am
+
+* add missing lib/Makefile.am
+
+------------------------------------------------------------------------
+r459 | cpickett | 2008-12-28 17:51:34 +1100 (Sun, 28 Dec 2008) | 3 lines
+Changed paths:
+   M /trunk/Makefile.am
+   M /trunk/configure.ac
+   A /trunk/lib/malloc.c (from /trunk/src/malloc.c:457)
+   A /trunk/lib/realloc.c (from /trunk/src/realloc.c:457)
+   A /trunk/lib/strsignal.c (from /trunk/src/strsignal.c:457)
+   M /trunk/src/Makefile.am
+   D /trunk/src/malloc.c
+   D /trunk/src/realloc.c
+   D /trunk/src/strsignal.c
+
+* move strsignal, malloc, and realloc to lib/ subdir, as recommended
+  by Automake manual
+
+------------------------------------------------------------------------
+r458 | cpickett | 2008-12-28 17:37:59 +1100 (Sun, 28 Dec 2008) | 2 lines
+Changed paths:
+   A /trunk/lib
+
+* add lib dir for libcompat
+
+------------------------------------------------------------------------
+r457 | cpickett | 2008-12-28 17:24:38 +1100 (Sun, 28 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/src/Makefile.am
+
+* add missing @LTLIBOJBS@ to libcheck_la_DEPENDENCIES
+
+------------------------------------------------------------------------
+r456 | cpickett | 2008-12-24 11:03:12 +1100 (Wed, 24 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/src/Makefile.am
+
+* use LTLIBOBJS instead of LIBOJBS since we're building a library
+
+------------------------------------------------------------------------
+r455 | cpickett | 2008-12-23 16:04:01 +1100 (Tue, 23 Dec 2008) | 6 lines
+Changed paths:
+   M /trunk/src/Makefile.am
+   M /trunk/src/check.c
+   A /trunk/src/malloc.c
+   A /trunk/src/realloc.c
+   A /trunk/src/strsignal.c
+
+* Fix problems with the use of AC_FUNC_MALLOC, AC_FUNC_REALLOC, and
+  AC_REPLACE_FUNCS([strsignal]):
+  - add @LIBOBJS@ to libcheck_la_LIBADD and libcheckinternal_la_LIBADD
+  - create separate malloc.c, realloc.c, and strsignal.c files
+  - move function definitions from check.c into these files  
+
+------------------------------------------------------------------------
+r454 | cpickett | 2008-12-23 12:40:31 +1100 (Tue, 23 Dec 2008) | 4 lines
+Changed paths:
+   M /trunk/src/check_run.c
+
+* Changes to make the src/ directory compile with gcc/MSYS:
+  - protect inclusion of sys/wait.h with HAVE_SYS_WAIT_H
+  - protect POSIX-only calls with _POSIX_VERSION
+
+------------------------------------------------------------------------
+r453 | cpickett | 2008-12-02 08:14:15 +1100 (Tue, 02 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/TODO
+
+* add note about CFLAGS and ax_cflags_gcc_option to TODO
+
+------------------------------------------------------------------------
+r452 | cpickett | 2008-12-02 08:10:44 +1100 (Tue, 02 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/src
+
+* add exported.sym to ignored files
+
+------------------------------------------------------------------------
+r451 | cpickett | 2008-12-01 07:00:40 +1100 (Mon, 01 Dec 2008) | 2 lines
+Changed paths:
+   M /trunk/TODO
+
+* update TODO
+
+------------------------------------------------------------------------
+r450 | cpickett | 2008-11-30 19:49:41 +1100 (Sun, 30 Nov 2008) | 2 lines
+Changed paths:
+   M /trunk/tests
+
+* set some svn:ignore properties so svn status works better
+
+------------------------------------------------------------------------
+r449 | cpickett | 2008-11-30 18:11:42 +1100 (Sun, 30 Nov 2008) | 2 lines
+Changed paths:
+   M /trunk/TODO
+
+* add Cygwin, MinGW, MSVC to TODO
+
+------------------------------------------------------------------------
+r448 | cpickett | 2008-11-30 18:03:49 +1100 (Sun, 30 Nov 2008) | 5 lines
+Changed paths:
+   M /trunk/AUTHORS
+   M /trunk/configure.ac
+   M /trunk/src/check.c
+
+* add call to AC_REPLACE_FUNCS([strsignal])
+* add new rpl_strsignal following rpl_(re)malloc template, body
+  of function due to Roland Illig
+  -- hopefully closes 1629755
+
+------------------------------------------------------------------------
+r447 | cpickett | 2008-11-30 16:30:49 +1100 (Sun, 30 Nov 2008) | 4 lines
+Changed paths:
+   M /trunk/AUTHORS
+   M /trunk/tests/check_check_master.c
+   M /trunk/tests/check_check_sub.c
+
+* add missing NULL argument to fail* varargs macro calls
+* define incorrect tests for __GNUC__ only
+   -- both per Roland Illig in bug 1677391
+
+------------------------------------------------------------------------
+r446 | cpickett | 2008-11-30 14:38:06 +1100 (Sun, 30 Nov 2008) | 3 lines
+Changed paths:
+   M /trunk/src/check.h.in
+
+* define CK_ATTRIBUTE_UNUSED for GCC >= 2.95, closing:
+  [ 1674626 ] compile error with non defined __attribute__ compiler
+
+------------------------------------------------------------------------
+r445 | cpickett | 2008-11-30 14:30:21 +1100 (Sun, 30 Nov 2008) | 3 lines
+Changed paths:
+   M /trunk/README
+
+* mention that texinfo is for documentation, and that any TeX
+  installation will do in dependencies section
+
+------------------------------------------------------------------------
+r443 | cpickett | 2008-11-16 05:23:14 +1100 (Sun, 16 Nov 2008) | 2 lines
+Changed paths:
+   M /trunk
+   M /trunk/doc
+
+* set svn:ignore for generated files so svn status is useful
+
+------------------------------------------------------------------------
+r442 | hugo303 | 2008-11-13 06:03:48 +1100 (Thu, 13 Nov 2008) | 1 line
+Changed paths:
+   M /trunk/doc/example/tests/Makefile.am
+
+* Fixed error in documentation example Makefile.am, bug #1888237
+------------------------------------------------------------------------
+r441 | hugo303 | 2008-11-11 09:05:13 +1100 (Tue, 11 Nov 2008) | 1 line
+Changed paths:
+   M /trunk/doc/check.texi
+
+* Fixed spelling (patch #1652630)
+------------------------------------------------------------------------
+r440 | hugo303 | 2008-11-11 08:44:52 +1100 (Tue, 11 Nov 2008) | 1 line
+Changed paths:
+   M /trunk/src/check.c
+
+* Handle NULL in srunner_add_suite(). Fixes #1624887
+------------------------------------------------------------------------
+r439 | hugo303 | 2008-11-11 08:25:27 +1100 (Tue, 11 Nov 2008) | 1 line
+Changed paths:
+   M /trunk/index.html
+
+* Fixed faulty link to Daimonin
+------------------------------------------------------------------------
+r438 | hugo303 | 2008-11-11 08:23:10 +1100 (Tue, 11 Nov 2008) | 1 line
+Changed paths:
+   M /trunk/doc/check.texi
+
+* Updated chapter 3.3 (bug #2053018)
+------------------------------------------------------------------------
+r437 | cpickett | 2008-08-29 06:49:06 +1000 (Fri, 29 Aug 2008) | 2 lines
+Changed paths:
+   M /trunk/index.html
+
+* add scew
+
+------------------------------------------------------------------------
+r435 | cpickett | 2008-03-22 09:16:13 +1100 (Sat, 22 Mar 2008) | 3 lines
+Changed paths:
+   M /trunk/src/Makefile.am
+
+* use @top_srcdir@/src/check.h.in instead of check.h.in
+  -- fixes broken make distcheck
+
+------------------------------------------------------------------------
+r434 | cpickett | 2008-03-22 09:04:41 +1100 (Sat, 22 Mar 2008) | 3 lines
+Changed paths:
+   M /trunk/doc/Makefile.am
+
+* add '|| test $$? -eq 1;' after each diff command per 
+  OpenBSD 4.2 problems Torok Edwin was having.
+
+------------------------------------------------------------------------
+r433 | cpickett | 2008-03-22 08:45:37 +1100 (Sat, 22 Mar 2008) | 2 lines
+Changed paths:
+   M /trunk/src/check.c
+   M /trunk/src/check.h.in
+   M /trunk/src/check_impl.h
+   M /trunk/src/check_run.c
+
+* add CK_FORK_GETENV to enum fork_status and delete CK_FORK_UNSPECIFIED
+
+------------------------------------------------------------------------
+r432 | cpickett | 2008-03-22 08:10:16 +1100 (Sat, 22 Mar 2008) | 2 lines
+Changed paths:
+   M /trunk/tests/check_check_master.c
+
+* add comment about strsignal overwriting string returned by previous call
+
+------------------------------------------------------------------------
+r431 | cpickett | 2008-03-22 07:44:52 +1100 (Sat, 22 Mar 2008) | 3 lines
+Changed paths:
+   M /trunk/AUTHORS
+   M /trunk/tests/check_check_master.c
+
+* call strdup on result from strsignal to avoid clobbering it
+* add Torok Edwin to AUTHORS
+
+------------------------------------------------------------------------
+r430 | cpickett | 2008-03-22 05:54:36 +1100 (Sat, 22 Mar 2008) | 2 lines
+Changed paths:
+   M /trunk/src/check.c
+   M /trunk/src/check.h.in
+   M /trunk/src/check_print.c
+
+* add CK_TEST_RESULT_INVALID to enum test_result
+
+------------------------------------------------------------------------
+r429 | cpickett | 2008-03-22 05:26:50 +1100 (Sat, 22 Mar 2008) | 2 lines
+Changed paths:
+   M /trunk/src/check.c
+   M /trunk/src/check.h.in
+   M /trunk/src/check_pack.c
+
+* add CK_CTX_INVALID to ck_result_ctx and don't use -1 anymore
+
+------------------------------------------------------------------------
+r428 | cpickett | 2008-03-22 04:54:42 +1100 (Sat, 22 Mar 2008) | 2 lines
+Changed paths:
+   M /trunk/configure.ac
+   A /trunk/m4/ax_c_check_flag.html
+   A /trunk/m4/ax_c_check_flag.m4
+   D /trunk/m4/ax_cflags_gcc_option.html
+   D /trunk/m4/ax_cflags_gcc_option.m4
+
+* favour ax_c_check_flag over ax_cflags_gcc_option
+
+------------------------------------------------------------------------
+r427 | cpickett | 2008-03-22 04:22:43 +1100 (Sat, 22 Mar 2008) | 2 lines
+Changed paths:
+   M /trunk/Makefile.am
+   M /trunk/configure.ac
+
+* add options using AX_CFLAGS_GCC_OPTION
+
+------------------------------------------------------------------------
+r426 | cpickett | 2008-03-22 02:39:00 +1100 (Sat, 22 Mar 2008) | 2 lines
+Changed paths:
+   A /trunk/m4
+   A /trunk/m4/ax_cflags_gcc_option.html
+   A /trunk/m4/ax_cflags_gcc_option.m4
+
+* add m4 directory and ax_cflags_gcc_option macro
+
+------------------------------------------------------------------------
+r425 | cpickett | 2008-03-22 02:06:24 +1100 (Sat, 22 Mar 2008) | 2 lines
+Changed paths:
+   M /trunk/src/Makefile.am
+
+* replace $< with check.h.in for non-gmake (patch due to Torok Edwin)
+
+------------------------------------------------------------------------
+r424 | cpickett | 2008-03-22 02:00:21 +1100 (Sat, 22 Mar 2008) | 2 lines
+Changed paths:
+   M /trunk/configure.ac
+
+* call AM_PROG_CC_C_O
+
+------------------------------------------------------------------------
+r423 | cpickett | 2008-03-21 10:19:16 +1100 (Fri, 21 Mar 2008) | 4 lines
+Changed paths:
+   M /trunk/src/check.c
+
+* add prototypes for rpl_malloc and rpl_realloc
+* fix prototypes for malloc and realloc
+* document AC_FUNC_MALLOC / AC_FUNC_REALLOC madness
+
+------------------------------------------------------------------------
+r422 | cpickett | 2008-03-07 03:59:38 +1100 (Fri, 07 Mar 2008) | 5 lines
+Changed paths:
+   M /trunk/src/check_error.c
+   M /trunk/src/check_log.c
+   M /trunk/src/check_msg.c
+   M /trunk/src/check_pack.c
+   M /trunk/src/check_run.c
+
+* Pass an adjusted line number to eprintf when the error
+  being reported is based on the result of another function.
+* Name the function that failed in these cases.
+* Add FIXME re: colons at the end of system error messages
+
+------------------------------------------------------------------------
+r421 | cpickett | 2008-03-04 01:13:27 +1100 (Tue, 04 Mar 2008) | 2 lines
+Changed paths:
+   M /trunk/doc/check.texi
+   M /trunk/index.html
+
+* add daimonin, embunit, and aceunit
+
+------------------------------------------------------------------------
+r420 | cpickett | 2008-03-04 00:48:38 +1100 (Tue, 04 Mar 2008) | 2 lines
+Changed paths:
+   M /trunk/AUTHORS
+   M /trunk/src/check_run.c
+   M /trunk/tests/check_check_fixture.c
+
+* count checks in setup() as well; patch due to Roland Stigge
+
+------------------------------------------------------------------------
+r419 | cpickett | 2008-02-09 01:09:41 +1100 (Sat, 09 Feb 2008) | 4 lines
+Changed paths:
+   M /trunk/src/check.h.in
+
+* use int __attribute__((unused)) _i instead of
+      int _i __attribute__((unused))
+  per gcc-3.3.5 request from Sebastian Trahm
+
+------------------------------------------------------------------------
+r418 | cpickett | 2008-01-23 09:54:46 +1100 (Wed, 23 Jan 2008) | 2 lines
+Changed paths:
+   M /trunk/doc/check.texi
+
+* fix cppunit link
+
+------------------------------------------------------------------------
+r417 | cpickett | 2008-01-18 06:03:32 +1100 (Fri, 18 Jan 2008) | 2 lines
+Changed paths:
+   M /trunk/index.html
+
+* add XCB to list of projects using Check
+
+------------------------------------------------------------------------
+r416 | cpickett | 2007-12-12 12:17:42 +1100 (Wed, 12 Dec 2007) | 3 lines
+Changed paths:
+   M /trunk/src/check.c
+   M /trunk/src/check.h.in
+
+* rename signal to _signal in _tcase_add_test to avoid a
+  symbol clash with /usr/include/sys/signal.h on OS X.
+
+------------------------------------------------------------------------
+r415 | cpickett | 2007-10-29 03:38:34 +1100 (Mon, 29 Oct 2007) | 2 lines
+Changed paths:
+   M /trunk/index.html
+
+* add Pigment to list of projects using Check
+
+------------------------------------------------------------------------
+r414 | hugo303 | 2007-08-27 23:13:11 +1000 (Mon, 27 Aug 2007) | 3 lines
+Changed paths:
+   M /trunk/src/check_msg.c
+
+ * Made send_file1 and send_file2 static.
+
+
+------------------------------------------------------------------------
+r413 | hugo303 | 2007-08-27 19:50:07 +1000 (Mon, 27 Aug 2007) | 3 lines
+Changed paths:
+   M /trunk/index.html
+
+* Add BitlBee and ctrlproxy to list of Check-using projects.
+
+
+------------------------------------------------------------------------
+r412 | cpickett | 2007-06-20 13:50:45 +1000 (Wed, 20 Jun 2007) | 3 lines
+Changed paths:
+   M /trunk/tests/check_check_sub.c
+
+* test fail(NULL) instead of fail() because there is
+  no way to fix fail() to work with the XL C compiler.
+
+------------------------------------------------------------------------
+r411 | cpickett | 2007-06-20 09:36:39 +1000 (Wed, 20 Jun 2007) | 4 lines
+Changed paths:
+   M /trunk/src/check.c
+
+* define rpl_malloc and rpl_realloc for platforms where
+  !malloc(0) and !realloc(0,0), such as AIX, because configure
+  goes and redefines malloc/realloc in this case...
+
+------------------------------------------------------------------------
+r410 | cpickett | 2007-04-21 11:41:34 +1000 (Sat, 21 Apr 2007) | 2 lines
+Changed paths:
+   M /trunk/Makefile.am
+
+* SVNChangeLog patch from Robert Collins
+
+------------------------------------------------------------------------
+r409 | hugo303 | 2007-03-13 03:05:53 +1100 (Tue, 13 Mar 2007) | 3 lines
+Changed paths:
+   M /trunk/tests/check_check_master.c
+   M /trunk/tests/check_check_sub.c
+
+ * Added some simple testing of srunner_create() and srunner_add_suite().
+
+
+------------------------------------------------------------------------
+r408 | cpickett | 2007-01-29 08:03:53 +1100 (Mon, 29 Jan 2007) | 2 lines
+Changed paths:
+   M /trunk/index.html
+
+* Add Iodine to list of Check-using projects.
+
+------------------------------------------------------------------------
+r407 | cpickett | 2007-01-17 08:57:52 +1100 (Wed, 17 Jan 2007) | 2 lines
+Changed paths:
+   M /trunk/README
+   M /trunk/TODO
+   M /trunk/doc/check.texi
+   M /trunk/index.html
+
+* s/unit test/unit testing/ when used as a verb.
+
+------------------------------------------------------------------------
+r406 | cpickett | 2006-12-21 11:46:08 +1100 (Thu, 21 Dec 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/check.texi
+
+* Fix broken example of loop test usage.
+
+------------------------------------------------------------------------
+r405 | cpickett | 2006-12-13 06:11:09 +1100 (Wed, 13 Dec 2006) | 3 lines
+Changed paths:
+   M /trunk/AUTHORS
+   M /trunk/HACKING
+   M /trunk/THANKS
+   M /trunk/TODO
+   M /trunk/configure.ac
+
+* Obfuscate email addresses a little bit more.
+* Update Arien Malec's email address.
+
+------------------------------------------------------------------------
+r404 | cpickett | 2006-12-12 18:10:20 +1100 (Tue, 12 Dec 2006) | 2 lines
+Changed paths:
+   M /trunk/TODO
+
+* Add pkg-config documentation TODO.
+
+------------------------------------------------------------------------
+r403 | cpickett | 2006-12-11 04:19:43 +1100 (Mon, 11 Dec 2006) | 2 lines
+Changed paths:
+   M /trunk/index.html
+
+* Add Tinymail link.
+
+------------------------------------------------------------------------
+r402 | cpickett | 2006-12-09 04:47:49 +1100 (Sat, 09 Dec 2006) | 2 lines
+Changed paths:
+   M /trunk/src/check.h.in
+   M /trunk/tests/check_check_master.c
+   M /trunk/tests/check_check_sub.c
+
+* Add ck_abort and ck_abort_msg implementation with tests.
+
+------------------------------------------------------------------------
+r401 | hugo303 | 2006-12-06 19:54:01 +1100 (Wed, 06 Dec 2006) | 3 lines
+Changed paths:
+   M /trunk/check.m4
+
+ * Incorporated patch from Debian for debian bug #395466. This fixes
+    'AM_PATH_CHECK causes "possibly undefined macro" errors'.
+
+------------------------------------------------------------------------
+r400 | hugo303 | 2006-11-28 22:51:29 +1100 (Tue, 28 Nov 2006) | 1 line
+Changed paths:
+   M /trunk/tests/check_check_master.c
+
+ * Fixed line number typo in timeout test.
+------------------------------------------------------------------------
+r399 | hugo303 | 2006-11-28 21:47:35 +1100 (Tue, 28 Nov 2006) | 2 lines
+Changed paths:
+   M /trunk/tests/check_check_master.c
+   M /trunk/tests/check_check_sub.c
+
+ * Added tests for new Check fail API.
+
+------------------------------------------------------------------------
+r398 | hugo303 | 2006-11-28 21:46:12 +1100 (Tue, 28 Nov 2006) | 4 lines
+Changed paths:
+   M /trunk/src/check.h.in
+
+ * Added new Check fail API. Implemented on top of fail_unless. Future
+   versions will reverse this so fail_unless is implemented on top of the
+   ck_assert API.
+
+------------------------------------------------------------------------
+r397 | cpickett | 2006-11-24 05:20:44 +1100 (Fri, 24 Nov 2006) | 2 lines
+Changed paths:
+   M /trunk/README
+
+* Relax sed dependency from GNU to POSIX.
+
+------------------------------------------------------------------------
+r396 | cpickett | 2006-11-24 05:18:11 +1100 (Fri, 24 Nov 2006) | 3 lines
+Changed paths:
+   M /trunk/AUTHORS
+   M /trunk/HACKING
+   M /trunk/THANKS
+   M /trunk/TODO
+   M /trunk/configure.ac
+   M /trunk/doc/check.texi
+   M /trunk/doc/example/README
+   M /trunk/doc/example/configure.ac
+   M /trunk/index.html
+
+* Update AUTHORS to reflect current maintainers.
+* Perform basic email address obfuscation, replacing @ with AT.
+
+------------------------------------------------------------------------
+r395 | hugo303 | 2006-11-24 00:35:24 +1100 (Fri, 24 Nov 2006) | 1 line
+Changed paths:
+   M /trunk/configure.ac
+
+ * Reverted change in r377. genhtml is used in src/Makefile.am.
+------------------------------------------------------------------------
+r394 | hugo303 | 2006-11-23 19:18:10 +1100 (Thu, 23 Nov 2006) | 1 line
+Changed paths:
+   M /trunk/src/Makefile.am
+
+ * Modified sed exported symbols regexp to work on OS X.
+------------------------------------------------------------------------
+r393 | cpickett | 2006-11-23 16:27:00 +1100 (Thu, 23 Nov 2006) | 5 lines
+Changed paths:
+   M /trunk/TODO
+   M /trunk/doc/check.texi
+   M /trunk/src/check.c
+
+* Change DEFAULT_TIMEOUT from 3 seconds to 4 seconds.  Document in
+  TODO that this should ultimately be fixed properly.  This fixes
+  build errors with timeout tests on a Mac Pro, and possibly other 
+  systems and/or architectures.
+
+------------------------------------------------------------------------
+r392 | cpickett | 2006-11-23 15:25:13 +1100 (Thu, 23 Nov 2006) | 2 lines
+Changed paths:
+   M /trunk/README
+
+* Document dependency on GNU sed 4.0.5.
+
+------------------------------------------------------------------------
+r391 | hugo303 | 2006-11-22 21:13:51 +1100 (Wed, 22 Nov 2006) | 3 lines
+Changed paths:
+   M /trunk/tests/check_check_master.c
+   M /trunk/tests/check_check_sub.c
+
+ * Reverted back to r378, undoing the -ansi and -pedantic fixes.
+   Now the tests shall work again.
+
+------------------------------------------------------------------------
+r390 | hugo303 | 2006-11-22 21:11:49 +1100 (Wed, 22 Nov 2006) | 3 lines
+Changed paths:
+   M /trunk/configure.ac
+   M /trunk/src/Makefile.am
+
+ * Moved -ansi and -pedantic CFLAGS to src/Makefile.am from configure.ac.
+   Without these flags in the tests, they will be able to work again.
+
+------------------------------------------------------------------------
+r389 | cpickett | 2006-11-22 18:33:47 +1100 (Wed, 22 Nov 2006) | 3 lines
+Changed paths:
+   M /trunk/doc/check.texi
+
+* Clarified checked and unchecked fixtures according to discussion
+  between Hugo and Greger Ohlson in the Help forum.
+
+------------------------------------------------------------------------
+r388 | cpickett | 2006-11-22 18:22:38 +1100 (Wed, 22 Nov 2006) | 3 lines
+Changed paths:
+   M /trunk/TODO
+
+* Update TODO with Hugo's idea from Help forum about forking
+  test cases as well as forking unit tests.
+
+------------------------------------------------------------------------
+r387 | cpickett | 2006-11-22 16:13:35 +1100 (Wed, 22 Nov 2006) | 2 lines
+Changed paths:
+   M /trunk/HACKING
+
+* Changed release email project files link to direct download link.
+
+------------------------------------------------------------------------
+r386 | cpickett | 2006-11-22 12:26:56 +1100 (Wed, 22 Nov 2006) | 2 lines
+Changed paths:
+   M /trunk/HACKING
+
+* Document release process.
+
+------------------------------------------------------------------------
+r385 | cpickett | 2006-11-22 10:56:21 +1100 (Wed, 22 Nov 2006) | 3 lines
+Changed paths:
+   M /trunk/NEWS
+   M /trunk/TODO
+   M /trunk/configure.ac
+
+* svn merge -r383:384 ../tags/check-0.9.5/ .
+  -- Updated version to 0.9.5, along with NEWS and TODO to match.
+
+------------------------------------------------------------------------
+r382 | hugo303 | 2006-11-21 20:36:01 +1100 (Tue, 21 Nov 2006) | 1 line
+Changed paths:
+   M /trunk/TODO
+
+ * Clarified patch submission in TODO list.
+------------------------------------------------------------------------
+r381 | cpickett | 2006-11-21 14:41:37 +1100 (Tue, 21 Nov 2006) | 3 lines
+Changed paths:
+   M /trunk/Makefile.am
+
+* svn merge -r375:374 .
+  -- This removes the `.PHONY: SVNChangeLog' target.
+
+------------------------------------------------------------------------
+r380 | cpickett | 2006-11-18 12:02:13 +1100 (Sat, 18 Nov 2006) | 3 lines
+Changed paths:
+   M /trunk/src/check_run.c
+
+* Eliminate comparison of enum print_mode with 0, since the enum type
+  is unsigned int.
+
+------------------------------------------------------------------------
+r379 | cpickett | 2006-11-18 11:47:21 +1100 (Sat, 18 Nov 2006) | 5 lines
+Changed paths:
+   M /trunk/tests/check_check_master.c
+   M /trunk/tests/check_check_sub.c
+
+* Always pass NULL to fail_if and fail_unless if there is no
+  message, as required by C99.
+* Delete test_fail_no_msg and test_fail_if_no_msg since they test
+  support for non-ISO behaviour.
+
+------------------------------------------------------------------------
+r378 | cpickett | 2006-11-18 11:44:33 +1100 (Sat, 18 Nov 2006) | 2 lines
+Changed paths:
+   M /trunk/configure.ac
+
+* Add some strictness to CFLAGS.
+
+------------------------------------------------------------------------
+r377 | cpickett | 2006-11-18 10:53:54 +1100 (Sat, 18 Nov 2006) | 2 lines
+Changed paths:
+   M /trunk/configure.ac
+
+* Remove check for genhtml, since it isn't used anywhere.
+
+------------------------------------------------------------------------
+r376 | cpickett | 2006-11-18 10:45:08 +1100 (Sat, 18 Nov 2006) | 2 lines
+Changed paths:
+   M /trunk/TODO
+
+* Tick off make html (0.9.4) and loop test clarification (0.9.5).
+
+------------------------------------------------------------------------
+r375 | hugo303 | 2006-11-18 00:17:38 +1100 (Sat, 18 Nov 2006) | 1 line
+Changed paths:
+   M /trunk/Makefile.am
+
+ * Made SVNChangeLog target PHONY so it is always regenerated.
+------------------------------------------------------------------------
+r374 | hugo303 | 2006-11-17 22:57:41 +1100 (Fri, 17 Nov 2006) | 1 line
+Changed paths:
+   M /trunk/TODO
+
+ * Added future AC_PROG_CC_C99 stuff. Ticked off distcheck failure.
+------------------------------------------------------------------------
+r373 | hugo303 | 2006-11-17 19:56:43 +1100 (Fri, 17 Nov 2006) | 3 lines
+Changed paths:
+   M /trunk/src/Makefile.am
+   M /trunk/tests/Makefile.am
+
+ * Added use of libtool functionality for hiding non-exported symbols.
+   Sourceforge feature request #1165405 and bug #1597963.
+
+------------------------------------------------------------------------
+r372 | hugo303 | 2006-11-17 19:54:29 +1100 (Fri, 17 Nov 2006) | 3 lines
+Changed paths:
+   A /trunk/tests/check_check_export_main.c
+
+ * New file used for testing the exported lib with hidden symbols. The
+   old main now tests an internal lib were all symbols are still visible.
+
+------------------------------------------------------------------------
+r371 | hugo303 | 2006-11-17 19:45:29 +1100 (Fri, 17 Nov 2006) | 1 line
+Changed paths:
+   M /trunk/src/check.h.in
+
+ * Added marker on exported symbols to facilitate hiding of lib-local symbols.
+------------------------------------------------------------------------
+r370 | cpickett | 2006-11-16 09:40:50 +1100 (Thu, 16 Nov 2006) | 2 lines
+Changed paths:
+   M /trunk/NEWS
+
+* Update NEWS.
+
+------------------------------------------------------------------------
+r369 | cpickett | 2006-11-16 09:36:31 +1100 (Thu, 16 Nov 2006) | 5 lines
+Changed paths:
+   M /trunk/doc/check.texi
+   M /trunk/src/check.h.in
+   M /trunk/tests/check_check_master.c
+   M /trunk/tests/ex_xml_output.c
+
+* Rename loop test iteration variable from i to _i.  This avoids
+  confusing the user due to warnings issued when using a local
+  variable i in a normal, non-looping test.
+* Add example of loop test usage to documentation.
+
+------------------------------------------------------------------------
+r368 | hugo303 | 2006-11-16 00:50:15 +1100 (Thu, 16 Nov 2006) | 3 lines
+Changed paths:
+   M /trunk/configure.ac
+   M /trunk/src/Makefile.am
+
+ * Fixed coverage support to work with gcc4 and buggy libtool.
+
+
+------------------------------------------------------------------------
+r367 | hugo303 | 2006-11-16 00:41:39 +1100 (Thu, 16 Nov 2006) | 2 lines
+Changed paths:
+   M /trunk/README
+
+ * Added texinfo dependencies.
+
+------------------------------------------------------------------------
+r366 | cpickett | 2006-11-15 20:20:47 +1100 (Wed, 15 Nov 2006) | 2 lines
+Changed paths:
+   M /trunk/index.html
+
+* Clarify meaning of "sporadically maintained".
+
+------------------------------------------------------------------------
+r365 | hugo303 | 2006-11-15 02:51:33 +1100 (Wed, 15 Nov 2006) | 2 lines
+Changed paths:
+   M /trunk/Makefile.am
+
+ * Fixed distcheck target. SVNChangeLog added to EXTRA_DIST.
+
+------------------------------------------------------------------------
+r364 | hugo303 | 2006-11-04 00:03:55 +1100 (Sat, 04 Nov 2006) | 4 lines
+Changed paths:
+   M /trunk/tests/check_check_main.c
+   M /trunk/tests/check_check_master.c
+
+ * Fixed signal string problem in tests. Strings differed between
+   OSes. Fixes Sourceforge bug #1539828. 
+
+
+------------------------------------------------------------------------
+r363 | hugo303 | 2006-10-26 23:48:54 +1000 (Thu, 26 Oct 2006) | 1 line
+Changed paths:
+   M /trunk/src/check_run.c
+
+Fixed problem with process group ID, especially visible on Solaris and LynxOS. Sourceforge bugs #1407360 and #1539828
+------------------------------------------------------------------------
+r362 | cpickett | 2006-10-14 05:25:25 +1000 (Sat, 14 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/configure.ac
+
+* s/yes/no/ in --enable-gcov help message.
+
+------------------------------------------------------------------------
+r359 | cpickett | 2006-10-14 04:40:38 +1000 (Sat, 14 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/NEWS
+   M /trunk/index.html
+
+* Update NEWS.
+
+------------------------------------------------------------------------
+r358 | cpickett | 2006-10-14 04:23:09 +1000 (Sat, 14 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/configure.ac
+
+* Oops, s/>:/:>/
+
+------------------------------------------------------------------------
+r357 | cpickett | 2006-10-14 04:20:07 +1000 (Sat, 14 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/configure.ac
+
+* Fixed help strings for --enable-gcov and --enable-timeout-tests
+
+------------------------------------------------------------------------
+r356 | cpickett | 2006-10-13 17:51:23 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/index.html
+
+* Update links to projects using Check.
+
+------------------------------------------------------------------------
+r355 | cpickett | 2006-10-13 17:23:13 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/TODO
+
+* Update TODO.
+
+------------------------------------------------------------------------
+r354 | cpickett | 2006-10-13 17:12:57 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/index.html
+
+* Clean up webpage a little bit more.
+
+------------------------------------------------------------------------
+r353 | cpickett | 2006-10-13 17:08:35 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/index.html
+
+* Update webpage.
+
+------------------------------------------------------------------------
+r352 | cpickett | 2006-10-13 16:33:37 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   D /trunk/htdocs
+   A /trunk/index.html (from /trunk/htdocs/index.html:351)
+
+* Move website index.html into root directory.
+
+------------------------------------------------------------------------
+r351 | cpickett | 2006-10-13 16:12:16 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   A /trunk/htdocs (from /trunk/website:350)
+   D /trunk/website
+
+* Rename website/ to htdocs/
+
+------------------------------------------------------------------------
+r350 | cpickett | 2006-10-13 16:02:34 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/website/index.html
+
+* Updated website.
+
+------------------------------------------------------------------------
+r346 | cpickett | 2006-10-13 14:15:58 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/src/check.h.in
+
+* Add FIXME documenting broken fail_if and fail_unless macros.
+
+------------------------------------------------------------------------
+r345 | cpickett | 2006-10-13 14:15:28 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/README
+
+* Mention dependencies better in README.
+
+------------------------------------------------------------------------
+r344 | cpickett | 2006-10-13 14:14:36 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   A /trunk/website
+   A /trunk/website/doc
+   A /trunk/website/index.html
+
+* Create website directory with existing index.html.
+
+------------------------------------------------------------------------
+r343 | cpickett | 2006-10-13 14:13:07 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/TODO
+
+* Update TODO.
+
+------------------------------------------------------------------------
+r342 | cpickett | 2006-10-13 14:12:41 +1000 (Fri, 13 Oct 2006) | 3 lines
+Changed paths:
+   M /trunk/src/check.h.in
+
+* Indicate that the loop index `i' of a test might be unused
+  with __attribute__((unused)). 
+
+------------------------------------------------------------------------
+r341 | cpickett | 2006-10-13 14:12:08 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/src/check.h.in
+
+* Added tcase_add_loop_test_raise_signal()
+
+------------------------------------------------------------------------
+r340 | cpickett | 2006-10-13 14:11:22 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/Makefile.am
+   M /trunk/TODO
+
+* Update TODO, tiny Makefile.am fixes
+
+------------------------------------------------------------------------
+r339 | cpickett | 2006-10-13 14:10:50 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/src/check_log.c
+
+* Fixed printing of newlines in output.
+
+------------------------------------------------------------------------
+r338 | cpickett | 2006-10-13 14:09:56 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/HACKING
+   M /trunk/README
+   M /trunk/TODO
+   M /trunk/configure.ac
+   M /trunk/doc/Makefile.am
+   D /trunk/doc/tutorial.sgml
+
+* Removed SGML / DocBook tutorial; Texinfo version supersedes it.
+
+------------------------------------------------------------------------
+r337 | cpickett | 2006-10-13 14:08:49 +1000 (Fri, 13 Oct 2006) | 3 lines
+Changed paths:
+   M /trunk/Makefile.am
+   M /trunk/doc/Makefile.am
+
+* Fixed doc building for make distcheck.
+* Cleaned up SVNChangeLog generation a little
+
+------------------------------------------------------------------------
+r336 | cpickett | 2006-10-13 14:08:19 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/Makefile.am
+   M /trunk/doc/check.texi
+
+* Cleaner building of diffs for check.texi
+
+------------------------------------------------------------------------
+r335 | cpickett | 2006-10-13 14:07:44 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/example/tests/Makefile.am
+
+* s/check_money_INCLUDES/check_money_CFLAGS/ in tests/Makefile.am
+
+------------------------------------------------------------------------
+r334 | cpickett | 2006-10-13 14:06:57 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/TODO
+
+* Update TODO
+
+------------------------------------------------------------------------
+r333 | cpickett | 2006-10-13 14:05:59 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/AUTHORS
+   M /trunk/Makefile.am
+   M /trunk/check.m4
+   A /trunk/check.pc.in
+   M /trunk/configure.ac
+
+* Added check.pc.in for pkg-config support
+
+------------------------------------------------------------------------
+r332 | cpickett | 2006-10-13 14:05:10 +1000 (Fri, 13 Oct 2006) | 3 lines
+Changed paths:
+   M /trunk/TODO
+   M /trunk/tests/check_check_fixture.c
+   M /trunk/tests/check_check_fork.c
+   M /trunk/tests/check_check_limit.c
+   M /trunk/tests/check_check_main.c
+   M /trunk/tests/check_check_master.c
+
+* Updated TODO, pulled in check.sourceforge.net TODO
+* Made tests run with CK_VERBOSE instead of CK_SILENT
+
+------------------------------------------------------------------------
+r331 | cpickett | 2006-10-13 14:03:41 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   A /trunk/HACKING
+   M /trunk/Makefile.am
+
+* Add SVNChangeLog generation, brief HACKING file
+
+------------------------------------------------------------------------
+r330 | cpickett | 2006-10-13 14:00:54 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/Makefile.am
+
+* Create money example diffs in tutorial Makefile.am
+
+------------------------------------------------------------------------
+r329 | cpickett | 2006-10-13 14:00:11 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/check.texi
+
+* Finished converting tutorial to Texinfo!
+
+------------------------------------------------------------------------
+r328 | cpickett | 2006-10-13 13:59:30 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/check.texi
+
+* Converted next section of Chapter 4 to Texinfo.
+
+------------------------------------------------------------------------
+r327 | cpickett | 2006-10-13 13:59:06 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/example/tests/check_money.c
+
+* Break another line for money_suite()
+
+------------------------------------------------------------------------
+r326 | cpickett | 2006-10-13 13:58:41 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/example/tests/check_money.3.c
+   M /trunk/doc/example/tests/check_money.6.c
+   M /trunk/doc/example/tests/check_money.7.c
+
+* Insert line break between type and name of money_suite()
+
+------------------------------------------------------------------------
+r325 | cpickett | 2006-10-13 13:58:04 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/example/tests/check_money.2.c
+   M /trunk/doc/example/tests/check_money.3.c
+   M /trunk/doc/example/tests/check_money.6.c
+   A /trunk/doc/example/tests/check_money.7.c
+   M /trunk/doc/example/tests/check_money.c
+
+* Added revision 7 of money example.
+
+------------------------------------------------------------------------
+r324 | cpickett | 2006-10-13 13:56:57 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/check.texi
+
+* Converted "No Fork Mode" section of Chapter 4 to Texinfo.
+
+------------------------------------------------------------------------
+r323 | cpickett | 2006-10-13 13:56:23 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/check.texi
+
+* Convert first section of tutorial Chapter 4 to Texinfo.
+
+------------------------------------------------------------------------
+r322 | cpickett | 2006-10-13 13:55:47 +1000 (Fri, 13 Oct 2006) | 3 lines
+Changed paths:
+   A /trunk/doc/example/src/money.6.c
+   M /trunk/doc/example/src/money.c
+   M /trunk/doc/example/tests/check_money.2.c
+   M /trunk/doc/example/tests/check_money.3.c
+   A /trunk/doc/example/tests/check_money.6.c
+
+* Added revision 6 of money example.
+* Fixed some whitespace errors in other revisions.
+
+------------------------------------------------------------------------
+r321 | cpickett | 2006-10-13 13:54:47 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/check.texi
+
+* Finally converted all of tutorial chapter 3 to Texinfo.
+
+------------------------------------------------------------------------
+r320 | cpickett | 2006-10-13 13:54:20 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   A /trunk/doc/example/src/money.5.c
+
+* Added revision 5 of money example.
+
+------------------------------------------------------------------------
+r319 | cpickett | 2006-10-13 13:53:41 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   A /trunk/doc/example/src/money.4.c
+
+* Added revision 4 of money example.
+
+------------------------------------------------------------------------
+r318 | cpickett | 2006-10-13 13:52:59 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/check.texi
+
+* Added next section of Chapter 3.
+
+------------------------------------------------------------------------
+r317 | cpickett | 2006-10-13 13:52:28 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   A /trunk/doc/example/src/money.3.c
+   A /trunk/doc/example/tests/check_money.3.c
+
+* Added revision 3 of money example.
+
+------------------------------------------------------------------------
+r316 | cpickett | 2006-10-13 13:51:41 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   A /trunk/doc/example/src/money.2.h
+   A /trunk/doc/example/tests/check_money.2.c
+
+* Added revision 2 of money example
+
+------------------------------------------------------------------------
+r315 | cpickett | 2006-10-13 13:50:38 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   A /trunk/doc/example/src/money.1.c
+   A /trunk/doc/example/src/money.1.h
+   A /trunk/doc/example/tests/check_money.1.c
+
+* Added revision 1 of money example
+
+------------------------------------------------------------------------
+r314 | cpickett | 2006-10-13 13:49:07 +1000 (Fri, 13 Oct 2006) | 4 lines
+Changed paths:
+   M /trunk/doc/check.texi
+
+* Converted the next section of chapter 3 to Texinfo.
+* And actually, below, chapter 3 wasn't completed.  The previous
+  section _in_ chapter 3 was completed.
+
+------------------------------------------------------------------------
+r313 | cpickett | 2006-10-13 13:48:36 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/Makefile.am
+
+* include example/ dir in AM_MAKEINFOFLAGS
+
+------------------------------------------------------------------------
+r312 | cpickett | 2006-10-13 13:47:54 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/check.texi
+
+* Converted chapter 3 of manual to Texinfo.
+
+------------------------------------------------------------------------
+r311 | cpickett | 2006-10-13 13:47:07 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/example/tests/Makefile.am
+
+* small example Makefile.am fixes
+
+------------------------------------------------------------------------
+r310 | cpickett | 2006-10-13 13:46:43 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/example/tests/Makefile.am
+
+* add spaces to example Makefile.am
+
+------------------------------------------------------------------------
+r309 | cpickett | 2006-10-13 13:46:16 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/AUTHORS
+   M /trunk/THANKS
+
+* Add Robert Lemmen to AUTHORS
+
+------------------------------------------------------------------------
+r308 | cpickett | 2006-10-13 13:45:52 +1000 (Fri, 13 Oct 2006) | 3 lines
+Changed paths:
+   M /trunk/doc/tutorial.sgml
+
+* Applied patch from Robert Lemmen, adding test coverage description
+  to the (Docbook) manual.
+
+------------------------------------------------------------------------
+r307 | cpickett | 2006-10-13 13:45:09 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/check.texi
+
+* Partway through Chapter 3.
+
+------------------------------------------------------------------------
+r306 | cpickett | 2006-10-13 13:44:39 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/check.texi
+
+* Converted chapter 2 of manual to Texinfo.
+
+------------------------------------------------------------------------
+r305 | cpickett | 2006-10-13 13:44:12 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/check.texi
+
+* Converted first chapter to Texinfo.
+
+------------------------------------------------------------------------
+r304 | cpickett | 2006-10-13 13:43:41 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/check.texi
+
+* Update manual structure a little.
+
+------------------------------------------------------------------------
+r303 | cpickett | 2006-10-13 13:43:12 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/Makefile.am
+   M /trunk/doc/check.texi
+   A /trunk/doc/fdl.texi
+
+* add hooks to Makefile.am, include copy of FDL
+
+------------------------------------------------------------------------
+r302 | cpickett | 2006-10-13 13:41:40 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   A /trunk/doc/check.texi (from /trunk/doc/tutorial.texi:301)
+   D /trunk/doc/tutorial.texi
+
+* rename tutorial.texi to check.texi
+
+------------------------------------------------------------------------
+r301 | cpickett | 2006-10-13 13:41:09 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   A /trunk/doc/tutorial.texi
+
+* create Texinfo boilerplate for Check manual / tutorial
+
+------------------------------------------------------------------------
+r300 | cpickett | 2006-10-13 13:40:25 +1000 (Fri, 13 Oct 2006) | 3 lines
+Changed paths:
+   M /trunk/check.m4
+
+* Applied patch from Loic Minier to fix check.m4.
+  From http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=342864
+
+------------------------------------------------------------------------
+r299 | cpickett | 2006-10-13 13:39:41 +1000 (Fri, 13 Oct 2006) | 3 lines
+Changed paths:
+   M /trunk/TODO
+   M /trunk/configure.ac
+   M /trunk/doc/example/configure.ac
+   M /trunk/src/Makefile.am
+   M /trunk/tests/Makefile.am
+
+* update check to use libtool, now both static and shared
+  libraries are created.
+
+------------------------------------------------------------------------
+r298 | cpickett | 2006-10-13 13:38:33 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/Makefile.am
+
+* include money src, tests in doc EXTRA_DIST
+
+------------------------------------------------------------------------
+r297 | cpickett | 2006-10-13 13:38:07 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/TODO
+   M /trunk/doc/Makefile.am
+
+* fix installation of tutorial and example docs
+
+------------------------------------------------------------------------
+r296 | cpickett | 2006-10-13 13:37:39 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/Makefile.am
+
+* include example README in distribution
+
+------------------------------------------------------------------------
+r295 | cpickett | 2006-10-13 13:37:00 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   A /trunk/doc/example/README
+
+* add README to money example
+
+------------------------------------------------------------------------
+r294 | cpickett | 2006-10-13 13:34:16 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/tutorial.sgml
+
+* add a missing quote to tutorial
+
+------------------------------------------------------------------------
+r293 | cpickett | 2006-10-13 13:33:25 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/example/configure.ac
+   M /trunk/doc/example/src/Makefile.am
+   M /trunk/doc/example/src/money.c
+   M /trunk/doc/example/tests/Makefile.am
+   M /trunk/doc/example/tests/check_money.c
+
+* fix money example somewhat
+
+------------------------------------------------------------------------
+r292 | cpickett | 2006-10-13 13:32:46 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/configure.ac
+
+* change unique file in AC_CONFIG_SRCDIR
+
+------------------------------------------------------------------------
+r291 | cpickett | 2006-10-13 13:32:02 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/Makefile.am
+   M /trunk/configure.ac
+   M /trunk/doc/Makefile.am
+
+* Use $(datadir) in Makefile.am's
+
+------------------------------------------------------------------------
+r290 | cpickett | 2006-10-13 13:31:33 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/Makefile.am
+
+* Adjusted doc Makefile.am to use example, tutorial subdirs better
+
+------------------------------------------------------------------------
+r289 | cpickett | 2006-10-13 13:30:47 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/doc/example/Makefile.am
+   M /trunk/doc/example/configure.ac
+   A /trunk/doc/example/src/Makefile.am
+   A /trunk/doc/example/src/main.c
+   M /trunk/doc/example/src/money.c
+   M /trunk/doc/example/src/money.h
+   A /trunk/doc/example/tests/Makefile.am
+   M /trunk/doc/example/tests/check_money.c
+
+* Rewrite Makefiles to accomodate new example structure
+
+------------------------------------------------------------------------
+r288 | cpickett | 2006-10-13 13:28:43 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   D /trunk/doc/example/check_money.c
+   D /trunk/doc/example/money.c
+   D /trunk/doc/example/money.h
+   A /trunk/doc/example/src
+   A /trunk/doc/example/src/money.c (from /trunk/doc/example/money.c:285)
+   A /trunk/doc/example/src/money.h (from /trunk/doc/example/money.h:285)
+   A /trunk/doc/example/tests
+   A /trunk/doc/example/tests/check_money.c (from /trunk/doc/example/check_money.c:285)
+
+* Move money example source into src/ and tests/
+
+------------------------------------------------------------------------
+r287 | cpickett | 2006-10-13 13:26:35 +1000 (Fri, 13 Oct 2006) | 3 lines
+Changed paths:
+   A /trunk/doc/example/Makefile.am (from /trunk/doc/example/Makefile.am.money:285)
+   D /trunk/doc/example/Makefile.am.money
+   A /trunk/doc/example/configure.ac (from /trunk/doc/example/configure.in.money:285)
+   D /trunk/doc/example/configure.in.money
+
+* Renamed Makefile.am.money to Makefile.am
+* Renamed configure.in.money to configure.ac
+
+------------------------------------------------------------------------
+r286 | cpickett | 2006-10-13 13:24:34 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   D /trunk/doc/example/Makefile.am
+
+* delete old Makefile.am
+
+------------------------------------------------------------------------
+r285 | cpickett | 2006-10-13 13:23:36 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   A /trunk/doc/example (from /trunk/doc/money:284)
+   D /trunk/doc/money
+
+* Rename money to example
+
+------------------------------------------------------------------------
+r284 | cpickett | 2006-10-13 13:19:55 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/TODO
+   D /trunk/doc/money/aclocal.m4
+
+* Update TODO, remove generated aclocal.m4 from money example
+
+------------------------------------------------------------------------
+r283 | cpickett | 2006-10-13 13:18:54 +1000 (Fri, 13 Oct 2006) | 5 lines
+Changed paths:
+   D /trunk/INSTALL
+   M /trunk/README
+   M /trunk/THANKS
+   M /trunk/TODO
+   M /trunk/configure.ac
+   D /trunk/rpm
+
+* Remove installation instructions
+* Remove rpm target altogether
+* Update README with comments from downstream Fedora Extras
+  and Debian maintainers
+
+------------------------------------------------------------------------
+r282 | cpickett | 2006-10-13 13:18:04 +1000 (Fri, 13 Oct 2006) | 4 lines
+Changed paths:
+   M /trunk/Makefile.am
+   M /trunk/tests/Makefile.am
+
+* Removed $(MAKE) compilation of libcheck.a in tests/Makefile.am
+* Removed core from CLEANFILES in tests/Makefile.am
+* Put tests at the end of top-level SUBDIRS
+
+------------------------------------------------------------------------
+r281 | cpickett | 2006-10-13 13:17:18 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   D /trunk/Doxyfile
+
+* delete obsolete Doxyfile
+
+------------------------------------------------------------------------
+r280 | cpickett | 2006-10-13 13:16:36 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   A /trunk/TODO
+
+* simple TODO file, just build issues for now
+
+------------------------------------------------------------------------
+r279 | cpickett | 2006-10-13 13:15:57 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/Makefile.am
+   M /trunk/configure.ac
+   M /trunk/doc/Makefile.am
+   M /trunk/doc/money/Makefile.am
+
+* various fixes to doc building and installation
+
+------------------------------------------------------------------------
+r278 | cpickett | 2006-10-13 13:15:21 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/Makefile.am
+   M /trunk/configure.ac
+
+* Remove debian from top-level Makefile.am and configure.ac
+
+------------------------------------------------------------------------
+r277 | cpickett | 2006-10-13 13:14:20 +1000 (Fri, 13 Oct 2006) | 3 lines
+Changed paths:
+   M /trunk/Makefile.am
+   M /trunk/NEWS
+   M /trunk/configure.ac
+   M /trunk/doc/Makefile.am
+   M /trunk/doc/money/Makefile.am
+
+* Got rid of --enable-plain-docdir : just let packagers take care
+  of this if they want to.
+
+------------------------------------------------------------------------
+r276 | cpickett | 2006-10-13 13:13:37 +1000 (Fri, 13 Oct 2006) | 3 lines
+Changed paths:
+   D /trunk/debian
+
+* Delete debian/ per Debian maintainer's suggestion
+  -- it's better not for upstream to manage packaging for distributions
+
+------------------------------------------------------------------------
+r275 | cpickett | 2006-10-13 13:12:50 +1000 (Fri, 13 Oct 2006) | 8 lines
+Changed paths:
+   M /trunk/NEWS
+   M /trunk/configure.ac
+   M /trunk/doc/Makefile.am
+   M /trunk/src/Makefile.am
+   M /trunk/tests/Makefile.am
+
+* Replaced .. usage in Makefile.am's with $(top_builddir) or 
+  $(top_srcdir) where appropriate
+  -- make distcheck now works, make distcleancheck and
+     make distuninstallcheck do not
+* Added core to CLEANFILES in tests/Makefile.am
+* Bumped version to 0.9.4, added notice to top of NEWS 
+  -- should bump version in CVS right after release
+
+------------------------------------------------------------------------
+r274 | cpickett | 2006-10-13 13:11:12 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/Makefile.am
+   M /trunk/debian/Makefile.am
+   M /trunk/doc/Makefile.am
+   M /trunk/doc/money/Makefile.am
+   M /trunk/doc/money/Makefile.am.money
+   M /trunk/rpm/Makefile.am
+   M /trunk/src/Makefile.am
+   M /trunk/tests/Makefile.am
+
+* Comments in Makefile.am's
+
+------------------------------------------------------------------------
+r273 | cpickett | 2006-10-13 13:10:08 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/AUTHORS
+   M /trunk/NEWS
+
+* Add change notice to AUTHORS, NEWS
+
+------------------------------------------------------------------------
+r272 | cpickett | 2006-10-13 13:09:21 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/README
+
+* Updated README to mention docbook2html
+
+------------------------------------------------------------------------
+r271 | cpickett | 2006-10-13 13:08:27 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/Makefile.am
+
+* Remove autogen.sh from EXTRA_DIST
+
+------------------------------------------------------------------------
+r270 | cpickett | 2006-10-13 13:07:50 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/Makefile.am
+
+* Change COPYING to COPYING.LESSER in Makefile.am
+
+------------------------------------------------------------------------
+r269 | cpickett | 2006-10-13 13:06:36 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/configure.ac
+
+* remove accidental junk line from configure.ac
+
+------------------------------------------------------------------------
+r268 | cpickett | 2006-10-13 13:05:55 +1000 (Fri, 13 Oct 2006) | 3 lines
+Changed paths:
+   D /trunk/acinclude.m4
+   D /trunk/stamp-h.in
+
+* Removed acinclude.m4 because it was empty
+* Removed stamp-h.in because it is automatically generated
+
+------------------------------------------------------------------------
+r267 | cpickett | 2006-10-13 13:05:06 +1000 (Fri, 13 Oct 2006) | 6 lines
+Changed paths:
+   D /trunk/COPYING
+   A /trunk/COPYING.LESSER
+
+* Removed COPYING, replaced with COPYING.LESSER
+  The LGPL-2.1 in COPYING had some problems:
+    -- out of date, FSF address has changed
+    -- formatting (linebreaks and such) has changed or is unofficial
+    -- COPYING is actually for GPL, so use COPYING.LESSER instead
+
+------------------------------------------------------------------------
+r266 | cpickett | 2006-10-13 13:02:53 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   M /trunk/tests/Makefile.am
+
+* change INCLUDES to AM_CPPFLAGS to stop Automake from complaining
+
+------------------------------------------------------------------------
+r265 | cpickett | 2006-10-13 13:01:50 +1000 (Fri, 13 Oct 2006) | 3 lines
+Changed paths:
+   M /trunk/AUTHORS
+   A /trunk/THANKS
+
+* moved design suggestions out of AUTHORS and into THANKS
+  -- AUTHORS is for people with copyright over some piece of Check
+
+------------------------------------------------------------------------
+r264 | cpickett | 2006-10-13 12:58:52 +1000 (Fri, 13 Oct 2006) | 4 lines
+Changed paths:
+   M /trunk/configure.ac
+
+* Updated configure.ac to use 2.59 macro syntax
+* Ran autoscan, merged generated configure.scan with configure.ac
+  -- this resolves autoscan warnings
+
+------------------------------------------------------------------------
+r263 | cpickett | 2006-10-13 12:57:19 +1000 (Fri, 13 Oct 2006) | 17 lines
+Changed paths:
+   M /trunk/README
+   D /trunk/autogen.sh
+   D /trunk/config.h.in
+
+* Removed config.h.in -- generated automatically by autoheader
+
+* Removed autogen.sh.  Unnecessary features inside included:
+    1) checking version of autoconf, automake (twice each)
+    2) checking for being in the top-level project dir
+    3) running configure automatically
+    4) specifying --include-deps to automake (obsolete)
+    5) some autoheader line I don't understand:
+       (autoheader --version)  < /dev/null > /dev/null 2>&1 && autoheader
+    6) calling configure --enable-maintainer-mode, which is no
+       longer recognized by configure
+
+* Updated README to specify latest autoconf and automake,
+  and usage of autoreconf --install instead of ./autogen.sh
+
+* Note: this build is still broken
+
+------------------------------------------------------------------------
+r262 | cpickett | 2006-10-13 12:09:26 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   A /trunk/configure.ac (from /trunk/configure.in:261)
+   D /trunk/configure.in
+
+* svn mv configure.in configure.ac
+
+------------------------------------------------------------------------
+r261 | cpickett | 2006-10-13 10:29:39 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   D /trunk/check
+
+* Remove old trunk/check directory.
+
+------------------------------------------------------------------------
+r260 | cpickett | 2006-10-13 10:24:56 +1000 (Fri, 13 Oct 2006) | 2 lines
+Changed paths:
+   A /trunk/.cvsignore (from /trunk/check/.cvsignore:259)
+   A /trunk/AUTHORS (from /trunk/check/AUTHORS:259)
+   A /trunk/COPYING (from /trunk/check/COPYING:259)
+   A /trunk/ChangeLog (from /trunk/check/ChangeLog:259)
+   A /trunk/ChangeLogOld (from /trunk/check/ChangeLogOld:259)
+   A /trunk/Doxyfile (from /trunk/check/Doxyfile:259)
+   A /trunk/INSTALL (from /trunk/check/INSTALL:259)
+   A /trunk/Makefile.am (from /trunk/check/Makefile.am:259)
+   A /trunk/NEWS (from /trunk/check/NEWS:259)
+   A /trunk/README (from /trunk/check/README:259)
+   A /trunk/acinclude.m4 (from /trunk/check/acinclude.m4:259)
+   A /trunk/autogen.sh (from /trunk/check/autogen.sh:259)
+   D /trunk/check/.cvsignore
+   D /trunk/check/AUTHORS
+   D /trunk/check/COPYING
+   D /trunk/check/ChangeLog
+   D /trunk/check/ChangeLogOld
+   D /trunk/check/Doxyfile
+   D /trunk/check/INSTALL
+   D /trunk/check/Makefile.am
+   D /trunk/check/NEWS
+   D /trunk/check/README
+   D /trunk/check/acinclude.m4
+   D /trunk/check/autogen.sh
+   D /trunk/check/check.m4
+   D /trunk/check/config.h.in
+   D /trunk/check/configure.in
+   D /trunk/check/debian
+   D /trunk/check/doc
+   D /trunk/check/rpm
+   D /trunk/check/src
+   D /trunk/check/stamp-h.in
+   D /trunk/check/tests
+   A /trunk/check.m4 (from /trunk/check/check.m4:259)
+   A /trunk/config.h.in (from /trunk/check/config.h.in:259)
+   A /trunk/configure.in (from /trunk/check/configure.in:259)
+   A /trunk/debian (from /trunk/check/debian:259)
+   A /trunk/doc (from /trunk/check/doc:259)
+   A /trunk/rpm (from /trunk/check/rpm:259)
+   A /trunk/src (from /trunk/check/src:259)
+   A /trunk/stamp-h.in (from /trunk/check/stamp-h.in:259)
+   A /trunk/tests (from /trunk/check/tests:259)
+
+* Move trunk/check/* to trunk/.
+
+------------------------------------------------------------------------
+r259 | hugo303 | 2005-12-17 02:19:16 +1100 (Sat, 17 Dec 2005) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Fixed eprintf arguments
+
+------------------------------------------------------------------------
+r258 | hugo303 | 2005-12-17 02:07:01 +1100 (Sat, 17 Dec 2005) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_pack.c
+
+Fixed eprintf string
+
+------------------------------------------------------------------------
+r257 | hugo303 | 2005-10-31 23:35:18 +1100 (Mon, 31 Oct 2005) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/NEWS
+
+Fixed sourceforge bug #1327225, Two teardown checked fixtures segfaults
+
+------------------------------------------------------------------------
+r256 | hugo303 | 2005-10-31 23:29:12 +1100 (Mon, 31 Oct 2005) | 2 lines
+Changed paths:
+   M /trunk/check/tests/check_check_fixture.c
+
+Added tests for several setup and teardown functions.
+
+------------------------------------------------------------------------
+r255 | hugo303 | 2005-10-31 23:25:59 +1100 (Mon, 31 Oct 2005) | 2 lines
+Changed paths:
+   M /trunk/check/tests/check_list.c
+
+Added tests for list_add_front.
+
+------------------------------------------------------------------------
+r254 | hugo303 | 2005-10-31 23:25:12 +1100 (Mon, 31 Oct 2005) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_list.c
+
+Fixed memove bug in list_add_front. Pointer arithmetics bites again.
+
+------------------------------------------------------------------------
+r253 | hugo303 | 2005-09-30 22:19:44 +1000 (Fri, 30 Sep 2005) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/doc/tutorial.sgml
+
+Updated documentation with a section about looping tests
+
+------------------------------------------------------------------------
+r252 | hugo303 | 2005-09-30 21:43:03 +1000 (Fri, 30 Sep 2005) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/NEWS
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check.h.in
+   M /trunk/check/src/check_impl.h
+   M /trunk/check/src/check_print.c
+   M /trunk/check/src/check_run.c
+   M /trunk/check/src/check_str.c
+   M /trunk/check/tests/Makefile.am
+   M /trunk/check/tests/check_check_fixture.c
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/ex_xml_output.c
+   M /trunk/check/tests/test_log_output.sh
+   M /trunk/check/tests/test_output.sh
+   M /trunk/check/tests/test_xml_output.sh
+
+Looping tests added
+
+------------------------------------------------------------------------
+r251 | hugo303 | 2005-09-22 00:42:10 +1000 (Thu, 22 Sep 2005) | 2 lines
+Changed paths:
+   M /trunk/check/tests/check_check_sub.c
+
+Fixed line number error introduced when adding configure option --enable-timeout-tests=no
+
+------------------------------------------------------------------------
+r250 | hugo303 | 2005-09-15 23:04:17 +1000 (Thu, 15 Sep 2005) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/configure.in
+   M /trunk/check/tests/Makefile.am
+   M /trunk/check/tests/check_check.h
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_check_sub.c
+
+Added possibility to turn off timeout tests through configure option --enable-timeout-tests=no
+
+------------------------------------------------------------------------
+r249 | hugo303 | 2005-09-15 19:55:21 +1000 (Thu, 15 Sep 2005) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Coverage improvements
+
+------------------------------------------------------------------------
+r248 | hugo303 | 2005-09-15 19:52:26 +1000 (Thu, 15 Sep 2005) | 2 lines
+Changed paths:
+   M /trunk/check/src/Makefile.am
+
+Improved coverage analysis by running all tests before compiling result. Added gcc3.3 coverage bug workaround.
+
+------------------------------------------------------------------------
+r247 | hugo303 | 2005-09-15 19:49:11 +1000 (Thu, 15 Sep 2005) | 2 lines
+Changed paths:
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_check_sub.c
+
+Added testing of timeout set through environment variable
+
+------------------------------------------------------------------------
+r246 | hugo303 | 2005-09-15 00:24:14 +1000 (Thu, 15 Sep 2005) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Added gcov/lcov support
+
+------------------------------------------------------------------------
+r245 | hugo303 | 2005-09-08 01:10:17 +1000 (Thu, 08 Sep 2005) | 2 lines
+Changed paths:
+   M /trunk/check/configure.in
+   M /trunk/check/src/Makefile.am
+   M /trunk/check/tests/Makefile.am
+
+Added gcov/lcov support
+
+------------------------------------------------------------------------
+r244 | hugo303 | 2005-09-08 00:35:18 +1000 (Thu, 08 Sep 2005) | 2 lines
+Changed paths:
+   M /trunk/check/tests/Makefile.am
+
+Clean emacs temp files
+
+------------------------------------------------------------------------
+r243 | hugo303 | 2005-09-08 00:24:57 +1000 (Thu, 08 Sep 2005) | 2 lines
+Changed paths:
+   M /trunk/check/tests/check_list.c
+
+Added a test to get 100% coverage
+
+------------------------------------------------------------------------
+r241 | hugo303 | 2005-08-30 19:12:23 +1000 (Tue, 30 Aug 2005) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Post 0.9.3 fixes
+
+------------------------------------------------------------------------
+r240 | hugo303 | 2005-08-30 19:05:22 +1000 (Tue, 30 Aug 2005) | 2 lines
+Changed paths:
+   A /trunk/check/debian/README.Debian
+   A /trunk/check/debian/compat
+   M /trunk/check/debian/copyright
+   A /trunk/check/debian/docs
+   A /trunk/check/debian/example_makefile
+   A /trunk/check/debian/examples
+   A /trunk/check/debian/watch
+
+Added new debian files, missed in the checkin of the debian patch
+
+------------------------------------------------------------------------
+r239 | hugo303 | 2005-08-30 18:40:11 +1000 (Tue, 30 Aug 2005) | 2 lines
+Changed paths:
+   M /trunk/check/NEWS
+
+Added missed NEWS update for 0.9.3
+
+------------------------------------------------------------------------
+r237 | hugo303 | 2005-08-23 23:28:00 +1000 (Tue, 23 Aug 2005) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Added debian fixes
+
+------------------------------------------------------------------------
+r236 | hugo303 | 2005-08-22 23:46:48 +1000 (Mon, 22 Aug 2005) | 2 lines
+Changed paths:
+   M /trunk/check/debian/changelog
+   M /trunk/check/debian/check.doc-base.tut
+   M /trunk/check/debian/check.docs
+   M /trunk/check/debian/check.postinst.debhelper
+   M /trunk/check/debian/check.prerm.debhelper
+   M /trunk/check/debian/control
+   M /trunk/check/debian/copyright
+   M /trunk/check/debian/dirs
+   M /trunk/check/debian/rules
+
+Applied patch for debian files received from check debian maintainer Robert Lemmen
+
+------------------------------------------------------------------------
+r235 | hugo303 | 2005-08-22 23:42:53 +1000 (Mon, 22 Aug 2005) | 2 lines
+Changed paths:
+   M /trunk/check/src/check.h.in
+
+Added include of stddef.h for NULL definition
+
+------------------------------------------------------------------------
+r234 | hugo303 | 2005-08-22 23:36:43 +1000 (Mon, 22 Aug 2005) | 2 lines
+Changed paths:
+   M /trunk/check/doc/tutorial.sgml
+
+Fixed sourceforge bug #1216502
+
+------------------------------------------------------------------------
+r233 | hugo303 | 2005-07-19 23:53:37 +1000 (Tue, 19 Jul 2005) | 2 lines
+Changed paths:
+   M /trunk/check/configure.in
+
+Updated for 0.9.3 release
+
+------------------------------------------------------------------------
+r232 | hugo303 | 2005-07-19 23:02:43 +1000 (Tue, 19 Jul 2005) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Refactored messaging
+
+------------------------------------------------------------------------
+r231 | hugo303 | 2005-07-19 22:54:45 +1000 (Tue, 19 Jul 2005) | 2 lines
+Changed paths:
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check.h.in
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/src/check_msg.h
+   M /trunk/check/src/check_run.c
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_check_msg.c
+   M /trunk/check/tests/check_check_sub.c
+
+Refactored messaging to use the new tmpfile() method all the way, removing the message keys, pipes, pipe entries and pipe list. This makes the messaging work with forking tests, and also with threading tests on linux 2.4 (on 2.6 it already worked). Added check_fork and check_waitpid_and_exit to be used for forking tests.
+
+------------------------------------------------------------------------
+r230 | hugo303 | 2005-07-18 21:05:00 +1000 (Mon, 18 Jul 2005) | 2 lines
+Changed paths:
+   M /trunk/check/tests/check_check_main.c
+
+Use correct variable for number of tests
+
+------------------------------------------------------------------------
+r229 | hugo303 | 2005-05-27 06:12:31 +1000 (Fri, 27 May 2005) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/debian/Makefile.am
+
+Removed 'files' file from DIST
+
+------------------------------------------------------------------------
+r228 | hugo303 | 2005-03-30 00:30:06 +1000 (Wed, 30 Mar 2005) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/src/check.h.in
+
+Fixed gcc 2.95.3 compatibility for VA_ARGS in fail_if
+
+------------------------------------------------------------------------
+r227 | hugo303 | 2005-03-30 00:25:56 +1000 (Wed, 30 Mar 2005) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_run.c
+
+Removed warning introduced by 2005-03-01 test timeout fix
+
+------------------------------------------------------------------------
+r226 | hugo303 | 2005-03-03 00:07:07 +1100 (Thu, 03 Mar 2005) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/src/check.h.in
+
+Added define for NULL if needed
+
+------------------------------------------------------------------------
+r225 | hugo303 | 2005-03-01 20:46:47 +1100 (Tue, 01 Mar 2005) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/src/check_run.c
+
+Changed timeout error message
+
+------------------------------------------------------------------------
+r224 | hugo303 | 2005-03-01 20:41:31 +1100 (Tue, 01 Mar 2005) | 2 lines
+Changed paths:
+   M /trunk/check/tests/check_check_master.c
+
+Updated tests for timeout message change
+
+------------------------------------------------------------------------
+r223 | hugo303 | 2005-03-01 01:46:46 +1100 (Tue, 01 Mar 2005) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   D /trunk/check/debian/files
+
+Removed auto generated debian file
+
+------------------------------------------------------------------------
+r222 | hugo303 | 2005-03-01 01:06:23 +1100 (Tue, 01 Mar 2005) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/rpm/check.spec.in
+
+Added patch for x86_64 arch (fc3)
+
+------------------------------------------------------------------------
+r221 | hugo303 | 2005-03-01 00:42:53 +1100 (Tue, 01 Mar 2005) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Fixed mem leaks
+
+------------------------------------------------------------------------
+r220 | hugo303 | 2005-03-01 00:35:19 +1100 (Tue, 01 Mar 2005) | 2 lines
+Changed paths:
+   M /trunk/check/tests/ex_output.c
+
+Added free of srunner
+
+------------------------------------------------------------------------
+r219 | hugo303 | 2005-03-01 00:28:06 +1100 (Tue, 01 Mar 2005) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_log.c
+
+Fixed memory leaks in xml log
+
+------------------------------------------------------------------------
+r218 | hugo303 | 2005-03-01 00:26:59 +1100 (Tue, 01 Mar 2005) | 2 lines
+Changed paths:
+   M /trunk/check/tests/ex_log_output.c
+   M /trunk/check/tests/ex_xml_output.c
+
+Added free of srunner
+
+------------------------------------------------------------------------
+r216 | hugo303 | 2005-01-04 20:42:35 +1100 (Tue, 04 Jan 2005) | 2 lines
+Changed paths:
+   M /trunk/check/debian/files
+
+Fixed for 0.9.2
+
+------------------------------------------------------------------------
+r215 | hugo303 | 2005-01-04 19:57:00 +1100 (Tue, 04 Jan 2005) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Updated with latest changes
+
+------------------------------------------------------------------------
+r214 | hugo303 | 2005-01-04 19:56:03 +1100 (Tue, 04 Jan 2005) | 2 lines
+Changed paths:
+   M /trunk/check/check.m4
+   M /trunk/check/config.h.in
+   M /trunk/check/configure.in
+   M /trunk/check/src/check_pack.c
+
+Fixed quoting and added configure test for stdint.h.
+
+------------------------------------------------------------------------
+r213 | hugo303 | 2005-01-04 19:47:04 +1100 (Tue, 04 Jan 2005) | 2 lines
+Changed paths:
+   M /trunk/check/tests/check_check_master.c
+
+Made fail strings more helpful
+
+------------------------------------------------------------------------
+r212 | hugo303 | 2004-11-12 22:00:49 +1100 (Fri, 12 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Debian fixes
+
+------------------------------------------------------------------------
+r211 | hugo303 | 2004-11-12 21:56:36 +1100 (Fri, 12 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/debian/changelog
+   M /trunk/check/debian/check.dirs
+   M /trunk/check/debian/control
+   M /trunk/check/debian/rules
+
+Fixed building with gcc3. Removed empty money dir from docs
+
+------------------------------------------------------------------------
+r210 | hugo303 | 2004-11-11 22:19:24 +1100 (Thu, 11 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/debian/control
+   M /trunk/check/rpm/check.spec.in
+
+Fixed mail address
+
+------------------------------------------------------------------------
+r209 | hugo303 | 2004-11-10 23:49:49 +1100 (Wed, 10 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/rpm/Makefile.am
+
+Added autogenerated check.spec to CLEANFILES
+
+------------------------------------------------------------------------
+r208 | hugo303 | 2004-11-10 23:26:29 +1100 (Wed, 10 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/NEWS
+
+Preparations for 0.9.2 release
+
+------------------------------------------------------------------------
+r207 | hugo303 | 2004-11-10 23:16:57 +1100 (Wed, 10 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Use strsignal to print describing text for signals.
+
+------------------------------------------------------------------------
+r206 | hugo303 | 2004-11-10 23:12:35 +1100 (Wed, 10 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/Makefile.am
+
+Added debian target
+
+------------------------------------------------------------------------
+r205 | hugo303 | 2004-11-10 23:06:38 +1100 (Wed, 10 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/rpm/Makefile.am
+
+Added variable for RPM release number
+
+------------------------------------------------------------------------
+r204 | hugo303 | 2004-11-10 22:55:20 +1100 (Wed, 10 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/configure.in
+   M /trunk/check/debian/changelog
+   M /trunk/check/rpm/check.spec.in
+
+Updated for 0.9.2 release
+
+------------------------------------------------------------------------
+r203 | hugo303 | 2004-11-10 22:03:41 +1100 (Wed, 10 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/debian/control
+
+Changed maintainer
+
+------------------------------------------------------------------------
+r202 | hugo303 | 2004-11-10 21:56:31 +1100 (Wed, 10 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/AUTHORS
+
+Added more names
+
+------------------------------------------------------------------------
+r201 | hugo303 | 2004-11-10 02:42:26 +1100 (Wed, 10 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_run.c
+   M /trunk/check/tests/check_check_master.c
+
+Use strsignal to print describing text for signals.
+
+------------------------------------------------------------------------
+r200 | hugo303 | 2004-11-10 02:29:55 +1100 (Wed, 10 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_list.c
+
+Fixed warning
+
+------------------------------------------------------------------------
+r199 | hugo303 | 2004-11-10 01:51:15 +1100 (Wed, 10 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/doc/tutorial.sgml
+
+Documented signals handling and timeouts
+
+------------------------------------------------------------------------
+r198 | hugo303 | 2004-11-10 00:38:47 +1100 (Wed, 10 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/src/check.h.in
+   M /trunk/check/tests/check_check_master.c
+
+Changed failure message for fail_if
+
+------------------------------------------------------------------------
+r197 | hugo303 | 2004-11-09 23:49:41 +1100 (Tue, 09 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check.h.in
+   M /trunk/check/src/check_impl.h
+   M /trunk/check/src/check_run.c
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_check_sub.c
+
+Added support for timeouts on tests, enabling detection of eternal loops as errors.
+
+------------------------------------------------------------------------
+r196 | hugo303 | 2004-11-09 01:40:05 +1100 (Tue, 09 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check.h.in
+   M /trunk/check/src/check_impl.h
+   M /trunk/check/src/check_run.c
+
+Added support for testing on expected signals.
+
+------------------------------------------------------------------------
+r195 | hugo303 | 2004-11-09 01:31:49 +1100 (Tue, 09 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/tests/check_check_master.c
+
+Added tests for signals patch and cleaned up the verification functions
+
+------------------------------------------------------------------------
+r194 | hugo303 | 2004-11-09 01:31:01 +1100 (Tue, 09 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/tests/check_check_sub.c
+
+Added tests for signals patch
+
+------------------------------------------------------------------------
+r193 | hugo303 | 2004-11-05 00:51:03 +1100 (Fri, 05 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check_list.c
+   M /trunk/check/src/check_list.h
+   M /trunk/check/src/check_log.c
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/tests/check_list.c
+
+Changed name on function list_create to check_list_create to avoid name clash
+
+------------------------------------------------------------------------
+r192 | hugo303 | 2004-11-05 00:03:42 +1100 (Fri, 05 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/doc/tutorial.sgml
+
+Fixed stale link to gnu autounit
+
+------------------------------------------------------------------------
+r191 | hugo303 | 2004-11-04 23:52:10 +1100 (Thu, 04 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/check.m4
+
+Fixed underquoted definition of AM_PATH_CHECK
+
+------------------------------------------------------------------------
+r190 | hugo303 | 2004-11-04 23:42:51 +1100 (Thu, 04 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check.h.in
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_check_sub.c
+
+Applied ANSI C99 patch (#1047014)
+
+------------------------------------------------------------------------
+r188 | hugo303 | 2004-09-03 21:50:51 +1000 (Fri, 03 Sep 2004) | 2 lines
+Changed paths:
+   M /trunk/check/NEWS
+   M /trunk/check/configure.in
+
+Updated for 0.9.1 release
+
+------------------------------------------------------------------------
+r187 | hugo303 | 2004-08-20 21:21:39 +1000 (Fri, 20 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/doc/tutorial.sgml
+
+Updated documentation with new features
+
+------------------------------------------------------------------------
+r186 | hugo303 | 2004-08-18 22:52:09 +1000 (Wed, 18 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/src/check_print.c
+   M /trunk/check/tests/test_xml_output.sh
+
+Fixed distcheck problem
+
+------------------------------------------------------------------------
+r185 | hugo303 | 2004-08-18 22:08:09 +1000 (Wed, 18 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/check/tests/Makefile.am
+
+Added test_xml_output.sh to EXTRA_DIST
+
+------------------------------------------------------------------------
+r184 | hugo303 | 2004-08-18 22:02:02 +1000 (Wed, 18 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check.h.in
+   M /trunk/check/src/check_impl.h
+   M /trunk/check/src/check_log.c
+   M /trunk/check/src/check_log.h
+   M /trunk/check/src/check_print.c
+   M /trunk/check/src/check_print.h
+   M /trunk/check/src/check_run.c
+   M /trunk/check/tests/Makefile.am
+   M /trunk/check/tests/check_check_log.c
+   A /trunk/check/tests/ex_xml_output.c
+   A /trunk/check/tests/test_xml_output.sh
+
+Added support for XML output of the test results.
+
+------------------------------------------------------------------------
+r183 | hugo303 | 2004-08-18 19:23:02 +1000 (Wed, 18 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/tests/check_check_fixture.c
+
+Fixed setup bug from forum, failure in setup did not abort test in nofork mode. Added test cases for bug.
+
+------------------------------------------------------------------------
+r182 | hugo303 | 2004-08-18 19:19:37 +1000 (Wed, 18 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_run.c
+
+Fixed setup bug from forum, failure in setup did not abort test in nofork mode.
+
+------------------------------------------------------------------------
+r181 | hugo303 | 2004-08-18 00:39:30 +1000 (Wed, 18 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/src/check_pack.c
+
+Use stdint.h for specific sized type
+
+------------------------------------------------------------------------
+r180 | hugo303 | 2004-08-17 19:50:36 +1000 (Tue, 17 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check.h.in
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_check_sub.c
+
+Applied varargs patch (#933411) and added test cases.
+
+------------------------------------------------------------------------
+r179 | hugo303 | 2004-08-17 18:39:12 +1000 (Tue, 17 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/src/check.h.in
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_check_sub.c
+
+Applied fail_if (#709167) patch
+
+------------------------------------------------------------------------
+r178 | hugo303 | 2004-08-17 00:40:35 +1000 (Tue, 17 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Updated with latest changes
+
+------------------------------------------------------------------------
+r177 | hugo303 | 2004-08-17 00:11:31 +1000 (Tue, 17 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/check/rpm/check.spec.in
+
+Applied doc patch from Bill Barnard
+
+------------------------------------------------------------------------
+r176 | hugo303 | 2004-08-17 00:01:27 +1000 (Tue, 17 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/check/doc/tutorial.sgml
+
+Applied 'newbies' patch for autoconf doc.
+
+------------------------------------------------------------------------
+r175 | hugo303 | 2004-06-05 00:52:40 +1000 (Sat, 05 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/check/tests/test_log_output.sh
+   M /trunk/check/tests/test_output.sh
+
+Fixed portability problem by changing == to =.
+
+------------------------------------------------------------------------
+r174 | hugo303 | 2004-05-26 19:55:37 +1000 (Wed, 26 May 2004) | 2 lines
+Changed paths:
+   M /trunk/check/rpm/check.spec.in
+
+Changed copyright
+
+------------------------------------------------------------------------
+r173 | hugo303 | 2004-05-25 17:46:03 +1000 (Tue, 25 May 2004) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_run.c
+
+Applied patch 796705. Replacing _exit with exit
+
+------------------------------------------------------------------------
+r172 | hugo303 | 2004-05-25 17:38:36 +1000 (Tue, 25 May 2004) | 2 lines
+Changed paths:
+   M /trunk/check/src/check.c
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_check_sub.c
+
+Applied patch for bug 793671
+
+------------------------------------------------------------------------
+r170 | hugo303 | 2004-05-25 17:05:15 +1000 (Tue, 25 May 2004) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/NEWS
+   M /trunk/check/configure.in
+
+Released 0.9.0
+
+------------------------------------------------------------------------
+r169 | hugo303 | 2004-05-17 18:46:53 +1000 (Mon, 17 May 2004) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/NEWS
+
+Released 0.8.5
+
+------------------------------------------------------------------------
+r168 | hugo303 | 2004-05-17 18:42:08 +1000 (Mon, 17 May 2004) | 2 lines
+Changed paths:
+   M /trunk/check/AUTHORS
+
+Updated with new maintainer
+
+------------------------------------------------------------------------
+r167 | hugo303 | 2004-05-17 17:30:56 +1000 (Mon, 17 May 2004) | 2 lines
+Changed paths:
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check_list.c
+   M /trunk/check/src/check_list.h
+
+Run fixture teardowns in reverse order to setup
+
+------------------------------------------------------------------------
+r166 | hugo303 | 2004-05-15 01:26:45 +1000 (Sat, 15 May 2004) | 2 lines
+Changed paths:
+   M /trunk/check/doc/tutorial.sgml
+
+Updated doc to show test name when printing
+
+------------------------------------------------------------------------
+r165 | hugo303 | 2004-05-15 00:41:20 +1000 (Sat, 15 May 2004) | 2 lines
+Changed paths:
+   M /trunk/check/configure.in
+
+Replaced lyx stuff with docbook. Bumped minor version. Removed autoconf warnings
+
+------------------------------------------------------------------------
+r164 | hugo303 | 2004-05-15 00:39:37 +1000 (Sat, 15 May 2004) | 2 lines
+Changed paths:
+   M /trunk/check/acinclude.m4
+
+Removed lyx stuff
+
+------------------------------------------------------------------------
+r163 | hugo303 | 2004-05-15 00:35:18 +1000 (Sat, 15 May 2004) | 2 lines
+Changed paths:
+   M /trunk/check/doc/Makefile.am
+   D /trunk/check/doc/index.html
+   D /trunk/check/doc/tutorial.lyx
+   A /trunk/check/doc/tutorial.sgml
+
+Updated documentation according to changes. Changed to docbook format
+
+------------------------------------------------------------------------
+r162 | hugo303 | 2004-05-15 00:33:35 +1000 (Sat, 15 May 2004) | 2 lines
+Changed paths:
+   M /trunk/check/doc/money/check_money.c
+
+Removed suite_free()
+
+------------------------------------------------------------------------
+r161 | hugo303 | 2004-05-15 00:09:46 +1000 (Sat, 15 May 2004) | 2 lines
+Changed paths:
+   M /trunk/check/tests/check_check_fixture.c
+   M /trunk/check/tests/check_check_fork.c
+   M /trunk/check/tests/check_check_log.c
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_check_msg.c
+   M /trunk/check/tests/check_check_sub.c
+   M /trunk/check/tests/check_stress.c
+   M /trunk/check/tests/ex_log_output.c
+   M /trunk/check/tests/ex_output.c
+   M /trunk/check/tests/test_log_output.sh
+   M /trunk/check/tests/test_output.sh
+
+Updated according to implementation changes. Applied distcheck patch (802160).
+
+------------------------------------------------------------------------
+r160 | hugo303 | 2004-05-14 23:54:49 +1000 (Fri, 14 May 2004) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_run.c
+   M /trunk/check/src/check_str.c
+
+Added name of test to result.
+
+------------------------------------------------------------------------
+r159 | hugo303 | 2004-05-14 23:53:02 +1000 (Fri, 14 May 2004) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_msg.c
+
+Fixed message for nofork failures.
+
+------------------------------------------------------------------------
+r158 | hugo303 | 2004-05-14 22:11:16 +1000 (Fri, 14 May 2004) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_pack.c
+   M /trunk/check/src/check_pack.h
+
+Fixed message for nofork failures.
+
+------------------------------------------------------------------------
+r157 | hugo303 | 2004-05-14 22:08:11 +1000 (Fri, 14 May 2004) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_log.c
+   M /trunk/check/src/check_print.c
+   M /trunk/check/src/check_print.h
+
+Added new print mode that reads the mode from environment variable.
+
+------------------------------------------------------------------------
+r156 | hugo303 | 2004-05-14 22:05:49 +1000 (Fri, 14 May 2004) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_list.c
+
+Fixed bug in NULL check
+
+------------------------------------------------------------------------
+r155 | hugo303 | 2004-05-14 22:04:31 +1000 (Fri, 14 May 2004) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_impl.h
+
+Added name of test to result.
+
+------------------------------------------------------------------------
+r154 | hugo303 | 2004-05-14 22:02:51 +1000 (Fri, 14 May 2004) | 2 lines
+Changed paths:
+   M /trunk/check/src/check.h.in
+
+Made suite_free and tcase_free static. Added new print mode that reads the mode from environment variable.
+
+------------------------------------------------------------------------
+r153 | hugo303 | 2004-05-14 22:00:53 +1000 (Fri, 14 May 2004) | 2 lines
+Changed paths:
+   M /trunk/check/src/check.c
+
+Added free of suites when freeing srunner. Made suite_free and tcase_free static. Added name of test to result.
+
+------------------------------------------------------------------------
+r152 | neo23 | 2002-10-21 21:29:53 +1000 (Mon, 21 Oct 2002) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/NEWS
+
+Made 0.8.4 release.
+
+------------------------------------------------------------------------
+r151 | neo23 | 2002-10-16 21:47:44 +1000 (Wed, 16 Oct 2002) | 2 lines
+Changed paths:
+   M /trunk/check/AUTHORS
+   M /trunk/check/ChangeLog
+   M /trunk/check/configure.in
+
+Bumped version number to 0.8.4. Updated AUTHORS and ChangeLog.
+
+------------------------------------------------------------------------
+r150 | neo23 | 2002-10-16 21:39:48 +1000 (Wed, 16 Oct 2002) | 5 lines
+Changed paths:
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/tests/check_check_msg.c
+
+Applied a patch from Rick Poyner that changes the pipe used for IPC
+to use a temporary file instead of stdin/stdout. This fixes the
+long-standing problem that the pipe used to fill up when too many
+fail_unless() were used. (#482012).
+
+------------------------------------------------------------------------
+r149 | neo23 | 2002-10-10 02:57:36 +1000 (Thu, 10 Oct 2002) | 3 lines
+Changed paths:
+   M /trunk/check/src/check.h.in
+
+Applied a patch from Rick Poyner that fixes a typo which broke check
+for C++ compilers (bug #601397).
+
+------------------------------------------------------------------------
+r148 | neo23 | 2002-08-17 03:41:04 +1000 (Sat, 17 Aug 2002) | 3 lines
+Changed paths:
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/src/check_msg.h
+   M /trunk/check/src/check_pack.c
+   M /trunk/check/src/check_pack.h
+
+Applied a patch from Dietmar Petras <dpetras@gmx.de> that plugs some
+memory leaks.
+
+------------------------------------------------------------------------
+r147 | neo23 | 2002-07-10 12:37:19 +1000 (Wed, 10 Jul 2002) | 2 lines
+Changed paths:
+   M /trunk/check
+   M /trunk/check/.cvsignore
+   M /trunk/check/autogen.sh
+
+Call aclocal from autogen.sh.
+
+------------------------------------------------------------------------
+r146 | neo23 | 2002-07-10 12:32:55 +1000 (Wed, 10 Jul 2002) | 2 lines
+Changed paths:
+   D /trunk/check/aclocal.m4
+   D /trunk/check/depcomp
+   D /trunk/check/install-sh
+   D /trunk/check/missing
+   D /trunk/check/mkinstalldirs
+
+Removed files generated by automake.
+
+------------------------------------------------------------------------
+r145 | neo23 | 2002-06-16 22:25:04 +1000 (Sun, 16 Jun 2002) | 2 lines
+Changed paths:
+   M /trunk/check/debian/changelog
+
+applied patch from Arien Malec to fix build of Debian packages
+
+------------------------------------------------------------------------
+r144 | neo23 | 2002-05-25 01:04:38 +1000 (Sat, 25 May 2002) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Made 0.8.3 Release.
+
+------------------------------------------------------------------------
+r143 | neo23 | 2002-05-25 01:00:49 +1000 (Sat, 25 May 2002) | 3 lines
+Changed paths:
+   M /trunk/check/NEWS
+   M /trunk/check/doc/tutorial.lyx
+   M /trunk/check/rpm/check.spec.in
+
+Added check.m4 to the spec file. Updated NEWS. Updated the date of the
+tutorial.
+
+------------------------------------------------------------------------
+r142 | neo23 | 2002-05-25 00:35:10 +1000 (Sat, 25 May 2002) | 2 lines
+Changed paths:
+   M /trunk/check/debian/check.dirs
+   M /trunk/check/debian/check.files
+   M /trunk/check/debian/control
+
+Added check.m4 to debian rules. Changed the maintainer entry.
+
+------------------------------------------------------------------------
+r141 | neo23 | 2002-05-24 01:08:32 +1000 (Fri, 24 May 2002) | 3 lines
+Changed paths:
+   M /trunk/check/doc/tutorial.lyx
+
+Mention that EXIT_SUCCESS and EXIT_FAILURE are defined in stdlib.h.
+Suggested by Russell Reed in bug #547129.
+
+------------------------------------------------------------------------
+r140 | neo23 | 2002-05-10 22:01:44 +1000 (Fri, 10 May 2002) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_msg.c
+
+Declared local functions static (based on a patch from Gilgamesh Nootebos).
+
+------------------------------------------------------------------------
+r139 | neo23 | 2002-05-03 21:58:02 +1000 (Fri, 03 May 2002) | 3 lines
+Changed paths:
+   M /trunk/check/src/Makefile.am
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check_error.c
+   A /trunk/check/src/check_list.c
+   A /trunk/check/src/check_list.h
+   M /trunk/check/src/check_log.c
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/src/check_pack.c
+   M /trunk/check/src/check_print.c
+   M /trunk/check/src/check_run.c
+   M /trunk/check/src/check_str.c
+   D /trunk/check/src/list.c
+   D /trunk/check/src/list.h
+   M /trunk/check/tests/check_list.c
+
+Renamed list.[ch] to check_list.[ch] for consistency.
+Include config.h from all over the place, cleaned up includes.
+
+------------------------------------------------------------------------
+r138 | neo23 | 2002-05-02 18:34:57 +1000 (Thu, 02 May 2002) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_pack.c
+   M /trunk/check/tests/check_check_log.c
+
+Removed compiler warnings mentioned in bug #547126.
+
+------------------------------------------------------------------------
+r137 | neo23 | 2002-05-02 18:27:25 +1000 (Thu, 02 May 2002) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_print.c
+   M /trunk/check/tests/check_check_msg.c
+
+Don't include "error.h" (bug #546175 small cygwin portability problem).
+
+------------------------------------------------------------------------
+r136 | neo23 | 2002-04-17 03:33:49 +1000 (Wed, 17 Apr 2002) | 4 lines
+Changed paths:
+   M /trunk/check/doc/tutorial.lyx
+
+Changed date to that of the latest release.
+Added a name to an internal reference so that we get a working link in
+the generated HTML.
+
+------------------------------------------------------------------------
+r135 | neo23 | 2002-04-16 02:47:44 +1000 (Tue, 16 Apr 2002) | 3 lines
+Changed paths:
+   M /trunk/check/check.m4
+   M /trunk/check/configure.in
+
+Fixed check.m4 so that --without-check is a valid option to disable check.
+Bumped version number to 0.8.3.
+
+------------------------------------------------------------------------
+r134 | neo23 | 2002-04-15 20:58:10 +1000 (Mon, 15 Apr 2002) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Updated ChangeLog.
+
+------------------------------------------------------------------------
+r133 | neo23 | 2002-04-15 20:57:35 +1000 (Mon, 15 Apr 2002) | 2 lines
+Changed paths:
+   M /trunk/check/NEWS
+   M /trunk/check/README
+
+Made 0.8.2 Release.
+
+------------------------------------------------------------------------
+r132 | neo23 | 2002-04-15 02:59:08 +1000 (Mon, 15 Apr 2002) | 4 lines
+Changed paths:
+   M /trunk/check/src/check_msg.c
+
+Applied a patch from Arien that makes the pipe nonblocking. This doesn't
+solve #482012 but makes it more obvious what is going wrong if the pipe
+fills up.
+
+------------------------------------------------------------------------
+r131 | neo23 | 2002-04-12 20:50:04 +1000 (Fri, 12 Apr 2002) | 2 lines
+Changed paths:
+   M /trunk/check/doc/tutorial.lyx
+
+Use #include rather than #import (bug #484564).
+
+------------------------------------------------------------------------
+r130 | neo23 | 2002-04-12 20:34:04 +1000 (Fri, 12 Apr 2002) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Updated ChangeLog.
+
+------------------------------------------------------------------------
+r129 | neo23 | 2002-04-12 20:33:06 +1000 (Fri, 12 Apr 2002) | 3 lines
+Changed paths:
+   M /trunk/check/AUTHORS
+   M /trunk/check/doc/tutorial.lyx
+
+Document the fact that you can now use NULL as msg argument for
+fail_unless().
+
+------------------------------------------------------------------------
+r128 | neo23 | 2002-04-12 19:54:17 +1000 (Fri, 12 Apr 2002) | 10 lines
+Changed paths:
+   M /trunk/check/config.h.in
+   M /trunk/check/configure.in
+   M /trunk/check/src/Makefile.am
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check_impl.h
+   D /trunk/check/src/check_magic.h
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/src/check_pack.c
+   M /trunk/check/src/check_pack.h
+   M /trunk/check/src/check_run.c
+   M /trunk/check/src/check_str.c
+   M /trunk/check/src/check_str.h
+   M /trunk/check/tests/Makefile.am
+   M /trunk/check/tests/check_check_fixture.c
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_check_msg.c
+   M /trunk/check/tests/check_check_pack.c
+
+Removed limitations on line number, message and buffer sizes
+(bug #478233) by changing the way we send integers over the
+pipe. Instead of strings, integers are now send as 4 bytes.
+This allows the pack routine to easily calculate the message
+size so that we can allocate the needed buffer there.
+Made a union out of the different Msg structs to clean up the
+internal API. Also introduced the internal function
+ck_strdup_printf(), a simple wrapper around sprintf() that
+allocates enough space to hold the resulting string.
+
+------------------------------------------------------------------------
+r127 | neo23 | 2002-04-10 21:11:48 +1000 (Wed, 10 Apr 2002) | 7 lines
+Changed paths:
+   M /trunk/check/AUTHORS
+   M /trunk/check/NEWS
+   M /trunk/check/configure.in
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check.h.in
+   M /trunk/check/src/check_error.c
+   M /trunk/check/src/check_error.h
+   M /trunk/check/src/check_impl.h
+   M /trunk/check/src/check_log.c
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/src/check_msg.h
+   M /trunk/check/src/check_pack.c
+   M /trunk/check/src/check_run.c
+   M /trunk/check/src/check_str.c
+   M /trunk/check/src/list.c
+   M /trunk/check/src/list.h
+   M /trunk/check/tests/check_check_fixture.c
+   M /trunk/check/tests/check_check_fork.c
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_check_pack.c
+   M /trunk/check/tests/check_list.c
+
+Applied a slightly modified version of a patch from
+Neil Spring <nspring@cs.washington.edu> that declares strings as
+const where applicable. It also changes our CFLAGS to be much
+stricter and removes the warnings introduced by -Wwrite-strings.
+This allows building other check tests with -Wwrite-strings
+without heaping gobs of compiler warnings.
+
+------------------------------------------------------------------------
+r126 | neo23 | 2002-03-29 06:12:30 +1100 (Fri, 29 Mar 2002) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Updated ChangeLog.
+
+------------------------------------------------------------------------
+r125 | neo23 | 2002-03-29 05:37:07 +1100 (Fri, 29 Mar 2002) | 6 lines
+Changed paths:
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check.h.in
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_check_sub.c
+
+Allow fail_unless() to be called with a NULL msg and substitute a reasonable
+error message in that case. Bail out if NULL is passed to _fail_unless() to
+avoid possible confusion.
+
+Added a test case that calls fail_unless() with msg=NULL.
+
+------------------------------------------------------------------------
+r124 | neo23 | 2002-03-29 05:22:09 +1100 (Fri, 29 Mar 2002) | 21 lines
+Changed paths:
+   M /trunk/check/Makefile.am
+   M /trunk/check/README
+   M /trunk/check/autogen.sh
+   A /trunk/check/check.m4
+   M /trunk/check/configure.in
+   M /trunk/check/doc/money
+   A /trunk/check/doc/money/.cvsignore
+   M /trunk/check/doc/money/Makefile.am.money
+   M /trunk/check/doc/money/aclocal.m4
+   M /trunk/check/doc/money/configure.in.money
+   M /trunk/check/doc/tutorial.lyx
+   M /trunk/check/rpm
+   M /trunk/check/rpm/.cvsignore
+   M /trunk/check/rpm/Makefile.am
+   D /trunk/check/rpm/check.spec
+   A /trunk/check/rpm/check.spec.in
+   M /trunk/check/src
+   M /trunk/check/src/.cvsignore
+   M /trunk/check/src/Makefile.am
+   M /trunk/check/src/check.c
+   D /trunk/check/src/check.h
+   A /trunk/check/src/check.h.in
+   M /trunk/check/tests
+   M /trunk/check/tests/.cvsignore
+
+Changed autogen.sh to bail out if necessary tools can't be found
+instead of proceeding to the version checks.
+
+Document use of autogen.sh in README.
+
+Generate check.spec from check.spec.in to it automatically gets the
+correct version number.
+
+Generate check.h from chech.h.in and include Check version information.
+
+Compile Check version number into the library to allow for runtime
+version checks.
+
+Added the m4 script check.m4 that allows to easily integrate Check
+into projects using autoconf/automake. It does version checking and
+also assures that header and library versions match.
+
+Document the use of check.m4 and the AM_PATH_CHECK() macro in the
+tutorial. Adapted example Makefile.am and configure.in and added a
+missing .cvsignore file.
+
+------------------------------------------------------------------------
+r123 | amalec | 2002-03-27 12:21:12 +1100 (Wed, 27 Mar 2002) | 2 lines
+Changed paths:
+   D /trunk/check/src/Makefile.in
+   D /trunk/check/tests/Makefile.in
+
+Complete CVS cleanup
+
+------------------------------------------------------------------------
+r122 | amalec | 2002-03-27 12:18:55 +1100 (Wed, 27 Mar 2002) | 2 lines
+Changed paths:
+   M /trunk/check
+   A /trunk/check/.cvsignore
+   M /trunk/check/Makefile.am
+   D /trunk/check/Makefile.in
+   A /trunk/check/autogen.sh
+   D /trunk/check/configure
+   M /trunk/check/debian
+   A /trunk/check/debian/.cvsignore
+   D /trunk/check/debian/Makefile.in
+   M /trunk/check/doc
+   A /trunk/check/doc/.cvsignore
+   D /trunk/check/doc/Makefile.in
+   D /trunk/check/doc/money/Makefile.in
+   M /trunk/check/rpm
+   A /trunk/check/rpm/.cvsignore
+   D /trunk/check/rpm/Makefile.in
+   M /trunk/check/src
+   A /trunk/check/src/.cvsignore
+   M /trunk/check/tests
+   A /trunk/check/tests/.cvsignore
+
+Cleaned up CVS to remove all autofoo generated files, included an autogen.sh bootstrap file. Changes at the suggestion of Sven Neumann
+
+------------------------------------------------------------------------
+r121 | amalec | 2002-03-02 12:42:48 +1100 (Sat, 02 Mar 2002) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Update ChangeLog
+
+------------------------------------------------------------------------
+r120 | amalec | 2002-03-02 12:42:20 +1100 (Sat, 02 Mar 2002) | 2 lines
+Changed paths:
+   M /trunk/check/debian/changelog
+   M /trunk/check/debian/files
+   M /trunk/check/rpm/check.spec
+   M /trunk/check/src/Makefile.am
+   M /trunk/check/src/Makefile.in
+   M /trunk/check/src/check.c
+   A /trunk/check/src/check_error.c
+   A /trunk/check/src/check_error.h
+   M /trunk/check/src/check_log.c
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/src/check_pack.c
+   M /trunk/check/src/check_run.c
+   M /trunk/check/src/check_str.c
+   D /trunk/check/src/error.c
+   D /trunk/check/src/error.h
+   M /trunk/check/src/list.c
+   M /trunk/check/tests/check_check_fixture.c
+   M /trunk/check/tests/check_check_pack.c
+
+Moved error.[hc] to check_error.[hc], and fixed bug in running checked setup in nofork mode.
+
+------------------------------------------------------------------------
+r119 | amalec | 2002-02-28 13:02:09 +1100 (Thu, 28 Feb 2002) | 2 lines
+Changed paths:
+   M /trunk/check/COPYING
+   M /trunk/check/configure
+   M /trunk/check/configure.in
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check.h
+   M /trunk/check/src/check_impl.h
+   M /trunk/check/src/check_log.c
+   M /trunk/check/src/check_log.h
+   M /trunk/check/src/check_magic.h
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/src/check_msg.h
+   M /trunk/check/src/check_pack.c
+   M /trunk/check/src/check_pack.h
+   M /trunk/check/src/check_print.c
+   M /trunk/check/src/check_print.h
+   M /trunk/check/src/check_run.c
+   M /trunk/check/src/check_str.c
+   M /trunk/check/src/check_str.h
+   M /trunk/check/src/error.c
+   M /trunk/check/src/error.h
+   M /trunk/check/src/list.c
+   M /trunk/check/src/list.h
+
+Changed license to LGPL
+
+------------------------------------------------------------------------
+r117 | amalec | 2001-10-26 09:19:28 +1000 (Fri, 26 Oct 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Update ChangeLog
+
+------------------------------------------------------------------------
+r116 | amalec | 2001-10-26 09:18:42 +1000 (Fri, 26 Oct 2001) | 2 lines
+Changed paths:
+   M /trunk/check/AUTHORS
+
+Update AUTHORS to give credit to key contributors
+
+------------------------------------------------------------------------
+r115 | amalec | 2001-10-26 09:12:35 +1000 (Fri, 26 Oct 2001) | 2 lines
+Changed paths:
+   M /trunk/check/configure
+   M /trunk/check/configure.in
+
+Clarified configuration warning on doc building
+
+------------------------------------------------------------------------
+r114 | amalec | 2001-10-26 08:51:35 +1000 (Fri, 26 Oct 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Updating ChangeLog prior to release
+
+------------------------------------------------------------------------
+r113 | amalec | 2001-10-26 08:45:31 +1000 (Fri, 26 Oct 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_run.c
+   M /trunk/check/tests/check_check_pack.c
+
+Fixed some missing header includes
+
+------------------------------------------------------------------------
+r112 | amalec | 2001-10-26 08:25:11 +1000 (Fri, 26 Oct 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_pack.c
+
+Fix packing of NULL strings (causing problems under Solaris)
+
+------------------------------------------------------------------------
+r111 | amalec | 2001-10-26 08:17:03 +1000 (Fri, 26 Oct 2001) | 2 lines
+Changed paths:
+   M /trunk/check/tests/check_check_pack.c
+
+Minor change to pack tests to ensure that tests don't pass accidentally
+
+------------------------------------------------------------------------
+r110 | amalec | 2001-10-25 10:45:23 +1000 (Thu, 25 Oct 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Updated ChangeLog
+
+------------------------------------------------------------------------
+r109 | amalec | 2001-10-25 10:44:13 +1000 (Thu, 25 Oct 2001) | 2 lines
+Changed paths:
+   A /trunk/check/depcomp
+
+Added new automake file
+
+------------------------------------------------------------------------
+r108 | amalec | 2001-10-25 10:43:37 +1000 (Thu, 25 Oct 2001) | 2 lines
+Changed paths:
+   M /trunk/check/NEWS
+   M /trunk/check/doc/index.html
+   M /trunk/check/doc/money/check_money.c
+   M /trunk/check/tests/check_check_sub.c
+
+Added comments on string functions to NEWS, cleaned up money example, and fixed a signal unit test so that it will pass under cygwin
+
+------------------------------------------------------------------------
+r107 | amalec | 2001-10-25 03:25:47 +1000 (Thu, 25 Oct 2001) | 2 lines
+Changed paths:
+   M /trunk/check/Makefile.in
+   M /trunk/check/NEWS
+   M /trunk/check/aclocal.m4
+   M /trunk/check/configure
+   M /trunk/check/debian/Makefile.in
+   M /trunk/check/debian/changelog
+   M /trunk/check/debian/files
+   M /trunk/check/doc/Makefile.am
+   M /trunk/check/doc/Makefile.in
+   M /trunk/check/doc/money/Makefile.in
+   M /trunk/check/doc/tutorial.lyx
+   M /trunk/check/rpm/Makefile.in
+   M /trunk/check/rpm/check.spec
+   M /trunk/check/src/Makefile.am
+   M /trunk/check/src/Makefile.in
+   M /trunk/check/src/check.h
+   M /trunk/check/src/check_log.c
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/src/check_msg.h
+   M /trunk/check/src/check_print.c
+   M /trunk/check/src/check_run.c
+   M /trunk/check/tests/Makefile.am
+   M /trunk/check/tests/Makefile.in
+   M /trunk/check/tests/check_check_fixture.c
+   M /trunk/check/tests/check_check_fork.c
+   M /trunk/check/tests/check_check_limit.c
+   M /trunk/check/tests/check_check_main.c
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_stress.c
+   M /trunk/check/tests/ex_log_output.c
+   M /trunk/check/tests/ex_output.c
+   M /trunk/check/tests/test_log_output.sh
+   M /trunk/check/tests/test_output.sh
+
+Documentation updates
+
+------------------------------------------------------------------------
+r106 | amalec | 2001-10-23 09:57:18 +1000 (Tue, 23 Oct 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/src/check_pack.c
+   M /trunk/check/src/check_pack.h
+   M /trunk/check/tests/check_check_pack.c
+
+Removed old ppunpack, renamed new_*, and updated callers
+
+------------------------------------------------------------------------
+r105 | amalec | 2001-10-23 09:26:48 +1000 (Tue, 23 Oct 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/src/check_msg.h
+   M /trunk/check/src/check_pack.c
+   M /trunk/check/src/check_run.c
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_check_msg.c
+   M /trunk/check/tests/check_check_pack.c
+
+Moved Check to use new internal ppack routine, and fixed a nasty bug
+
+------------------------------------------------------------------------
+r104 | amalec | 2001-10-20 09:27:33 +1000 (Sat, 20 Oct 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/src/check_msg.h
+   M /trunk/check/src/check_pack.c
+   M /trunk/check/tests/check_check_msg.c
+   M /trunk/check/tests/check_check_pack.c
+
+New version of receive_test_result passes unit tests
+
+------------------------------------------------------------------------
+r103 | amalec | 2001-10-20 04:44:39 +1000 (Sat, 20 Oct 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_pack.c
+   M /trunk/check/src/check_pack.h
+   M /trunk/check/tests/check_check_fixture.c
+   M /trunk/check/tests/check_check_pack.c
+
+Changed punpack to return test and fixture locs to preserve test information when teardown messages are sent
+
+------------------------------------------------------------------------
+r102 | amalec | 2001-10-17 11:15:16 +1000 (Wed, 17 Oct 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_run.c
+   M /trunk/check/tests/check_check_fixture.c
+
+Checked setup passes unit tests
+
+------------------------------------------------------------------------
+r101 | amalec | 2001-10-14 02:13:52 +1000 (Sun, 14 Oct 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/Makefile.am
+   M /trunk/check/src/Makefile.in
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/src/check_msg.h
+   M /trunk/check/src/check_run.c
+   M /trunk/check/tests/check_check_msg.c
+
+Replace previous messaging implementation files with new module
+
+------------------------------------------------------------------------
+r100 | amalec | 2001-10-13 16:05:11 +1000 (Sat, 13 Oct 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check.h
+   M /trunk/check/src/check_log.c
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/src/check_pack.c
+   M /trunk/check/src/check_run.c
+   M /trunk/check/src/check_str.c
+   M /trunk/check/src/error.c
+   M /trunk/check/src/error.h
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/test_log_output.sh
+   M /trunk/check/tests/test_output.sh
+
+Fully implemented new messaging back-end based on pipes
+
+------------------------------------------------------------------------
+r99 | amalec | 2001-10-11 04:01:17 +1000 (Thu, 11 Oct 2001) | 2 lines
+Changed paths:
+   M /trunk/check/Makefile.in
+   M /trunk/check/aclocal.m4
+   M /trunk/check/configure
+   M /trunk/check/debian/Makefile.in
+   M /trunk/check/doc/Makefile.in
+   M /trunk/check/doc/money/Makefile.in
+   M /trunk/check/rpm/Makefile.in
+   M /trunk/check/src/Makefile.am
+   M /trunk/check/src/Makefile.in
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check_impl.h
+   M /trunk/check/src/check_pack.c
+   M /trunk/check/tests/Makefile.in
+   M /trunk/check/tests/check_check_msg.c
+   M /trunk/check/tests/check_check_pack.c
+
+Updated messaging tests to use new infrastructure
+
+------------------------------------------------------------------------
+r98 | amalec | 2001-10-05 07:55:29 +1000 (Fri, 05 Oct 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check.h
+   M /trunk/check/src/check_impl.h
+   M /trunk/check/src/check_pack.c
+   M /trunk/check/src/check_pack.h
+   M /trunk/check/tests/check_check_pack.c
+
+Completed implementation of check_pack
+
+------------------------------------------------------------------------
+r97 | amalec | 2001-10-03 01:38:48 +1000 (Wed, 03 Oct 2001) | 2 lines
+Changed paths:
+   M /trunk/check/doc/index.html
+   M /trunk/check/doc/tutorial.lyx
+   M /trunk/check/src/Makefile.am
+   M /trunk/check/src/Makefile.in
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check.h
+   M /trunk/check/src/check_magic.h
+   M /trunk/check/src/check_msg.h
+   A /trunk/check/src/check_pack.c
+   A /trunk/check/src/check_pack.h
+   M /trunk/check/tests/Makefile.am
+   M /trunk/check/tests/Makefile.in
+   M /trunk/check/tests/check_check.h
+   M /trunk/check/tests/check_check_fixture.c
+   M /trunk/check/tests/check_check_fork.c
+   M /trunk/check/tests/check_check_limit.c
+   M /trunk/check/tests/check_check_main.c
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_check_msg.c
+   A /trunk/check/tests/check_check_pack.c
+
+First generation packing code as the infrastructure to revising message passing between processes, to accomodate context messages
+
+------------------------------------------------------------------------
+r96 | amalec | 2001-09-28 10:20:37 +1000 (Fri, 28 Sep 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check.h
+   M /trunk/check/src/check_impl.h
+   M /trunk/check/src/check_run.c
+   M /trunk/check/src/list.c
+   M /trunk/check/src/list.h
+   M /trunk/check/tests/check_check_fixture.c
+   M /trunk/check/tests/check_check_fork.c
+   M /trunk/check/tests/check_check_limit.c
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_check_msg.c
+
+Added framework for support of checked fixture functions
+
+------------------------------------------------------------------------
+r95 | amalec | 2001-09-28 02:08:48 +1000 (Fri, 28 Sep 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check_run.c
+
+Refactored failure info functions
+
+------------------------------------------------------------------------
+r94 | amalec | 2001-09-19 10:14:03 +1000 (Wed, 19 Sep 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check.h
+   M /trunk/check/src/check_impl.h
+   M /trunk/check/src/check_magic.h
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/src/check_msg.h
+   M /trunk/check/src/check_print.c
+   M /trunk/check/src/check_run.c
+   M /trunk/check/src/check_str.c
+   M /trunk/check/tests/Makefile.am
+   M /trunk/check/tests/Makefile.in
+   M /trunk/check/tests/check_check.h
+   A /trunk/check/tests/check_check_fixture.c
+   M /trunk/check/tests/check_check_main.c
+   M /trunk/check/tests/check_check_master.c
+
+Setup failure is working and partially tested
+
+------------------------------------------------------------------------
+r93 | amalec | 2001-09-15 09:15:28 +1000 (Sat, 15 Sep 2001) | 2 lines
+Changed paths:
+   M /trunk/check/tests/check_check.h
+   A /trunk/check/tests/check_check_fork.c
+   M /trunk/check/tests/check_check_main.c
+
+Completed implementation of CK_NOFORK
+
+------------------------------------------------------------------------
+r92 | amalec | 2001-09-08 08:12:54 +1000 (Sat, 08 Sep 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_impl.h
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/src/check_msg.h
+   M /trunk/check/src/check_run.c
+
+Implemented nofork mode
+
+------------------------------------------------------------------------
+r91 | amalec | 2001-09-07 04:10:22 +1000 (Fri, 07 Sep 2001) | 2 lines
+Changed paths:
+   M /trunk/check/Doxyfile
+   M /trunk/check/configure.in
+   M /trunk/check/src/check.h
+   M /trunk/check/src/check_impl.h
+   M /trunk/check/src/check_log.c
+   M /trunk/check/src/check_log.h
+   M /trunk/check/src/check_print.c
+   M /trunk/check/src/check_print.h
+   M /trunk/check/src/check_run.c
+   M /trunk/check/tests/Makefile.am
+   M /trunk/check/tests/Makefile.in
+   M /trunk/check/tests/check_check.h
+   M /trunk/check/tests/check_check_main.c
+
+Added initial control functions to control forking
+
+------------------------------------------------------------------------
+r90 | amalec | 2001-09-06 02:48:45 +1000 (Thu, 06 Sep 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/src/check_msg.h
+   M /trunk/check/src/check_run.c
+   M /trunk/check/tests/check_check_msg.c
+
+Completely abstracted the details of messaging behind check_msg.c
+
+------------------------------------------------------------------------
+r89 | amalec | 2001-09-01 10:12:51 +1000 (Sat, 01 Sep 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/src/check_msg.h
+   M /trunk/check/src/check_run.c
+
+Ensure that each subprocesses alloc the correct msg queue
+
+------------------------------------------------------------------------
+r88 | amalec | 2001-08-30 11:00:45 +1000 (Thu, 30 Aug 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check.h
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/src/check_msg.h
+   M /trunk/check/src/check_run.c
+   M /trunk/check/tests/check_check_msg.c
+
+Eliminated passing of msqid in unit tests
+
+------------------------------------------------------------------------
+r87 | amalec | 2001-08-29 10:49:07 +1000 (Wed, 29 Aug 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/check_print.c
+   M /trunk/check/src/check_str.c
+   A /trunk/check/tests/check_check_limit.c
+
+Added test checking running empty suites
+
+------------------------------------------------------------------------
+r86 | amalec | 2001-08-29 03:06:05 +1000 (Wed, 29 Aug 2001) | 2 lines
+Changed paths:
+   A /trunk/check/src/check_magic.h
+
+Moved magic values to separate header
+
+------------------------------------------------------------------------
+r85 | amalec | 2001-08-29 03:04:27 +1000 (Wed, 29 Aug 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/Makefile.am
+   M /trunk/check/src/Makefile.in
+   M /trunk/check/src/check.h
+   M /trunk/check/src/check_impl.h
+   M /trunk/check/src/check_print.c
+   A /trunk/check/src/check_str.c
+   A /trunk/check/src/check_str.h
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_check_msg.c
+
+Separated printing from string formating functions to allow better testing.
+
+------------------------------------------------------------------------
+r84 | amalec | 2001-08-28 10:18:00 +1000 (Tue, 28 Aug 2001) | 2 lines
+Changed paths:
+   M /trunk/check/configure
+   M /trunk/check/configure.in
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/src/check_msg.h
+   M /trunk/check/src/check_run.c
+   M /trunk/check/tests/Makefile.am
+   M /trunk/check/tests/Makefile.in
+   M /trunk/check/tests/check_check.h
+   M /trunk/check/tests/check_check_main.c
+   M /trunk/check/tests/check_check_msg.c
+
+Use pid/ppid as message queue key, preliminary to removing _msqid from unit test functions
+
+------------------------------------------------------------------------
+r82 | amalec | 2001-08-24 07:26:16 +1000 (Fri, 24 Aug 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Final ChangeLog for 0.7.3 release
+
+------------------------------------------------------------------------
+r81 | amalec | 2001-08-24 07:25:03 +1000 (Fri, 24 Aug 2001) | 2 lines
+Changed paths:
+   M /trunk/check/NEWS
+
+Document 0.7.3 in NEWS
+
+------------------------------------------------------------------------
+r80 | amalec | 2001-08-24 07:13:58 +1000 (Fri, 24 Aug 2001) | 2 lines
+Changed paths:
+   M /trunk/check/debian/changelog
+
+This time, fix debian changelog correctly
+
+------------------------------------------------------------------------
+r79 | amalec | 2001-08-24 07:10:48 +1000 (Fri, 24 Aug 2001) | 2 lines
+Changed paths:
+   M /trunk/check/debian/changelog
+
+Fixed maintainer email in debian changelog
+
+------------------------------------------------------------------------
+r78 | amalec | 2001-08-23 09:08:21 +1000 (Thu, 23 Aug 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/acinclude.m4
+   M /trunk/check/aclocal.m4
+   M /trunk/check/configure
+   M /trunk/check/configure.in
+   M /trunk/check/debian/changelog
+   M /trunk/check/debian/check.doc-base.tut
+   M /trunk/check/debian/files
+   M /trunk/check/rpm/check.spec
+
+Updated acinclude.m4 to increase portability; fixed a minor packaging bug in debian doc-base files
+
+------------------------------------------------------------------------
+r76 | amalec | 2001-08-18 15:28:01 +1000 (Sat, 18 Aug 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/doc/index.html
+
+index.html changes
+
+------------------------------------------------------------------------
+r75 | amalec | 2001-08-18 15:24:32 +1000 (Sat, 18 Aug 2001) | 2 lines
+Changed paths:
+   M /trunk/check/INSTALL
+   M /trunk/check/NEWS
+
+NEWS and INSTALL changes
+
+------------------------------------------------------------------------
+r74 | amalec | 2001-08-18 15:15:48 +1000 (Sat, 18 Aug 2001) | 2 lines
+Changed paths:
+   M /trunk/check/Doxyfile
+   M /trunk/check/configure
+   M /trunk/check/configure.in
+   M /trunk/check/debian/check.postinst.debhelper
+   M /trunk/check/debian/check.prerm.debhelper
+   M /trunk/check/debian/files
+   M /trunk/check/doc/Makefile.in
+   M /trunk/check/doc/tutorial.lyx
+   M /trunk/check/rpm/Makefile.am
+   M /trunk/check/rpm/Makefile.in
+   M /trunk/check/rpm/check.spec
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check.h
+   M /trunk/check/src/check_log.c
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/src/check_print.c
+   M /trunk/check/src/check_run.c
+   M /trunk/check/tests/check_check_log.c
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_check_msg.c
+   M /trunk/check/tests/check_list.c
+   M /trunk/check/tests/check_stress.c
+   M /trunk/check/tests/ex_log_output.c
+   M /trunk/check/tests/ex_output.c
+
+Bug fixes and assorted cleanup prior to release
+
+------------------------------------------------------------------------
+r73 | amalec | 2001-08-18 09:16:57 +1000 (Sat, 18 Aug 2001) | 2 lines
+Changed paths:
+   A /trunk/check/doc/money/Makefile.am
+   A /trunk/check/doc/money/Makefile.in
+
+Added money example Makefiles to CVS
+
+------------------------------------------------------------------------
+r72 | amalec | 2001-08-18 09:13:21 +1000 (Sat, 18 Aug 2001) | 2 lines
+Changed paths:
+   M /trunk/check/doc/Makefile.am
+   D /trunk/check/doc/example.lyx
+   A /trunk/check/doc/tutorial.lyx
+
+Moved example.lyx to tutorial.lyx
+
+------------------------------------------------------------------------
+r71 | amalec | 2001-08-16 10:47:35 +1000 (Thu, 16 Aug 2001) | 2 lines
+Changed paths:
+   A /trunk/check/acinclude.m4
+   A /trunk/check/debian/Makefile.am
+   A /trunk/check/debian/Makefile.in
+   A /trunk/check/debian/check.docs
+
+Added leftover stuff in debian directory, acinclude.m4
+
+------------------------------------------------------------------------
+r70 | amalec | 2001-08-16 10:45:54 +1000 (Thu, 16 Aug 2001) | 2 lines
+Changed paths:
+   M /trunk/check/Makefile.am
+   M /trunk/check/Makefile.in
+   M /trunk/check/aclocal.m4
+   M /trunk/check/configure
+   M /trunk/check/configure.in
+   A /trunk/check/debian/check.doc-base.tut
+   M /trunk/check/debian/control
+   D /trunk/check/debian/docs
+   M /trunk/check/doc/Makefile.am
+   M /trunk/check/doc/Makefile.in
+   D /trunk/check/doc/money/AUTHORS
+   D /trunk/check/doc/money/COPYING
+   D /trunk/check/doc/money/ChangeLog
+   D /trunk/check/doc/money/INSTALL
+   D /trunk/check/doc/money/Makefile.am
+   A /trunk/check/doc/money/Makefile.am.money
+   D /trunk/check/doc/money/Makefile.in
+   D /trunk/check/doc/money/NEWS
+   D /trunk/check/doc/money/README
+   D /trunk/check/doc/money/config.h.in
+   D /trunk/check/doc/money/configure
+   D /trunk/check/doc/money/configure.in
+   A /trunk/check/doc/money/configure.in.money
+   D /trunk/check/doc/money/stamp-h.in
+   M /trunk/check/rpm/Makefile.in
+   M /trunk/check/rpm/check.spec
+   M /trunk/check/src/Makefile.in
+   M /trunk/check/tests/Makefile.in
+
+Added configure check for Lyx with Linuxdoc
+
+------------------------------------------------------------------------
+r69 | amalec | 2001-08-07 06:45:30 +1000 (Tue, 07 Aug 2001) | 2 lines
+Changed paths:
+   A /trunk/check/rpm/Makefile.in
+
+Added rpm/Makefile.in
+
+------------------------------------------------------------------------
+r68 | amalec | 2001-08-07 06:44:28 +1000 (Tue, 07 Aug 2001) | 2 lines
+Changed paths:
+   M /trunk/check/Makefile.am
+   M /trunk/check/Makefile.in
+   M /trunk/check/configure
+   M /trunk/check/configure.in
+   M /trunk/check/debian/changelog
+   M /trunk/check/debian/check.dirs
+   M /trunk/check/debian/check.files
+   M /trunk/check/debian/rules
+   M /trunk/check/doc/Makefile.am
+   M /trunk/check/doc/Makefile.in
+   M /trunk/check/doc/index.html
+   M /trunk/check/doc/money/AUTHORS
+   M /trunk/check/doc/money/COPYING
+   M /trunk/check/doc/money/ChangeLog
+   M /trunk/check/doc/money/NEWS
+   M /trunk/check/doc/money/README
+   M /trunk/check/rpm/check.spec
+
+Can now build complete debs
+
+------------------------------------------------------------------------
+r67 | amalec | 2001-08-04 15:40:15 +1000 (Sat, 04 Aug 2001) | 2 lines
+Changed paths:
+   D /trunk/check/debian/README.Debian
+
+Don't need README.Debian
+
+------------------------------------------------------------------------
+r66 | amalec | 2001-08-04 15:26:40 +1000 (Sat, 04 Aug 2001) | 2 lines
+Changed paths:
+   A /trunk/check/debian
+   A /trunk/check/debian/README.Debian
+   A /trunk/check/debian/changelog
+   A /trunk/check/debian/check.dirs
+   A /trunk/check/debian/check.files
+   A /trunk/check/debian/check.postinst.debhelper
+   A /trunk/check/debian/check.prerm.debhelper
+   A /trunk/check/debian/control
+   A /trunk/check/debian/copyright
+   A /trunk/check/debian/dirs
+   A /trunk/check/debian/docs
+   A /trunk/check/debian/files
+   A /trunk/check/debian/rules
+   M /trunk/check/doc/Makefile.am
+   M /trunk/check/doc/index.html
+
+Added preliminary debian packaging files
+
+------------------------------------------------------------------------
+r65 | amalec | 2001-08-03 11:05:18 +1000 (Fri, 03 Aug 2001) | 2 lines
+Changed paths:
+   M /trunk/check/Makefile.am
+   M /trunk/check/Makefile.in
+   M /trunk/check/aclocal.m4
+   M /trunk/check/configure
+   M /trunk/check/configure.in
+   M /trunk/check/doc/index.html
+   A /trunk/check/rpm/Makefile.am
+   D /trunk/check/rpm/buildrpm.sh
+
+Added automatic building of RPMs
+
+------------------------------------------------------------------------
+r63 | amalec | 2001-08-01 02:51:40 +1000 (Wed, 01 Aug 2001) | 2 lines
+Changed paths:
+   M /trunk/check/doc/index.html
+
+Update index.html for final release to main Check website.
+
+------------------------------------------------------------------------
+r62 | amalec | 2001-07-31 11:08:59 +1000 (Tue, 31 Jul 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Update ChangeLog
+
+------------------------------------------------------------------------
+r61 | amalec | 2001-07-31 11:08:17 +1000 (Tue, 31 Jul 2001) | 2 lines
+Changed paths:
+   M /trunk/check/NEWS
+   M /trunk/check/configure
+   M /trunk/check/configure.in
+   M /trunk/check/doc/example.lyx
+   A /trunk/check/rpm/buildrpm.sh
+   M /trunk/check/rpm/check.spec
+   M /trunk/check/tests/Makefile.am
+   M /trunk/check/tests/Makefile.in
+   M /trunk/check/tests/ex_log_output.c
+   M /trunk/check/tests/test_log_output.sh
+
+Update NEWS, docs, and rpm building
+
+------------------------------------------------------------------------
+r60 | amalec | 2001-07-31 06:10:32 +1000 (Tue, 31 Jul 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Update ChangeLog
+
+------------------------------------------------------------------------
+r59 | amalec | 2001-07-31 06:10:10 +1000 (Tue, 31 Jul 2001) | 2 lines
+Changed paths:
+   A /trunk/check/doc/Makefile.in
+   A /trunk/check/tests/ex_log_output.c
+
+Add neglected files
+
+------------------------------------------------------------------------
+r58 | amalec | 2001-07-31 06:08:57 +1000 (Tue, 31 Jul 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/Makefile.am
+   M /trunk/check/src/Makefile.in
+   M /trunk/check/src/check_impl.h
+   M /trunk/check/src/check_log.c
+   A /trunk/check/src/check_log.h
+   A /trunk/check/src/check_print.c
+   A /trunk/check/src/check_print.h
+   M /trunk/check/src/check_run.c
+   M /trunk/check/tests/test_log_output.sh
+
+Reorganized printing and logging functions and implemented more sophisticated logging
+
+------------------------------------------------------------------------
+r57 | amalec | 2001-07-26 07:26:51 +1000 (Thu, 26 Jul 2001) | 2 lines
+Changed paths:
+   M /trunk/check/Makefile.in
+   M /trunk/check/aclocal.m4
+   M /trunk/check/config.h.in
+   M /trunk/check/configure
+   M /trunk/check/doc/money/aclocal.m4
+   M /trunk/check/doc/money/config.h.in
+   M /trunk/check/doc/money/configure
+   M /trunk/check/src/Makefile.in
+   M /trunk/check/tests/Makefile.in
+   A /trunk/check/tests/test_log_output.sh
+
+Added log tests
+
+------------------------------------------------------------------------
+r55 | amalec | 2001-07-12 06:46:08 +1000 (Thu, 12 Jul 2001) | 2 lines
+Changed paths:
+   M /trunk/check/NEWS
+   M /trunk/check/README
+   M /trunk/check/doc/example.lyx
+   M /trunk/check/rpm/check.spec
+   M /trunk/check/src/check.h
+   M /trunk/check/tests/check_check_log.c
+   M /trunk/check/tests/check_check_main.c
+
+Updated docs
+
+------------------------------------------------------------------------
+r54 | amalec | 2001-07-11 09:29:27 +1000 (Wed, 11 Jul 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Update ChangeLog
+
+------------------------------------------------------------------------
+r53 | amalec | 2001-07-11 09:28:57 +1000 (Wed, 11 Jul 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/Makefile.in
+   M /trunk/check/src/check_log.c
+   M /trunk/check/tests/check_check.h
+   M /trunk/check/tests/check_check_log.c
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_check_sub.c
+   M /trunk/check/tests/test_output.sh
+
+Completed testing for multiple suite running, and reorganized files
+
+------------------------------------------------------------------------
+r52 | amalec | 2001-07-11 09:26:28 +1000 (Wed, 11 Jul 2001) | 2 lines
+Changed paths:
+   A /trunk/check/src/check_log.c
+   D /trunk/check/src/check_log.h
+
+Commit file changes
+
+------------------------------------------------------------------------
+r51 | amalec | 2001-07-11 09:25:53 +1000 (Wed, 11 Jul 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/Makefile.am
+   M /trunk/check/src/check.h
+   M /trunk/check/src/check_run.c
+
+Moved check_log.h functions into check.h
+
+------------------------------------------------------------------------
+r50 | amalec | 2001-07-10 10:10:06 +1000 (Tue, 10 Jul 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Commit ChangeLog
+
+------------------------------------------------------------------------
+r49 | amalec | 2001-07-10 10:09:41 +1000 (Tue, 10 Jul 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check.h
+   M /trunk/check/src/check_impl.h
+   M /trunk/check/src/check_run.c
+   M /trunk/check/src/list.h
+   M /trunk/check/tests/Makefile.am
+   M /trunk/check/tests/Makefile.in
+   M /trunk/check/tests/check_check.h
+   M /trunk/check/tests/check_check_log.c
+   M /trunk/check/tests/check_check_main.c
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_check_msg.c
+   M /trunk/check/tests/check_check_sub.c
+   M /trunk/check/tests/check_list.c
+
+Completed test for initial logging feature, and added feature to run multiple suites through an SRunner
+
+------------------------------------------------------------------------
+r48 | amalec | 2001-06-30 11:27:02 +1000 (Sat, 30 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/Makefile.in
+   M /trunk/check/src/check.h
+   M /trunk/check/src/check_impl.h
+   M /trunk/check/src/check_log.h
+   M /trunk/check/src/check_run.c
+   M /trunk/check/tests/check_check_log.c
+   M /trunk/check/tests/test_output.sh
+
+Restructured printing to allow for logging function
+
+------------------------------------------------------------------------
+r47 | amalec | 2001-06-29 10:40:03 +1000 (Fri, 29 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/Makefile.am
+   M /trunk/check/src/Makefile.in
+
+Add check_log.c to Makefile.am
+
+------------------------------------------------------------------------
+r46 | amalec | 2001-06-29 10:33:07 +1000 (Fri, 29 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/tests/Makefile.am
+   M /trunk/check/tests/Makefile.in
+
+Complete move of check_check_log.c -- this time for real...
+
+------------------------------------------------------------------------
+r45 | amalec | 2001-06-29 10:31:39 +1000 (Fri, 29 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/Doxyfile
+   M /trunk/check/src/check_log.h
+   M /trunk/check/tests/Makefile.am
+   M /trunk/check/tests/Makefile.in
+
+Complete move of check_check_log.c
+
+------------------------------------------------------------------------
+r44 | amalec | 2001-06-29 10:30:29 +1000 (Fri, 29 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/tests/Makefile.am
+   A /trunk/check/tests/check_check_log.c
+   D /trunk/check/tests/check_log.c
+
+Moved check_log.c to check_check_log.c
+
+------------------------------------------------------------------------
+r43 | amalec | 2001-06-29 08:56:26 +1000 (Fri, 29 Jun 2001) | 2 lines
+Changed paths:
+   D /trunk/check/doc/money/stamp-h
+
+Removed stamp-h
+
+------------------------------------------------------------------------
+r42 | amalec | 2001-06-29 08:51:36 +1000 (Fri, 29 Jun 2001) | 2 lines
+Changed paths:
+   A /trunk/check/src/check_log.h
+   A /trunk/check/tests/check_log.c
+
+Added skeleton files for check logging
+
+------------------------------------------------------------------------
+r41 | amalec | 2001-06-29 08:33:50 +1000 (Fri, 29 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/Doxyfile
+   M /trunk/check/configure
+   M /trunk/check/configure.in
+   M /trunk/check/src/check.h
+   M /trunk/check/tests/Makefile.am
+   M /trunk/check/tests/Makefile.in
+
+Additional doxygenation of check.h
+
+------------------------------------------------------------------------
+r39 | amalec | 2001-06-28 04:27:35 +1000 (Thu, 28 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Updated ChangeLog
+
+------------------------------------------------------------------------
+r38 | amalec | 2001-06-28 04:25:54 +1000 (Thu, 28 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/configure
+   M /trunk/check/rpm/check.spec
+
+Updated check.spec
+
+------------------------------------------------------------------------
+r37 | amalec | 2001-06-28 04:21:32 +1000 (Thu, 28 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Update ChangeLog
+
+------------------------------------------------------------------------
+r36 | amalec | 2001-06-28 04:20:42 +1000 (Thu, 28 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/NEWS
+   M /trunk/check/configure.in
+   M /trunk/check/doc/example.lyx
+   M /trunk/check/doc/money/check_money.c
+   M /trunk/check/doc/money/configure
+   M /trunk/check/doc/money/configure.in
+   M /trunk/check/src/check.h
+   M /trunk/check/src/check_run.c
+   M /trunk/check/tests/check_check_main.c
+   M /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_check_msg.c
+   M /trunk/check/tests/check_list.c
+   M /trunk/check/tests/check_stress.c
+
+Completed srunner_results, and added unit tests; changed srunner_nfailed to srunner_ntests_failed and changed documentation.
+
+------------------------------------------------------------------------
+r35 | amalec | 2001-06-27 08:51:57 +1000 (Wed, 27 Jun 2001) | 2 lines
+Changed paths:
+   A /trunk/check/Doxyfile
+   M /trunk/check/doc/example.lyx
+   M /trunk/check/src/check.h
+   M /trunk/check/src/check_run.c
+   M /trunk/check/tests/Makefile.am
+   M /trunk/check/tests/Makefile.in
+   D /trunk/check/tests/check_check.c
+   A /trunk/check/tests/check_check.h
+   A /trunk/check/tests/check_check_main.c
+   A /trunk/check/tests/check_check_master.c
+   M /trunk/check/tests/check_check_msg.c
+   A /trunk/check/tests/check_check_sub.c
+   M /trunk/check/tests/check_list.c
+   M /trunk/check/tests/check_stress.c
+
+Fixed a bug in srunner_failures, fixed a typo in the tutorial documentation (thanks to Michael Tucker), and refactored check_check
+
+------------------------------------------------------------------------
+r34 | amalec | 2001-06-22 11:16:03 +1000 (Fri, 22 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Update ChangeLog
+
+------------------------------------------------------------------------
+r33 | amalec | 2001-06-22 11:15:23 +1000 (Fri, 22 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/NEWS
+   M /trunk/check/doc/Makefile.am
+   M /trunk/check/doc/example.lyx
+   M /trunk/check/doc/index.html
+   M /trunk/check/rpm/check.spec
+   M /trunk/check/tests/Makefile.am
+   M /trunk/check/tests/Makefile.in
+
+Specfile changes, updates to NEWS
+
+------------------------------------------------------------------------
+r32 | amalec | 2001-06-22 10:37:48 +1000 (Fri, 22 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Update ChangeLog
+
+------------------------------------------------------------------------
+r31 | amalec | 2001-06-22 10:36:49 +1000 (Fri, 22 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/check.h
+   M /trunk/check/src/check_run.c
+   M /trunk/check/tests/Makefile.am
+   M /trunk/check/tests/Makefile.in
+   M /trunk/check/tests/check_check.c
+   A /trunk/check/tests/ex_output.c
+   A /trunk/check/tests/test_output.sh
+
+Changed test output, added end-to-end test, and removed redundant field from TestResult struct
+
+------------------------------------------------------------------------
+r30 | amalec | 2001-06-20 06:01:10 +1000 (Wed, 20 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Update changelog
+
+------------------------------------------------------------------------
+r29 | amalec | 2001-06-20 05:59:48 +1000 (Wed, 20 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/src/check.h
+   M /trunk/check/src/check_run.c
+   M /trunk/check/tests/check_check.c
+
+Added accessors for TestResult and expanded unit test
+
+------------------------------------------------------------------------
+r28 | amalec | 2001-06-13 03:29:04 +1000 (Wed, 13 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Updated ChangeLog
+
+------------------------------------------------------------------------
+r27 | amalec | 2001-06-13 03:28:10 +1000 (Wed, 13 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/configure
+   M /trunk/check/configure.in
+   M /trunk/check/src/check.h
+   M /trunk/check/src/check_run.c
+   M /trunk/check/tests/check_check.c
+
+Added new tests for line number
+
+------------------------------------------------------------------------
+r26 | amalec | 2001-06-05 03:58:14 +1000 (Tue, 05 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   A /trunk/check/doc/index.html
+
+Added homepage file in doc directory, and updated change log
+
+------------------------------------------------------------------------
+r24 | amalec | 2001-06-05 03:08:54 +1000 (Tue, 05 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/doc/Makefile.am
+   M /trunk/check/doc/example.lyx
+   M /trunk/check/rpm/check.spec
+
+Cleaned up spec file for RPM packaging
+
+------------------------------------------------------------------------
+r23 | amalec | 2001-06-04 09:50:40 +1000 (Mon, 04 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/Makefile.am
+   M /trunk/check/Makefile.in
+   M /trunk/check/configure
+   M /trunk/check/configure.in
+   M /trunk/check/doc/Makefile.am
+   A /trunk/check/rpm
+   A /trunk/check/rpm/check.spec
+
+Added RPM spec file and added additional documentation files
+
+------------------------------------------------------------------------
+r22 | amalec | 2001-06-02 01:46:39 +1000 (Sat, 02 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Updated ChangeLog
+
+------------------------------------------------------------------------
+r21 | amalec | 2001-06-02 01:44:43 +1000 (Sat, 02 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/Makefile.in
+   M /trunk/check/src/Makefile.in
+   M /trunk/check/src/check.c
+   M /trunk/check/src/check.h
+   M /trunk/check/src/check_impl.h
+   M /trunk/check/src/check_msg.c
+   M /trunk/check/src/check_msg.h
+   M /trunk/check/src/check_run.c
+   M /trunk/check/src/error.c
+   M /trunk/check/src/error.h
+   M /trunk/check/src/list.c
+   M /trunk/check/src/list.h
+   M /trunk/check/tests/Makefile.in
+
+GNUified source files with copyright notice
+
+------------------------------------------------------------------------
+r20 | amalec | 2001-06-02 01:33:42 +1000 (Sat, 02 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/aclocal.m4
+   M /trunk/check/configure
+   M /trunk/check/configure.in
+   M /trunk/check/doc/Makefile.am
+   M /trunk/check/doc/example.lyx
+
+Made building docs conditional on presence of lyx and sgml2html
+
+------------------------------------------------------------------------
+r19 | amalec | 2001-06-01 08:35:20 +1000 (Fri, 01 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Update ChangeLog
+
+------------------------------------------------------------------------
+r18 | amalec | 2001-06-01 08:34:38 +1000 (Fri, 01 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/configure.in
+   M /trunk/check/doc/Makefile.am
+
+Modified Makefile.am to include docs in dist
+
+------------------------------------------------------------------------
+r17 | amalec | 2001-06-01 08:26:35 +1000 (Fri, 01 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/Makefile.am
+   M /trunk/check/Makefile.in
+   M /trunk/check/aclocal.m4
+   M /trunk/check/configure
+   M /trunk/check/configure.in
+   A /trunk/check/doc/Makefile.am
+   M /trunk/check/src/Makefile.in
+   M /trunk/check/tests/Makefile.in
+
+Added Automake support to create and install documentation
+
+------------------------------------------------------------------------
+r16 | amalec | 2001-06-01 07:30:36 +1000 (Fri, 01 Jun 2001) | 2 lines
+Changed paths:
+   D /trunk/check/doc/money/config.h
+   D /trunk/check/doc/money/config.log
+   D /trunk/check/doc/money/config.status
+
+Removed unneded files
+
+------------------------------------------------------------------------
+r15 | amalec | 2001-06-01 01:37:53 +1000 (Fri, 01 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+   M /trunk/check/ChangeLogOld
+
+Updated change logs
+
+------------------------------------------------------------------------
+r14 | amalec | 2001-06-01 01:35:28 +1000 (Fri, 01 Jun 2001) | 2 lines
+Changed paths:
+   M /trunk/check/doc/example.lyx
+
+Commit changes to example, get things in synch
+
+------------------------------------------------------------------------
+r13 | amalec | 2001-06-01 01:32:22 +1000 (Fri, 01 Jun 2001) | 2 lines
+Changed paths:
+   A /trunk/check/doc/money/COPYING
+   A /trunk/check/doc/money/ChangeLog
+   A /trunk/check/doc/money/INSTALL
+   A /trunk/check/doc/money/Makefile.am
+   A /trunk/check/doc/money/Makefile.in
+   A /trunk/check/doc/money/NEWS
+   A /trunk/check/doc/money/README
+   A /trunk/check/doc/money/aclocal.m4
+   A /trunk/check/doc/money/check_money.c
+   A /trunk/check/doc/money/config.h
+   A /trunk/check/doc/money/config.h.in
+   A /trunk/check/doc/money/config.log
+   A /trunk/check/doc/money/config.status
+   A /trunk/check/doc/money/configure
+   A /trunk/check/doc/money/configure.in
+   A /trunk/check/doc/money/money.c
+   A /trunk/check/doc/money/money.h
+   A /trunk/check/doc/money/stamp-h
+   A /trunk/check/doc/money/stamp-h.in
+
+Hopefully finally solved CVS problems and commited changes to money example and example.lyx
+
+------------------------------------------------------------------------
+r12 | amalec | 2001-05-31 09:48:43 +1000 (Thu, 31 May 2001) | 2 lines
+Changed paths:
+   A /trunk/check/doc/money
+   A /trunk/check/doc/money/AUTHORS
+
+Trying to commit added files...
+
+------------------------------------------------------------------------
+r11 | amalec | 2001-05-31 09:45:07 +1000 (Thu, 31 May 2001) | 2 lines
+Changed paths:
+   M /trunk/check/doc/example.lyx
+
+Cleaning up CVS..
+
+------------------------------------------------------------------------
+r10 | amalec | 2001-05-31 09:37:35 +1000 (Thu, 31 May 2001) | 2 lines
+Changed paths:
+   A /trunk/check/ChangeLogOld
+
+Trying to update documentation and change log, and statisfy CVS...
+
+------------------------------------------------------------------------
+r9 | amalec | 2001-05-31 09:34:29 +1000 (Thu, 31 May 2001) | 2 lines
+Changed paths:
+   M /trunk/check/ChangeLog
+
+Refined documentation, and moved old change log information to ChangeLogOld
+
+------------------------------------------------------------------------
+r8 | amalec | 2001-05-31 08:44:48 +1000 (Thu, 31 May 2001) | 2 lines
+Changed paths:
+   M /trunk/check/doc/example.lyx
+
+Added complete example to accompany documentation
+
+------------------------------------------------------------------------
+r7 | amalec | 2001-05-30 13:25:29 +1000 (Wed, 30 May 2001) | 2 lines
+Changed paths:
+   M /trunk/check/Makefile.in
+
+Added example and expanded documentation
+
+------------------------------------------------------------------------
+r3 | amalec | 2001-05-30 08:42:55 +1000 (Wed, 30 May 2001) | 2 lines
+Changed paths:
+   A /trunk/check
+   A /trunk/check/AUTHORS
+   A /trunk/check/COPYING
+   A /trunk/check/ChangeLog
+   A /trunk/check/INSTALL
+   A /trunk/check/Makefile.am
+   A /trunk/check/Makefile.in
+   A /trunk/check/NEWS
+   A /trunk/check/README
+   A /trunk/check/aclocal.m4
+   A /trunk/check/config.h.in
+   A /trunk/check/configure
+   A /trunk/check/configure.in
+   A /trunk/check/doc
+   A /trunk/check/doc/example.lyx
+   A /trunk/check/install-sh
+   A /trunk/check/missing
+   A /trunk/check/mkinstalldirs
+   A /trunk/check/src
+   A /trunk/check/src/Makefile.am
+   A /trunk/check/src/Makefile.in
+   A /trunk/check/src/check.c
+   A /trunk/check/src/check.h
+   A /trunk/check/src/check_impl.h
+   A /trunk/check/src/check_msg.c
+   A /trunk/check/src/check_msg.h
+   A /trunk/check/src/check_run.c
+   A /trunk/check/src/error.c
+   A /trunk/check/src/error.h
+   A /trunk/check/src/list.c
+   A /trunk/check/src/list.h
+   A /trunk/check/stamp-h.in
+   A /trunk/check/tests
+   A /trunk/check/tests/Makefile.am
+   A /trunk/check/tests/Makefile.in
+   A /trunk/check/tests/check_check.c
+   A /trunk/check/tests/check_check_msg.c
+   A /trunk/check/tests/check_list.c
+   A /trunk/check/tests/check_stress.c
+
+Initial revision
+
+------------------------------------------------------------------------
+r1 | (no author) | 2001-05-30 08:42:54 +1000 (Wed, 30 May 2001) | 1 line
+Changed paths:
+   A /branches
+   A /tags
+   A /trunk
+
+New repository initialized by cvs2svn.
+------------------------------------------------------------------------

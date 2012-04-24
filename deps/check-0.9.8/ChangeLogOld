@@ -1,0 +1,120 @@
+Revisions previous to move to SourceForge
+2001-05-25 05:56  amalec
+
+	* src/check_msg.c, src/check_msg.h, tests/Makefile.am,
+	tests/check_check_msg.c: Added testcases for check_msg
+
+2001-05-25 05:25  amalec
+
+	* ChangeLog: Update ChangeLog
+
+2001-05-25 05:25  amalec
+
+	* configure, src/Makefile.am, src/check.c, src/check.h,
+	src/check_impl.h, src/check_run.c, src/check_run.h,
+	tests/check_check.c, tests/check_list.c, tests/check_stress.c:
+	Added fixture support and moved suite running functions to main
+	check.h header
+
+2001-05-23 20:29  amalec
+
+	* ChangeLog, configure.in: Bumped version
+
+2001-05-23 20:28  amalec
+
+	* src/check.h, src/check_impl.h, src/check_msg.c, src/check_msg.h,
+	src/check_run.c, src/check_run.h, tests/check_check.c,
+	tests/check_list.c, tests/check_stress.c: Changed check_check to
+	run silently if no errors
+
+2001-05-22 16:15  amalec
+
+	* src/Makefile.am, tests/Makefile.am: Cleanup of move to a non-flat
+	directory structure
+
+2001-05-22 16:15  amalec
+
+	* Makefile.am, Makefile.in, check.c, check.h, check_check.c,
+	check_impl.h, check_list.c, check_msg.c, check_msg.h, check_run.h,
+	configure, configure.in, error.c, error.h, list.c, list.h,
+	src/check.c, src/check.h, src/check_impl.h, src/check_msg.c,
+	src/check_msg.h, src/check_run.c, src/check_run.h, src/error.c,
+	src/error.h, src/list.c, src/list.h, tests/check_check.c,
+	tests/check_list.c, tests/check_stress.c: Moved to a non-flat
+	directory structure
+
+2001-05-22 14:53  amalec
+
+	* ChangeLog: Update ChangeLog
+
+2001-05-22 14:52  amalec
+
+	* Makefile.am, Makefile.in, check.c, check.h, check_check.c,
+	check_list.c, check_run.h, config.h.in, configure, configure.in,
+	error.c, error.h, list.c: Switched to a dynamically grown array
+	implementation for lists, to solve a performance problem forking
+	with large numbers of tests; fixed a memory problem in srunner_free
+
+2001-05-18 12:31  amalec
+
+	* ChangeLog: Useing cvs2cl.pl to handle ChangeLog
+
+2001-05-18 12:02  amalec
+
+	* check_run.h, configure, stamp-h.in: More code reorgazization
+
+2001-05-16 11:20  amalec
+
+	* check.c, check_check.c, check_msg.c, check_msg.h, check_run.h,
+	configure.in: Cleaned up memory leaks and rearranged some
+	responsibilities
+
+2001-05-15 17:36  amalec
+
+	* check.c, check.h, check_check.c, check_impl.h, check_list.c,
+	check_msg.c, check_msg.h, check_run.h: Addition of SRunner object,
+	and major reorganization of responsibilites between suites/cases
+	and the SRunner
+
+2001-05-15 15:11  amalec
+
+	* list.c: Added list_add_end function
+
+2001-05-15 09:20  amalec
+
+	* Makefile.am, Makefile.in: Cleaned up Makefile.am to declare
+	headers correctly, and install correctly.
+
+2001-05-14 18:06  amalec
+
+	* check.c, check.h, check_impl.h, check_run.h: Completed
+	reorganization
+
+2001-05-14 17:33  amalec
+
+	* Makefile.in, check.c, check_run.h: Complete commit of last
+	changes
+
+2001-05-14 17:30  amalec
+
+	* Makefile.am, check.h, check_check.c, check_list.c, check_run.h:
+	Cleaned up some documentation, and moved suite printing functions
+	to a separate module as a first step to separating the text runner
+	from the underlying interface.
+
+2001-05-14 17:07  amalec
+
+	* AUTHORS, ChangeLog, Makefile.am, Makefile.in, NEWS, README,
+	aclocal.m4, check.c, check.h, check_check.c, check_impl.h,
+	check_list.c, check_msg.c, check_msg.h, config.h.in, configure,
+	configure.in, error.c, error.h, list.c, list.h, stamp-h.in: Initial
+	revision
+
+2001-05-14 17:07  amalec
+
+	* AUTHORS, ChangeLog, Makefile.am, Makefile.in, NEWS, README,
+	aclocal.m4, check.c, check.h, check_check.c, check_impl.h,
+	check_list.c, check_msg.c, check_msg.h, config.h.in, configure,
+	configure.in, error.c, error.h, list.c, list.h, stamp-h.in:
+	Imported sources
+

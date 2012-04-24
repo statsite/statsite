@@ -1,0 +1,316 @@
+Tue, Sep 22, 2009: Released Check 0.9.8
+  based on r559 (2009-09-23 21:00).
+
+* Fix CHECK_MICRO_VERSION, left at 6 in 0.9.7 by mistake.
+
+Tue, Sep 22, 2009: Released Check 0.9.7
+  based on r552 (2009-09-22 09:26).
+
+* Added CK_SUBUNIT support for outputting test information in the subunit wire
+  protocol. See the check manual for more information. (Contributed by Robert
+  Collins).
+
+* Added code and tests for timeout scaling via environment variable.
+  Feature requested in tracker item #1549835 on sourceforge.
+
+* Added documentation for testing exit values with tcase_add_exit_test().
+
+* Add make_macros perl script from somebody (who?)
+
+* add type to check_type error message
+
+* add contrib dir with xslt transform
+
+* function exist testing support (patch #1726574).
+
+* introduce HAVE_WORKING_SETENV to protect tc_timeout_env usage
+
+* support running tests with multiple pthreads (Daniel Gollub, closes 1391527)
+
+* partial MSYS/MinGW support
+
+Mon, Dec 29, 2008: Released Check 0.9.6
+  based on r453 (2008-12-01 22:14:15).
+
+* 'make distcheck' does not work out of the box. Disable the two
+  top lines in doc/Makefile.am and it shall pass. Will have to
+  be fixed later.
+
+* add call to AC_REPLACE_FUNCS([strsignal])
+* add new rpl_strsignal following rpl_(re)malloc template, body
+  of function due to Roland Illig
+  -- hopefully closes 1629755
+
+* add missing NULL argument to fail* varargs macro calls
+* define incorrect tests for __GNUC__ only
+   -- both per Roland Illig in bug 1677391
+
+* define CK_ATTRIBUTE_UNUSED for GCC >= 2.95, closing:
+  [ 1674626 ] compile error with non defined __attribute__ compiler
+
+* Fixed error in documentation example Makefile.am, bug #1888237
+
+* Fixed spelling (patch #1652630)
+
+* Handle NULL in srunner_add_suite(). Fixes #1624887
+
+* add CK_FORK_GETENV to enum fork_status and delete CK_FORK_UNSPECIFIED
+
+* call strdup on result from strsignal to avoid clobbering it
+* add Torok Edwin to AUTHORS
+
+* add CK_TEST_RESULT_INVALID to enum test_result
+
+* add CK_CTX_INVALID to ck_result_ctx and don't use -1 anymore
+
+* count checks in setup() as well; patch due to Roland Stigge
+
+* use int __attribute__((unused)) _i instead of
+      int _i __attribute__((unused))
+  per gcc-3.3.5 request from Sebastian Trahm
+
+* rename signal to _signal in _tcase_add_test to avoid a
+  symbol clash with /usr/include/sys/signal.h on OS X.
+
+* define rpl_malloc and rpl_realloc for platforms where
+  !malloc(0) and !realloc(0,0), such as AIX, because configure
+  goes and redefines malloc/realloc in this case...
+
+* SVNChangeLog patch from Robert Collins
+
+* Incorporated patch from Debian for debian bug #395466. This fixes
+   'AM_PATH_CHECK causes "possibly undefined macro" errors'.
+
+* Added new Check fail API. Implemented on top of fail_unless. Future
+  versions will reverse this so fail_unless is implemented on top of the
+  ck_assert API. This API is not documented yet, will probably not be fully
+  released until 0.9.8, when it will be possible to choose API.
+
+Tue, Nov 21, 2006: Released Check 0.9.5
+
+* Fixed code coverage support to work with gcc4 and buggy libtool.
+
+* Changed loop test iteration variable from i to _i.  Added example of
+  loop test usage to documentation.
+
+* Fixed distcheck target by adding SVNChangeLog to EXTRA_DIST.
+
+* Fixed signal string problem in tests.  Strings differed between
+  OSes, now we use strsignal().  Fixes Sourceforge bug #1539828. 
+
+* Fixed problem with process group ID, especially visible on Solaris
+  and LynxOS.  Fixes Sourceforge bugs #1407360 and #1539828.
+
+Fri, Oct 13, 2006: Released Check 0.9.4
+
+* Updated manual and converted from DocBook to Texinfo.
+
+* Added pkg-config support.
+
+* Added Libtool support to build both static and shared libraries.
+
+* Removed debian/ and rpm/ directories for building packages.
+  Downstream maintainers can easily handle this.
+
+* Updated GNU Build System to use modern Autotools.
+
+* Fixed sourceforge bug #1327225, two teardown checked fixtures
+  segfaults.
+
+* Added a new kind of test, looping tests, which are called with a new
+  context for each loop iteration. This makes them ideal for table
+  based tests. Previously, with the loop in the test itself, only the
+  first error was caught and then the test would exit. Now all errors
+  are shown at once which should help in debugging
+
+* Added possibility to turn off timeout tests in check's own unit tests
+  through configure option --disable-timeout-tests.
+
+* Added coverage analysis for check's own unit tests.
+
+Thu, Aug 25, 2005: Released Check 0.9.3
+
+Applied debian patches from debian maintainer.
+
+Fixed documentation bug #1216502.
+
+gcc 2.95.3 compatibility fixed (patch #1161654, bug #1211672).
+
+Messaging refactored to make it  work with forking tests, and also with
+threading tests on linux 2.4. Added check_fork and check_waitpid_and_exit
+to be used for forking tests. (bug # 1233585)
+
+Timeout error message changed (feature request #1121452, bug #1160305).
+
+Fix check.spec for fc3 x86_64 (patch #1111782)
+
+
+Fri, Nov 12, 2004: Released Check 0.9.2
+
+Use strsignal to print describing text for signals.
+Documented signals handling and timeouts.
+Changed failure message for fail_if.
+Added support for timeouts on tests, enabling detection of eternal loops.
+Changed name on function list_create to check_list_create to avoid name clash.
+Applied ANSI C99 patch (#1047014) for macro var args.
+Cleaned up the self test verification to simplify merging of new tests.
+Fixed debian and rpm targets
+
+Added support for testing on expected signals. Implementation courtesy of
+Lucas Di Pentima and Cesar Ballardini. 
+
+
+Fri, Sep 3, 2004: Released Check 0.9.1
+
+Updated tutorial with new features.
+Added support for XML output of the test results, courtesy of Frederic Peters.
+Fixed setup bug from forum, failure in setup did not abort test in nofork mode.
+Applied varargs patch (#933411) and added test cases.
+Applied fail_if (#709167) patch.
+Applied 'newbies' patch #995028 for autoconf doc.
+Applied doc patch #995028 from Bill Barnard.
+Fixed portability problems tests by changing == to =.
+Changed copyright according to bug report.
+Applied patch 796705. Replacing _exit with exit.
+Applied patch for bug 793671.
+
+
+Mon, May 17, 2004: Released Check 0.9.0
+
+Run fixture teardowns in reverse order to setup
+Plugged some memory leaks.
+Added test name to log outputs.
+Applied patch (802160) for distcheck bug (579604).
+Fixed log printouts for nofork mode.
+Updated documentation and converted to DocBook.
+
+Added a new print mode, CK_ENV, that gets the print mode from the
+environment variable CK_VERBOSITY.
+
+Made tcase_free and suite_free static. This may break existing test
+programs. Everything is now freed when srunner_free is called.
+
+
+Mon Oct 21, 2002: Released Check 0.8.4
+
+Fixed pipe issues.
+Allow to use check.h from C++.
+Plugged some memory leaks.
+
+
+Fri May 24, 2002: Released Check 0.8.3
+
+Fixed various build problems. Fixed a problem with check.m4.
+Documentation updates.
+
+
+Mon Apr 15, 2002: Released Check 0.8.2
+
+Added version information to headers and library. Added an autoconf
+macro to easily integrate check into projects that use autoconf.
+
+Removed limitations on line number, message and buffer sizes.
+
+Declared constant string parameters as const.
+
+
+Sat Mar 2, 2002: Released Check 0.8.1
+
+Changed license to LGPL.
+
+Fixed bug in running checked setup in nofork mode.
+
+
+Wed Oct 24, 2001: Released Check 0.8.0
+
+Support running in a nofork mode. Defined a checked fixture as well as
+an unchecked fixture, support failing in checked and uncheck fixture
+functions, and errors in checked fixture functions. Rewrote the
+back-end to use pipes, rather than message queues.
+
+Reimplemented printing functions in terms of string formatting
+functions, to allow better testing of output without full end-to-end
+testing.
+
+Renamed some public constants to use the CK_ naming convention. This
+will break existing test programs.
+
+Documented the new features, and changed the distribution to include
+sgml and html files, as well as lyx files, as many people don't have
+lyx.
+
+
+Thu Aug 23, 2001: Released Check 0.7.3
+
+Fixed the Autoconf Lyx check in acinclude.m4 so that configure works
+on Solaris systems (and hopefully others), and cleaned up a minor
+problem in Debian packaging.
+
+
+Fri Aug 17, 2001: Released Check 0.7.2
+
+Automated RPM packaging, and included debian packaging. The makefiles
+now has an rpm target (the RPMFLAGS variable can be set to add
+additional flags to RPM). Debian packages are built the ordinary way
+(dpkg-buildpackage).
+
+Moved the example*.* files to tutorial*.*, since the docs really are
+tutorials. Beefed up the tutorial docs to add clarity to the behavior
+of fixture setup/teardown (based on a helpful critique by Fred Drake),
+and to document the static nature of unit tests demanded by the bug
+fix below.
+
+Many bugfixes: added -Wall to the CCFLAGS for gcc, and fixed a mess of
+warnings that resulted. Changed a bizarre naming mismatch in
+tcase_set_fixture (masked by the lack of compile warnings), and made
+unit tests static (both bugfixes suggested by Fred Drake). Also added
+a more sophisticated test of Lyx to (hopefully) ensure that Lyx
+supports linuxdoc (but it's not clear to me how to test that for
+sure).
+
+
+Wed Jul 30, 2001: Released Check 0.7.1
+
+Reorganized printing and logging functions to allow for a less
+primitive logging function. Logging is now documented in the tutorial
+documentation.
+
+
+Wed Jul 11, 2001: Released Check 0.7.0
+
+Included a primitive logging function (at the moment, it only prints a
+copy of the CRVERBOSE output to the log file), added the ability for
+an SRunner to run multiple suites (and reorganized the Check tests to
+take advantage of that), and added the magic to allow Check to be used
+with C++.
+
+Also added Doxygen markup to the header file, but I'm not terribly
+satisfied withe clarity of the output. I may switch to CWEB... Next
+release should include API docs and improved logging, if nothing else
+comes up...
+
+
+Wed Jun 27, 2001: Released Check 0.6.1
+
+Bug fix for srunner_failures (bad version actually returned all
+results), added srunner_results to do what srunner_failures used to
+do, and added corrected unit tests for both.
+
+Also changed the API for reporting the number of failed tests from
+srunner_nfailed to srunner_ntests_failed, to harmonized better with
+new function srunner_ntests_run. This unfortunately may break some
+unit tests slightly -- that's why the major release number is 0 :-)
+
+
+Thu Jun 21, 2001: Released Check 0.6.0
+
+Features improved unit test reporting options, more complete unit
+tests, and end-to-end test, and a full API into TestResults
+
+
+Check 0.5.2
+Minor edits
+Check 0.5.1
+GPL compliance release
+Check 0.5.0
+Initial public release

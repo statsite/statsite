@@ -1,0 +1,27 @@
+Maintainers:     Fredrik Hugosson <hugo303 at users dot sourceforge dot net>
+	         Chris Pickett <chris dot pickett at mail dot mcgill dot ca>
+
+Ex-Maintainer:   Sven Neumann <sven at convergence dot de>
+Original Author: Arien Malec <arien dot malec at gmail dot com>
+
+Patches:         Bernhard Reiter (configure issues)
+                 Neil Spring (const fixes)
+                 Rick Poyner (pipe handling, bug fixes)
+                 Dietmar Petras (bug fixes)
+                 Gilgamesh Nootebos (bug fixes)
+	         Frederic Peters (XML output)
+	         Lucas Di Pentima and Cesar Ballardini (signals)
+                 Robert Lemmen (gcov description in manual)
+	         Loic Martin (AM_PATH_CHECK patch)
+	         Ross Burton (pkg-config patch)
+		 Roland Stigge (bug fix: allow fail inside setup)
+		 Torok Edwin (strsignal and build fixes)
+		 Roland Illig (varargs and strsignal portability fixes)
+		 Daniel Gollub (pthreads support)
+		 Friedrich Beckmann (mingw and msvc port)
+		 Roy Merkel (specified test exit value)
+ 		 Robert Collins (subunit support)
+
+Anybody who has contributed code to Check or Check's build system is
+considered an author.  Send patches to this file to 
+<check-devel at lists dot sourceforge dot net>.
