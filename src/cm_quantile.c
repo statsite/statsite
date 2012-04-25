@@ -13,11 +13,14 @@
 #include "cm_quantile.h"
 
 /* Static declarations */
-static int cm_add_to_buffer(cm_quantile *cm, double value);
+static void cm_add_to_buffer(cm_quantile *cm, double value);
+static double cm_insert_point_value(cm_quantile *cm);
 static int cm_cursor_increment(cm_quantile *cm);
-static int cm_increment_insert_cursor(cm_quantile *cm);
-static int cm_increment_compress_cursor(cm_quantile *cm);
-static int cm_calc_rank_diff(cm_quantile *cm, uint64_t rank);
+static void cm_insert_sample(cm_quantile *cm, cm_sample *position, cm_sample *new);
+static void cm_append_sample(cm_quantile *cm, cm_sample *position, cm_sample *new);
+static void cm_insert(cm_quantile *cm);
+static void cm_compress(cm_quantile *cm);
+static int cm_rank_spread(cm_quantile *cm);
 
 // This is a comparison function that treats keys as doubles
 static int compare_double_keys(register void* key1, register void* key2) {
@@ -36,15 +39,15 @@ static int compare_double_keys(register void* key1, register void* key2) {
 
 /**
  * Initializes the CM quantile struct
- * @arg error_epsilon The maximum error for the quantiles
+ * @arg eps The maximum error for the quantiles
  * @arg quantiles A sorted array of double quantile values, must be on (0, 1)
  * @arg num_quants The number of entries in the quantiles array
  * @arg cm_quantile The cm_quantile struct to initialize
  * @return 0 on success.
  */
-int init_cm_quantile(double error_epsilon, double *quantiles, uint32_t num_quants, cm_quantile *cm) {
+int init_cm_quantile(double eps, double *quantiles, uint32_t num_quants, cm_quantile *cm) {
     // Verify the sanity of epsilon
-    if (error_epsilon <= 0 or error_epsilon >= 0.5) return -1;
+    if (eps <= 0 or eps >= 0.5) return -1;
 
     // Verify the quantiles
     if (!num_quants) return -1;
@@ -56,21 +59,29 @@ int init_cm_quantile(double error_epsilon, double *quantiles, uint32_t num_quant
     // Check that we have a non-null cm
     if (!cm) return -1;
 
-    // Copy things
-    cm->error_epsilon = error_epsilon;
+    // Initialize
+    cm->eps = eps;
+    cm->num_samples = 0;
+    cm->num_values = 0;
+    cm->samples = NULL;
+    cm->end = NULL;
+
+    // Copy the quantiles
     cm->quantiles = malloc(num_quants * sizeof(double));
     memcpy(cm->quantiles, quantiles, num_quants * sizeof(double));
     cm->num_quantiles = num_quants;
-    cm->num_samples = 0;
-    cm->samples = 0;
 
-    // Initialize the buffer
-    heap_create(&cm->buffer, 0, compare_double_keys);
+    // Initialize the buffers
+    heap *heaps = malloc(2*sizeof(heap));
+    cm->bufLess = heaps;
+    cm->bufMore = heaps+1;
+    heap_create(cm->bufLess, 0, compare_double_keys);
+    heap_create(cm->bufMore, 0, compare_double_keys);
 
     // Setup the cursors
-    cm->insert.current = NULL;
+    cm->insert.curs = NULL;
     cm->insert.rank = 0;
-    cm->compress.current = NULL;
+    cm->compress.curs = NULL;
 
     return 0;
 }
@@ -80,8 +91,6 @@ int init_cm_quantile(double error_epsilon, double *quantiles, uint32_t num_quant
  * heap buffer.
  */
 static void free_buffer_sample(void *key, void *val) {
-    // The value is a cm_sample struct, so we can
-    // just free it.
     free(val);
 }
 
@@ -93,11 +102,15 @@ static void free_buffer_sample(void *key, void *val) {
 int destroy_cm_quantile(cm_quantile *cm) {
     // Free the quantiles
     free(cm->quantiles);
-    cm->quantiles = NULL;
 
     // Destroy everything in the buffer
-    heap_foreach(&cm->buffer, free_buffer_sample);
-    heap_destroy(&cm->buffer);
+    heap_foreach(cm->bufLess, free_buffer_sample);
+    heap_destroy(cm->bufLess);
+    heap_foreach(cm->bufMore, free_buffer_sample);
+    heap_destroy(cm->bufMore);
+
+    // Free the lower address, since they are allocated to be adjacent
+    free((cm->bufLess < cm->bufMore) ? cm->bufLess : cm->bufMore);
 
     // Iterate through the linked list, free all
     cm_sample *next;
@@ -107,7 +120,6 @@ int destroy_cm_quantile(cm_quantile *cm) {
         free(current);
         current = next;
     }
-    cm->samples = NULL;
 
     return 0;
 }
@@ -119,19 +131,10 @@ int destroy_cm_quantile(cm_quantile *cm) {
  * @return 0 on success.
  */
 int cm_add_sample(cm_quantile *cm, double sample) {
-    // Add to the buffer
-    int res = 0;
-    res = cm_add_to_buffer(cm, sample);
-    if (res) return res;
-
-    // Increment the cursors to amortize the work
-    res = cm_increment_insert_cursor(cm);
-    if (res) return res;
-
-    res = cm_increment_compress_cursor(cm);
-    if (res) return res;
-
-    return res;
+    cm_add_to_buffer(cm, sample);
+    cm_insert(cm);
+    cm_compress(cm);
+    return 0;
 }
 
 /**
@@ -147,133 +150,120 @@ int cm_query(cm_quantile *cm, double quantile) {
 /**
  * Adds a new sample to the buffer
  */
-static int cm_add_to_buffer(cm_quantile *cm, double value) {
+static void cm_add_to_buffer(cm_quantile *cm, double value) {
     // Allocate a new sample
-    cm_sample *s = malloc(sizeof(cm_sample));
+    cm_sample *s = calloc(1, sizeof(cm_sample));
     s->value = value;
-    s->next = NULL;
 
-    // Add to the buffer
-    heap_insert(&cm->buffer, &s->value, s);
-    return 0;
+    // Check the cursor value
+    if (value < cm_insert_point_value(cm)) {
+        heap_insert(cm->bufLess, &s->value, s);
+    } else {
+        heap_insert(cm->bufMore, &s->value, s);
+    }
 }
 
-/**
- * Computes the number of items to process in
- * one round of iteration
- */
+// Returns the value under the insertion cursor or 0
+static double cm_insert_point_value(cm_quantile *cm) {
+    return (cm->insert.curs) ? cm->insert.curs->value : 0;
+}
+
+// Computes the number of items to process in one iteration
 static int cm_cursor_increment(cm_quantile *cm) {
-    return ceil((cm->num_samples / 2) * cm->error_epsilon);
+    return ceil(cm->num_samples * cm->eps);
 }
 
-
-/**
- * Returns the smallest sample from the buffer or NULL if none.
- */
-static cm_sample* cm_get_next_buffered(cm_quantile *cm) {
-    void *key;
-    void *val = NULL;
-    heap_min(&cm->buffer, &key, &val);
-    return val;
+/* Inserts a new sample before the position sample */
+static void cm_insert_sample(cm_quantile *cm, cm_sample *position, cm_sample *new) {
+    // Inserting at the head
+    if (!position->prev) {
+        position->prev = new;
+        cm->samples = new;
+        new->next = position;
+    } else {
+        cm_sample *prev = position->prev;
+        prev->next = new;
+        position->prev = new;
+        new->prev = prev;
+        new->next = position;
+    }
 }
 
-/**
- * Returns the smallest sample from the buffer or NULL if none,
- * and removes the sample from the buffer.
- */
-static cm_sample* cm_delete_next_buffered(cm_quantile *cm) {
-    void *key;
-    void *val = NULL;
-    heap_delmin(&cm->buffer, &key, &val);
-    return val;
+/* Inserts a new sample after the position sample */
+static void cm_append_sample(cm_quantile *cm, cm_sample *position, cm_sample *new) {
+    // Inserting at the end
+    if (!position->next) {
+        position->next = new;
+        cm->end = new;
+        new->prev = position;
+    } else {
+        cm_sample *next = position->next;
+        next->prev = new;
+        position->next = new;
+        new->prev = position;
+        new->next = next;
+    }
 }
 
 /**
  * Incrementally processes inserts by moving
  * data from the buffer to the samples using a cursor
  */
-static int cm_increment_insert_cursor(cm_quantile *cm) {
-    // Prepare to sample the buffer
-    cm_sample *sample = cm_get_next_buffered(cm);
-    if (!sample) return 0;
-    double val = sample->value;
-
-    // Check if this is the first sample or the smallest
-    if (!cm->samples or val < cm->samples->value) {
-        sample->next = cm->samples;
-        sample->min_rank = 1;
-        sample->rank_diff = 0;
-        cm->samples = sample;
+static void cm_insert(cm_quantile *cm) {
+    // Check if this is the first element
+    cm_sample *samp;
+    if (!cm->samples) {
+        heap_delmin(cm->bufMore, NULL, (void**)&samp);
+        samp->width = 1;
+        samp->delta = 0;
+        cm->samples = samp;
+        cm->end = samp;
+        cm->num_values++;
         cm->num_samples++;
-        cm_delete_next_buffered(cm);
-        return 0;
+        cm->insert.curs = samp;
+		return;
+	}
 
-    // Check if this is the last element
-    } else if (!cm->samples->next) {
-        cm->samples->next = sample;
-        sample->min_rank = 1;
-        sample->rank_diff = 0;
-        sample->next = NULL;
-        cm->num_samples++;
-        cm_delete_next_buffered(cm);
-        return 0;
-    }
+    // Check if we need to initialize the cursor
+    if (!cm->insert.curs)
+        cm->insert.curs = cm->samples;
 
-    // Get the number of tuples to process
-    int num = cm_cursor_increment(cm);
-
-    for (int i=0; i < num; i++) {
-        // If we don't have a cursor, start at the beginning
-        if (!cm->insert.current) {
-            cm->insert.current = cm->samples;
-            cm->insert.rank = 0;
-
-        // Check if our cursor is past the min-value
-        } else if (val >= cm->insert.current->value) {
-            // Check if this is the largest value (e.g. at the end)
-            if (!cm->insert.current->next) {
-                cm->insert.current->next = sample;
-                sample->min_rank = 1;
-                sample->rank_diff = 0;
-                cm->num_samples++;
-
-                // Get the next sample
-                cm_delete_next_buffered(cm);
-                sample = cm_get_next_buffered(cm);
-                if (!sample) return 0;
-                val = sample->value;
-
-            // Check if we should insert the sample
-            } else if  (val < cm->insert.current->next->value) {
-                sample->next = cm->insert.current->next;
-                cm->insert.current->next = sample;
-                sample->min_rank = 1;
-                sample->rank_diff = cm_calc_rank_diff(cm, cm->insert.rank);
-
-                // Get the next sample
-                cm_delete_next_buffered(cm);
-                sample = cm_get_next_buffered(cm);
-                if (!sample) return 0;
-                val = sample->value;
-
-            } else {
-                cm->insert.current = cm->samples;
-                cm->insert.rank = 0;
-            }
+    // Handle adding values in the middle
+    int incr_size = cm_cursor_increment(cm);
+    double *val;
+    for (int i=0; i < incr_size and cm->insert.curs != cm->end; i++) {
+        while (heap_min(cm->bufMore, (void**)&val, NULL) && *val <= cm_insert_point_value(cm)) {
+            heap_delmin(cm->bufMore, NULL, (void**)&samp);
+            samp->width = 1;
+            samp->delta = cm_rank_spread(cm);
+            cm_insert_sample(cm, cm->insert.curs, samp);
+            cm->insert.curs = samp;
+            cm->num_values++;
+            cm->num_samples++;
         }
 
-        // Increment the rank
-        cm->insert.rank += cm->insert.current->min_rank;
+        // Increment the cursor
+        if (i + 1 < incr_size)
+            cm->insert.curs = cm->insert.curs->next;
+	}
 
-        // Move the cursor
-        cm->insert.current = cm->insert.current->next;
-    }
-}
+    // Handle adding values at the end
+    if (cm->insert.curs == cm->end) {
+        while (heap_min(cm->bufMore, (void**)&val, NULL) && *val > cm_insert_point_value(cm)) {
+            heap_delmin(cm->bufMore, NULL, (void**)&samp);
+            samp->width = 1;
+            samp->delta = 0;
+            cm_append_sample(cm, cm->insert.curs, samp);
+            cm->insert.curs = samp;
+            cm->num_values++;
+            cm->num_samples++;
+        }
 
-/**
- * Incrementally processes compresses using a cursor
- */
-static int cm_increment_compress_cursor(cm_quantile *cm) {
-
+        // Swap the buffers, reset the cursor
+        heap *tmp = cm->bufLess;
+        cm->bufLess = cm->bufMore;
+        cm->bufMore = tmp;
+        cm->insert.curs = NULL;
+	}
 }
 
