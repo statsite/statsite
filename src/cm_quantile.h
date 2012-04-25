@@ -17,11 +17,11 @@ typedef struct cm_sample {
 
 struct cm_insert_cursor {
     cm_sample *curs;
-    uint64_t rank;
 };
 
 struct cm_compress_cursor {
     cm_sample *curs;
+    uint64_t min_rank;
 };
 
 typedef struct {
