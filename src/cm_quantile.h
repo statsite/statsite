@@ -68,11 +68,11 @@ int destroy_cm_quantile(cm_quantile *cm);
 int cm_add_sample(cm_quantile *cm, double sample);
 
 /**
- * Adds a new sample to the struct
- * @arg cm_quantile The cm_quantile to add to
+ * Queries for a quantile value
+ * @arg cm_quantile The cm_quantile to query
  * @arg quantile The quantile to query
- * @return 0 on success.
+ * @return The value on success or 0.
  */
-int cm_query(cm_quantile *cm, double quantile);
+double cm_query(cm_quantile *cm, double quantile);
 
 #endif

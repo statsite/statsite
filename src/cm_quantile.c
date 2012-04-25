@@ -138,13 +138,27 @@ int cm_add_sample(cm_quantile *cm, double sample) {
 }
 
 /**
- * Adds a new sample to the struct
- * @arg cm_quantile The cm_quantile to add to
+ * Queries for a quantile value
+ * @arg cm_quantile The cm_quantile to query
  * @arg quantile The quantile to query
- * @return 0 on success.
+ * @return The value on success or 0.
  */
-int cm_query(cm_quantile *cm, double quantile) {
-    return 0;
+double cm_query(cm_quantile *cm, double quantile) {
+    uint64_t rank = ceil(quantile * cm->num_values);
+	uint64_t min_rank=0;
+    uint64_t max_rank;
+	uint64_t threshold = ceil(cm_threshold(cm, rank) / 2.);
+
+    cm_sample *current = cm->samples;
+    while (current) {
+        min_rank += current->width;
+        max_rank = min_rank + current->delta;
+        if ((rank - min_rank) <= threshold && (max_rank - rank) <= threshold) {
+            break;
+        }
+        current = current->next;
+    }
+    return (current) ? current->value : 0;
 }
 
 /**
@@ -280,7 +294,7 @@ static void cm_compress(cm_quantile *cm) {
 
     int incr_size = cm_cursor_increment(cm);
     cm_sample *next, *prev;
-    double threshold, *val;
+    double threshold;
     uint64_t max_rank, test_val;
     for (int i=0; i < incr_size and cm->insert.curs != cm->samples; i++) {
         next = cm->insert.curs->next;
