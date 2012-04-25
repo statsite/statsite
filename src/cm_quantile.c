@@ -8,8 +8,16 @@
 #include <iso646.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "heap.h"
 #include "cm_quantile.h"
+
+/* Static declarations */
+static int cm_add_to_buffer(cm_quantile *cm, double value);
+static int cm_cursor_increment(cm_quantile *cm);
+static int cm_increment_insert_cursor(cm_quantile *cm);
+static int cm_increment_compress_cursor(cm_quantile *cm);
+static int cm_calc_rank_diff(cm_quantile *cm, uint64_t rank);
 
 // This is a comparison function that treats keys as doubles
 static int compare_double_keys(register void* key1, register void* key2) {
@@ -59,6 +67,11 @@ int init_cm_quantile(double error_epsilon, double *quantiles, uint32_t num_quant
     // Initialize the buffer
     heap_create(&cm->buffer, 0, compare_double_keys);
 
+    // Setup the cursors
+    cm->insert.current = NULL;
+    cm->insert.rank = 0;
+    cm->compress.current = NULL;
+
     return 0;
 }
 
@@ -106,7 +119,19 @@ int destroy_cm_quantile(cm_quantile *cm) {
  * @return 0 on success.
  */
 int cm_add_sample(cm_quantile *cm, double sample) {
-    return 0;
+    // Add to the buffer
+    int res = 0;
+    res = cm_add_to_buffer(cm, sample);
+    if (res) return res;
+
+    // Increment the cursors to amortize the work
+    res = cm_increment_insert_cursor(cm);
+    if (res) return res;
+
+    res = cm_increment_compress_cursor(cm);
+    if (res) return res;
+
+    return res;
 }
 
 /**
@@ -117,5 +142,138 @@ int cm_add_sample(cm_quantile *cm, double sample) {
  */
 int cm_query(cm_quantile *cm, double quantile) {
     return 0;
+}
+
+/**
+ * Adds a new sample to the buffer
+ */
+static int cm_add_to_buffer(cm_quantile *cm, double value) {
+    // Allocate a new sample
+    cm_sample *s = malloc(sizeof(cm_sample));
+    s->value = value;
+    s->next = NULL;
+
+    // Add to the buffer
+    heap_insert(&cm->buffer, &s->value, s);
+    return 0;
+}
+
+/**
+ * Computes the number of items to process in
+ * one round of iteration
+ */
+static int cm_cursor_increment(cm_quantile *cm) {
+    return ceil((cm->num_samples / 2) * cm->error_epsilon);
+}
+
+
+/**
+ * Returns the smallest sample from the buffer or NULL if none.
+ */
+static cm_sample* cm_get_next_buffered(cm_quantile *cm) {
+    void *key;
+    void *val = NULL;
+    heap_min(&cm->buffer, &key, &val);
+    return val;
+}
+
+/**
+ * Returns the smallest sample from the buffer or NULL if none,
+ * and removes the sample from the buffer.
+ */
+static cm_sample* cm_delete_next_buffered(cm_quantile *cm) {
+    void *key;
+    void *val = NULL;
+    heap_delmin(&cm->buffer, &key, &val);
+    return val;
+}
+
+/**
+ * Incrementally processes inserts by moving
+ * data from the buffer to the samples using a cursor
+ */
+static int cm_increment_insert_cursor(cm_quantile *cm) {
+    // Prepare to sample the buffer
+    cm_sample *sample = cm_get_next_buffered(cm);
+    if (!sample) return 0;
+    double val = sample->value;
+
+    // Check if this is the first sample or the smallest
+    if (!cm->samples or val < cm->samples->value) {
+        sample->next = cm->samples;
+        sample->min_rank = 1;
+        sample->rank_diff = 0;
+        cm->samples = sample;
+        cm->num_samples++;
+        cm_delete_next_buffered(cm);
+        return 0;
+
+    // Check if this is the last element
+    } else if (!cm->samples->next) {
+        cm->samples->next = sample;
+        sample->min_rank = 1;
+        sample->rank_diff = 0;
+        sample->next = NULL;
+        cm->num_samples++;
+        cm_delete_next_buffered(cm);
+        return 0;
+    }
+
+    // Get the number of tuples to process
+    int num = cm_cursor_increment(cm);
+
+    for (int i=0; i < num; i++) {
+        // If we don't have a cursor, start at the beginning
+        if (!cm->insert.current) {
+            cm->insert.current = cm->samples;
+            cm->insert.rank = 0;
+
+        // Check if our cursor is past the min-value
+        } else if (val >= cm->insert.current->value) {
+            // Check if this is the largest value (e.g. at the end)
+            if (!cm->insert.current->next) {
+                cm->insert.current->next = sample;
+                sample->min_rank = 1;
+                sample->rank_diff = 0;
+                cm->num_samples++;
+
+                // Get the next sample
+                cm_delete_next_buffered(cm);
+                sample = cm_get_next_buffered(cm);
+                if (!sample) return 0;
+                val = sample->value;
+
+            // Check if we should insert the sample
+            } else if  (val < cm->insert.current->next->value) {
+                sample->next = cm->insert.current->next;
+                cm->insert.current->next = sample;
+                sample->min_rank = 1;
+                sample->rank_diff = cm_calc_rank_diff(cm, cm->insert.rank);
+
+                // Get the next sample
+                cm_delete_next_buffered(cm);
+                sample = cm_get_next_buffered(cm);
+                if (!sample) return 0;
+                val = sample->value;
+
+            } else {
+                cm->insert.current = cm->samples;
+                cm->insert.rank = 0;
+            }
+        }
+
+        // Increment the rank
+        cm->insert.rank += cm->insert.current->min_rank;
+
+        // Move the cursor
+        cm->insert.current = cm->insert.current->next;
+    }
+}
+
+/**
+ * Incrementally processes compresses using a cursor
+ */
+static int cm_increment_compress_cursor(cm_quantile *cm) {
+
 }
 

@@ -14,13 +14,25 @@ typedef struct cm_sample {
     struct cm_sample *next;
 } cm_sample;
 
+struct cm_insert_cursor {
+    cm_sample *current;
+    uint64_t rank;
+};
+
+struct cm_compress_cursor {
+    cm_sample *current;
+};
+
 typedef struct {
     double error_epsilon;  // Desired epsilon
     double *quantiles;      // Queryable quantiles, sorted array
     uint32_t num_quantiles; // Number of quantiles
-    uint64_t num_samples;   // Number of samples so far
+    uint64_t num_samples;   // Number of samples
+    uint64_t num_values;    // Number of values added
     cm_sample *samples;     // Sorted linked list of samples
     heap buffer;     // Sample buffer
+    struct cm_insert_cursor insert;     // Insertion cursor
+    struct cm_compress_cursor compress; // Compression cursor
 } cm_quantile;
 
 
