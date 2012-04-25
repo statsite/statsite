@@ -58,8 +58,8 @@ static void* map_in_pages(int page_count) {
     else {
         // Clear the memory
         bzero(addr,page_count*PAGE_SIZE);
-        
-        // Return the address 
+
+        // Return the address
         return addr;
     }
 }
@@ -105,7 +105,7 @@ void heap_create(heap* h, int initial_size, int (*comp_func)(void*,void*)) {
         // Calculate the max entries
         ENTRIES_PER_PAGE = PAGE_SIZE / sizeof(heap_entry);
     }
-    
+
     // Check that initial size is greater than 0, else set it to ENTRIES_PER_PAGE
     if (initial_size <= 0)
         initial_size = ENTRIES_PER_PAGE;
@@ -162,8 +162,8 @@ int heap_min(heap* h, void** key, void** value) {
     heap_entry* root = GET_ENTRY(0, h->table);
 
     // Set the key and value
-    *key = root->key;
-    *value = root->value;
+    if (key) *key = root->key;
+    if (value) *value = root->value;
 
     // Success
     return 1;
@@ -186,7 +186,7 @@ void heap_insert(heap *h, void* key, void* value) {
 
         // Copy the old entries, copy the entire pages
         memcpy(new_table, h->table, h->allocated_pages*PAGE_SIZE);
-        
+
         // Cleanup the old table
         map_out_pages(h->table, h->allocated_pages);
 
@@ -194,7 +194,7 @@ void heap_insert(heap *h, void* key, void* value) {
         h->table = new_table;
         h->allocated_pages = new_size;
     }
-    
+
     // Store the comparison function
     int (*cmp_func)(void*,void*) = h->compare_func;
 
@@ -216,8 +216,8 @@ void heap_insert(heap *h, void* key, void* value) {
 
         // Get the parent entry
         parent = GET_ENTRY(parent_index, table);
-       
-        // Compare the keys, and swap if we need to 
+
+        // Compare the keys, and swap if we need to
         if (cmp_func(key, parent->key) < 0) {
             // Move the parent down
             current->key = parent->key;
@@ -234,7 +234,7 @@ void heap_insert(heap *h, void* key, void* value) {
 
     // Insert at the current index
     current->key = key;
-    current->value = value; 
+    current->value = value;
 
     // Increase the number of active entries
     h->active_entries++;
@@ -255,15 +255,15 @@ int heap_delmin(heap* h, void** key, void** value) {
     heap_entry* current = GET_ENTRY(current_index, table);
 
     // Store the outputs
-    *key = current->key;
-    *value = current->value;
+    if (key) *key = current->key;
+    if (value) *value = current->value;
 
     // Reduce the number of active entries
     h->active_entries--;
 
     // Get the active entries
     int entries = h->active_entries;
-   
+
     // If there are any other nodes, we may need to move them up
     if (h->active_entries > 0) {
         // Move the last element to the root
@@ -330,7 +330,7 @@ int heap_delmin(heap* h, void** key, void** value) {
                 break;
 
         }
-    } 
+    }
 
     // Check if we should release a page of memory
     int used_pages = entries / ENTRIES_PER_PAGE + ((entries % ENTRIES_PER_PAGE > 0) ? 1 : 0);
@@ -345,7 +345,7 @@ int heap_delmin(heap* h, void** key, void** value) {
 
         // Copy the old entries, copy the entire pages
         memcpy(new_table, h->table, used_pages*PAGE_SIZE);
-        
+
         // Cleanup the old table
         map_out_pages(h->table, h->allocated_pages);
 
