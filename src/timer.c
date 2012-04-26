@@ -12,7 +12,7 @@ static void finalize_timer(timer *timer);
  * @arg timeer The timer struct to initialize
  * @return 0 on success.
  */
-int init_timer_quantile(double eps, double *quantiles, uint32_t num_quants, timer *timer) {
+int init_timer(double eps, double *quantiles, uint32_t num_quants, timer *timer) {
     timer->count = 0;
     timer->sum = 0;
     timer->squared_sum = 0;

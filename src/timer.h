@@ -19,7 +19,7 @@ typedef struct {
  * @arg timeer The timer struct to initialize
  * @return 0 on success.
  */
-int init_timer_quantile(double eps, double *quantiles, uint32_t num_quants, timer *timer);
+int init_timer(double eps, double *quantiles, uint32_t num_quants, timer *timer);
 
 /**
  * Destroy the timer struct.
