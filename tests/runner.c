@@ -60,6 +60,7 @@ int main(void)
     suite_add_tcase(s1, tc4);
     tcase_add_test(tc4, test_timer_init_and_destroy);
     tcase_add_test(tc4, test_timer_init_add_destroy);
+    tcase_add_test(tc4, test_timer_add_loop);
 
     srunner_run_all(sr, CK_ENV);
     nf = srunner_ntests_failed(sr);
