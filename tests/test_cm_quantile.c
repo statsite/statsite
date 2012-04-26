@@ -156,10 +156,32 @@ START_TEST(test_cm_init_add_loop_rev_query_destroy)
     res = cm_flush(&cm);
     fail_unless(res == 0);
 
-    //print_cm(&cm);
     double val = cm_query(&cm, 0.5);
-    printf("Val: %f\n", val);
     fail_unless(val >= 50000.0 - 1000 && val <= 50000 + 1000);
+
+    res = destroy_cm_quantile(&cm);
+    fail_unless(res == 0);
+}
+END_TEST
+
+START_TEST(test_cm_init_add_loop_random_query_destroy)
+{
+    cm_quantile cm;
+    double quants[] = {0.5, 0.90, 0.99};
+    int res = init_cm_quantile(0.01, (double*)&quants, 3, &cm);
+    fail_unless(res == 0);
+
+    srandom(42);
+    for (int i=0; i < 100000; i++) {
+        res = cm_add_sample(&cm, random());
+        fail_unless(res == 0);
+    }
+
+    res = cm_flush(&cm);
+    fail_unless(res == 0);
+
+    double val = cm_query(&cm, 0.5);
+    fail_unless(val >= 1073741823 - 21474836 && val <= 1073741823 + 21474836);
 
     res = destroy_cm_quantile(&cm);
     fail_unless(res == 0);

@@ -41,6 +41,7 @@ int main(void)
     tcase_add_test(tc2, test_cm_init_add_query_destroy);
     tcase_add_test(tc2, test_cm_init_add_loop_query_destroy);
     tcase_add_test(tc2, test_cm_init_add_loop_rev_query_destroy);
+    tcase_add_test(tc2, test_cm_init_add_loop_random_query_destroy);
 
     srunner_run_all(sr, CK_ENV);
     nf = srunner_ntests_failed(sr);
