@@ -10,18 +10,20 @@
 #include <string.h>
 #include <math.h>
 #include <limits.h>
+#include <stdio.h>
 #include "heap.h"
 #include "cm_quantile.h"
 
 /* Static declarations */
 static void cm_add_to_buffer(cm_quantile *cm, double value);
 static double cm_insert_point_value(cm_quantile *cm);
+static void cm_reset_insert_cursor(cm_quantile *cm);
 static int cm_cursor_increment(cm_quantile *cm);
 static void cm_insert_sample(cm_quantile *cm, cm_sample *position, cm_sample *new);
-static void cm_append_sample(cm_quantile *cm, cm_sample *position, cm_sample *new);
+static void cm_append_sample(cm_quantile *cm, cm_sample *new);
 static void cm_insert(cm_quantile *cm);
 static void cm_compress(cm_quantile *cm);
-static int cm_threshold(cm_quantile *cm, uint64_t rank);
+static uint64_t cm_threshold(cm_quantile *cm, uint64_t rank);
 
 // This is a comparison function that treats keys as doubles
 static int compare_double_keys(register void* key1, register void* key2) {
@@ -138,6 +140,23 @@ int cm_add_sample(cm_quantile *cm, double sample) {
 }
 
 /**
+ * Forces the internal buffers to be flushed,
+ * this allows query to have maximum accuracy.
+ * @arg cm_quantile The cm_quantile to add to
+ * @return 0 on success.
+ */
+int cm_flush(cm_quantile *cm) {
+    int rounds = 0;
+    while (heap_size(cm->bufLess) or heap_size(cm->bufMore)) {
+        if (heap_size(cm->bufMore) == 0) cm_reset_insert_cursor(cm);
+        cm_insert(cm);
+        cm_compress(cm);
+        rounds++;
+    }
+    return 0;
+}
+
+/**
  * Queries for a quantile value
  * @arg cm_quantile The cm_quantile to query
  * @arg quantile The quantile to query
@@ -149,16 +168,18 @@ double cm_query(cm_quantile *cm, double quantile) {
     uint64_t max_rank;
 	uint64_t threshold = ceil(cm_threshold(cm, rank) / 2.);
 
+    cm_sample *prev = cm->samples;
     cm_sample *current = cm->samples;
     while (current) {
-        min_rank += current->width;
-        max_rank = min_rank + current->delta;
-        if ((rank - min_rank) <= threshold && (max_rank - rank) <= threshold) {
+        max_rank = min_rank + current->width + current->delta;
+        if (max_rank > rank + threshold) {
             break;
         }
+        min_rank += current->width;
+        prev = current;
         current = current->next;
     }
-    return (current) ? current->value : 0;
+    return (prev) ? prev->value : 0;
 }
 
 /**
@@ -182,6 +203,15 @@ static double cm_insert_point_value(cm_quantile *cm) {
     return (cm->insert.curs) ? cm->insert.curs->value : 0;
 }
 
+// Resets the insert cursor
+static void cm_reset_insert_cursor(cm_quantile *cm) {
+    // Swap the buffers, reset the cursor
+    heap *tmp = cm->bufLess;
+    cm->bufLess = cm->bufMore;
+    cm->bufMore = tmp;
+    cm->insert.curs = NULL;
+}
+
 // Computes the number of items to process in one iteration
 static int cm_cursor_increment(cm_quantile *cm) {
     return ceil(cm->num_samples * cm->eps);
@@ -203,20 +233,11 @@ static void cm_insert_sample(cm_quantile *cm, cm_sample *position, cm_sample *ne
     }
 }
 
-/* Inserts a new sample after the position sample */
-static void cm_append_sample(cm_quantile *cm, cm_sample *position, cm_sample *new) {
-    // Inserting at the end
-    if (!position->next) {
-        position->next = new;
-        cm->end = new;
-        new->prev = position;
-    } else {
-        cm_sample *next = position->next;
-        next->prev = new;
-        position->next = new;
-        new->prev = position;
-        new->next = next;
-    }
+/* Inserts a new sample at the end */
+static void cm_append_sample(cm_quantile *cm, cm_sample *new) {
+    new->prev = cm->end;
+    cm->end->next = new;
+    cm->end = new;
 }
 
 /**
@@ -239,45 +260,44 @@ static void cm_insert(cm_quantile *cm) {
 	}
 
     // Check if we need to initialize the cursor
-    if (!cm->insert.curs)
+    if (!cm->insert.curs) {
         cm->insert.curs = cm->samples;
+    }
 
     // Handle adding values in the middle
     int incr_size = cm_cursor_increment(cm);
     double *val;
-    for (int i=0; i < incr_size and cm->insert.curs != cm->end; i++) {
+    for (int i=0; i < incr_size and cm->insert.curs; i++) {
         while (heap_min(cm->bufMore, (void**)&val, NULL) && *val <= cm_insert_point_value(cm)) {
             heap_delmin(cm->bufMore, NULL, (void**)&samp);
             samp->width = 1;
             samp->delta = cm->insert.curs->width + cm->insert.curs->delta - 1;
             cm_insert_sample(cm, cm->insert.curs, samp);
-            cm->insert.curs = samp;
             cm->num_values++;
             cm->num_samples++;
-        }
 
+            // Check if we need to update the compress cursor
+            if (cm->compress.curs && cm->compress.curs->value >= samp->value) {
+                cm->compress.min_rank++;
+            }
+        }
         // Increment the cursor
-        if (i + 1 < incr_size)
-            cm->insert.curs = cm->insert.curs->next;
+        cm->insert.curs = cm->insert.curs->next;
 	}
 
     // Handle adding values at the end
-    if (cm->insert.curs == cm->end) {
-        while (heap_min(cm->bufMore, (void**)&val, NULL) && *val > cm_insert_point_value(cm)) {
+    if (cm->insert.curs == NULL) {
+        while (heap_min(cm->bufMore, (void**)&val, NULL) && *val > cm->end->value) {
             heap_delmin(cm->bufMore, NULL, (void**)&samp);
             samp->width = 1;
             samp->delta = 0;
-            cm_append_sample(cm, cm->insert.curs, samp);
-            cm->insert.curs = samp;
+            cm_append_sample(cm, samp);
             cm->num_values++;
             cm->num_samples++;
         }
 
-        // Swap the buffers, reset the cursor
-        heap *tmp = cm->bufLess;
-        cm->bufLess = cm->bufMore;
-        cm->bufMore = tmp;
-        cm->insert.curs = NULL;
+        // Reset the cursor
+        cm_reset_insert_cursor(cm);
 	}
 }
 
@@ -290,15 +310,16 @@ static void cm_compress(cm_quantile *cm) {
     if (!cm->compress.curs) {
         cm->compress.curs = cm->end->prev;
         cm->compress.min_rank = cm->num_values - 1 - cm->compress.curs->width;
+        cm->compress.curs = cm->compress.curs->prev;
     }
 
     int incr_size = cm_cursor_increment(cm);
     cm_sample *next, *prev;
-    double threshold;
+    uint64_t threshold;
     uint64_t max_rank, test_val;
-    for (int i=0; i < incr_size and cm->insert.curs != cm->samples; i++) {
-        next = cm->insert.curs->next;
-        max_rank = cm->compress.min_rank + cm->compress.curs->delta;
+    for (int i=0; i < incr_size and cm->compress.curs != cm->samples; i++) {
+        next = cm->compress.curs->next;
+        max_rank = cm->compress.min_rank + cm->compress.curs->width + cm->compress.curs->delta;
         cm->compress.min_rank -= cm->compress.curs->width;
 
         threshold = cm_threshold(cm, max_rank);
@@ -310,14 +331,14 @@ static void cm_compress(cm_quantile *cm) {
             }
 
             // Combine the widths
-            next->width += cm->insert.curs->width;
+            next->width += cm->compress.curs->width;
 
             // Remove the tuple
-            prev = cm->insert.curs->prev;
+            prev = cm->compress.curs->prev;
             prev->next = next;
             next->prev = prev;
-            free(cm->insert.curs);
-            cm->insert.curs = next;
+            free(cm->compress.curs);
+            cm->compress.curs = prev;
 
             // Reduce the sample count
             cm->num_samples--;
@@ -331,7 +352,7 @@ static void cm_compress(cm_quantile *cm) {
 }
 
 /* Computes the minimum threshold value */
-static int cm_threshold(cm_quantile *cm, uint64_t rank) {
+static uint64_t cm_threshold(cm_quantile *cm, uint64_t rank) {
     uint64_t min_val = LLONG_MAX;
 
     uint64_t quant_min;
