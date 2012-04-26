@@ -136,6 +136,12 @@ START_TEST(test_cm_init_add_loop_query_destroy)
     double val = cm_query(&cm, 0.5);
     fail_unless(val >= 50000.0 - 1000 && val <= 50000 + 1000);
 
+    val = cm_query(&cm, 0.9);
+    fail_unless(val >= 90000.0 - 1000 && val <= 90000 + 1000);
+
+    val = cm_query(&cm, 0.99);
+    fail_unless(val >= 99000.0 - 1000 && val <= 99000 + 1000);
+
     res = destroy_cm_quantile(&cm);
     fail_unless(res == 0);
 }
@@ -158,6 +164,12 @@ START_TEST(test_cm_init_add_loop_rev_query_destroy)
 
     double val = cm_query(&cm, 0.5);
     fail_unless(val >= 50000.0 - 1000 && val <= 50000 + 1000);
+
+    val = cm_query(&cm, 0.9);
+    fail_unless(val >= 90000.0 - 1000 && val <= 90000 + 1000);
+
+    val = cm_query(&cm, 0.99);
+    fail_unless(val >= 99000.0 - 1000 && val <= 99000 + 1000);
 
     res = destroy_cm_quantile(&cm);
     fail_unless(res == 0);
@@ -182,6 +194,12 @@ START_TEST(test_cm_init_add_loop_random_query_destroy)
 
     double val = cm_query(&cm, 0.5);
     fail_unless(val >= 1073741823 - 21474836 && val <= 1073741823 + 21474836);
+
+    val = cm_query(&cm, 0.90);
+    fail_unless(val >= 1932735282 - 21474836 && val <= 1932735282 + 21474836);
+
+    val = cm_query(&cm, 0.99);
+    fail_unless(val >= 2126008810 - 21474836 && val <= 2126008810 + 21474836);
 
     res = destroy_cm_quantile(&cm);
     fail_unless(res == 0);
