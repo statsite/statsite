@@ -4,6 +4,7 @@
 #include "test_hashmap.c"
 #include "test_cm_quantile.c"
 #include "test_heap.c"
+#include "test_timer.c"
 
 int main(void)
 {
@@ -13,6 +14,7 @@ int main(void)
     TCase *tc1 = tcase_create("hashmap");
     TCase *tc2 = tcase_create("quantile");
     TCase *tc3 = tcase_create("heap");
+    TCase *tc4 = tcase_create("timer");
     SRunner *sr = srunner_create(s1);
     int nf;
 
@@ -53,6 +55,11 @@ int main(void)
     tcase_add_test(tc3, test_heap_delete_order);
     tcase_add_test(tc3, test_heap_for_each);
     tcase_add_test(tc3, test_heap_del_empty);
+
+    // Add the timer tests
+    suite_add_tcase(s1, tc4);
+    tcase_add_test(tc4, test_timer_init_and_destroy);
+
 
     srunner_run_all(sr, CK_ENV);
     nf = srunner_ntests_failed(sr);
