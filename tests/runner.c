@@ -59,7 +59,7 @@ int main(void)
     // Add the timer tests
     suite_add_tcase(s1, tc4);
     tcase_add_test(tc4, test_timer_init_and_destroy);
-
+    tcase_add_test(tc4, test_timer_init_add_destroy);
 
     srunner_run_all(sr, CK_ENV);
     nf = srunner_ntests_failed(sr);

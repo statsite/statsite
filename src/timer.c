@@ -92,6 +92,7 @@ double timer_mean(timer *timer) {
 double timer_stddev(timer *timer) {
     double num = (timer->count * timer->squared_sum) - pow(timer->sum, 2);
     double div = timer->count * (timer->count - 1);
+    if (div == 0) return 0;
     return sqrt(num / div);
 }
 
