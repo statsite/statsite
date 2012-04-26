@@ -3,6 +3,7 @@
 #include <syslog.h>
 #include "test_hashmap.c"
 #include "test_cm_quantile.c"
+#include "test_heap.c"
 
 int main(void)
 {
@@ -11,6 +12,7 @@ int main(void)
     Suite *s1 = suite_create("Statsite");
     TCase *tc1 = tcase_create("hashmap");
     TCase *tc2 = tcase_create("quantile");
+    TCase *tc3 = tcase_create("heap");
     SRunner *sr = srunner_create(s1);
     int nf;
 
@@ -42,6 +44,15 @@ int main(void)
     tcase_add_test(tc2, test_cm_init_add_loop_query_destroy);
     tcase_add_test(tc2, test_cm_init_add_loop_rev_query_destroy);
     tcase_add_test(tc2, test_cm_init_add_loop_random_query_destroy);
+
+    // Add the heap tests
+    suite_add_tcase(s1, tc3);
+    tcase_add_test(tc3, test_heap_init_and_destroy);
+    tcase_add_test(tc3, test_heap_insert);
+    tcase_add_test(tc3, test_heap_insert_delete);
+    tcase_add_test(tc3, test_heap_delete_order);
+    tcase_add_test(tc3, test_heap_for_each);
+    tcase_add_test(tc3, test_heap_del_empty);
 
     srunner_run_all(sr, CK_ENV);
     nf = srunner_ntests_failed(sr);
