@@ -6,6 +6,8 @@
  */
 #ifndef CM_QUANTILE_H
 #define CM_QUANTILE_H
+#include <stdint.h>
+#include "heap.h"
 
 typedef struct cm_sample {
     double value;       // The sampled value
@@ -74,5 +76,13 @@ int cm_add_sample(cm_quantile *cm, double sample);
  * @return The value on success or 0.
  */
 double cm_query(cm_quantile *cm, double quantile);
+
+/**
+ * Forces the internal buffers to be flushed,
+ * this allows query to have maximum accuracy.
+ * @arg cm_quantile The cm_quantile to add to
+ * @return 0 on success.
+ */
+int cm_flush(cm_quantile *cm);
 
 #endif
