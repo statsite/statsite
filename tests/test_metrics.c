@@ -49,3 +49,30 @@ START_TEST(test_metrics_empty_iter)
 }
 END_TEST
 
+static int iter_test_cb(void *data, metric_type type, char *key, void *val) {
+    if (type == KEY_VAL && strcmp(key, "test") == 0) {
+        double *v = val;
+        if (*v == 100) {
+            int *okay = data;
+            *okay = 1;
+        }
+    }
+    return 0;
+}
+
+START_TEST(test_metrics_add_iter)
+{
+    metrics m;
+    int res = init_metrics_defaults(&m);
+    fail_unless(res == 0);
+
+    int okay = 0;
+    fail_unless(metrics_add_sample(&m, KEY_VAL, "test", 100) == 0);
+    fail_unless(metrics_iter(&m, (void*)&okay, iter_test_cb) == 0);
+    fail_unless(okay == 1);
+
+    res = destroy_metrics(&m);
+    fail_unless(res == 0);
+}
+END_TEST
+

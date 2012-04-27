@@ -77,7 +77,7 @@ int main(void)
     tcase_add_test(tc6, test_metrics_init_and_destroy);
     tcase_add_test(tc6, test_metrics_init_defaults_and_destroy);
     tcase_add_test(tc6, test_metrics_empty_iter);
-
+    tcase_add_test(tc6, test_metrics_add_iter);
 
     srunner_run_all(sr, CK_ENV);
     nf = srunner_ntests_failed(sr);
