@@ -63,6 +63,7 @@ int metrics_add_sample(metrics *m, metric_type type, char *name, double val);
 /**
  * Iterates through all the metrics
  * @arg m The metrics to iterate through
+ * @arg data Opaque handle passed to the callback
  * @arg cb A callback function to invoke. Called with a type, name
  * and value. If the type is KEY_VAL, it is a pointer to a double,
  * for a counter, it is a pointer to a counter, and for a timer it is
