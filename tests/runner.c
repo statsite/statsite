@@ -75,6 +75,8 @@ int main(void)
     // Add the counter tests
     suite_add_tcase(s1, tc6);
     tcase_add_test(tc6, test_metrics_init_and_destroy);
+    tcase_add_test(tc6, test_metrics_init_defaults_and_destroy);
+    tcase_add_test(tc6, test_metrics_empty_iter);
 
 
     srunner_run_all(sr, CK_ENV);
