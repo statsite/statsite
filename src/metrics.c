@@ -4,6 +4,13 @@
 
 static int counter_delete_cb(void *data, const char *key, void *value);
 static int timer_delete_cb(void *data, const char *key, void *value);
+static int iter_cb(void *data, const char *key, void *value);
+
+struct cb_info {
+    metric_type type;
+    void *data;
+    metric_callback cb;
+};
 
 /**
  * Initializes the metrics struct.
@@ -77,7 +84,7 @@ int destroy_metrics(metrics *m) {
  * @arg val The value to add
  * @return 0 on success
  */
-int metrics_increment_counter(metrics *m, char *name, double val) {
+static int metrics_increment_counter(metrics *m, char *name, double val) {
     counter *c;
     int res = hashmap_get(m->counters, name, (void**)&c);
 
@@ -99,7 +106,7 @@ int metrics_increment_counter(metrics *m, char *name, double val) {
  * @arg val The sample to add
  * @return 0 on success.
  */
-int metrics_add_timer_sample(metrics *m, char *name, double val) {
+static int metrics_add_timer_sample(metrics *m, char *name, double val) {
     timer *t;
     int res = hashmap_get(m->timers, name, (void**)&t);
 
@@ -120,7 +127,7 @@ int metrics_add_timer_sample(metrics *m, char *name, double val) {
  * @arg val The value associated
  * @return 0 on success.
  */
-int metrics_add_kv(metrics *m, char *name, double val) {
+static int metrics_add_kv(metrics *m, char *name, double val) {
     key_val *kv = malloc(sizeof(key_val));
     kv->name = strdup(name);
     kv->val = val;
@@ -129,6 +136,61 @@ int metrics_add_kv(metrics *m, char *name, double val) {
     return 0;
 }
 
+/**
+ * Adds a new sampled value
+ * arg type The type of the metrics
+ * @arg name The name of the metric
+ * @arg val The sample to add
+ * @return 0 on success.
+ */
+int metrics_add_sample(metrics *m, metric_type type, char *name, double val) {
+    switch (type) {
+        case KEY_VAL:
+            return metrics_add_kv(m, name, val);
+
+        case COUNTER:
+            return metrics_increment_counter(m, name, val);
+
+        case TIMER:
+            return metrics_add_timer_sample(m, name, val);
+
+        default:
+            return -1;
+    }
+}
+
+/**
+ * Iterates through all the metrics
+ * @arg m The metrics to iterate through
+ * @arg data Opaque handle passed to the callback
+ * @arg cb A callback function to invoke. Called with a type, name
+ * and value. If the type is KEY_VAL, it is a pointer to a double,
+ * for a counter, it is a pointer to a counter, and for a timer it is
+ * a pointer to a timer. Return non-zero to stop iteration.
+ * @return 0 on success, or the return of the callback
+ */
+int metrics_iter(metrics *m, void *data, metric_callback cb) {
+    // Handle the K/V pairs first
+    key_val *current = m->kv_vals;
+    int should_break = 0;
+    while (current && !should_break) {
+        should_break = cb(data, KEY_VAL, current->name, &current->val);
+        current = current->next;
+    }
+    if (should_break) return should_break;
+
+    // Store our data in a small struct
+    struct cb_info info = {COUNTER, data, cb};
+
+    // Send the counters
+    should_break = hashmap_iter(m->counters, iter_cb, &info);
+    if (should_break) return should_break;
+
+    // Send the timers
+    info.type = TIMER;
+    should_break = hashmap_iter(m->timers, iter_cb, &info);
+    return should_break;
+}
 
 // Counter map cleanup
 static int counter_delete_cb(void *data, const char *key, void *value) {
@@ -142,5 +204,11 @@ static int timer_delete_cb(void *data, const char *key, void *value) {
     destroy_timer(t);
     free(t);
     return 0;
+}
+
+// Callback to invoke the user code
+static int iter_cb(void *data, const char *key, void *value) {
+    struct cb_info *info = data;
+    return info->cb(info->data, info->type, (char*)key, value);
 }
 
