@@ -380,6 +380,6 @@ int hashmap_iter(hashmap *map, hashmap_callback cb, void *data) {
             entry = entry->next;
         }
     }
-    return 0;
+    return should_break;
 }
 

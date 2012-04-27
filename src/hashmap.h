@@ -69,7 +69,7 @@ int hashmap_clear(hashmap *map);
  * @arg map The hashmap to iterate over
  * @arg cb The callback function to invoke
  * @arg data Opaque handle passed to the callback
- * @return 0 on success
+ * @return 0 on success, or the return of the callback.
  */
 int hashmap_iter(hashmap *map, hashmap_callback cb, void *data);
 

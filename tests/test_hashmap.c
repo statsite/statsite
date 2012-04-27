@@ -263,7 +263,7 @@ START_TEST(test_map_put_iter_break)
     }
 
     int val = 0;
-    fail_unless(hashmap_iter(map, iter_break_test, (void*)&val) == 0);
+    fail_unless(hashmap_iter(map, iter_break_test, (void*)&val) == 1);
     fail_unless(val == 1);
 
     res = hashmap_destroy(map);
