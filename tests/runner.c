@@ -5,6 +5,7 @@
 #include "test_cm_quantile.c"
 #include "test_heap.c"
 #include "test_timer.c"
+#include "test_counter.c"
 
 int main(void)
 {
@@ -15,6 +16,7 @@ int main(void)
     TCase *tc2 = tcase_create("quantile");
     TCase *tc3 = tcase_create("heap");
     TCase *tc4 = tcase_create("timer");
+    TCase *tc5 = tcase_create("counter");
     SRunner *sr = srunner_create(s1);
     int nf;
 
@@ -61,6 +63,12 @@ int main(void)
     tcase_add_test(tc4, test_timer_init_and_destroy);
     tcase_add_test(tc4, test_timer_init_add_destroy);
     tcase_add_test(tc4, test_timer_add_loop);
+
+    // Add the counter tests
+    suite_add_tcase(s1, tc5);
+    tcase_add_test(tc4, test_counter_init);
+    tcase_add_test(tc4, test_counter_init_add);
+    tcase_add_test(tc4, test_counter_add_loop);
 
     srunner_run_all(sr, CK_ENV);
     nf = srunner_ntests_failed(sr);
