@@ -1,0 +1,69 @@
+#include <math.h>
+#include "counter.h"
+
+/**
+ * Initializes the counter struct
+ * @arg eps The maximum error for the quantiles
+ * @arg quantiles A sorted array of double quantile values, must be on (0, 1)
+ * @arg num_quants The number of entries in the quantiles array
+ * @arg timeer The counter struct to initialize
+ * @return 0 on success.
+ */
+int init_counter(double eps, double *quantiles, uint32_t num_quants, counter *counter) {
+    counter->count = 0;
+    counter->sum = 0;
+    counter->squared_sum = 0;
+}
+
+/**
+ * Adds a new sample to the struct
+ * @arg counter The counter to add to
+ * @arg sample The new sample value
+ * @return 0 on success.
+ */
+int counter_add_sample(counter *counter, double sample) {
+    counter->count++;
+    counter->sum += sample;
+    counter->squared_sum += pow(sample, 2);
+    return 0;
+}
+
+/**
+ * Returns the number of samples in the counter
+ * @arg counter The counter to query
+ * @return The number of samples
+ */
+uint64_t counter_count(counter *counter) {
+    return counter->count;
+}
+
+/**
+ * Returns the mean counter value
+ * @arg counter The counter to query
+ * @return The mean value
+ */
+double counter_mean(counter *counter) {
+    return counter->sum / counter->count;
+}
+
+/**
+ * Returns the sample standard deviation counter value
+ * @arg counter The counter to query
+ * @return The sample standard deviation
+ */
+double counter_stddev(counter *counter) {
+    double num = (counter->count * counter->squared_sum) - pow(counter->sum, 2);
+    double div = counter->count * (counter->count - 1);
+    if (div == 0) return 0;
+    return sqrt(num / div);
+}
+
+/**
+ * Returns the sum of the counter
+ * @arg counter The counter to query
+ * @return The sum of values
+ */
+double counter_sum(counter *counter) {
+    return counter->sum;
+}
+
