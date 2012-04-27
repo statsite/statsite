@@ -10,13 +10,10 @@ typedef struct {
 
 /**
  * Initializes the counter struct
- * @arg eps The maximum error for the quantiles
- * @arg quantiles A sorted array of double quantile values, must be on (0, 1)
- * @arg num_quants The number of entries in the quantiles array
- * @arg timeer The counter struct to initialize
+ * @arg counter The counter struct to initialize
  * @return 0 on success.
  */
-int init_counter(double eps, double *quantiles, uint32_t num_quants, counter *counter);
+int init_counter(counter *counter);
 
 /**
  * Adds a new sample to the struct
