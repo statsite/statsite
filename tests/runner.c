@@ -6,6 +6,7 @@
 #include "test_heap.c"
 #include "test_timer.c"
 #include "test_counter.c"
+#include "test_metrics.c"
 
 int main(void)
 {
@@ -17,6 +18,7 @@ int main(void)
     TCase *tc3 = tcase_create("heap");
     TCase *tc4 = tcase_create("timer");
     TCase *tc5 = tcase_create("counter");
+    TCase *tc6 = tcase_create("metrics");
     SRunner *sr = srunner_create(s1);
     int nf;
 
@@ -66,9 +68,14 @@ int main(void)
 
     // Add the counter tests
     suite_add_tcase(s1, tc5);
-    tcase_add_test(tc4, test_counter_init);
-    tcase_add_test(tc4, test_counter_init_add);
-    tcase_add_test(tc4, test_counter_add_loop);
+    tcase_add_test(tc5, test_counter_init);
+    tcase_add_test(tc5, test_counter_init_add);
+    tcase_add_test(tc5, test_counter_add_loop);
+
+    // Add the counter tests
+    suite_add_tcase(s1, tc6);
+    tcase_add_test(tc6, test_metrics_init_and_destroy);
+
 
     srunner_run_all(sr, CK_ENV);
     nf = srunner_ntests_failed(sr);
