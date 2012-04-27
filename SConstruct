@@ -12,7 +12,8 @@ env_statsite_without_err = Environment(CCFLAGS = '-std=c99 -D_GNU_SOURCE -O2 -pt
 objs = env_statsite_with_err.Object('src/hashmap', 'src/hashmap.c') + \
         env_statsite_with_err.Object('src/heap', 'src/heap.c') + \
         env_statsite_with_err.Object('src/cm_quantile', 'src/cm_quantile.c') + \
-        env_statsite_with_err.Object('src/timer', 'src/timer.c')
+        env_statsite_with_err.Object('src/timer', 'src/timer.c') + \
+        env_statsite_with_err.Object('src/counter', 'src/counter.c')
 
 statsite_libs = ["m", "pthread", murmur, inih]
 if platform.system() == 'Linux':
