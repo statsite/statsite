@@ -8,7 +8,7 @@
 
 /* Static regexes */
 static regex_t VALID_METRIC;
-static const char *VALID_METRIC_PATTERN= "^([a-zA-Z0-9-_.]+):(-?[0-9.]+)|([a-z]+)(?:|@([0-9.]+))?$";
+static const char *VALID_METRIC_PATTERN= "^([a-zA-Z0-9_.-]+):(-?[0-9.]+)\\|([a-z]+)(\\|@([0-9.]+))?$";
 
 /* Static method declarations */
 static int buffer_after_terminator(char *buf, int buf_len, char terminator, char **after_term, int *after_len);
@@ -21,7 +21,6 @@ void init_conn_handler() {
     int res;
     res = regcomp(&VALID_METRIC, VALID_METRIC_PATTERN, REG_EXTENDED);
     assert(res == 0);
-
 }
 
 
