@@ -85,6 +85,9 @@ int main(void)
     // Add the streaming tests
     suite_add_tcase(s1, tc7);
     tcase_add_test(tc7, test_stream_empty);
+    tcase_add_test(tc7, test_stream_some);
+    tcase_add_test(tc7, test_stream_bad_cmd);
+    tcase_add_test(tc7, test_stream_sigpipe);
 
     srunner_run_all(sr, CK_ENV);
     nf = srunner_ntests_failed(sr);
