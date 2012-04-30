@@ -4,6 +4,7 @@
 #include <regex.h>
 #include <assert.h>
 #include <regex.h>
+#include "metrics.h"
 #include "conn_handler.h"
 
 /* Static regexes */
@@ -34,9 +35,10 @@ void init_conn_handler() {
  */
 int handle_client_connect(statsite_conn_handler *handle) {
     // Look for the next command line
-    char *buf;
-    int buf_len, should_free;
-    int status;
+    char *buf, *key, *val_str, *type_str, *endptr;
+    metric_type type;
+    int buf_len, should_free, status, i;
+    double val;
     while (1) {
         status = extract_to_terminator(handle->conn, '\n', &buf, &buf_len, &should_free);
         if (status == -1) return 0; // Return if no command is available
@@ -46,10 +48,42 @@ int handle_client_connect(statsite_conn_handler *handle) {
         status = regexec(&VALID_METRIC, buf, 5, matches, 0);
         if (status == 0) {
             // Null terminate the fields
-            for (int i=1;i<5;i++) {
+            for (i=1;i<5;i++) {
                 *(buf + matches[i].rm_eo) = 0;
             }
 
+            // Setup the pointers
+            key = buf+matches[1].rm_so;
+            val_str = buf+matches[2].rm_so;
+            type_str = buf+matches[3].rm_so;
+
+            // XXX: Ignore the flags
+            //char *flags = buf+matches[4].rm_so+2;
+
+            // Convert the type
+            switch (*val_str) {
+                case 'c':
+                    type = COUNTER;
+                    break;
+                case 'm':
+                    type = TIMER;
+                    break;
+                case 'k':
+                    type = KEY_VAL;
+                    break;
+                default:
+                    type = UNKNOWN;
+            }
+
+            // Convert the value to a double
+            endptr = NULL;
+            val = strtod(val_str, &endptr);
+
+            // Store the sample if we did the conversion
+            if (val != 0 || endptr != val_str)
+                metrics_add_sample(NULL, type, key, val);
+
+            // XXX: Debug
             printf("Key: %s Val: %s Type: %s Flag: %s\n",
                     buf+matches[1].rm_so,
                     buf+matches[2].rm_so,
