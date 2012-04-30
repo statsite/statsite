@@ -9,12 +9,13 @@ inih = envinih.Library('inih', Glob("deps/inih/*.c"))
 env_statsite_with_err = Environment(CCFLAGS = '-std=c99 -D_GNU_SOURCE -Wall -Werror -O2 -pthread -Ideps/inih/ -Ideps/libev/ -Isrc/')
 env_statsite_without_err = Environment(CCFLAGS = '-std=c99 -D_GNU_SOURCE -O2 -pthread -Ideps/inih/ -Ideps/libev/ -Isrc/')
 
-objs = env_statsite_with_err.Object('src/hashmap', 'src/hashmap.c') + \
-        env_statsite_with_err.Object('src/heap', 'src/heap.c') + \
+objs = env_statsite_with_err.Object('src/hashmap', 'src/hashmap.c')          + \
+        env_statsite_with_err.Object('src/heap', 'src/heap.c')               + \
         env_statsite_with_err.Object('src/cm_quantile', 'src/cm_quantile.c') + \
-        env_statsite_with_err.Object('src/timer', 'src/timer.c') + \
-        env_statsite_with_err.Object('src/counter', 'src/counter.c') + \
-        env_statsite_with_err.Object('src/metrics', 'src/metrics.c')
+        env_statsite_with_err.Object('src/timer', 'src/timer.c')             + \
+        env_statsite_with_err.Object('src/counter', 'src/counter.c')         + \
+        env_statsite_with_err.Object('src/metrics', 'src/metrics.c')         + \
+        env_statsite_with_err.Object('src/streaming', 'src/streaming.c')
 
 statsite_libs = ["m", "pthread", murmur, inih]
 if platform.system() == 'Linux':

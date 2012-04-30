@@ -7,6 +7,7 @@
 #include "test_timer.c"
 #include "test_counter.c"
 #include "test_metrics.c"
+#include "test_streaming.c"
 
 int main(void)
 {
@@ -19,6 +20,7 @@ int main(void)
     TCase *tc4 = tcase_create("timer");
     TCase *tc5 = tcase_create("counter");
     TCase *tc6 = tcase_create("metrics");
+    TCase *tc7 = tcase_create("streaming");
     SRunner *sr = srunner_create(s1);
     int nf;
 
@@ -79,6 +81,10 @@ int main(void)
     tcase_add_test(tc6, test_metrics_empty_iter);
     tcase_add_test(tc6, test_metrics_add_iter);
     tcase_add_test(tc6, test_metrics_add_all_iter);
+
+    // Add the streaming tests
+    suite_add_tcase(s1, tc7);
+    tcase_add_test(tc7, test_stream_empty);
 
     srunner_run_all(sr, CK_ENV);
     nf = srunner_ntests_failed(sr);
