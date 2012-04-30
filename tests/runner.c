@@ -8,6 +8,7 @@
 #include "test_counter.c"
 #include "test_metrics.c"
 #include "test_streaming.c"
+#include "test_config.c"
 
 int main(void)
 {
@@ -21,6 +22,7 @@ int main(void)
     TCase *tc5 = tcase_create("counter");
     TCase *tc6 = tcase_create("metrics");
     TCase *tc7 = tcase_create("streaming");
+    TCase *tc8 = tcase_create("config");
     SRunner *sr = srunner_create(s1);
     int nf;
 
@@ -88,6 +90,20 @@ int main(void)
     tcase_add_test(tc7, test_stream_some);
     tcase_add_test(tc7, test_stream_bad_cmd);
     tcase_add_test(tc7, test_stream_sigpipe);
+
+    // Add the config tests
+    suite_add_tcase(s1, tc8);
+    tcase_add_test(tc8, test_config_get_default);
+    tcase_add_test(tc8, test_config_bad_file);
+    tcase_add_test(tc8, test_config_empty_file);
+    tcase_add_test(tc8, test_config_basic_config);
+    tcase_add_test(tc8, test_validate_default_config);
+    tcase_add_test(tc8, test_validate_bad_config);
+    tcase_add_test(tc8, test_join_path_no_slash);
+    tcase_add_test(tc8, test_join_path_with_slash);
+    tcase_add_test(tc8, test_sane_log_level);
+    tcase_add_test(tc8, test_sane_timer_eps);
+    tcase_add_test(tc8, test_sane_flush_interval);
 
     srunner_run_all(sr, CK_ENV);
     nf = srunner_ntests_failed(sr);

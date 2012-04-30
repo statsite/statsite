@@ -190,10 +190,7 @@ int sane_timer_eps(double eps) {
 }
 
 int sane_flush_interval(int intv) {
-    if (intv == 0) {
-        syslog(LOG_WARNING,
-               "Flushing is disabled! Increased risk of data loss.");
-    } else if (intv < 0) {
+    if (intv <= 0) {
         syslog(LOG_ERR, "Flush interval cannot be negative!");
         return 1;
     } else if (intv >= 600)  {
