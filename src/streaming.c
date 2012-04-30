@@ -38,11 +38,14 @@ int stream_to_command(metrics *m, void *data, stream_callback cb, char *cmd) {
     // Check if we are the child
     if (pid == 0) {
         // Set stdin to the pipe
-        dup2(filedes[0], 0);
+        if (dup2(filedes[0], STDIN_FILENO)){
+            perror("Failed to initialize stdin!");
+            exit(250);
+        }
         close(filedes[1]);
 
         // Try to run the command
-        res = execl("/bin/sh", "-c", cmd, NULL);
+        res = execl("/bin/sh", "streaming", "-c", cmd, NULL);
         if (res != 0) perror("Failed to execute command!");
 
         // Always exit
@@ -65,7 +68,13 @@ int stream_to_command(metrics *m, void *data, stream_callback cb, char *cmd) {
     fclose(f);
     close(filedes[1]);
 
-    // Return the result of the iteration
-    return res;
+    // Wait for termination
+    int status;
+    do {
+        waitpid(pid, &status, 0);
+    } while (!WIFEXITED(status));
+
+    // Return the result of the process
+    return WEXITSTATUS(status);
 }
 
