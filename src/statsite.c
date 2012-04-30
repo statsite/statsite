@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include "config.h"
+#include "networking.h"
 
 /**
  * By default we should run. Our signal
@@ -125,20 +126,16 @@ int main(int argc, char **argv) {
     syslog(LOG_INFO, "Starting statsite.");
 
     // Initialize the networking
-    /*
-    bloom_networking *netconf = NULL;
-    int net_res = init_networking(config, mgr, &netconf);
+    statsite_networking *netconf = NULL;
+    int net_res = init_networking(config, &netconf);
     if (net_res != 0) {
-        syslog(LOG_ERR, "Failed to initialize bloomd networking!");
+        syslog(LOG_ERR, "Failed to initialize networking!");
         return 1;
     }
 
     // Start the network workers
     pthread_t thread;
-    for (int i=0; i < config->worker_threads; i++) {
-        pthread_create(&thread, NULL, (void*(*)(void*))start_networking_worker, netconf);
-    }
-    */
+    pthread_create(&thread, NULL, (void*(*)(void*))start_networking_worker, netconf);
 
     /**
      * Loop forever, until we get a signal that
@@ -153,7 +150,7 @@ int main(int argc, char **argv) {
     }
 
     // Begin the shutdown/cleanup
-    //shutdown_networking(netconf);
+    shutdown_networking(netconf);
 
     // Free our memory
     free(config);
