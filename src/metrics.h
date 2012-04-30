@@ -6,6 +6,7 @@
 #include "hashmap.h"
 
 typedef enum {
+    UNKNOWN,
     KEY_VAL,
     COUNTER,
     TIMER
