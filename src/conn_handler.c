@@ -41,6 +41,22 @@ int handle_client_connect(statsite_conn_handler *handle) {
         status = extract_to_terminator(handle->conn, '\n', &buf, &buf_len, &should_free);
         if (status == -1) return 0; // Return if no command is available
 
+        // Check for a valid metric
+        regmatch_t matches[5];
+        status = regexec(&VALID_METRIC, buf, 5, matches, 0);
+        if (status == 0) {
+            // Null terminate the fields
+            for (int i=1;i<5;i++) {
+                *(buf + matches[i].rm_eo) = 0;
+            }
+
+            printf("Key: %s Val: %s Type: %s Flag: %s\n",
+                    buf+matches[1].rm_so,
+                    buf+matches[2].rm_so,
+                    buf+matches[3].rm_so,
+                    buf+matches[4].rm_so+2);
+        }
+
         // Make sure to free the command buffer if we need to
         if (should_free) free(buf);
     }
