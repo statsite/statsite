@@ -22,6 +22,7 @@
 #include <sys/uio.h>
 #include <syslog.h>
 #include <unistd.h>
+#include "conn_handler.h"
 
 
 /**
@@ -300,7 +301,7 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
     ev_async_start(&netconf->loop_async);
 
     // Prepare the conn handlers
-    //init_conn_handler();
+    init_conn_handler();
 
     // Success!
     *netconf_out = netconf;
@@ -573,13 +574,10 @@ static void invoke_event_handler(worker_ev_userdata* data) {
     int res = handle_client_data(watcher, data);
 
     if (res == 0) {
-        /*
         statsite_conn_handler handle;
         handle.config = data->netconf->config;
-        handle.mgr = data->netconf->mgr;
         handle.conn = conn;
         res = handle_client_connect(&handle);
-        */
     }
 
     // Reschedule the watcher, unless told otherwise.
