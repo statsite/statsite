@@ -41,22 +41,6 @@ static int value_to_int(const char *val, int *result) {
 }
 
 /**
- * Attempts to convert a string to an integer (64bit),
- * and write the value out.
- * @arg val The string value
- * @arg result The destination for the result
- * @return 0 on success, 0 on error.
- */
-static int value_to_int64(const char *val, uint64_t *result) {
-    long long res = strtoll(val, NULL, 10);
-    if (res == 0 && errno == EINVAL) {
-        return 0;
-    }
-    *result = res;
-    return 1;
-}
-
-/**
  * Attempts to convert a string to a double,
  * and write the value out.
  * @arg val The string value
