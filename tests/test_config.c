@@ -18,7 +18,7 @@ START_TEST(test_config_get_default)
     fail_unless(strcmp(config.log_level, "DEBUG") == 0);
     fail_unless(config.syslog_log_level == LOG_DEBUG);
     fail_unless(config.timer_eps == 1e-2);
-    fail_unless(strcmp(config.stream_cmd, "cat > /dev/null") == 0);
+    fail_unless(strcmp(config.stream_cmd, "cat") == 0);
     fail_unless(config.flush_interval == 10);
 }
 END_TEST
@@ -35,7 +35,7 @@ START_TEST(test_config_bad_file)
     fail_unless(strcmp(config.log_level, "DEBUG") == 0);
     fail_unless(config.syslog_log_level == LOG_DEBUG);
     fail_unless(config.timer_eps == 1e-2);
-    fail_unless(strcmp(config.stream_cmd, "cat > /dev/null") == 0);
+    fail_unless(strcmp(config.stream_cmd, "cat") == 0);
     fail_unless(config.flush_interval == 10);
     }
 END_TEST
@@ -56,7 +56,7 @@ START_TEST(test_config_empty_file)
     fail_unless(strcmp(config.log_level, "DEBUG") == 0);
     fail_unless(config.syslog_log_level == LOG_DEBUG);
     fail_unless(config.timer_eps == 1e-2);
-    fail_unless(strcmp(config.stream_cmd, "cat > /dev/null") == 0);
+    fail_unless(strcmp(config.stream_cmd, "cat") == 0);
     fail_unless(config.flush_interval == 10);
 
     unlink("/tmp/zero_file");
@@ -71,7 +71,7 @@ port = 10000\n\
 udp_port = 10001\n\
 flush_interval = 120\n\
 timer_eps = 0.005\n\
-stream_cmd = cat\n\
+stream_cmd = foo\n\
 log_level = INFO\n";
     write(fh, buf, strlen(buf));
     fchmod(fh, 777);
@@ -86,7 +86,7 @@ log_level = INFO\n";
     fail_unless(config.udp_port == 10001);
     fail_unless(strcmp(config.log_level, "INFO") == 0);
     fail_unless(config.timer_eps == 0.005);
-    fail_unless(strcmp(config.stream_cmd, "cat") == 0);
+    fail_unless(strcmp(config.stream_cmd, "foo") == 0);
     fail_unless(config.flush_interval == 120);
 
     unlink("/tmp/basic_config");

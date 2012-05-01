@@ -20,7 +20,7 @@ static const statsite_config DEFAULT_CONFIG = {
     "DEBUG",            // DEBUG level
     LOG_DEBUG,
     0.01,               // Default 1% error
-    "cat > /dev/null",  // Pipe to /dev/null
+    "cat",              // Pipe to cat
     10                  // Flush every 10 seconds
 };
 
