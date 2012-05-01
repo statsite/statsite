@@ -48,7 +48,7 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
             break;
 
         case COUNTER:
-            STREAM("counters.%s|%f|%lld\n", name, counter_sum(value));
+            STREAM("counts.%s|%f|%lld\n", name, counter_sum(value));
             break;
 
         case TIMER:
@@ -157,6 +157,8 @@ int handle_client_connect(statsite_conn_handler *handle) {
             } else {
                 syslog(LOG_WARNING, "Failed value conversion! Input: %s", val_str);
             }
+        } else {
+            syslog(LOG_WARNING, "Failed parse metric! Input: %s", buf);
         }
 
         // Make sure to free the command buffer if we need to
