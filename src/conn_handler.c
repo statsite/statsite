@@ -61,7 +61,7 @@ int handle_client_connect(statsite_conn_handler *handle) {
             //char *flags = buf+matches[4].rm_so+2;
 
             // Convert the type
-            switch (*val_str) {
+            switch (*type_str) {
                 case 'c':
                     type = COUNTER;
                     break;
@@ -80,8 +80,12 @@ int handle_client_connect(statsite_conn_handler *handle) {
             val = strtod(val_str, &endptr);
 
             // Store the sample if we did the conversion
-            if (val != 0 || endptr != val_str)
-                metrics_add_sample(NULL, type, key, val);
+            if (val != 0 || endptr != val_str) {
+                printf("ADD: %f\n", val);
+                //metrics_add_sample(NULL, type, key, val);
+            } else {
+                syslog(LOG_WARNING, "Failed value conversion! Input: %s", val_str);
+            }
 
             // XXX: Debug
             printf("Key: %s Val: %s Type: %s Flag: %s\n",
