@@ -32,6 +32,7 @@ int stream_to_command(metrics *m, void *data, stream_callback cb, char *cmd) {
     if (res < 0) return res;
 
     // Fork and exec
+    int status;
     pid_t pid = fork();
     if (pid < 0) return res;
 
@@ -53,6 +54,7 @@ int stream_to_command(metrics *m, void *data, stream_callback cb, char *cmd) {
     } else {
         // Close the read end
         close(filedes[0]);
+        waitpid(pid, &status, WNOHANG);
     }
 
     // Create a file wrapper
@@ -69,9 +71,9 @@ int stream_to_command(metrics *m, void *data, stream_callback cb, char *cmd) {
     close(filedes[1]);
 
     // Wait for termination
-    int status;
     do {
-        waitpid(pid, &status, 0);
+        sleep(1);
+        if (waitpid(pid, &status, 0) < 0) break;
     } while (!WIFEXITED(status));
 
     // Return the result of the process
