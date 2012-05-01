@@ -308,7 +308,7 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
     ev_timer_start(&netconf->flush_timer);
 
     // Prepare the conn handlers
-    init_conn_handler();
+    init_conn_handler(config);
 
     // Success!
     *netconf_out = netconf;
@@ -403,7 +403,8 @@ static void handle_async_event(ev_async *watcher, int revents) {
  * We need to instruct the connection handler about this.
  */
 static void handle_flush_event(ev_timer *watcher, int revents) {
-
+    // Inform the connection handler of the timeout
+    flush_interval_trigger();
 }
 
 /**
