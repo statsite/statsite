@@ -304,7 +304,7 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
     ev_async_start(&netconf->loop_async);
 
     // Setup the timer
-    ev_timer_init(&netconf->flush_timer, handle_flush_event, config->flush_interval, 1);
+    ev_timer_init(&netconf->flush_timer, handle_flush_event, config->flush_interval, config->flush_interval);
     ev_timer_start(&netconf->flush_timer);
 
     // Prepare the conn handlers
