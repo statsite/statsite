@@ -3,16 +3,11 @@
 #include <string.h>
 #include <regex.h>
 #include <assert.h>
-#include <regex.h>
 #include <pthread.h>
 #include <sys/time.h>
 #include "metrics.h"
 #include "streaming.h"
 #include "conn_handler.h"
-
-/* Static regexes */
-static regex_t VALID_METRIC;
-static const char *VALID_METRIC_PATTERN= "^([a-zA-Z0-9_.-]+):(-?[0-9.]+)\\|([a-z]+)(\\|@([0-9.]+))?$";
 
 /* Static method declarations */
 static int buffer_after_terminator(char *buf, int buf_len, char terminator, char **after_term, int *after_len);
@@ -31,14 +26,9 @@ static statsite_config *GLOBAL_CONFIG;
  * Invoked to initialize the conn handler layer.
  */
 void init_conn_handler(statsite_config *config) {
-    // Compile our regexes
-    int res;
-    res = regcomp(&VALID_METRIC, VALID_METRIC_PATTERN, REG_EXTENDED);
-    assert(res == 0);
-
     // Make the initial metrics object
     metrics *m = malloc(sizeof(metrics));
-    res = init_metrics(config->timer_eps, (double*)&QUANTILES, NUM_QUANTILES, m);
+    int res = init_metrics(config->timer_eps, (double*)&QUANTILES, NUM_QUANTILES, m);
     assert(res == 0);
     GLOBAL_METRICS = m;
 
@@ -131,29 +121,17 @@ int handle_client_connect(statsite_conn_handler *handle) {
     // Look for the next command line
     char *buf, *key, *val_str, *type_str, *endptr;
     metric_type type;
-    int buf_len, should_free, status, i;
+    int buf_len, should_free, status, i, after_len;
     double val;
     while (1) {
         status = extract_to_terminator(handle->conn, '\n', &buf, &buf_len, &should_free);
         if (status == -1) return 0; // Return if no command is available
 
         // Check for a valid metric
-        regmatch_t matches[5];
-        status = regexec(&VALID_METRIC, buf, 5, matches, 0);
+        // Scan for the colon
+        status = buffer_after_terminator(buf, buf_len, ':', &val_str, &after_len);
+        status |= buffer_after_terminator(val_str, after_len, '|', &type_str, &after_len);
         if (status == 0) {
-            // Null terminate the fields
-            for (i=1;i<5;i++) {
-                *(buf + matches[i].rm_eo) = 0;
-            }
-
-            // Setup the pointers
-            key = buf+matches[1].rm_so;
-            val_str = buf+matches[2].rm_so;
-            type_str = buf+matches[3].rm_so;
-
-            // XXX: Ignore the flags
-            //char *flags = buf+matches[4].rm_so+2;
-
             // Convert the type
             switch (*type_str) {
                 case 'c':
@@ -175,7 +153,7 @@ int handle_client_connect(statsite_conn_handler *handle) {
 
             // Store the sample if we did the conversion
             if (val != 0 || endptr != val_str) {
-                metrics_add_sample(GLOBAL_METRICS, type, key, val);
+                metrics_add_sample(GLOBAL_METRICS, type, buf, val);
             } else {
                 syslog(LOG_WARNING, "Failed value conversion! Input: %s", val_str);
             }
