@@ -4,7 +4,10 @@
 #include <regex.h>
 #include <assert.h>
 #include <regex.h>
+#include <pthread.h>
+#include <sys/time.h>
 #include "metrics.h"
+#include "streaming.h"
 #include "conn_handler.h"
 
 /* Static regexes */
@@ -14,16 +17,107 @@ static const char *VALID_METRIC_PATTERN= "^([a-zA-Z0-9_.-]+):(-?[0-9.]+)\\|([a-z
 /* Static method declarations */
 static int buffer_after_terminator(char *buf, int buf_len, char terminator, char **after_term, int *after_len);
 
+/* These are the quantiles we track */
+static double QUANTILES[] = {0.5, 0.95, 0.99};
+static int NUM_QUANTILES = 3;
+
+/**
+ * This is the current metrics object we are using
+ */
+static metrics *GLOBAL_METRICS;
+static statsite_config *GLOBAL_CONFIG;
+
 /**
  * Invoked to initialize the conn handler layer.
  */
-void init_conn_handler() {
+void init_conn_handler(statsite_config *config) {
     // Compile our regexes
     int res;
     res = regcomp(&VALID_METRIC, VALID_METRIC_PATTERN, REG_EXTENDED);
     assert(res == 0);
+
+    // Make the initial metrics object
+    metrics *m = malloc(sizeof(metrics));
+    res = init_metrics(config->timer_eps, (double*)&QUANTILES, NUM_QUANTILES, m);
+    assert(res == 0);
+    GLOBAL_METRICS = m;
+
+    // Store the config
+    GLOBAL_CONFIG = config;
 }
 
+/**
+ * Streaming callback to format our output
+ */
+static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name, void *value) {
+    #define STREAM(...) if (fprintf(pipe, __VA_ARGS__, (long long)tv->tv_sec) < 0) return 1;
+    struct timeval *tv = data;
+    switch (type) {
+        case KEY_VAL:
+            STREAM("kv.%s|%f|%lld\n", name, *(double*)value);
+            break;
+
+        case COUNTER:
+            STREAM("counters.%s|%f|%lld\n", name, counter_sum(value));
+            break;
+
+        case TIMER:
+            STREAM("timers.%s.sum|%f|%lld\n", name, timer_sum(value));
+            STREAM("timers.%s.mean|%f|%lld\n", name, timer_mean(value));
+            STREAM("timers.%s.lower|%f|%lld\n", name, timer_min(value));
+            STREAM("timers.%s.upper|%f|%lld\n", name, timer_max(value));
+            STREAM("timers.%s.count|%lld|%lld\n", name, timer_count(value));
+            STREAM("timers.%s.stdev|%f|%lld\n", name, timer_stddev(value));
+            STREAM("timers.%s.median|%f|%lld\n", name, timer_query(value, 0.5));
+            STREAM("timers.%s.p95|%f|%lld\n", name, timer_query(value, 0.95));
+            STREAM("timers.%s.p99|%f|%lld\n", name, timer_query(value, 0.99));
+            break;
+
+        default:
+            syslog(LOG_ERR, "Unknown metric type: %d", type);
+            break;
+    }
+    return 0;
+}
+
+/**
+ * This is the thread that is invoked to handle flushing metrics
+ */
+static void* flush_thread(void *arg) {
+    // Cast the args
+    metrics *m = arg;
+
+    // Get the current time
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+
+    // Stream the records
+    int res = stream_to_command(m, &tv, stream_formatter, GLOBAL_CONFIG->stream_cmd);
+    if (res != 0) {
+        syslog(LOG_WARNING, "Streaming command exited with status %d", res);
+    }
+
+    // Cleanup
+    destroy_metrics(m);
+    free(m);
+}
+
+/**
+ * Invoked to when we've reached the flush interval timeout
+ */
+void flush_interval_trigger() {
+    // Make a new metrics object
+    metrics *m = malloc(sizeof(metrics));
+    init_metrics(GLOBAL_METRICS->eps, (double*)&QUANTILES, NUM_QUANTILES, m);
+
+    // Swap with the new one
+    metrics *old = GLOBAL_METRICS;
+    GLOBAL_METRICS = m;
+
+    // Start a flush thread
+    pthread_t thread;
+    pthread_create(&thread, NULL, flush_thread, old);
+}
 
 /**
  * Invoked by the networking layer when there is new
@@ -81,18 +175,10 @@ int handle_client_connect(statsite_conn_handler *handle) {
 
             // Store the sample if we did the conversion
             if (val != 0 || endptr != val_str) {
-                printf("ADD: %f\n", val);
-                //metrics_add_sample(NULL, type, key, val);
+                metrics_add_sample(GLOBAL_METRICS, type, key, val);
             } else {
                 syslog(LOG_WARNING, "Failed value conversion! Input: %s", val_str);
             }
-
-            // XXX: Debug
-            printf("Key: %s Val: %s Type: %s Flag: %s\n",
-                    buf+matches[1].rm_so,
-                    buf+matches[2].rm_so,
-                    buf+matches[3].rm_so,
-                    buf+matches[4].rm_so+2);
         }
 
         // Make sure to free the command buffer if we need to

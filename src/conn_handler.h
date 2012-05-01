@@ -16,7 +16,12 @@ typedef struct {
 /**
  * Invoked to initialize the conn handler layer.
  */
-void init_conn_handler();
+void init_conn_handler(statsite_config *config);
+
+/**
+ * Invoked to when we've reached the flush interval timeout
+ */
+void flush_interval_trigger();
 
 /**
  * Invoked by the networking layer when there is new
