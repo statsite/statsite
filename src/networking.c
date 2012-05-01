@@ -140,6 +140,8 @@ struct statsite_networking {
     ev_async loop_async;            // Allows async interrupts
     volatile async_event *events;   // List of pending events
 
+    ev_timer flush_timer;
+
     pthread_t thread;       // Thread references
 };
 
@@ -150,6 +152,7 @@ static void schedule_async(statsite_networking *netconf,
                             ev_io *watcher);
 static void prepare_event(ev_io *watcher, int revents);
 static void handle_async_event(ev_async *watcher, int revents);
+static void handle_flush_event(ev_timer *watcher, int revents);
 static void handle_new_client(int listen_fd, worker_ev_userdata* data);
 static int handle_client_data(ev_io *watch, worker_ev_userdata* data);
 static void invoke_event_handler(worker_ev_userdata* data);
@@ -300,6 +303,10 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
     ev_async_init(&netconf->loop_async, handle_async_event);
     ev_async_start(&netconf->loop_async);
 
+    // Setup the timer
+    ev_timer_init(&netconf->flush_timer, handle_flush_event, config->flush_interval, 1);
+    ev_timer_start(&netconf->flush_timer);
+
     // Prepare the conn handlers
     init_conn_handler();
 
@@ -390,6 +397,14 @@ static void handle_async_event(ev_async *watcher, int revents) {
     }
 }
 
+
+/**
+ * Invoked when our flush timer is reached.
+ * We need to instruct the connection handler about this.
+ */
+static void handle_flush_event(ev_timer *watcher, int revents) {
+
+}
 
 /**
  * Invoked when a TCP listening socket fd is ready
