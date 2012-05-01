@@ -1,13 +1,13 @@
 import platform
 
-envmurmur = Environment(CPPPATH = ['deps/murmurhash/'], CPPFLAGS="-fno-exceptions -O2")
+envmurmur = Environment(CPPPATH = ['deps/murmurhash/'], CPPFLAGS="-fno-exceptions -O3")
 murmur = envmurmur.Library('murmur', Glob("deps/murmurhash/*.cpp"))
 
-envinih = Environment(CPATH = ['deps/inih/'], CFLAGS="-O2")
+envinih = Environment(CPATH = ['deps/inih/'], CFLAGS="-O3")
 inih = envinih.Library('inih', Glob("deps/inih/*.c"))
 
-env_statsite_with_err = Environment(CCFLAGS = '-std=c99 -D_GNU_SOURCE -Wall -Werror -O2 -pthread -Ideps/inih/ -Ideps/libev/ -Isrc/')
-env_statsite_without_err = Environment(CCFLAGS = '-std=c99 -D_GNU_SOURCE -O2 -pthread -Ideps/inih/ -Ideps/libev/ -Isrc/')
+env_statsite_with_err = Environment(CCFLAGS = '-std=c99 -D_GNU_SOURCE -Wall -Werror -O3 -pthread -Ideps/inih/ -Ideps/libev/ -Isrc/')
+env_statsite_without_err = Environment(CCFLAGS = '-std=c99 -D_GNU_SOURCE -O3 -pthread -Ideps/inih/ -Ideps/libev/ -Isrc/')
 
 objs = env_statsite_with_err.Object('src/hashmap', 'src/hashmap.c')           + \
         env_statsite_with_err.Object('src/heap', 'src/heap.c')                + \
