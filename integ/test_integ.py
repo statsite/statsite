@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import random
 
 try:
     import pytest
@@ -24,12 +25,13 @@ def pytest_funcarg__servers(request):
     cmd = "cat > %s" % output
 
     # Write the configuration
+    port = random.randrange(10000, 65000)
     config_path = os.path.join(tmpdir, "config.cfg")
     conf = """[statsite]
 flush_interval = 1
-port = 8126
+port = %d
 stream_cmd = %s
-""" % cmd
+""" % (port, cmd)
     open(config_path, "w").write(conf)
 
     # Start the process
@@ -40,10 +42,11 @@ stream_cmd = %s
     # Define a cleanup handler
     def cleanup():
         try:
-            proc.terminate()
+            proc.kill()
             proc.wait()
-            shutil.rmtree(tmpdir)
+            #shutil.rmtree(tmpdir)
         except:
+            print proc
             pass
     request.addfinalizer(cleanup)
 
@@ -53,7 +56,7 @@ stream_cmd = %s
         try:
             conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             conn.settimeout(1)
-            conn.connect(("localhost", 8126))
+            conn.connect(("localhost", port))
             connected = True
             break
         except Exception, e:
@@ -67,7 +70,7 @@ stream_cmd = %s
     # Make a second connection
     conn2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     conn2.settimeout(1)
-    conn2.connect(("localhost", 8126))
+    conn2.connect(("localhost", port))
 
     # Return the connection
     return conn, conn2, output
