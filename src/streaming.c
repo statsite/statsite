@@ -1,5 +1,7 @@
 #include <unistd.h>
 #include <stdlib.h>
+#include <sys/wait.h>
+#include <sys/types.h>
 #include "streaming.h"
 
 // Struct to hold the callback info
