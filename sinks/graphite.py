@@ -44,8 +44,6 @@ class GraphiteStore(object):
         # Construct the output
         metrics = [m.split("|") for m in metrics if m]
         data = "\n".join(["%s.%s %s %s" % (self.prefix, k, v, ts) for k, v, ts in metrics]) + "\n"
-        print data
-        return
 
         # Serialize writes to the socket
         try:
