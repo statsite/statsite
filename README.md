@@ -2,7 +2,7 @@ Statsite
 ========
 
 This is a stats aggregation server. Statsite is based heavily
-on `Etsy's StatsD <https://github.com/etsy/statsd>`_. This is
+on Etsy's StatsD <https://github.com/etsy/statsd>. This is
 a re-implementation of the Python version of statsite
 <https://github.com/kiip/statsite>.
 
@@ -72,9 +72,7 @@ Usage
 -----
 
 Statsite is configured using a simple INI file.
-Here is an example configuration file:
-
-::
+Here is an example configuration file::
 
     [statsite]
     port = 8125 
@@ -82,7 +80,7 @@ Here is an example configuration file:
     timer_eps = 0.01
     stream_cmd = python sinks/graphite.py localhost 2003
 
-Then run statsite, pointing it to that file (assuming `/etc` right now)::
+Then run statsite, pointing it to that file::
 
     statsite -f /etc/statsite.conf
 
