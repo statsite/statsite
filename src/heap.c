@@ -9,6 +9,8 @@
 #include <assert.h>
 #include <strings.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "heap.h"
 
 // Helpful Macro's
@@ -51,10 +53,10 @@ static void* map_in_pages(int page_count) {
     // Check everything
     assert(page_count > 0);
 
-    // Call mmmap to get the pages
-    void* addr = mmap(NULL, page_count*PAGE_SIZE, PROT_READ|PROT_WRITE, MAP_ANON|MAP_PRIVATE, -1, 0);
+    // Call malloc to get the pages
+    void* addr = malloc(page_count*PAGE_SIZE);
 
-    if (addr == MAP_FAILED)
+    if (!addr)
         return NULL;
     else {
         // Clear the memory
@@ -73,10 +75,7 @@ static void map_out_pages(void* addr, int page_count) {
     assert(page_count > 0);
 
     // Call munmap to get rid of the pages
-    int result = munmap(addr, page_count*PAGE_SIZE);
-
-    // The result should be 0
-    assert(result == 0);
+    free(addr);
 }
 
 
