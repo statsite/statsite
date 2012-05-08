@@ -43,6 +43,7 @@ class GraphiteStore(object):
         """
         # Construct the output
         metrics = [m.split("|") for m in metrics if m]
+        self.logger.info("Outputting %d metrics" % len(metrics))
         data = "\n".join(["%s.%s %s %s" % (self.prefix, k, v, ts) for k, v, ts in metrics]) + "\n"
 
         # Serialize writes to the socket
@@ -78,6 +79,9 @@ class GraphiteStore(object):
 
 
 if __name__ == "__main__":
+    # Initialize the logger
+    logging.basicConfig()
+
     # Intialize from our arguments
     graphite = GraphiteStore(*sys.argv[1:])
 
@@ -86,4 +90,5 @@ if __name__ == "__main__":
 
     # Flush
     graphite.flush(metrics.split("\n"))
+    graphite.close()
 
