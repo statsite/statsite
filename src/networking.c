@@ -656,9 +656,16 @@ int shutdown_networking(statsite_networking *netconf) {
     ev_io_stop(&netconf->udp_client);
     close(netconf->udp_client.fd);
 
+    // Stop the other timers
+    ev_async_stop(&netconf->loop_async);
+    ev_timer_stop(&netconf->flush_timer);
+
     // TODO: Close all the client connections
     // ??? For now, we just leak the memory
     // since we are shutdown down anyways...
+
+    // Free the event loop
+    ev_loop_destroy(EV_DEFAULT);
 
     // Free the netconf
     free(netconf);
