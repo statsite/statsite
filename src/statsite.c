@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include "config.h"
+#include "conn_handler.h"
 #include "networking.h"
 
 /**
@@ -151,6 +152,9 @@ int main(int argc, char **argv) {
 
     // Begin the shutdown/cleanup
     shutdown_networking(netconf);
+
+    // Do the final flush
+    final_flush();
 
     // Free our memory
     free(config);

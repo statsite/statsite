@@ -110,6 +110,23 @@ void flush_interval_trigger() {
 }
 
 /**
+ * Called when statsite is terminating to flush the
+ * final set of metrics
+ */
+void final_flush() {
+    // Get the last set of metrics
+    metrics *old = GLOBAL_METRICS;
+    GLOBAL_METRICS = NULL;
+
+    // Start a flush thread
+    pthread_t thread;
+    pthread_create(&thread, NULL, flush_thread, old);
+
+    // Wait for the thread to finish
+    pthread_join(thread, NULL);
+}
+
+/**
  * Invoked by the networking layer when there is new
  * data to be handled. The connection handler should
  * consume all the input possible, and generate responses

@@ -24,6 +24,12 @@ void init_conn_handler(statsite_config *config);
 void flush_interval_trigger();
 
 /**
+ * Called when statsite is terminating to flush the
+ * final set of metrics
+ */
+void final_flush();
+
+/**
  * Invoked by the networking layer when there is new
  * data to be handled. The connection handler should
  * consume all the input possible, and generate responses
