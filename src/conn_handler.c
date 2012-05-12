@@ -107,6 +107,7 @@ void flush_interval_trigger() {
     // Start a flush thread
     pthread_t thread;
     pthread_create(&thread, NULL, flush_thread, old);
+    pthread_detach(thread);
 }
 
 /**
