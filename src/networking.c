@@ -525,8 +525,9 @@ static int handle_udp_message(ev_io *watch, worker_ev_userdata* data) {
     circbuf_setup_readv_iovec(&conn->input, (struct iovec*)&vectors, &num_vectors);
 
     /*
-     * Issue the read, allows use the first vector.
-     * since we just cleared the buffer.
+     * Issue the read, always use the first vector.
+     * since we just cleared the buffer, and it should
+     * be a contiguous buffer.
      */
     ssize_t read_bytes = recv(watch->fd, vectors[0].iov_base,
                                 vectors[0].iov_len, 0);
