@@ -148,7 +148,7 @@ int handle_client_connect(statsite_conn_handler *handle) {
         // Check for a valid metric
         // Scan for the colon
         status = buffer_after_terminator(buf, buf_len, ':', &val_str, &after_len);
-        status |= buffer_after_terminator(val_str, after_len, '|', &type_str, &after_len);
+        if (!status) status |= buffer_after_terminator(val_str, after_len, '|', &type_str, &after_len);
         if (status == 0) {
             // Convert the type
             switch (*type_str) {
