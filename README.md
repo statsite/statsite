@@ -29,7 +29,7 @@ and millions of metrics. After each flush interval expires,
 statsite performs a fork/exec to start a new stream handler
 invoking a specified application. Statsite then streams the
 aggregated metrics over stdin to the application, which is
-free to handle the metrics as it sees fit. 
+free to handle the metrics as it sees fit.
 
 This allows statsite to aggregate metrics and then ship metrics
 to any number of sinks (Graphite, SQL databases, etc). There
@@ -48,9 +48,9 @@ Install
 -------
 
 Download and build from source::
-   
+
     $ git clone https://armon@github.com/armon/statsite.git
-    $ cd statsite 
+    $ cd statsite
     $ pip install SCons  # Uses the Scons build system, may not be necessary
     $ scons
     $ ./statsite
@@ -75,7 +75,9 @@ Statsite is configured using a simple INI file.
 Here is an example configuration file::
 
     [statsite]
-    port = 8125 
+    port = 8125
+    udp_port = 8125
+    log_level = INFO
     flush_interval = 10
     timer_eps = 0.01
     stream_cmd = python sinks/graphite.py localhost 2003
@@ -87,18 +89,18 @@ Then run statsite, pointing it to that file::
 Protocol
 --------
 
-By default, Statsite will listen for TCP connections. A message
+By default, Statsite will listen for TCP and UDP connections. A message
 looks like the following (where the flag is optional)::
 
     key:value|type[|@flag]
 
-Messages msut be separated by newlines (`\n`).
+Messages must be terminated by newlines (`\n`).
 
 Currently supported message types:
 
-* `kv` - Simple Key/Value. 
-* `ms` - Timer. 
-* `c` - Counter. 
+* `kv` - Simple Key/Value.
+* `ms` - Timer.
+* `c` - Counter.
 
 After the flush interval, the counters and timers of the same key are
 aggregated and this is sent to the store.
