@@ -155,6 +155,7 @@ static void handle_async_event(ev_async *watcher, int revents);
 static void handle_flush_event(ev_timer *watcher, int revents);
 static void handle_new_client(int listen_fd, worker_ev_userdata* data);
 static int handle_client_data(ev_io *watch, worker_ev_userdata* data);
+static int handle_udp_message(ev_io *watch, worker_ev_userdata* data);
 static void invoke_event_handler(worker_ev_userdata* data);
 
 // Utility methods
@@ -169,6 +170,7 @@ static void private_close_connection(conn_info *conn);
 
 // Circular buffer method
 static void circbuf_init(circular_buffer *buf);
+static void circbuf_clear(circular_buffer *buf);
 static void circbuf_free(circular_buffer *buf);
 static uint64_t circbuf_avail_buf(circular_buffer *buf);
 static void circbuf_grow_buf(circular_buffer *buf);
@@ -243,6 +245,14 @@ static int setup_udp_listener(statsite_networking *netconf) {
         close(udp_listener_fd);
         return 1;
     }
+
+    // Allocate a connection object for the UDP socket,
+    // ensure a min-buffer size of 64K
+    conn_info *conn = get_conn(netconf);
+    while (circbuf_avail_buf(&conn->input) < 65536) {
+        circbuf_grow_buf(&conn->input);
+    }
+    netconf->udp_client.data = conn;
 
     // Create the libev objects
     ev_io_init(&netconf->udp_client, prepare_event,
@@ -497,6 +507,49 @@ static int handle_client_data(ev_io *watch, worker_ev_userdata* data) {
 
 
 /**
+ * Invoked when a UDP connection has a message ready to be read.
+ * We need to take care to add the data to our buffers, and then
+ * invoke the connection handlers who have the business logic
+ * of what to do.
+ */
+static int handle_udp_message(ev_io *watch, worker_ev_userdata* data) {
+    // Get the associated connection struct
+    conn_info *conn = watch->data;
+
+    // Clear the input buffer
+    circbuf_clear(&conn->input);
+
+    // Build the IO vectors to perform the read
+    struct iovec vectors[2];
+    int num_vectors;
+    circbuf_setup_readv_iovec(&conn->input, (struct iovec*)&vectors, &num_vectors);
+
+    /*
+     * Issue the read, allows use the first vector.
+     * since we just cleared the buffer.
+     */
+    ssize_t read_bytes = recv(watch->fd, vectors[0].iov_base,
+                                vectors[0].iov_len, 0);
+
+    // Make sure we actually read something
+    if (read_bytes == 0) {
+        syslog(LOG_DEBUG, "Got empty UDP packet. [%d]\n", watch->fd);
+        return 1;
+    } else if (read_bytes == -1) {
+        if (errno != EAGAIN && errno != EINTR) {
+            syslog(LOG_ERR, "Failed to recv() from connection [%d]! %s.",
+                    watch->fd, strerror(errno));
+        }
+        return 1;
+    }
+
+    // Update the write cursor
+    circbuf_advance_write(&conn->input, read_bytes);
+    return 0;
+}
+
+
+/**
  * Invoked when a client connection is ready to be written to.
  */
 static int handle_client_writebuf(ev_io *watch, worker_ev_userdata* data) {
@@ -563,19 +616,22 @@ static void invoke_event_handler(worker_ev_userdata* data) {
         schedule_async(data->netconf, SCHEDULE_WATCHER, watcher);
         return;
 
-    } else if (watcher == &data->netconf->udp_client) {
-        // TODO: Handle UDP clients
-        //
-        syslog(LOG_WARNING, "UDP clients not currently supported!");
-
-        // Reschedule the listener
-        // schedule_async(data->netconf, SCHEDULE_WATCHER, watcher);
+    // If it is write ready, dispatch the write handler
+    }  else if (data->ready_events & EV_WRITE) {
+        handle_client_writebuf(watcher, data);
         return;
     }
 
-    // If it is write ready, dispatch the write handler
-    if (data->ready_events & EV_WRITE) {
-        handle_client_writebuf(watcher, data);
+    // Check for UDP inbound
+    if (watcher == &data->netconf->udp_client) {
+        // Read the message and process
+        if (!handle_udp_message(watcher, data)) {
+            statsite_conn_handler handle = {data->netconf->config, watcher->data};
+            handle_client_connect(&handle);
+        }
+
+        // Reschedule the listener
+        schedule_async(data->netconf, SCHEDULE_WATCHER, watcher);
         return;
     }
 
@@ -587,13 +643,10 @@ static void invoke_event_handler(worker_ev_userdata* data) {
      */
     conn_info *conn = watcher->data;
     incref_client_connection(conn);
-    int res = handle_client_data(watcher, data);
 
-    if (res == 0) {
-        statsite_conn_handler handle;
-        handle.config = data->netconf->config;
-        handle.conn = conn;
-        res = handle_client_connect(&handle);
+    if (!handle_client_data(watcher, data)) {
+        statsite_conn_handler handle = {data->netconf->config, watcher->data};
+        handle_client_connect(&handle);
     }
 
     // Reschedule the watcher, unless told otherwise.
@@ -994,6 +1047,12 @@ static void circbuf_init(circular_buffer *buf) {
     buf->write_cursor = 0;
     buf->buf_size = INIT_CONN_BUF_SIZE * sizeof(char);
     buf->buffer = malloc(buf->buf_size);
+}
+
+// Clears the circular buffer, reseting it.
+static void circbuf_clear(circular_buffer *buf) {
+    buf->read_cursor = 0;
+    buf->write_cursor = 0;
 }
 
 // Frees a buffer
