@@ -49,7 +49,7 @@ Install
 
 Download and build from source::
 
-    $ git clone https://armon@github.com/armon/statsite.git
+    $ git clone https://github.com/armon/statsite.git
     $ cd statsite
     $ pip install SCons  # Uses the Scons build system, may not be necessary
     $ scons
