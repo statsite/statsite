@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <errno.h>
 #include <syslog.h>
 #include <sys/stat.h>
@@ -21,8 +22,32 @@ static const statsite_config DEFAULT_CONFIG = {
     LOG_DEBUG,
     0.01,               // Default 1% error
     "cat",              // Pipe to cat
-    10                  // Flush every 10 seconds
+    10,                 // Flush every 10 seconds
+    0,                  // Do not daemonize
+    "/var/run/statsite.pid" // Default pidfile path
 };
+
+/**
+ * Attempts to convert a string to a boolean,
+ * and write the value out.
+ * @arg val The string value
+ * @arg result The destination for the result
+ * @return 1 on success, 0 on error.
+ */
+static bool value_to_bool(const char *val, bool *result) {
+    #define VAL_MATCH(param) (strcasecmp(param, val) == 0)
+    
+    if (VAL_MATCH("true") || VAL_MATCH("yes") || VAL_MATCH("1")) {
+        *result = true;
+        return 0;
+    } else if (VAL_MATCH("false") || VAL_MATCH("no") || VAL_MATCH("0")) {
+        *result = false;
+        return 0;
+    }
+
+    puts("Couldn't determine value of daemonize");
+    return 1;
+}
 
 /**
  * Attempts to convert a string to an integer,
@@ -85,16 +110,20 @@ static int config_callback(void* user, const char* section, const char* name, co
         return value_to_int(value, &config->udp_port);
     } else if (NAME_MATCH("flush_interval")) {
          return value_to_int(value, &config->flush_interval);
+    } else if (NAME_MATCH("daemonize")) {
+        return value_to_bool(value, &config->daemonize);
 
     // Handle the double cases
     } else if (NAME_MATCH("timer_eps")) {
-         return value_to_double(value, &config->timer_eps);
+        return value_to_double(value, &config->timer_eps);
 
     // Copy the string values
     } else if (NAME_MATCH("log_level")) {
         config->log_level = strdup(value);
     } else if (NAME_MATCH("stream_cmd")) {
         config->stream_cmd = strdup(value);
+    } else if (NAME_MATCH("pid_file")) {
+        config->pid_file = strdup(value);
 
     // Unknown parameter?
     } else {
