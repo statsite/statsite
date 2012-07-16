@@ -5,6 +5,7 @@
  * the filter manager, and finally starting the
  * front ends.
  */
+#include <sys/stat.h>
 #include <ctype.h>
 #include <errno.h>
 #include <pthread.h>
@@ -96,6 +97,32 @@ void signal_handler(int signum) {
 }
 
 
+/**
+ * Writes the pid to the configured pidfile
+ */
+int write_pidfile(char *pid_file, pid_t pid) {
+    struct stat buf;
+    int stat_res = stat(pid_file, &buf);
+    if (stat_res == 0) {
+        syslog(LOG_ERR, "pid file already exists!");
+        return 1;
+    }
+
+    FILE *file = fopen(pid_file, "w");
+
+    if (!file) {
+        syslog(LOG_ERR, "Failed to open pid file!");
+        return 1;
+    }
+
+    fprintf(file, "%d", pid);
+
+    fclose(file);
+    
+    return 0;
+}
+
+
 int main(int argc, char **argv) {
     // Initialize syslog
     setup_syslog();
@@ -122,6 +149,40 @@ int main(int argc, char **argv) {
 
     // Set the syslog mask
     setlogmask(config->syslog_log_level);
+
+    // Daemonize
+    if (config->daemonize == true) {
+        pid_t pid, sid;
+
+        syslog(LOG_ERR, "Daemonizing.");
+
+        pid = fork();
+
+        if (pid < 0) {
+            syslog(LOG_ERR, "Failed to fork() daemon!");
+            return 1;
+        }
+
+        if (pid > 0) {
+            return 0;
+        }
+
+        sid = setsid();
+        if (sid < 0) {
+            syslog(LOG_ERR, "Failed to set daemon SID!");
+            return 1;
+        }
+
+        int write_pidfile_res = write_pidfile(config->pid_file, sid);
+        if (write_pidfile_res != 0) {
+            syslog(LOG_ERR, "Couldn't write pidfile; shutting down.");
+            return 1;
+        }
+
+        close(STDIN_FILENO);
+        close(STDOUT_FILENO);
+        close(STDERR_FILENO);
+    }
 
     // Log that we are starting up
     syslog(LOG_INFO, "Starting statsite.");
@@ -155,6 +216,14 @@ int main(int argc, char **argv) {
 
     // Do the final flush
     final_flush();
+
+    // If daemonized, remove the pid file
+    if (config->daemonize == true) {
+        int unlink_res = unlink(config->pid_file);
+        if (unlink_res != 0) {
+            syslog(LOG_ERR, "Failed to delete pid file!");
+        }
+    }
 
     // Free our memory
     free(config);

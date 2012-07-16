@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <syslog.h>
 
+typedef enum { false, true } bool;
+
 /**
  * Stores our configuration
  */
@@ -14,6 +16,8 @@ typedef struct {
     double timer_eps;
     char *stream_cmd;
     int flush_interval;
+    bool daemonize;
+    char *pid_file;
 } statsite_config;
 
 /**
