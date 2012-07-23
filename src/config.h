@@ -2,8 +2,7 @@
 #define CONFIG_H
 #include <stdint.h>
 #include <syslog.h>
-
-typedef enum { false, true } bool;
+#include <stdbool.h>
 
 /**
  * Stores our configuration
