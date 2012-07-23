@@ -36,7 +36,7 @@ static const statsite_config DEFAULT_CONFIG = {
  */
 static bool value_to_bool(const char *val, bool *result) {
     #define VAL_MATCH(param) (strcasecmp(param, val) == 0)
-    
+
     if (VAL_MATCH("true") || VAL_MATCH("yes") || VAL_MATCH("1")) {
         *result = true;
         return 0;
@@ -44,8 +44,6 @@ static bool value_to_bool(const char *val, bool *result) {
         *result = false;
         return 0;
     }
-
-    puts("Couldn't determine value of daemonize");
     return 1;
 }
 
