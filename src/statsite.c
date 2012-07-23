@@ -104,21 +104,19 @@ int write_pidfile(char *pid_file, pid_t pid) {
     struct stat buf;
     int stat_res = stat(pid_file, &buf);
     if (stat_res == 0) {
-        syslog(LOG_ERR, "pid file already exists!");
+        syslog(LOG_ERR, "pid file already exists! (%s)", pid_file);
         return 1;
     }
 
     FILE *file = fopen(pid_file, "w");
-
     if (!file) {
-        syslog(LOG_ERR, "Failed to open pid file!");
+        syslog(LOG_ERR, "Failed to open pid file! (%s)", pid_file);
         return 1;
     }
 
     fprintf(file, "%d", pid);
-
     fclose(file);
-    
+
     return 0;
 }
 
@@ -151,22 +149,21 @@ int main(int argc, char **argv) {
     setlogmask(config->syslog_log_level);
 
     // Daemonize
-    if (config->daemonize == true) {
+    if (config->daemonize) {
         pid_t pid, sid;
-
-        syslog(LOG_ERR, "Daemonizing.");
-
+        syslog(LOG_INFO, "Daemonizing.");
         pid = fork();
 
+        // Exit if we failed to fork
         if (pid < 0) {
             syslog(LOG_ERR, "Failed to fork() daemon!");
             return 1;
         }
 
-        if (pid > 0) {
-            return 0;
-        }
+        // Parent process returns
+        if (pid) return 0;
 
+        // Create a new session
         sid = setsid();
         if (sid < 0) {
             syslog(LOG_ERR, "Failed to set daemon SID!");
@@ -174,8 +171,8 @@ int main(int argc, char **argv) {
         }
 
         int write_pidfile_res = write_pidfile(config->pid_file, sid);
-        if (write_pidfile_res != 0) {
-            syslog(LOG_ERR, "Couldn't write pidfile; shutting down.");
+        if (write_pidfile_res) {
+            syslog(LOG_ERR, "Failed to write pidfile. Terminating.");
             return 1;
         }
 
@@ -218,11 +215,8 @@ int main(int argc, char **argv) {
     final_flush();
 
     // If daemonized, remove the pid file
-    if (config->daemonize == true) {
-        int unlink_res = unlink(config->pid_file);
-        if (unlink_res != 0) {
-            syslog(LOG_ERR, "Failed to delete pid file!");
-        }
+    if (config->daemonize && unlink(config->pid_file)) {
+        syslog(LOG_ERR, "Failed to delete pid file!");
     }
 
     // Free our memory
