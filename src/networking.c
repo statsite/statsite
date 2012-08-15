@@ -1026,6 +1026,46 @@ int seek_client_bytes(statsite_conn_info *conn, int bytes) {
     return 0;
 }
 
+
+/**
+ * This method is used to read and consume the input buffer
+ * @arg conn The client connection
+ * @arg bytes The number of bytes to read
+ * @arg buf Output parameter, sets the start of the buffer.
+ * @arg should_free Output parameter, should the buffer be freed by the caller.
+ * @return 0 on success, -1 if there is insufficient data.
+ */
+int read_client_bytes(statsite_conn_info *conn, int bytes, char** buf, int* should_free) {
+    if (bytes > circbuf_avail_buf(&conn->input)) return -1;
+
+    // Handle the wrap around case
+    if (conn->input.write_cursor < conn->input.read_cursor) {
+        // Check if we can use a contiguous chunk
+        int end_size = conn->input.buf_size - conn->input.read_cursor;
+        if (end_size >= bytes) {
+            *buf = conn->input.buffer + conn->input.read_cursor;
+            *should_free = 0;
+
+        // Otherwise, allocate a dynamic slab, and copy
+        } else {
+            *buf = malloc(bytes);
+            memcpy(*buf, conn->input.buffer + conn->input.read_cursor, end_size);
+            memcpy(*buf + end_size, conn->input.buffer, bytes - end_size);
+            *should_free = 1;
+        }
+
+    // Handle the contiguous case
+    } else {
+        *buf = conn->input.buffer + conn->input.read_cursor;
+        *should_free = 0;
+    }
+
+    // Advance the read cursor
+    circbuf_advance_read(&conn->input, bytes);
+    return 0;
+}
+
+
 /**
  * Sets the client socket options.
  * @return 0 on success, 1 on error.

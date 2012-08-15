@@ -93,4 +93,14 @@ int peek_client_bytes(statsite_conn_info *conn, int bytes, char* buf);
  */
 int seek_client_bytes(statsite_conn_info *conn, int bytes);
 
+/**
+ * This method is used to read and consume the input buffer
+ * @arg conn The client connection
+ * @arg bytes The number of bytes to read
+ * @arg buf Output parameter, sets the start of the buffer.
+ * @arg should_free Output parameter, should the buffer be freed by the caller.
+ * @return 0 on success, -1 if there is insufficient data.
+ */
+int read_client_bytes(statsite_conn_info *conn, int bytes, char** buf, int* should_free);
+
 #endif
