@@ -73,4 +73,14 @@ int extract_to_terminator(statsite_conn_info *conn, char terminator, char **buf,
  */
 uint64_t available_bytes(statsite_conn_info *conn);
 
+/**
+ * This method is used to peek into the input buffer without
+ * causing input to be consumed.
+ * @arg conn The client connection
+ * @arg bytes The number of bytes to peek
+ * @arg buf The output buffer to write to
+ * @return 0 on success, -1 if there is insufficient data.
+ */
+int peek_client_bytes(statsite_conn_info *conn, int bytes, char* buf);
+
 #endif

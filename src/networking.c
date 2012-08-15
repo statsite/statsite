@@ -990,6 +990,28 @@ uint64_t available_bytes(statsite_conn_info *conn) {
 
 
 /**
+ * This method is used to peek into the input buffer without
+ * causing input to be consumed.
+ * @arg conn The client connection
+ * @arg bytes The number of bytes to peek
+ * @arg buf The output buffer to write to
+ * @return 0 on success, -1 if there is insufficient data.
+ */
+int peek_client_bytes(statsite_conn_info *conn, int bytes, char* buf) {
+    // Ensure we have sufficient data
+    if (bytes > circbuf_avail_buf(&conn->input)) return -1;
+
+    // Copy the bytes
+    int offset = conn->input.read_cursor;
+    int buf_size = conn->input.buf_size;
+    for (int i=0; i < bytes; i++) {
+        buf[i] = conn->input.buffer[(offset + i) % buf_size];
+    }
+
+    return 0;
+}
+
+/**
  * Sets the client socket options.
  * @return 0 on success, 1 on error.
  */
