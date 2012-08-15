@@ -159,6 +159,7 @@ int handle_client_connect(statsite_conn_handler *handle) {
                     type = TIMER;
                     break;
                 case 'k':
+                case 'g':
                     type = KEY_VAL;
                     break;
                 default:
