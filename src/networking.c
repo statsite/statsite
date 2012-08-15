@@ -978,6 +978,18 @@ int extract_to_terminator(statsite_conn_info *conn, char terminator, char **buf,
 
 
 /**
+ * This method is used to query how much data is available
+ * to be read from the command buffer.
+ * @arg conn The client connection
+ * @return The bytes available
+ */
+uint64_t available_bytes(statsite_conn_info *conn) {
+    // Query the circular buffer
+    return circbuf_avail_buf(&conn->input);
+}
+
+
+/**
  * Sets the client socket options.
  * @return 0 on success, 1 on error.
  */

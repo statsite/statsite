@@ -65,4 +65,12 @@ int send_client_response(statsite_conn_info *conn, char **response_buffers, int 
  */
 int extract_to_terminator(statsite_conn_info *conn, char terminator, char **buf, int *buf_len, int *should_free);
 
+/**
+ * This method is used to query how much data is available
+ * to be read from the command buffer.
+ * @arg conn The client connection
+ * @return The bytes available
+ */
+uint64_t available_bytes(statsite_conn_info *conn);
+
 #endif
