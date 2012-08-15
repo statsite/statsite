@@ -83,4 +83,14 @@ uint64_t available_bytes(statsite_conn_info *conn);
  */
 int peek_client_bytes(statsite_conn_info *conn, int bytes, char* buf);
 
+/**
+ * This method is used to seek the input buffer without
+ * consuming input. It can be used in conjunction with
+ * peek_client_bytes to conditionally seek.
+ * @arg conn The client connection
+ * @arg bytes The number of bytes to seek
+ * @return 0 on success, -1 if there is insufficient data.
+ */
+int seek_client_bytes(statsite_conn_info *conn, int bytes);
+
 #endif

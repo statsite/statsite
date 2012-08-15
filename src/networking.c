@@ -1011,6 +1011,21 @@ int peek_client_bytes(statsite_conn_info *conn, int bytes, char* buf) {
     return 0;
 }
 
+
+/**
+ * This method is used to seek the input buffer without
+ * consuming input. It can be used in conjunction with
+ * peek_client_bytes to conditionally seek.
+ * @arg conn The client connection
+ * @arg bytes The number of bytes to seek
+ * @return 0 on success, -1 if there is insufficient data.
+ */
+int seek_client_bytes(statsite_conn_info *conn, int bytes) {
+    if (bytes > circbuf_avail_buf(&conn->input)) return -1;
+    circbuf_advance_read(&conn->input, bytes);
+    return 0;
+}
+
 /**
  * Sets the client socket options.
  * @return 0 on success, 1 on error.
