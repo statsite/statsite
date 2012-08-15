@@ -284,7 +284,9 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
         // Verify the key contains a null terminator
         if (memchr(key, '\0', key_len) == NULL) {
             syslog(LOG_WARNING, "Received command from binary stream with non-null terminated key: %.*s!", key_len, key);
-            return 0;
+
+            // For safety, we will just set the last byte to be null, and continue processing
+            *(key + key_len - 1) = 0;
         }
 
         // Add the sample
