@@ -1,3 +1,8 @@
+# 0.3.0
+
+ * Binary protocol support
+ * Git SHA: a66163b45fbebc807d8caeb9526c43b45be0abc5
+
 # 0.2.1
 
  * Daemonization support thanks to jgoldschrafe
