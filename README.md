@@ -16,6 +16,7 @@ Features
   - Standard deviation
   - Median, Percentile 95, Percentile 99
 * Send counters that statsite will aggregate
+* Binary protocol
 
 
 Architecture
@@ -123,6 +124,41 @@ The next example is increments the "rewards" counter by 1::
 And this example decrements the "inventory" counter by 7::
 
     inventory:-7|c
+
+
+Binary Protocol
+---------------
+
+In addition to the statsd compatible ASCII protocol, statsite includes
+a lightweight binary protocol. This can be used if you want to make use
+of special characters such as the colon, pipe character, or newlines. It
+may also be marginally faster to process.
+
+Each command is sent to statsite over the same ports in the following manner:
+
+    <Magic Byte><Metric Type><Key Length><Value><Key>
+
+The "Magic Byte" is the value 0xaa (170). This switches the internal
+processing from the ASCII mode to binary. The metric type is one of:
+
+    * 0x1 : Key value / Gauge
+    * 0x2 : Counter
+    * 0x3 : Timer
+
+The key length is a 2 byte unsigned integer with the length of the
+key, INCLUDING a NULL terminator. The key must include a null terminator,
+and it's length must include this.
+
+The value is a standard IEEE754 double value, which is 8 bytes in length.
+
+Lastly, the key is provided as a byte stream which is `Key Length` long,
+terminated by a NULL (0) byte.
+
+All of these values must be transmitted in Little Endian order.
+
+Here is an example of sending ("Conns", "c", 200) as hex:
+
+    0xaa 0x02 0x0600 0x0000000000006940 0x436f6e6e7300
 
 
 Writing Statsite Sinks
