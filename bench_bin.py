@@ -1,0 +1,43 @@
+import socket
+import time
+import random
+import struct
+
+NUM = 1024 * 1024 * 4
+KEYS = ["test", "foobar", "zipzap"]
+VALS = [32, 100, 82, 101, 5, 6, 42, 73]
+
+BINARY_HEADER = struct.Struct("<BBHd")
+BIN_TYPES = {"kv": 1, "c": 2, "ms": 3}
+
+
+def format(key, type, val):
+    "Formats a binary message for statsite"
+    key = str(key)
+    key_len = len(key) + 1
+    type_num = BIN_TYPES[type]
+    header = BINARY_HEADER.pack(170, type_num, key_len, float(val))
+    mesg = header + key + "\0"
+    return mesg
+
+
+METS = []
+for x in xrange(NUM):
+    key = random.choice(KEYS)
+    val = random.choice(VALS)
+    METS.append(format(key, "c", val))
+
+s = socket.socket()
+s.connect(("localhost", 8125))
+start = time.time()
+
+current = 0
+while current < len(METS):
+    msg = "".join(METS[current:current + 1024])
+    current += 1024
+    s.sendall(msg)
+
+s.close()
+end = time.time()
+print NUM / (end - start), "ops/sec", (end - start), "sec"
+
