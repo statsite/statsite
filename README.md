@@ -100,6 +100,7 @@ Messages must be terminated by newlines (`\n`).
 Currently supported message types:
 
 * `kv` - Simple Key/Value.
+* `g`  - Same as `kv`, compatibility with statsd gauges
 * `ms` - Timer.
 * `c` - Counter.
 
