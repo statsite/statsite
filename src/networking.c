@@ -173,6 +173,7 @@ static void circbuf_init(circular_buffer *buf);
 static void circbuf_clear(circular_buffer *buf);
 static void circbuf_free(circular_buffer *buf);
 static uint64_t circbuf_avail_buf(circular_buffer *buf);
+static uint64_t circbuf_used_buf(circular_buffer *buf);
 static void circbuf_grow_buf(circular_buffer *buf);
 static void circbuf_setup_readv_iovec(circular_buffer *buf, struct iovec *vectors, int *num_vectors);
 static void circbuf_setup_writev_iovec(circular_buffer *buf, struct iovec *vectors, int *num_vectors);
@@ -985,7 +986,7 @@ int extract_to_terminator(statsite_conn_info *conn, char terminator, char **buf,
  */
 uint64_t available_bytes(statsite_conn_info *conn) {
     // Query the circular buffer
-    return circbuf_avail_buf(&conn->input);
+    return circbuf_used_buf(&conn->input);
 }
 
 
@@ -999,7 +1000,7 @@ uint64_t available_bytes(statsite_conn_info *conn) {
  */
 int peek_client_bytes(statsite_conn_info *conn, int bytes, char* buf) {
     // Ensure we have sufficient data
-    if (bytes > circbuf_avail_buf(&conn->input)) return -1;
+    if (bytes > circbuf_used_buf(&conn->input)) return -1;
 
     // Copy the bytes
     int offset = conn->input.read_cursor;
@@ -1021,7 +1022,7 @@ int peek_client_bytes(statsite_conn_info *conn, int bytes, char* buf) {
  * @return 0 on success, -1 if there is insufficient data.
  */
 int seek_client_bytes(statsite_conn_info *conn, int bytes) {
-    if (bytes > circbuf_avail_buf(&conn->input)) return -1;
+    if (bytes > circbuf_used_buf(&conn->input)) return -1;
     circbuf_advance_read(&conn->input, bytes);
     return 0;
 }
@@ -1036,7 +1037,7 @@ int seek_client_bytes(statsite_conn_info *conn, int bytes) {
  * @return 0 on success, -1 if there is insufficient data.
  */
 int read_client_bytes(statsite_conn_info *conn, int bytes, char** buf, int* should_free) {
-    if (bytes > circbuf_avail_buf(&conn->input)) return -1;
+    if (bytes > circbuf_used_buf(&conn->input)) return -1;
 
     // Handle the wrap around case
     if (conn->input.write_cursor < conn->input.read_cursor) {
@@ -1160,6 +1161,17 @@ static uint64_t circbuf_avail_buf(circular_buffer *buf) {
         avail_buf = buf->buf_size - buf->write_cursor + buf->read_cursor - 1;
     }
     return avail_buf;
+}
+
+// Calculates the used buffer size
+static uint64_t circbuf_used_buf(circular_buffer *buf) {
+    uint64_t used_buf;
+    if (buf->write_cursor < buf->read_cursor) {
+        used_buf = buf->buf_size - buf->read_cursor + buf->write_cursor;
+    } else {
+        used_buf = buf->write_cursor - buf->read_cursor;
+    }
+    return used_buf;
 }
 
 // Grows the circular buffer to make room for more data
