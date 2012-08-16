@@ -246,8 +246,7 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
         }
 
         // Get the metric type
-        type_input = *(uint8_t*)&header[1];
-        type_input = NTOHS(type_input);
+        type_input = header[1];
         switch (type_input) {
             case 0x1:
                 type = KEY_VAL;
@@ -264,12 +263,9 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
                 break;
         }
 
-        // Extract the key length
-        key_len = *(uint16_t*)&header[2];
-        key_len = NTOHS(key_len);
-
-        // Extract the value
-        val = *(double*)&header[4];
+        // Extract the key length and value
+        memcpy(&key_len, &header[2], 2);
+        memcpy(&val, &header[4], 8);
 
         // Abort if we haven't received the full key, wait for the data
         if (available_bytes(handle->conn) < BINARY_HEADER_SIZE + key_len)
