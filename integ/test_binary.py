@@ -11,7 +11,6 @@ import tempfile
 import time
 import random
 import struct
-import binascii
 
 try:
     import pytest
@@ -90,10 +89,8 @@ def format(key, type, val):
     key = str(key)
     key_len = len(key) + 1
     type_num = BIN_TYPES[type]
-    print "TYPE", type_num, "KEY_LEN", key_len, "KEY", key
     header = BINARY_HEADER.pack(170, type_num, key_len, float(val))
     mesg = header + key + "\0"
-    print binascii.hexlify(header), len(header)
     return mesg
 
 
