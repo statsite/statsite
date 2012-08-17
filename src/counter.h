@@ -51,4 +51,11 @@ double counter_stddev(counter *counter);
  */
 double counter_sum(counter *counter);
 
+/**
+ * Returns the sum squared of the counter
+ * @arg counter The counter to query
+ * @return The sum squared of values
+ */
+double counter_squared_sum(counter *counter);
+
 #endif
