@@ -31,6 +31,7 @@ START_TEST(test_timer_init_add_destroy)
     fail_unless(timer_add_sample(&t, 100) == 0);
     fail_unless(timer_count(&t) == 1);
     fail_unless(timer_sum(&t) == 100);
+    fail_unless(timer_squared_sum(&t) == 10000);
     fail_unless(timer_min(&t) == 100);
     fail_unless(timer_max(&t) == 100);
     fail_unless(timer_mean(&t) == 100);
@@ -54,6 +55,7 @@ START_TEST(test_timer_add_loop)
 
     fail_unless(timer_count(&t) == 100);
     fail_unless(timer_sum(&t) == 5050);
+    fail_unless(timer_squared_sum(&t) == 338350);
     fail_unless(timer_min(&t) == 1);
     fail_unless(timer_max(&t) == 100);
     fail_unless(timer_mean(&t) == 50.5);

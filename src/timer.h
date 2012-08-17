@@ -80,6 +80,13 @@ double timer_stddev(timer *timer);
 double timer_sum(timer *timer);
 
 /**
+ * Returns the sum squared of the timer
+ * @arg timer The timer to query
+ * @return The sum squared of values
+ */
+double timer_squared_sum(timer *timer);
+
+/**
  * Returns the maximum timer value
  * @arg timer The timer to query
  * @return The maximum value
