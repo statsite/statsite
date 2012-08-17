@@ -6,6 +6,8 @@ typedef struct {
     uint64_t count;     // Count of items
     double sum;         // Sum of the values
     double squared_sum; // Sum of the squared values
+    double min;         // Minimum value
+    double max;         // Maximum value
 } counter;
 
 /**
@@ -57,5 +59,19 @@ double counter_sum(counter *counter);
  * @return The sum squared of values
  */
 double counter_squared_sum(counter *counter);
+
+/**
+ * Returns the minimum value of the counter
+ * @arg counter The counter to query
+ * @return The minimum value.
+ */
+double counter_min(counter *counter);
+
+/**
+ * Returns the maximum value of the counter
+ * @arg counter The counter to query
+ * @return The maximum value.
+ */
+double counter_max(counter *counter);
 
 #endif

@@ -20,6 +20,14 @@ int init_counter(counter *counter) {
  * @return 0 on success.
  */
 int counter_add_sample(counter *counter, double sample) {
+    if (counter->count == 0) {
+        counter->min = counter->max = sample;
+    } else {
+        if (counter->min > sample)
+            counter->min = sample;
+        else if (counter->max < sample)
+            counter->max = sample;
+    }
     counter->count++;
     counter->sum += sample;
     counter->squared_sum += pow(sample, 2);
@@ -72,5 +80,23 @@ double counter_sum(counter *counter) {
  */
 double counter_squared_sum(counter *counter) {
     return counter->squared_sum;
+}
+
+/**
+ * Returns the minimum value of the counter
+ * @arg counter The counter to query
+ * @return The minimum value.
+ */
+double counter_min(counter *counter) {
+    return counter->min;
+}
+
+/**
+ * Returns the maximum value of the counter
+ * @arg counter The counter to query
+ * @return The maximum value.
+ */
+double counter_max(counter *counter) {
+    return counter->max;
 }
 
