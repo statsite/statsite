@@ -10,6 +10,8 @@ int init_counter(counter *counter) {
     counter->count = 0;
     counter->sum = 0;
     counter->squared_sum = 0;
+    counter->min = 0;
+    counter->max = 0;
     return 0;
 }
 
