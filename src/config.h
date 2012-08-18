@@ -17,6 +17,7 @@ typedef struct {
     int flush_interval;
     bool daemonize;
     char *pid_file;
+    bool binary_stream;
 } statsite_config;
 
 /**

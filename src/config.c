@@ -24,7 +24,8 @@ static const statsite_config DEFAULT_CONFIG = {
     "cat",              // Pipe to cat
     10,                 // Flush every 10 seconds
     0,                  // Do not daemonize
-    "/var/run/statsite.pid" // Default pidfile path
+    "/var/run/statsite.pid", // Default pidfile path
+    0,                  // Do not use binary output by default
 };
 
 /**
@@ -110,6 +111,8 @@ static int config_callback(void* user, const char* section, const char* name, co
          return value_to_int(value, &config->flush_interval);
     } else if (NAME_MATCH("daemonize")) {
         return value_to_bool(value, &config->daemonize);
+    } else if (NAME_MATCH("binary_stream")) {
+        return value_to_bool(value, &config->binary_stream);
 
     // Handle the double cases
     } else if (NAME_MATCH("timer_eps")) {
