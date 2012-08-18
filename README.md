@@ -127,13 +127,26 @@ And this example decrements the "inventory" counter by 7::
     inventory:-7|c
 
 
+Writing Statsite Sinks
+---------------------
+
+Statsite only ships with a graphite sink by default, but any executable
+can be used as a sink. The sink should read its inputs from stdin, where
+each metric is in the form::
+
+    key|val|timestamp
+
+Each metric is separated by a newline. The process should terminate with
+an exit code of 0 to indicate success.
+
+
 Binary Protocol
 ---------------
 
 In addition to the statsd compatible ASCII protocol, statsite includes
 a lightweight binary protocol. This can be used if you want to make use
 of special characters such as the colon, pipe character, or newlines. It
-may also be marginally faster to process.
+is also marginally faster to process, and may provide 10-20% more throughput.
 
 Each command is sent to statsite over the same ports in the following manner:
 
@@ -142,9 +155,9 @@ Each command is sent to statsite over the same ports in the following manner:
 The "Magic Byte" is the value 0xaa (170). This switches the internal
 processing from the ASCII mode to binary. The metric type is one of:
 
-    * 0x1 : Key value / Gauge
-    * 0x2 : Counter
-    * 0x3 : Timer
+* 0x1 : Key value / Gauge
+* 0x2 : Counter
+* 0x3 : Timer
 
 The key length is a 2 byte unsigned integer with the length of the
 key, INCLUDING a NULL terminator. The key must include a null terminator,
@@ -162,15 +175,46 @@ Here is an example of sending ("Conns", "c", 200) as hex:
     0xaa 0x02 0x0600 0x0000000000006940 0x436f6e6e7300
 
 
-Writing Statsite Sinks
----------------------
 
-Statsite only ships with a graphite sink by default, but any executable
-can be used as a sink. The sink should read its inputs from stdin, where
-each metric is in the form::
+Binary Sink Protocol
+--------------------
 
-    key|val|timestamp
+It is also possible to have the data streamed to be represented
+in a binary format. Again, this is used if you want to use the reserved
+characters. It may also be faster.
 
-Each metric is separated by a newline. The process should terminate with
-an exit code of 0 to indicate success.
+Each command is sent to the sink in the following manner:
+
+    <Timestamp><Metric Type><Value Type><Key Length><Value><Key>
+
+Most of these are the same as the binary protocol. There are a few.
+changes however. The Timestamp is sent as an 8 byte unsigned integer,
+which is the current Unix timestamp. The Metric type is one of:
+
+* 0x1 : Key value / Gauge
+* 0x2 : Counter
+* 0x3 : Timer
+
+The value type is one of:
+
+* 0x0 : No type (Key/Value)
+* 0x1 : Sum
+* 0x2 : Sum Squared
+* 0x3 : Mean
+* 0x4 : Count
+* 0x5 : Standard deviation
+* 0x6 : Minimum Value
+* 0x7 : Maximum Value
+* 0x80 OR `percentile` :  If the type OR's with 128 (0x80), then it is a
+    percentile amount. The amount is OR'd with 0x80 to provide the type. For
+    example (0x80 | 0x32) = 0xb2 is the 50% percentile or medium. The 95th
+    percentile is (0x80 | 0xdf) = 0xdf.
+
+The key length is a 2 byte unsigned integer representing the key length
+terminated by a NULL character. The Value is an IEEE754 double. Lastly,
+the key is a NULL-terminated character stream.
+
+To enable the binary sink protocol, add a configuration variable `binary_stream`
+to the configuration file with the value `yes`. An example sink is provided in
+`sinks/binary_sink.py`.
 
