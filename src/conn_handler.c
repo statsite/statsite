@@ -10,6 +10,23 @@
 #include "streaming.h"
 #include "conn_handler.h"
 
+/*
+ * Binary defines
+ */
+#define BIN_TYPE_KV      0x1
+#define BIN_TYPE_COUNTER 0x2
+#define BIN_TYPE_TIMER   0x3
+
+#define BIN_OUT_NO_TYPE 0x0
+#define BIN_OUT_SUM     0x1
+#define BIN_OUT_SUM_SQ  0x2
+#define BIN_OUT_MEAN    0x3
+#define BIN_OUT_COUNT   0x4
+#define BIN_OUT_STDDEV  0x5
+#define BIN_OUT_MIN     0x6
+#define BIN_OUT_MAX     0x7
+#define BIN_OUT_PCT     0x80
+
 /* Static method declarations */
 static int handle_binary_client_connect(statsite_conn_handler *handle);
 static int handle_ascii_client_connect(statsite_conn_handler *handle);
@@ -79,6 +96,63 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
     return 0;
 }
 
+/* Helps to write out a single binary result */
+#pragma pack(push,1)
+struct binary_out_prefix {
+    uint64_t timestamp;
+    uint8_t  type;
+    uint8_t  value_type;
+    uint16_t key_len;
+    double   val;
+};
+#pragma pack(pop)
+
+static int stream_bin_writer(FILE *pipe, uint64_t timestamp, unsigned char type,
+        unsigned char val_type, double val, char *name) {
+        uint16_t key_len = strlen(name) + 1;
+        struct binary_out_prefix out = {timestamp, type, val_type, key_len, val};
+        if (!fwrite(&out, sizeof(struct binary_out_prefix), 1, pipe)) return 1;
+        if (!fwrite(name, key_len, 1, pipe)) return 1;
+        return 0;
+}
+
+static int stream_formatter_bin(FILE *pipe, void *data, metric_type type, char *name, void *value) {
+    #define STREAM_BIN(...) if (stream_bin_writer(pipe, ((struct timeval *)data)->tv_sec, __VA_ARGS__, name)) return 1;
+    switch (type) {
+        case KEY_VAL:
+            STREAM_BIN(BIN_TYPE_KV, BIN_OUT_NO_TYPE, *(double*)value);
+            break;
+
+        case COUNTER:
+            STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_SUM, counter_sum(value));
+            STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_SUM_SQ, counter_squared_sum(value));
+            STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_MEAN, counter_mean(value));
+            STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_COUNT, counter_count(value));
+            STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_STDDEV, counter_stddev(value));
+            STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_MIN, counter_min(value));
+            STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_MAX, counter_max(value));
+            break;
+
+        case TIMER:
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_SUM, timer_sum(value));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_SUM_SQ, timer_squared_sum(value));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MEAN, timer_mean(value));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_COUNT, timer_count(value));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_STDDEV, timer_stddev(value));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MIN, timer_min(value));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MAX, timer_max(value));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 50, timer_query(value, 0.5));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 95, timer_query(value, 0.95));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 99, timer_query(value, 0.99));
+            break;
+
+        default:
+            syslog(LOG_ERR, "Unknown metric type: %d", type);
+            break;
+    }
+    return 0;
+}
+
 /**
  * This is the thread that is invoked to handle flushing metrics
  */
@@ -90,8 +164,11 @@ static void* flush_thread(void *arg) {
     struct timeval tv;
     gettimeofday(&tv, NULL);
 
+    // Determine which callback to use
+    stream_callback cb = (GLOBAL_CONFIG->binary_stream)? stream_formatter_bin: stream_formatter;
+
     // Stream the records
-    int res = stream_to_command(m, &tv, stream_formatter, GLOBAL_CONFIG->stream_cmd);
+    int res = stream_to_command(m, &tv, cb, GLOBAL_CONFIG->stream_cmd);
     if (res != 0) {
         syslog(LOG_WARNING, "Streaming command exited with status %d", res);
     }
@@ -248,13 +325,13 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
         // Get the metric type
         type_input = header[1];
         switch (type_input) {
-            case 0x1:
+            case BIN_TYPE_KV:
                 type = KEY_VAL;
                 break;
-            case 0x2:
+            case BIN_TYPE_COUNTER:
                 type = COUNTER;
                 break;
-            case 0x3:
+            case BIN_TYPE_TIMER:
                 type = TIMER;
                 break;
             default:
