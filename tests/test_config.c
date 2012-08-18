@@ -21,6 +21,7 @@ START_TEST(test_config_get_default)
     fail_unless(strcmp(config.stream_cmd, "cat") == 0);
     fail_unless(config.flush_interval == 10);
     fail_unless(config.daemonize == false);
+    fail_unless(config.binary_stream == false);
     fail_unless(strcmp(config.pid_file, "/var/run/statsite.pid") == 0);
 
 }
@@ -41,6 +42,7 @@ START_TEST(test_config_bad_file)
     fail_unless(strcmp(config.stream_cmd, "cat") == 0);
     fail_unless(config.flush_interval == 10);
     fail_unless(config.daemonize == false);
+    fail_unless(config.binary_stream == false);
     fail_unless(strcmp(config.pid_file, "/var/run/statsite.pid") == 0);
 }
 END_TEST
@@ -64,6 +66,7 @@ START_TEST(test_config_empty_file)
     fail_unless(strcmp(config.stream_cmd, "cat") == 0);
     fail_unless(config.flush_interval == 10);
     fail_unless(config.daemonize == false);
+    fail_unless(config.binary_stream == false);
     fail_unless(strcmp(config.pid_file, "/var/run/statsite.pid") == 0);
 
     unlink("/tmp/zero_file");
@@ -81,6 +84,7 @@ timer_eps = 0.005\n\
 stream_cmd = foo\n\
 log_level = INFO\n\
 daemonize = true\n\
+binary_stream = true\n\
 pid_file = /tmp/statsite.pid\n";
     write(fh, buf, strlen(buf));
     fchmod(fh, 777);
@@ -98,6 +102,7 @@ pid_file = /tmp/statsite.pid\n";
     fail_unless(strcmp(config.stream_cmd, "foo") == 0);
     fail_unless(config.flush_interval == 120);
     fail_unless(config.daemonize == true);
+    fail_unless(config.binary_stream == true);
     fail_unless(strcmp(config.pid_file, "/tmp/statsite.pid") == 0);
 
     unlink("/tmp/basic_config");
