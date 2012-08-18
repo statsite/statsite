@@ -1,3 +1,8 @@
+# 0.3.1
+
+ * Binary sink protocol support
+ * Git SHA: f14bc449487dcb096773c01ed81508b129708ca9
+
 # 0.3.0
 
  * Binary protocol support
