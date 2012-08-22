@@ -190,8 +190,11 @@ static void cm_add_to_buffer(cm_quantile *cm, double value) {
     cm_sample *s = calloc(1, sizeof(cm_sample));
     s->value = value;
 
-    // Check the cursor value
-    if (value < cm_insert_point_value(cm)) {
+    /*
+     * Check the cursor value.
+     * Only use bufLess if we have at least a single value.
+     */
+    if (cm->num_values && value < cm_insert_point_value(cm)) {
         heap_insert(cm->bufLess, &s->value, s);
     } else {
         heap_insert(cm->bufMore, &s->value, s);
@@ -248,7 +251,7 @@ static void cm_insert(cm_quantile *cm) {
     // Check if this is the first element
     cm_sample *samp;
     if (!cm->samples) {
-        heap_delmin(cm->bufMore, NULL, (void**)&samp);
+        if (!heap_delmin(cm->bufMore, NULL, (void**)&samp)) return;
         samp->width = 1;
         samp->delta = 0;
         cm->samples = samp;
