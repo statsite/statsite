@@ -1,3 +1,9 @@
+# 0.3.2
+
+ * Fixing critical bug that causes segfault if the first
+ timer value is negative.
+ * Git SHA: 97e4597aac776aca899482a46f23f72dc25b6e24
+
 # 0.3.1
 
  * Binary sink protocol support
