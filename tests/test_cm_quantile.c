@@ -110,6 +110,24 @@ START_TEST(test_cm_init_add_query_destroy)
 }
 END_TEST
 
+START_TEST(test_cm_init_add_negative_query_destroy)
+{
+    cm_quantile cm;
+    double quants[] = {0.5, 0.90, 0.99};
+    int res = init_cm_quantile(0.01, (double*)&quants, 3, &cm);
+    fail_unless(res == 0);
+
+    res = cm_add_sample(&cm, -100.0);
+    fail_unless(res == 0);
+
+    double val = cm_query(&cm, 0.5);
+    fail_unless(val == -100.0);
+
+    res = destroy_cm_quantile(&cm);
+    fail_unless(res == 0);
+}
+END_TEST
+
 void print_cm(cm_quantile *cm) {
     cm_sample *samp = cm->samples;
     while (samp) {
