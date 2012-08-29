@@ -530,6 +530,7 @@ static int handle_udp_message(ev_io *watch, worker_ev_userdata* data) {
      * since we just cleared the buffer, and it should
      * be a contiguous buffer.
      */
+    assert(num_vectors == 1);
     ssize_t read_bytes = recv(watch->fd, vectors[0].iov_base,
                                 vectors[0].iov_len, 0);
 
@@ -547,6 +548,13 @@ static int handle_udp_message(ev_io *watch, worker_ev_userdata* data) {
 
     // Update the write cursor
     circbuf_advance_write(&conn->input, read_bytes);
+
+    // UDP clients don't need to append newlines to the messages like
+    // TCP clients do, but our parser requires them.  Append one if
+    // it's not present.
+    if (conn->input.buffer[conn->input.write_cursor - 1] != '\n')
+        circbuf_write(&conn->input, "\n", 1);
+
     return 0;
 }
 
