@@ -278,6 +278,9 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
 
             // Store the sample if we did the conversion
             if (val != 0 || endptr != val_str) {
+                if (GLOBAL_CONFIG->input_counter != NULL)
+                    metrics_add_sample(GLOBAL_METRICS, COUNTER, GLOBAL_CONFIG->input_counter, 1);
+
                 metrics_add_sample(GLOBAL_METRICS, type, buf, val);
             } else {
                 syslog(LOG_WARNING, "Failed value conversion! Input: %s", val_str);
@@ -363,6 +366,9 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
         }
 
         // Add the sample
+        if (GLOBAL_CONFIG->input_counter != NULL)
+            metrics_add_sample(GLOBAL_METRICS, COUNTER, GLOBAL_CONFIG->input_counter, 1);
+
         metrics_add_sample(GLOBAL_METRICS, type, key, val);
 
         // Make sure to free the command buffer if we need to

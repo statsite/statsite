@@ -18,6 +18,7 @@ typedef struct {
     bool daemonize;
     char *pid_file;
     bool binary_stream;
+    char *input_counter;
 } statsite_config;
 
 /**

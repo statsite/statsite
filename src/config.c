@@ -26,6 +26,7 @@ static const statsite_config DEFAULT_CONFIG = {
     0,                  // Do not daemonize
     "/var/run/statsite.pid", // Default pidfile path
     0,                  // Do not use binary output by default
+    NULL,               // Do not track number of messages received
 };
 
 /**
@@ -125,6 +126,8 @@ static int config_callback(void* user, const char* section, const char* name, co
         config->stream_cmd = strdup(value);
     } else if (NAME_MATCH("pid_file")) {
         config->pid_file = strdup(value);
+    } else if (NAME_MATCH("input_counter")) {
+        config->input_counter = strdup(value);
 
     // Unknown parameter?
     } else {
