@@ -2,7 +2,9 @@
 
  * UDP compatibility with statsd clients (allow missing newline).
  thanks to @joeshaw
- * Git SHA: 2ab5170f14fabe4d020faadec4ee35474e936d4c
+ * Added ability to count the number of input metrics, and emit
+ to a configurable counter, thanks to @joeshaw
+ * Git SHA: b28c48be615d2dce5e57a2be56b0117b85e77588
 
 # 0.3.2
 
