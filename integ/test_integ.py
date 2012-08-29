@@ -138,6 +138,17 @@ class TestIntegUDP(object):
         out = open(output).read()
         assert out in ("counts.foobar|600.000000|%d\n" % now, "counts.foobar|600.000000|%d\n" % (now - 1))
 
+    def test_counters_no_newlines(self, servers):
+        "Tests adding counters without a trailing new line"
+        _, server, output = servers
+        server.sendall("zip:100|c")
+        server.sendall("zip:200|c")
+        server.sendall("zip:300|c")
+        time.sleep(1)
+        now = time.time()
+        out = open(output).read()
+        assert out in ("counts.zip|600.000000|%d\n" % now, "counts.zip|600.000000|%d\n" % (now - 1))
+
     def test_meters(self, servers):
         "Tests adding kv pairs"
         _, server, output = servers
