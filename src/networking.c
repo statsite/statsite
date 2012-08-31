@@ -925,7 +925,9 @@ int extract_to_terminator(statsite_conn_info *conn, char terminator, char **buf,
             *buf_len = term_addr - *buf + 1;    // Difference between the terminator and location
             *term_addr = '\0';              // Add a null terminator
             *should_free = 0;               // No need to free, in the buffer
-            conn->input.read_cursor = term_addr - conn->input.buffer + 1; // Push the read cursor forward
+
+            // Push the read cursor forward
+            conn->input.read_cursor = (term_addr - conn->input.buffer + 1) % conn->input.buf_size;
             return 0;
         }
 
