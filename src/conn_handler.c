@@ -243,10 +243,10 @@ int handle_client_connect(statsite_conn_handler *handle) {
  */
 static int handle_ascii_client_connect(statsite_conn_handler *handle) {
     // Look for the next command line
-    char *buf, *key, *val_str, *type_str, *endptr;
+    char *buf, *key, *val_str, *type_str, *sample_str, *endptr;
     metric_type type;
     int buf_len, should_free, status, i, after_len;
-    double val;
+    double val, sample_rate;
     while (1) {
         status = extract_to_terminator(handle->conn, '\n', &buf, &buf_len, &should_free);
         if (status == -1) return 0; // Return if no command is available
@@ -275,6 +275,15 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
             // Convert the value to a double
             endptr = NULL;
             val = strtod(val_str, &endptr);
+
+            // Handle counter sampling if applicable
+            if (type == COUNTER && !buffer_after_terminator(type_str, after_len, '@', &sample_str, &after_len)) {
+                sample_rate = strtod(sample_str, &endptr);
+                if (sample_rate > 0 && sample_rate <= 1) {
+                    // Magnify the value
+                    val = val * (1.0 / sample_rate);
+                }
+            }
 
             // Store the sample if we did the conversion
             if (val != 0 || endptr != val_str) {

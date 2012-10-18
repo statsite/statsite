@@ -96,6 +96,17 @@ class TestInteg(object):
         out = open(output).read()
         assert out in ("counts.foobar|600.000000|%d\n" % now, "counts.foobar|600.000000|%d\n" % (now - 1))
 
+    def test_counters_sample(self, servers):
+        "Tests adding kv pairs"
+        server, _, output = servers
+        server.sendall("foobar:100|c|@0.1\n")
+        server.sendall("foobar:200|c|@0.1\n")
+        server.sendall("foobar:300|c|@0.1\n")
+        time.sleep(1)
+        now = time.time()
+        out = open(output).read()
+        assert out in ("counts.foobar|6000.000000|%d\n" % now, "counts.foobar|6000.000000|%d\n" % (now - 1))
+
     def test_meters(self, servers):
         "Tests adding kv pairs"
         server, _, output = servers
@@ -137,6 +148,17 @@ class TestIntegUDP(object):
         now = time.time()
         out = open(output).read()
         assert out in ("counts.foobar|600.000000|%d\n" % now, "counts.foobar|600.000000|%d\n" % (now - 1))
+
+    def test_counters_sample(self, servers):
+        "Tests adding kv pairs"
+        _, server, output = servers
+        server.sendall("foobar:100|c|@0.1\n")
+        server.sendall("foobar:200|c|@0.1\n")
+        server.sendall("foobar:300|c|@0.1\n")
+        time.sleep(1)
+        now = time.time()
+        out = open(output).read()
+        assert out in ("counts.foobar|6000.000000|%d\n" % now, "counts.foobar|6000.000000|%d\n" % (now - 1))
 
     def test_counters_no_newlines(self, servers):
         "Tests adding counters without a trailing new line"
