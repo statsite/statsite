@@ -1,3 +1,8 @@
+# 0.3.4
+
+ * Compatibility with statsd sampling flag for counters
+ * Git SHA: c6002f5e0ba43d7e451be584f24d7f07e890dcf1
+
 # 0.3.3
 
  * UDP compatibility with statsd clients (allow missing newline).
