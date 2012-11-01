@@ -51,7 +51,7 @@ uint64_t counter_count(counter *counter) {
  * @return The mean value
  */
 double counter_mean(counter *counter) {
-    return counter->sum / counter->count;
+    return (counter->count) ? counter->sum / counter->count : 0;
 }
 
 /**

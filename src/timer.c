@@ -81,7 +81,7 @@ double timer_min(timer *timer) {
  * @return The mean value
  */
 double timer_mean(timer *timer) {
-    return timer->sum / timer->count;
+    return (timer->count) ? timer->sum / timer->count : 0;
 }
 
 /**
