@@ -118,6 +118,7 @@ class TestInteg(object):
         out = open(output).read()
         print out
         assert "timers.noobs.sum|4950" in out
+        assert "timers.noobs.sum_sq|328350" in out
         assert "timers.noobs.mean|49.500000" in out
         assert "timers.noobs.lower|0.000000" in out
         assert "timers.noobs.upper|99.000000" in out
@@ -182,6 +183,7 @@ class TestIntegUDP(object):
         out = open(output).read()
         print out
         assert "timers.noobs.sum|4950" in out
+        assert "timers.noobs.sum_sq|328350" in out
         assert "timers.noobs.mean|49.500000" in out
         assert "timers.noobs.lower|0.000000" in out
         assert "timers.noobs.upper|99.000000" in out
@@ -194,4 +196,3 @@ class TestIntegUDP(object):
 
 if __name__ == "__main__":
     sys.exit(pytest.main(args="-k TestInteg."))
-

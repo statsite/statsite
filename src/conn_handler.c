@@ -79,6 +79,7 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
 
         case TIMER:
             STREAM("timers.%s.sum|%f|%lld\n", name, timer_sum(value));
+            STREAM("timers.%s.sum_sq|%f|%lld\n", name, timer_squared_sum(value));
             STREAM("timers.%s.mean|%f|%lld\n", name, timer_mean(value));
             STREAM("timers.%s.lower|%f|%lld\n", name, timer_min(value));
             STREAM("timers.%s.upper|%f|%lld\n", name, timer_max(value));
@@ -415,4 +416,3 @@ static int buffer_after_terminator(char *buf, int buf_len, char terminator, char
     *after_len = buf_len - (term_addr - buf + 1);
     return 0;
 }
-
