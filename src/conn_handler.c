@@ -332,6 +332,7 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
         // Check for the magic byte
         if (header[0] != BINARY_MAGIC_BYTE) {
             syslog(LOG_WARNING, "Received command from binary stream without magic byte!");
+            close_client_connection(handle->conn);
             return -1;
         }
 
@@ -350,7 +351,8 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
             default:
                 type = UNKNOWN;
                 syslog(LOG_WARNING, "Received command from binary stream with unknown type: %u!", type_input);
-                break;
+                close_client_connection(handle->conn);
+                return -1;
         }
 
         // Extract the key length and value
@@ -368,11 +370,11 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
         read_client_bytes(handle->conn, key_len, &key, &should_free);
 
         // Verify the key contains a null terminator
-        if (memchr(key, '\0', key_len) == NULL) {
+        if (*(key + key_len - 1) != 0) {
             syslog(LOG_WARNING, "Received command from binary stream with non-null terminated key: %.*s!", key_len, key);
-
-            // For safety, we will just set the last byte to be null, and continue processing
-            *(key + key_len - 1) = 0;
+            close_client_connection(handle->conn);
+            if (should_free) free(key);
+            return -1;
         }
 
         // Add the sample
