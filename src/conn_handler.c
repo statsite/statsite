@@ -271,6 +271,10 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
                     break;
                 default:
                     type = UNKNOWN;
+                    syslog(LOG_WARNING, "Received unknown metric type! Input: %c", *type_str);
+                    close_client_connection(handle->conn);
+                    if (should_free) free(buf);
+                    return -1;
             }
 
             // Convert the value to a double
@@ -294,9 +298,16 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
                 metrics_add_sample(GLOBAL_METRICS, type, buf, val);
             } else {
                 syslog(LOG_WARNING, "Failed value conversion! Input: %s", val_str);
+                close_client_connection(handle->conn);
+                if (should_free) free(buf);
+                return -1;
+
             }
         } else {
             syslog(LOG_WARNING, "Failed parse metric! Input: %s", buf);
+            close_client_connection(handle->conn);
+            if (should_free) free(buf);
+            return -1;
         }
 
         // Make sure to free the command buffer if we need to
