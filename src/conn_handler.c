@@ -342,7 +342,7 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
 
         // Check for the magic byte
         if (header[0] != BINARY_MAGIC_BYTE) {
-            syslog(LOG_WARNING, "Received command from binary stream without magic byte!");
+            syslog(LOG_WARNING, "Received command from binary stream without magic byte! Byte: %u", header[0]);
             close_client_connection(handle->conn);
             return -1;
         }
