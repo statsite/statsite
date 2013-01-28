@@ -1,7 +1,9 @@
 import os
 import os.path
 import socket
+import textwrap
 import subprocess
+import contextlib
 import sys
 import tempfile
 import time
@@ -192,6 +194,61 @@ class TestIntegUDP(object):
         assert "timers.noobs.median|49.000000" in out
         assert "timers.noobs.p95|95.000000" in out
         assert "timers.noobs.p99|99.000000" in out
+
+
+class TestIntegBindAddress(object):
+    @contextlib.contextmanager
+    def run(self, addr, port=None):
+        port = port if port else random.randrange(10000, 65000)
+        fh = tempfile.NamedTemporaryFile()
+
+        conf = '''\
+        [statsite]
+        port = %d
+        udp_port = %s
+        bind_address = %s\n'''
+        fh.write(textwrap.dedent(conf % (port, port, addr)))
+        fh.flush()
+
+        try:
+            p = subprocess.Popen('./statsite -f %s' % fh.name, shell=True)
+            time.sleep(0.3)
+            yield port
+        finally:
+            p.kill()
+            fh.close()
+
+    def islistening(self, addr, port, command='statsite'):
+        try:
+            cmd = 'lsof -FnPc -nP -i @%s:%s' % (addr, port)
+            out = subprocess.check_output(cmd, shell=True)
+        except subprocess.CalledProcessError:
+            return False
+
+        return (command in out) and ('PTCP' in out) and ('PUDP' in out)
+
+    def test_ipv4_localhost(self):
+        with self.run('127.0.0.1') as port:
+            assert self.islistening('127.0.0.1', port), 'not listening'
+
+    def test_ipv4_any(self):
+        with self.run('0.0.0.0') as port:
+            assert self.islistening('0.0.0.0', port), 'not listening'
+
+    def test_ipv4_bogus(self):
+        with self.run('a.b.c.d') as port:
+            assert not self.islistening('0.0.0.0', port), 'should not be listening'
+        with self.run('1.0.1.0') as port:
+            assert not self.islistening('1.0.1.0', port), 'should not be listening'
+
+    def test_ipv4_used(self):
+        try:
+            port = random.randrange(10000, 65000)
+            p = subprocess.Popen(['nc', '-l', '127.0.0.1', str(port)])
+            with self.run('127.0.0.1', port):
+                assert not self.islistening('127.0.0.0', port), 'should not be listening'
+        finally:
+            p.kill()
 
 
 if __name__ == "__main__":

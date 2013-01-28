@@ -19,6 +19,7 @@
 static const statsite_config DEFAULT_CONFIG = {
     8125,               // TCP defaults to 8125
     8125,               // UDP on 8125
+    "0.0.0.0",          // Listen on all IPv4 addresses
     "DEBUG",            // DEBUG level
     LOG_DEBUG,
     0.01,               // Default 1% error
@@ -129,6 +130,8 @@ static int config_callback(void* user, const char* section, const char* name, co
         config->pid_file = strdup(value);
     } else if (NAME_MATCH("input_counter")) {
         config->input_counter = strdup(value);
+    } else if (NAME_MATCH("bind_address")) {
+        config->bind_address = strdup(value);
 
     // Unknown parameter?
     } else {
