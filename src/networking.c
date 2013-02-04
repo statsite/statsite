@@ -99,6 +99,9 @@ struct conn_info {
     volatile int use_write_buf;
     ev_io write_client;
     circular_buffer output;
+
+    // Tracks if this is a UDP connection
+    int is_udp;
 };
 typedef struct conn_info conn_info;
 
@@ -266,6 +269,7 @@ static int setup_udp_listener(statsite_networking *netconf) {
     // Allocate a connection object for the UDP socket,
     // ensure a min-buffer size of 64K
     conn_info *conn = get_conn(netconf);
+    conn->is_udp = 1;
     while (circbuf_avail_buf(&conn->input) < 65536) {
         circbuf_grow_buf(&conn->input);
     }
@@ -784,6 +788,9 @@ static void decref_client_connection(conn_info *conn) {
  * @arg conn The connection to close
  */
 void close_client_connection(conn_info *conn) {
+    // Do nothing for UDP
+    if (conn->is_udp) return;
+
     // Stop scheduling
     conn->should_schedule = 0;
 
