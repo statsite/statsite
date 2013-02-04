@@ -141,6 +141,16 @@ class TestIntegUDP(object):
         out = open(output).read()
         assert out in ("kv.tubez|100.000000|%d\n" % now, "kv.tubez|100.000000|%d\n" % (now - 1))
 
+    def test_bad_kv(self, servers):
+        "Tests adding a bad value, followed by a valid kv pair"
+        _, server, output = servers
+        server.sendall("this is junk data\n")
+        server.sendall("tubez:100|kv\n")
+        time.sleep(1)
+        now = time.time()
+        out = open(output).read()
+        assert out in ("kv.tubez|100.000000|%d\n" % now, "kv.tubez|100.000000|%d\n" % (now - 1))
+
     def test_counters(self, servers):
         "Tests adding kv pairs"
         _, server, output = servers
