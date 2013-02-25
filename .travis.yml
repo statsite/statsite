@@ -1,0 +1,14 @@
+language: python
+python:
+  - "2.7"
+before_install:
+  - sudo apt-get -y install scons
+  - pushd deps/check-0.9.8
+  - ./configure
+  - make
+  - sudo make install
+  - sudo ldconfig
+  - popd
+  - scons statsite test_runner
+install: pip install pytest==2.3.4 --use-mirrors
+script: ./test_runner && py.test integ/

@@ -1,4 +1,4 @@
-Statsite
+Statsite [![Build Status](https://travis-ci.org/armon/statsite.png)](https://travis-ci.org/armon/statsite)
 ========
 
 This is a stats aggregation server. Statsite is based heavily
