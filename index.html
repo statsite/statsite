@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Statsite by armon</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Statsite</h1>
+          <h2>A C implementation of statsite</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/armon/statsite/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/armon/statsite/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/armon/statsite" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>Statsite <a href="https://travis-ci.org/armon/statsite"><img src="https://travis-ci.org/armon/statsite.png" alt="Build Status"></a>
+</h1>
+
+<p>This is a stats aggregation server. Statsite is based heavily
+on Etsy's StatsD <a href="https://github.com/etsy/statsd">https://github.com/etsy/statsd</a>. This is
+a re-implementation of the Python version of statsite
+<a href="https://github.com/kiip/statsite">https://github.com/kiip/statsite</a>.</p>
+
+<h2>Features</h2>
+
+<ul>
+<li>Basic key/value metrics</li>
+<li>Send timer data, statsite will calculate:
+
+<ul>
+<li>Mean</li>
+<li>Min/Max</li>
+<li>Standard deviation</li>
+<li>Median, Percentile 95, Percentile 99</li>
+</ul>
+</li>
+<li>Send counters that statsite will aggregate</li>
+<li>Binary protocol</li>
+</ul><h2>Architecture</h2>
+
+<p>Statsite is designed to be both highly performant,
+and very flexible. To achieve this, it implements the stats
+collection and aggregation in pure C, using libev to be
+extremely fast. This allows it to handle hundreds of connections,
+and millions of metrics. After each flush interval expires,
+statsite performs a fork/exec to start a new stream handler
+invoking a specified application. Statsite then streams the
+aggregated metrics over stdin to the application, which is
+free to handle the metrics as it sees fit.</p>
+
+<p>This allows statsite to aggregate metrics and then ship metrics
+to any number of sinks (Graphite, SQL databases, etc). There
+is an included Python script that ships metrics to graphite.</p>
+
+<p>Additionally, statsite tries to minimize memory usage by not
+storing all the metrics that are received. Counter values are
+aggregated as they are received, and timer values are stored
+and aggregated using the Cormode-Muthurkrishnan algorithm from
+"Effective Computation of Biased Quantiles over Data Streams".
+This means that the percentile values are not perfectly accurate,
+and are subject to a specifiable error epsilon. This allows us to
+store only a fraction of the samples.</p>
+
+<h2>Install</h2>
+
+<p>Download and build from source::</p>
+
+<pre><code>$ git clone https://github.com/armon/statsite.git
+$ cd statsite
+$ pip install SCons  # Uses the Scons build system, may not be necessary
+$ scons
+$ ./statsite
+</code></pre>
+
+<p>Building the test code may generate errors if libcheck is not available.
+To build the test code successfully, do the following::</p>
+
+<pre><code>$ cd deps/check-0.9.8/
+$ ./configure
+$ make
+# make install
+# ldconfig (necessary on some Linux distros)
+$ cd ../../
+$ scons test_runner
+</code></pre>
+
+<p>At this point, the test code should build successfully.</p>
+
+<h2>Usage</h2>
+
+<p>Statsite is configured using a simple INI file.
+Here is an example configuration file::</p>
+
+<pre><code>[statsite]
+port = 8125
+udp_port = 8125
+log_level = INFO
+flush_interval = 10
+timer_eps = 0.01
+stream_cmd = python sinks/graphite.py localhost 2003
+</code></pre>
+
+<p>Then run statsite, pointing it to that file::</p>
+
+<pre><code>statsite -f /etc/statsite.conf
+</code></pre>
+
+<h2>Protocol</h2>
+
+<p>By default, Statsite will listen for TCP and UDP connections. A message
+looks like the following (where the flag is optional)::</p>
+
+<pre><code>key:value|type[|@flag]
+</code></pre>
+
+<p>Messages must be terminated by newlines (<code>\n</code>).</p>
+
+<p>Currently supported message types:</p>
+
+<ul>
+<li>
+<code>kv</code> - Simple Key/Value.</li>
+<li>
+<code>g</code>  - Same as <code>kv</code>, compatibility with statsd gauges</li>
+<li>
+<code>ms</code> - Timer.</li>
+<li>
+<code>c</code> - Counter.</li>
+</ul><p>After the flush interval, the counters and timers of the same key are
+aggregated and this is sent to the store.</p>
+
+<p>Examples:</p>
+
+<p>The following is a simple key/value pair, in this case reporting how many
+queries we've seen in the last second on MySQL::</p>
+
+<pre><code>mysql.queries:1381|kv
+</code></pre>
+
+<p>The following is a timer, timing the response speed of an API call::</p>
+
+<pre><code>api.session_created:114|ms
+</code></pre>
+
+<p>The next example is increments the "rewards" counter by 1::</p>
+
+<pre><code>rewards:1|c
+</code></pre>
+
+<p>And this example decrements the "inventory" counter by 7::</p>
+
+<pre><code>inventory:-7|c
+</code></pre>
+
+<h2>Writing Statsite Sinks</h2>
+
+<p>Statsite only ships with a graphite sink by default, but any executable
+can be used as a sink. The sink should read its inputs from stdin, where
+each metric is in the form::</p>
+
+<pre><code>key|val|timestamp
+</code></pre>
+
+<p>Each metric is separated by a newline. The process should terminate with
+an exit code of 0 to indicate success.</p>
+
+<h2>Binary Protocol</h2>
+
+<p>In addition to the statsd compatible ASCII protocol, statsite includes
+a lightweight binary protocol. This can be used if you want to make use
+of special characters such as the colon, pipe character, or newlines. It
+is also marginally faster to process, and may provide 10-20% more throughput.</p>
+
+<p>Each command is sent to statsite over the same ports in the following manner:</p>
+
+<pre><code>&lt;Magic Byte&gt;&lt;Metric Type&gt;&lt;Key Length&gt;&lt;Value&gt;&lt;Key&gt;
+</code></pre>
+
+<p>The "Magic Byte" is the value 0xaa (170). This switches the internal
+processing from the ASCII mode to binary. The metric type is one of:</p>
+
+<ul>
+<li>0x1 : Key value / Gauge</li>
+<li>0x2 : Counter</li>
+<li>0x3 : Timer</li>
+</ul><p>The key length is a 2 byte unsigned integer with the length of the
+key, INCLUDING a NULL terminator. The key must include a null terminator,
+and it's length must include this.</p>
+
+<p>The value is a standard IEEE754 double value, which is 8 bytes in length.</p>
+
+<p>Lastly, the key is provided as a byte stream which is <code>Key Length</code> long,
+terminated by a NULL (0) byte.</p>
+
+<p>All of these values must be transmitted in Little Endian order.</p>
+
+<p>Here is an example of sending ("Conns", "c", 200) as hex:</p>
+
+<pre><code>0xaa 0x02 0x0600 0x0000000000006940 0x436f6e6e7300
+</code></pre>
+
+<h2>Binary Sink Protocol</h2>
+
+<p>It is also possible to have the data streamed to be represented
+in a binary format. Again, this is used if you want to use the reserved
+characters. It may also be faster.</p>
+
+<p>Each command is sent to the sink in the following manner:</p>
+
+<pre><code>&lt;Timestamp&gt;&lt;Metric Type&gt;&lt;Value Type&gt;&lt;Key Length&gt;&lt;Value&gt;&lt;Key&gt;
+</code></pre>
+
+<p>Most of these are the same as the binary protocol. There are a few.
+changes however. The Timestamp is sent as an 8 byte unsigned integer,
+which is the current Unix timestamp. The Metric type is one of:</p>
+
+<ul>
+<li>0x1 : Key value / Gauge</li>
+<li>0x2 : Counter</li>
+<li>0x3 : Timer</li>
+</ul><p>The value type is one of:</p>
+
+<ul>
+<li>0x0 : No type (Key/Value)</li>
+<li>0x1 : Sum</li>
+<li>0x2 : Sum Squared</li>
+<li>0x3 : Mean</li>
+<li>0x4 : Count</li>
+<li>0x5 : Standard deviation</li>
+<li>0x6 : Minimum Value</li>
+<li>0x7 : Maximum Value</li>
+<li>0x80 OR <code>percentile</code> :  If the type OR's with 128 (0x80), then it is a
+percentile amount. The amount is OR'd with 0x80 to provide the type. For
+example (0x80 | 0x32) = 0xb2 is the 50% percentile or medium. The 95th
+percentile is (0x80 | 0xdf) = 0xdf.</li>
+</ul><p>The key length is a 2 byte unsigned integer representing the key length
+terminated by a NULL character. The Value is an IEEE754 double. Lastly,
+the key is a NULL-terminated character stream.</p>
+
+<p>To enable the binary sink protocol, add a configuration variable <code>binary_stream</code>
+to the configuration file with the value <code>yes</code>. An example sink is provided in
+<code>sinks/binary_sink.py</code>.</p>
+        </section>
+
+        <footer>
+          Statsite is maintained by <a href="https://github.com/armon">armon</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="http://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
