@@ -74,7 +74,6 @@ typedef struct {
 struct conn_info {
     ev_io client;
     circular_buffer input;
-    int is_udp;
 };
 typedef struct conn_info conn_info;
 
@@ -199,7 +198,6 @@ static int setup_udp_listener(statsite_networking *netconf) {
     // Allocate a connection object for the UDP socket,
     // ensure a min-buffer size of 64K
     conn_info *conn = get_conn();
-    conn->is_udp = 1;
     while (circbuf_avail_buf(&conn->input) < 65536) {
         circbuf_grow_buf(&conn->input);
     }
@@ -512,9 +510,6 @@ int shutdown_networking(statsite_networking *netconf) {
  * @arg conn The connection to close
  */
 void close_client_connection(conn_info *conn) {
-    // Do nothing for UDP
-    if (conn->is_udp) return;
-
     // Stop the libev clients
     ev_io_stop(&conn->client);
 
