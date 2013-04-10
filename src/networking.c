@@ -45,9 +45,9 @@
  * We want this to be aggressive enough to reduce
  * the number of resizes, but to also avoid wasted
  * space. With this, we will go from:
- * 32K -> 256K -> 2MB -> 16MB
+ * 32K -> 64K -> 128K
  */
-#define CONN_BUF_MULTIPLIER 8
+#define CONN_BUF_MULTIPLIER 2
 
 
 /**
