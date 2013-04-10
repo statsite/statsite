@@ -272,7 +272,6 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
                 default:
                     type = UNKNOWN;
                     syslog(LOG_WARNING, "Received unknown metric type! Input: %c", *type_str);
-                    close_client_connection(handle->conn);
                     if (should_free) free(buf);
                     return -1;
             }
@@ -298,14 +297,12 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
                 metrics_add_sample(GLOBAL_METRICS, type, buf, val);
             } else {
                 syslog(LOG_WARNING, "Failed value conversion! Input: %s", val_str);
-                close_client_connection(handle->conn);
                 if (should_free) free(buf);
                 return -1;
 
             }
         } else {
             syslog(LOG_WARNING, "Failed parse metric! Input: %s", buf);
-            close_client_connection(handle->conn);
             if (should_free) free(buf);
             return -1;
         }
@@ -343,7 +340,6 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
         // Check for the magic byte
         if (header[0] != BINARY_MAGIC_BYTE) {
             syslog(LOG_WARNING, "Received command from binary stream without magic byte! Byte: %u", header[0]);
-            close_client_connection(handle->conn);
             return -1;
         }
 
@@ -362,7 +358,6 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
             default:
                 type = UNKNOWN;
                 syslog(LOG_WARNING, "Received command from binary stream with unknown type: %u!", type_input);
-                close_client_connection(handle->conn);
                 return -1;
         }
 
@@ -383,7 +378,6 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
         // Verify the key contains a null terminator
         if (*(key + key_len - 1) != 0) {
             syslog(LOG_WARNING, "Received command from binary stream with non-null terminated key: %.*s!", key_len, key);
-            close_client_connection(handle->conn);
             if (should_free) free(key);
             return -1;
         }
