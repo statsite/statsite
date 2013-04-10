@@ -351,10 +351,12 @@ static int read_client_data(conn_info *conn) {
         syslog(LOG_DEBUG, "Closed client connection. [%d]\n", conn->client.fd);
         return 1;
     } else if (read_bytes == -1) {
-        if (errno != EAGAIN && errno != EINTR) {
-            syslog(LOG_ERR, "Failed to read() from connection [%d]! %s.",
-                    conn->client.fd, strerror(errno));
-        }
+        // Ignore the error, read again later
+        if (errno == EAGAIN || errno == EINTR)
+            return 0;
+
+        syslog(LOG_ERR, "Failed to read() from connection [%d]! %s.",
+                conn->client.fd, strerror(errno));
         return 1;
     }
 
