@@ -14,12 +14,14 @@ typedef struct conn_info statsite_conn_info;
 int init_networking(statsite_config *config, statsite_networking **netconf_out);
 
 /**
- * Entry point for threads to join the networking
+ * Entry point for main thread to enter the networking
  * stack. This method blocks indefinitely until the
  * network stack is shutdown.
  * @arg netconf The configuration for the networking stack.
+ * @arg should_run A reference to a variable that is set to 0 when
+ * shutdown should be started
  */
-void start_networking_worker(statsite_networking *netconf);
+void enter_networking_loop(statsite_networking *netconf, int *should_run);
 
 /**
  * Shuts down all the connections
@@ -37,16 +39,6 @@ int shutdown_networking(statsite_networking *netconf);
  * Closes the client connection.
  */
 void close_client_connection(statsite_conn_info *conn);
-
-/**
- * Sends a response to a client.
- * @arg conn The client connection
- * @arg response_buffers A list of response buffers to send
- * @arg buf_sizes A list of the buffer sizes
- * @arg num_bufs The number of response buffers
- * @return 0 on success.
- */
-int send_client_response(statsite_conn_info *conn, char **response_buffers, int *buf_sizes, int num_bufs);
 
 /**
  * This method is used to conveniently extract commands from the
