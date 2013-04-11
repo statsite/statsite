@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <regex.h>
 #include <assert.h>
@@ -54,7 +53,7 @@ static statsite_config *GLOBAL_CONFIG;
 void init_conn_handler(statsite_config *config) {
     // Make the initial metrics object
     metrics *m = malloc(sizeof(metrics));
-    int res = init_metrics(config->timer_eps, (double*)&QUANTILES, NUM_QUANTILES, m);
+    int res = init_metrics(config->eps, (double*)&QUANTILES, NUM_QUANTILES, m);
     assert(res == 0);
     GLOBAL_METRICS = m;
 
@@ -67,10 +66,11 @@ void init_conn_handler(statsite_config *config) {
  */
 static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name, void *value) {
     #define STREAM(...) if (fprintf(pipe, __VA_ARGS__, (long long)tv->tv_sec) < 0) return 1;
-    struct timeval *tv = data;
+
+    struct timeval *tv = data;    
     switch (type) {
         case KEY_VAL:
-            STREAM("kv.%s|%f|%lld\n", name, *(double*)value);
+            STREAM("gauges.%s|%f|%lld\n", name, *(double*)value);
             break;
 
         case COUNTER:
@@ -88,6 +88,11 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
             STREAM("timers.%s.median|%f|%lld\n", name, timer_query(value, 0.5));
             STREAM("timers.%s.p95|%f|%lld\n", name, timer_query(value, 0.95));
             STREAM("timers.%s.p99|%f|%lld\n", name, timer_query(value, 0.99));
+            break;
+
+        case SET:
+            syslog(LOG_DEBUG, "sets.%s|%f\n", name, *(double*)value);
+            //STREAM("sets.%s|%f|%lld\n", name, *(double*)value);
             break;
 
         default:
@@ -147,6 +152,10 @@ static int stream_formatter_bin(FILE *pipe, void *data, metric_type type, char *
             STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 99, timer_query(value, 0.99));
             break;
 
+        case SET:
+            // TODO
+            break;
+
         default:
             syslog(LOG_ERR, "Unknown metric type: %d", type);
             break;
@@ -169,10 +178,9 @@ static void* flush_thread(void *arg) {
     stream_callback cb = (GLOBAL_CONFIG->binary_stream)? stream_formatter_bin: stream_formatter;
 
     // Stream the records
-    int res = stream_to_command(m, &tv, cb, GLOBAL_CONFIG->stream_cmd);
-    if (res != 0) {
-        syslog(LOG_WARNING, "Streaming command exited with status %d", res);
-    }
+    char *cmd = GLOBAL_CONFIG->stream_cmd;
+    int res = stream_to_command(m, &tv, cb, cmd); 
+    if (res != 0) syslog(LOG_WARNING, "Streaming command '%s' exited with status: '%s'", cmd, strerror(res));
 
     // Cleanup
     destroy_metrics(m);
@@ -269,6 +277,10 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
                 case 'g':
                     type = KEY_VAL;
                     break;
+                case 's':
+                    type = SET;
+                    break;
+
                 default:
                     type = UNKNOWN;
                     syslog(LOG_WARNING, "Received unknown metric type! Input: %c", *type_str);

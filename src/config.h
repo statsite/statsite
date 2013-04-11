@@ -13,7 +13,7 @@ typedef struct {
     char *bind_address;
     char *log_level;
     int syslog_log_level;
-    double timer_eps;
+    double eps;
     char *stream_cmd;
     int flush_interval;
     bool daemonize;

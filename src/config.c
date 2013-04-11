@@ -1,7 +1,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
@@ -118,8 +117,8 @@ static int config_callback(void* user, const char* section, const char* name, co
         return value_to_bool(value, &config->binary_stream);
 
     // Handle the double cases
-    } else if (NAME_MATCH("timer_eps")) {
-        return value_to_double(value, &config->timer_eps);
+    } else if (NAME_MATCH("eps")) {
+        return value_to_double(value, &config->eps);
 
     // Copy the string values
     } else if (NAME_MATCH("log_level")) {
@@ -247,7 +246,7 @@ int validate_config(statsite_config *config) {
     int res = 0;
 
     res |= sane_log_level(config->log_level, &config->syslog_log_level);
-    res |= sane_timer_eps(config->timer_eps);
+    res |= sane_timer_eps(config->eps);
     res |= sane_flush_interval(config->flush_interval);
 
     return res;

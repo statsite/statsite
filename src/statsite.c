@@ -7,7 +7,6 @@
  */
 #include <sys/stat.h>
 #include <ctype.h>
-#include <errno.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,7 +17,7 @@
 #include "config.h"
 #include "conn_handler.h"
 #include "networking.h"
-
+ 
 /**
  * By default we should run. Our signal
  * handler updates this variable to allow the
@@ -119,7 +118,6 @@ int write_pidfile(char *pid_file, pid_t pid) {
 
     return 0;
 }
-
 
 int main(int argc, char **argv) {
     // Initialize syslog

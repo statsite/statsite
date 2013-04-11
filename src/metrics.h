@@ -4,12 +4,14 @@
 #include "counter.h"
 #include "timer.h"
 #include "hashmap.h"
+#include "set.h"
 
 typedef enum {
     UNKNOWN,
     KEY_VAL,
     COUNTER,
-    TIMER
+    TIMER,
+    SET
 } metric_type;
 
 typedef struct key_val {
@@ -22,6 +24,8 @@ typedef struct {
     hashmap *counters;  // Hashmap of name -> counter structs
     hashmap *timers;    // Map of name -> timer structs
     key_val *kv_vals;   // Linked list of key_val structs
+    hashmap *sets;      // Hashmap of name -> set structs 
+
     double eps;         // The error for timers
     double *quantiles;  // Array of quantiles
     uint32_t num_quants;    // Size of quantiles array
@@ -31,12 +35,12 @@ typedef int(*metric_callback)(void *data, metric_type type, char *name, void *va
 
 /**
  * Initializes the metrics struct.
- * @arg eps The maximum error for the quantiles
+ * @arg eps The maximum error for the quantiles 
  * @arg quantiles A sorted array of double quantile values, must be on (0, 1)
  * @arg num_quants The number of entries in the quantiles array
  * @return 0 on success.
  */
-int init_metrics(double eps, double *quantiles, uint32_t num_quants, metrics *m);
+int init_metrics(double timer_eps, double *quantiles, uint32_t num_quants, metrics *m);
 
 /**
  * Initializes the metrics struct, with preset configurations.

@@ -5,6 +5,8 @@
 static int counter_delete_cb(void *data, const char *key, void *value);
 static int timer_delete_cb(void *data, const char *key, void *value);
 static int iter_cb(void *data, const char *key, void *value);
+static int set_delete_cb(void* data, const char* key, void* value);
+static int set_cb(void *data, const char *key, void *value);
 
 struct cb_info {
     metric_type type;
@@ -29,7 +31,11 @@ int init_metrics(double eps, double *quantiles, uint32_t num_quants, metrics *m)
     // Allocate the hashmaps
     int res = hashmap_init(0, &m->counters);
     if (res) return res;
+
     res = hashmap_init(0, &m->timers);
+    if (res) return res;
+    
+    res = hashmap_init(0, &m->sets);
     if (res) return res;
 
     // Set the head of our linked list to null
@@ -74,6 +80,10 @@ int destroy_metrics(metrics *m) {
     hashmap_iter(m->timers, timer_delete_cb, NULL);
     hashmap_destroy(m->timers);
 
+    // Nuke the sets
+    hashmap_iter(m->sets, set_delete_cb, NULL);
+    hashmap_destroy(m->sets);
+
     return 0;
 }
 
@@ -97,6 +107,19 @@ static int metrics_increment_counter(metrics *m, char *name, double val) {
 
     // Add the sample value
     return counter_add_sample(c, val);
+}
+
+static int metrics_add_set_sample(metrics* m, char* name, double val) {
+    set* s;
+    int res = hashmap_get(m->sets, name, (void**)&s);
+
+    if (res == -1) {
+        s = malloc(sizeof(set));
+        set_init(s, m->eps);
+        hashmap_put(m->sets, name, s);
+    }
+    
+    return set_add(s, val);
 }
 
 /**
@@ -154,6 +177,9 @@ int metrics_add_sample(metrics *m, metric_type type, char *name, double val) {
         case TIMER:
             return metrics_add_timer_sample(m, name, val);
 
+        case SET:
+            return metrics_add_set_sample(m, name, val);
+
         default:
             return -1;
     }
@@ -186,6 +212,11 @@ int metrics_iter(metrics *m, void *data, metric_callback cb) {
     should_break = hashmap_iter(m->counters, iter_cb, &info);
     if (should_break) return should_break;
 
+    // Send the sets
+    info.type = SET;    
+    should_break = hashmap_iter(m->sets, set_cb, &info);
+    if (should_break) return should_break;
+
     // Send the timers
     info.type = TIMER;
     should_break = hashmap_iter(m->timers, iter_cb, &info);
@@ -195,6 +226,13 @@ int metrics_iter(metrics *m, void *data, metric_callback cb) {
 // Counter map cleanup
 static int counter_delete_cb(void *data, const char *key, void *value) {
     free(value);
+    return 0;
+}
+
+static int set_delete_cb(void* data, const char* key, void* value) {
+    set* s = value;
+    set_destroy(s);
+    free(s);
     return 0;
 }
 
@@ -210,5 +248,21 @@ static int timer_delete_cb(void *data, const char *key, void *value) {
 static int iter_cb(void *data, const char *key, void *value) {
     struct cb_info *info = data;
     return info->cb(info->data, info->type, (char*)key, value);
+}
+
+static int set_foreach_cb(double value, void **argv) {
+    struct cb_info *info = argv[0];
+    char *key = argv[1];
+
+    return info->cb(info->data, info->type, key, &value);
+}
+
+static int set_cb(void *data, const char *key, void *value) {
+    set *s = (set *)value;
+    void **tuple = calloc(2, sizeof(void *));
+    tuple[0] = data;
+    tuple[1] = (char *)key;
+
+    return set_foreach(s, set_foreach_cb, tuple);
 }
 
