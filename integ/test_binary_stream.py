@@ -50,7 +50,7 @@ def pytest_funcarg__servers(request):
 
     # Make the command
     output = "%s/output" % tmpdir
-    cmd = "cat > %s" % output
+    cmd = "cat >> %s" % output
 
     # Write the configuration
     port = random.randrange(10000, 65000)
@@ -91,7 +91,7 @@ binary_stream = yes
             break
         except Exception, e:
             print e
-            time.sleep(0.3)
+            time.sleep(0.5)
 
     # Die now
     if not connected:
@@ -121,12 +121,21 @@ def format_output(time, key, type, val_type, val):
     return prefix + key + "\0"
 
 
+def wait_file(path, timeout=5):
+    "Waits on a file to be make"
+    start = time.time()
+    while not os.path.isfile(path) and time.time() - start < timeout:
+        time.sleep(0.1)
+    if not os.path.isfile(path):
+        raise Exception("Timed out waiting for file %s" % path)
+
+
 class TestInteg(object):
     def test_kv(self, servers):
         "Tests adding kv pairs"
         server, _, output = servers
         server.sendall(format("tubez", "kv", 100))
-        time.sleep(1)
+        wait_file(output)
         now = time.time()
         out = open(output).read()
         assert out in (format_output(now, "tubez", BIN_TYPES["kv"], VAL_TYPE_MAP["kv"], 100),
@@ -138,7 +147,7 @@ class TestInteg(object):
         server.sendall(format("foobar", "c", 100))
         server.sendall(format("foobar", "c", 200))
         server.sendall(format("foobar", "c", 300))
-        time.sleep(1)
+        wait_file(output)
         now = time.time()
         out = open(output).read()
 
@@ -161,7 +170,7 @@ class TestInteg(object):
         for x in xrange(100):
             msg += format("noobs", "ms", x)
         server.sendall(msg)
-        time.sleep(1)
+        wait_file(output)
         now = time.time()
         out = open(output).read()
 
