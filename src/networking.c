@@ -285,9 +285,6 @@ static void handle_flush_event(ev_timer *watcher, int revents) {
  * the connection buffers, and stars to listening for data
  */
 static void handle_new_client(ev_io *watcher, int ready_events) {
-    // Get the user data
-    worker_ev_userdata *data = ev_userdata();
-
     // Accept the client connection
     int listen_fd = watcher->fd;
     struct sockaddr_in client_addr;
