@@ -6,7 +6,7 @@ static int counter_delete_cb(void *data, const char *key, void *value);
 static int timer_delete_cb(void *data, const char *key, void *value);
 static int iter_cb(void *data, const char *key, void *value);
 static int set_delete_cb(void* data, const char* key, void* value);
-static int set_cb(void *data, const char *key, void *value);
+//static int set_cb(void *data, const char *key, void *value);
 
 struct cb_info {
     metric_type type;
@@ -214,7 +214,7 @@ int metrics_iter(metrics *m, void *data, metric_callback cb) {
 
     // Send the sets
     info.type = SET;    
-    should_break = hashmap_iter(m->sets, set_cb, &info);
+    should_break = hashmap_iter(m->sets, iter_cb, &info);
     if (should_break) return should_break;
 
     // Send the timers
@@ -250,6 +250,7 @@ static int iter_cb(void *data, const char *key, void *value) {
     return info->cb(info->data, info->type, (char*)key, value);
 }
 
+/*
 static int set_foreach_cb(double value, void **argv) {
     struct cb_info *info = argv[0];
     char *key = argv[1];
@@ -265,4 +266,4 @@ static int set_cb(void *data, const char *key, void *value) {
 
     return set_foreach(s, set_foreach_cb, tuple);
 }
-
+*/

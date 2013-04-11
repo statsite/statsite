@@ -67,7 +67,7 @@ void init_conn_handler(statsite_config *config) {
 static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name, void *value) {
     #define STREAM(...) if (fprintf(pipe, __VA_ARGS__, (long long)tv->tv_sec) < 0) return 1;
 
-    struct timeval *tv = data;    
+    struct timeval *tv = data;
     switch (type) {
         case KEY_VAL:
             STREAM("gauges.%s|%f|%lld\n", name, *(double*)value);
@@ -92,8 +92,8 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
             break;
 
         case SET:
-            syslog(LOG_DEBUG, "sets.%s|%f\n", name, *(double*)value);
-            STREAM("sets.%s|%f|%lld\n", name, *(double*)value);
+            syslog(LOG_DEBUG, "sets.%s|%d\n", name, set_size((set *)value));
+            STREAM("sets.%s|%d|%lld\n", name, set_size((set *)value));
             break;
 
         default:
