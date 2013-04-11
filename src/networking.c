@@ -92,7 +92,6 @@ struct statsite_networking {
 // Static typedefs
 static void handle_flush_event(ev_timer *watcher, int revents);
 static void handle_new_client(ev_io *watcher, int ready_events);
-static int handle_client_data(ev_io *watch, worker_ev_userdata* data);
 static void handle_udp_message(ev_io *watch, int ready_events);
 static void invoke_event_handler(ev_io *watch, int ready_events);
 
