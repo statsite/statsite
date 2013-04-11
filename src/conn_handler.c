@@ -92,7 +92,7 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
 
         case SET:
             syslog(LOG_DEBUG, "sets.%s|%f\n", name, *(double*)value);
-            //STREAM("sets.%s|%f|%lld\n", name, *(double*)value);
+            STREAM("sets.%s|%f|%lld\n", name, *(double*)value);
             break;
 
         default:
