@@ -9,7 +9,6 @@
 #include <assert.h>
 #include <strings.h>
 #include <string.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include "heap.h"
 
@@ -116,7 +115,7 @@ void heap_create(heap* h, int initial_size, int (*comp_func)(void*,void*)) {
 
 
     // Store the compare function
-    
+    h->compare_func = comp_func;
 
     // Set active entries to 0
     h->active_entries = 0;
@@ -174,7 +173,6 @@ int heap_min(heap* h, void** key, void** value) {
 void heap_insert(heap *h, void* key, void* value) {
     // Check if this heap is not destoyed
     assert(h->table != NULL);
-    printf("INSERT(%s, %d)", (char *)key, *((int *)value));
 
     // Check if we have room
     int max_entries = h->allocated_pages * ENTRIES_PER_PAGE;
@@ -210,7 +208,6 @@ void heap_insert(heap *h, void* key, void* value) {
     int parent_index;
     heap_entry *parent;
 
-    char is_ok = 1;
     // While we can, keep swapping with our parent
     while (current_index > 0) {
         // Get the parent index
@@ -220,8 +217,7 @@ void heap_insert(heap *h, void* key, void* value) {
         parent = GET_ENTRY(parent_index, table);
 
         // Compare the keys, and swap if we need to
-        int cmp = cmp_func(key, parent->key);
-        if (cmp < 0) {
+        if (cmp_func(key, parent->key) < 0) {
             // Move the parent down
             current->key = parent->key;
             current->value = parent->value;
@@ -231,20 +227,10 @@ void heap_insert(heap *h, void* key, void* value) {
             current = parent;
 
         // We are done swapping
-        }  else {
-            if (cmp == 0) {
-                int v = *((int *) parent->value);
-                int vv = *((int *)value);
-
-                printf("\t FOUND: %s (%d)\n", ((char *)parent->key), v);
-                is_ok = (v != vv);
-            }            
+        }   else
             break;
-        }
-        printf("\n");
     }
 
-    if (!is_ok) return;
     // Insert at the current index
     current->key = key;
     current->value = value;
@@ -389,5 +375,3 @@ void heap_foreach(heap* h, void (*func)(void*,void*)) {
         func(entry->key, entry->value);
     }
 }
-
-

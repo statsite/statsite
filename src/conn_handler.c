@@ -53,7 +53,7 @@ static statsite_config *GLOBAL_CONFIG;
 void init_conn_handler(statsite_config *config) {
     // Make the initial metrics object
     metrics *m = malloc(sizeof(metrics));
-    int res = init_metrics(config->eps, (double*)&QUANTILES, NUM_QUANTILES, m);
+    int res = init_metrics(config->timer_eps, (double*)&QUANTILES, NUM_QUANTILES, m);
     assert(res == 0);
     GLOBAL_METRICS = m;
 
@@ -70,6 +70,7 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
     struct timeval *tv = data;
     switch (type) {
         case KEY_VAL:
+            syslog(LOG_DEBUG, "gauges.%s|%f\n", name, *(double*)value);
             STREAM("gauges.%s|%f|%lld\n", name, *(double*)value);
             break;
 
@@ -79,6 +80,8 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
             break;
 
         case TIMER:
+            syslog(LOG_DEBUG, "timers.%s.sum|%f\n", name, timer_sum(value));
+
             STREAM("timers.%s.sum|%f|%lld\n", name, timer_sum(value));
             STREAM("timers.%s.sum_sq|%f|%lld\n", name, timer_squared_sum(value));
             STREAM("timers.%s.mean|%f|%lld\n", name, timer_mean(value));
@@ -295,31 +298,34 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
                     return -1;
             }
 
-            // Convert the value to a double
-            endptr = NULL;
-            val = strtod(val_str, &endptr);
-
-            // Handle counter sampling if applicable
-            if (type == COUNTER && !buffer_after_terminator(type_str, after_len, '@', &sample_str, &after_len)) {
-                sample_rate = strtod(sample_str, &endptr);
-                if (sample_rate > 0 && sample_rate <= 1) {
-                    // Magnify the value
-                    val = val * (1.0 / sample_rate);
-                }
+            if (type == SET) {
+                metrics_add_set_sample(GLOBAL_METRICS, buf, val_str);
             }
+            else {
+                // Convert the value to a double
+                endptr = NULL;
+                val = strtod(val_str, &endptr);
+                // Handle counter sampling if applicable
+                if (type == COUNTER && !buffer_after_terminator(type_str, after_len, '@', &sample_str, &after_len)) {
+                    sample_rate = strtod(sample_str, &endptr);
+                    if (sample_rate > 0 && sample_rate <= 1) {
+                        // Magnify the value
+                        val = val * (1.0 / sample_rate);
+                    }
+                }
 
-            // Store the sample if we did the conversion
-            if (val != 0 || endptr != val_str) {
-                if (GLOBAL_CONFIG->input_counter != NULL)
-                    metrics_add_sample(GLOBAL_METRICS, COUNTER, GLOBAL_CONFIG->input_counter, 1);
+                // Store the sample if we did the conversion
+                if (val != 0 || endptr != val_str) {
+                    if (GLOBAL_CONFIG->input_counter != NULL)                    
+                        metrics_increment_counter(GLOBAL_METRICS, GLOBAL_CONFIG->input_counter, 1);
 
-                metrics_add_sample(GLOBAL_METRICS, type, buf, val);
-            } else {
-                syslog(LOG_WARNING, "Failed value conversion! Input: %s", val_str);
-                close_client_connection(handle->conn);
-                if (should_free) free(buf);
-                return -1;
-
+                    metrics_add_sample(GLOBAL_METRICS, type, buf, val);
+                } else {
+                    syslog(LOG_WARNING, "Failed value conversion! Input: %s", val_str);
+                    close_client_connection(handle->conn);
+                    if (should_free) free(buf);
+                    return -1;
+                }
             }
         } else {
             syslog(LOG_WARNING, "Failed parse metric! Input: %s", buf);

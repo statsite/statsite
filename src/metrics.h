@@ -66,6 +66,34 @@ int destroy_metrics(metrics *m);
 int metrics_add_sample(metrics *m, metric_type type, char *name, double val);
 
 /**
+ * Increments the counter with the given name
+ * by a value.
+ * @arg name The name of the counter
+ * @arg val The value to add
+ * @return 0 on success
+ */
+int metrics_increment_counter(metrics *m, char *name, double val);
+
+int metrics_add_set_sample(metrics* m, char* name, char *val);
+
+/**
+ * Adds a new timer sample for the timer with a
+ * given name.
+ * @arg name The name of the timer
+ * @arg val The sample to add
+ * @return 0 on success.
+ */
+int metrics_add_timer_sample(metrics *m, char *name, double val);
+
+/**
+ * Adds a new K/V pair
+ * @arg name The key name
+ * @arg val The value associated
+ * @return 0 on success.
+ */
+int metrics_add_kv(metrics *m, char *name, double val);
+
+/**
  * Iterates through all the metrics
  * @arg m The metrics to iterate through
  * @arg data Opaque handle passed to the callback

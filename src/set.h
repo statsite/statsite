@@ -10,7 +10,7 @@
  // Structure for a single set entry (BST node)
 typedef struct set_entry {
 	// value for this entry
-    double value;
+    char* value;
     
     // left/less BST node
     struct set_entry* le;
@@ -21,10 +21,7 @@ typedef struct set_entry {
 
 
 // Main struct for representing the set of unique entries
-typedef struct set {
-    // epsilon for comparing entries' value
-    double eps;
-
+typedef struct set {    
 	// the number of entries (elements) in the set 
     int active_entries;
     
@@ -34,13 +31,13 @@ typedef struct set {
 
 // Functions
 
-void set_init(set *, double);
+void set_init(set *);
 
 int set_size(set *);
 
-int set_add(set *, double);
+int set_add(set *, char *);
 
-int set_foreach(set *, int (*func)(double, void **), void **);
+int set_foreach(set *, int (*func_callback)(char *, void **), void **);
 
 void set_destroy(set *);
 

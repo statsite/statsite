@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "metrics.h"
@@ -6,7 +7,6 @@ static int counter_delete_cb(void *data, const char *key, void *value);
 static int timer_delete_cb(void *data, const char *key, void *value);
 static int iter_cb(void *data, const char *key, void *value);
 static int set_delete_cb(void* data, const char* key, void* value);
-//static int set_cb(void *data, const char *key, void *value);
 
 struct cb_info {
     metric_type type;
@@ -94,7 +94,7 @@ int destroy_metrics(metrics *m) {
  * @arg val The value to add
  * @return 0 on success
  */
-static int metrics_increment_counter(metrics *m, char *name, double val) {
+int metrics_increment_counter(metrics *m, char *name, double val) {
     counter *c;
     int res = hashmap_get(m->counters, name, (void**)&c);
 
@@ -109,13 +109,13 @@ static int metrics_increment_counter(metrics *m, char *name, double val) {
     return counter_add_sample(c, val);
 }
 
-static int metrics_add_set_sample(metrics* m, char* name, double val) {
+int metrics_add_set_sample(metrics* m, char* name, char *val) {
     set* s;
     int res = hashmap_get(m->sets, name, (void**)&s);
 
     if (res == -1) {
         s = malloc(sizeof(set));
-        set_init(s, m->eps);
+        set_init(s);
         hashmap_put(m->sets, name, s);
     }
     
@@ -129,7 +129,7 @@ static int metrics_add_set_sample(metrics* m, char* name, double val) {
  * @arg val The sample to add
  * @return 0 on success.
  */
-static int metrics_add_timer_sample(metrics *m, char *name, double val) {
+int metrics_add_timer_sample(metrics *m, char *name, double val) {    
     timer *t;
     int res = hashmap_get(m->timers, name, (void**)&t);
 
@@ -138,10 +138,10 @@ static int metrics_add_timer_sample(metrics *m, char *name, double val) {
         t = malloc(sizeof(timer));
         init_timer(m->eps, m->quantiles, m->num_quants, t);
         hashmap_put(m->timers, name, t);
-    }
-
+    }    
+    int r = timer_add_sample(t, val);
     // Add the sample value
-    return timer_add_sample(t, val);
+    return r;
 }
 
 /**
@@ -150,7 +150,7 @@ static int metrics_add_timer_sample(metrics *m, char *name, double val) {
  * @arg val The value associated
  * @return 0 on success.
  */
-static int metrics_add_kv(metrics *m, char *name, double val) {
+ int metrics_add_kv(metrics *m, char *name, double val) {
     key_val *kv = malloc(sizeof(key_val));
     kv->name = strdup(name);
     kv->val = val;
@@ -167,6 +167,8 @@ static int metrics_add_kv(metrics *m, char *name, double val) {
  * @return 0 on success.
  */
 int metrics_add_sample(metrics *m, metric_type type, char *name, double val) {
+    char val_str[128];
+
     switch (type) {
         case KEY_VAL:
             return metrics_add_kv(m, name, val);
@@ -178,7 +180,8 @@ int metrics_add_sample(metrics *m, metric_type type, char *name, double val) {
             return metrics_add_timer_sample(m, name, val);
 
         case SET:
-            return metrics_add_set_sample(m, name, val);
+            sprintf(val_str, "%f", val);
+            return metrics_add_set_sample(m, name, val_str);
 
         default:
             return -1;
@@ -249,21 +252,3 @@ static int iter_cb(void *data, const char *key, void *value) {
     struct cb_info *info = data;
     return info->cb(info->data, info->type, (char*)key, value);
 }
-
-/*
-static int set_foreach_cb(double value, void **argv) {
-    struct cb_info *info = argv[0];
-    char *key = argv[1];
-
-    return info->cb(info->data, info->type, key, &value);
-}
-
-static int set_cb(void *data, const char *key, void *value) {
-    set *s = (set *)value;
-    void **tuple = calloc(2, sizeof(void *));
-    tuple[0] = data;
-    tuple[1] = (char *)key;
-
-    return set_foreach(s, set_foreach_cb, tuple);
-}
-*/
