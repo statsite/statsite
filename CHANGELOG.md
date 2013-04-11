@@ -1,3 +1,9 @@
+# 0.3.5
+
+ * Cleanup of the networking code, reliability improvements,
+   reduced memory footprint.
+ * Git SHA: 4eb5e5e
+
 # 0.3.4
 
  * Compatibility with statsd sampling flag for counters
