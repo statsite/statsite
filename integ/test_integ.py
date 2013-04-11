@@ -84,7 +84,7 @@ def wait_file(path, timeout=5):
         time.sleep(0.1)
     if not os.path.isfile(path):
         raise Exception("Timed out waiting for file %s" % path)
-    else:
+    while os.path.getsize(path) == 0 and time.time() - start < timeout:
         time.sleep(0.1)
 
 
