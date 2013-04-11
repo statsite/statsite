@@ -74,6 +74,7 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
             break;
 
         case COUNTER:
+            syslog(LOG_DEBUG, "counts.%s|%f\n", name, counter_sum(value));
             STREAM("counts.%s|%f|%lld\n", name, counter_sum(value));
             break;
 
@@ -180,7 +181,12 @@ static void* flush_thread(void *arg) {
     // Stream the records
     char *cmd = GLOBAL_CONFIG->stream_cmd;
     int res = stream_to_command(m, &tv, cb, cmd); 
-    if (res != 0) syslog(LOG_WARNING, "Streaming command '%s' exited with status: '%s'", cmd, strerror(res));
+    if (res != 0) 
+        // [127]: Unknown error
+        if (res == 127)
+            syslog(LOG_DEBUG, "Streaming command '%s' exited with status: [%d]", cmd, res);
+        else
+            syslog(LOG_WARNING, "Streaming command '%s' exited with status: '%s'", cmd, strerror(res));
 
     // Cleanup
     destroy_metrics(m);
