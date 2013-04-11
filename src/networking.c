@@ -1,4 +1,16 @@
+#include <arpa/inet.h>
+#include <fcntl.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <syslog.h>
+#include <unistd.h>
+
 #include "networking.h"
+#include "conn_handler.h"
+
 #define EV_STANDALONE 1
 #define EV_API_STATIC 1
 #define EV_COMPAT3 0
@@ -12,19 +24,6 @@
 #define EV_USE_KQUEUE 1
 #endif
 #include "ev.c"
-
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <pthread.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netinet/tcp.h>
-#include <fcntl.h>
-#include <sys/uio.h>
-#include <syslog.h>
-#include <unistd.h>
-#include "conn_handler.h"
-
 
 /**
  * Default listen backlog size for
