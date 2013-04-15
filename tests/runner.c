@@ -107,6 +107,8 @@ int main(void)
     tcase_add_test(tc8, test_sane_log_level);
     tcase_add_test(tc8, test_sane_timer_eps);
     tcase_add_test(tc8, test_sane_flush_interval);
+    tcase_add_test(tc8, test_sane_histograms);
+    tcase_add_test(tc8, test_config_histograms);
 
     // Add the radix tests
     suite_add_tcase(s1, tc9);

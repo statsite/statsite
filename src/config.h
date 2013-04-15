@@ -3,6 +3,20 @@
 #include <stdint.h>
 #include <syslog.h>
 #include <stdbool.h>
+#include "radix.h"
+
+
+// Represents the configuration of a histogram
+typedef struct histogram_config {
+    char *prefix;
+    double min_val;
+    double max_val;
+    double bin_width;
+    int num_bins;
+    struct histogram_config *next;
+    char parts;
+} histogram_config;
+
 
 /**
  * Stores our configuration
@@ -20,6 +34,8 @@ typedef struct {
     char *pid_file;
     bool binary_stream;
     char *input_counter;
+    histogram_config *hist_configs;
+    radix_tree *histograms;
 } statsite_config;
 
 /**
@@ -43,6 +59,7 @@ int validate_config(statsite_config *config);
 int sane_log_level(char *log_level, int *syslog_level);
 int sane_timer_eps(double eps);
 int sane_flush_interval(int intv);
+int sane_histograms(histogram_config *config);
 
 /**
  * Joins two strings as part of a path,
