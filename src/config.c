@@ -241,6 +241,10 @@ int config_from_filename(char *filename, statsite_config *config) {
     // Check for an unfinished histogram
     if (in_progress) {
         syslog(LOG_WARNING, "Unfinished configuration for section: %s", histogram_section);
+        free(histogram_section);
+        free(in_progress);
+        in_progress = NULL;
+        histogram_section = NULL;
     }
 
     return 0;
