@@ -139,9 +139,14 @@ int main(int argc, char **argv) {
     }
 
     // Validate the config file
-    int validate_res = validate_config(config);
-    if (validate_res != 0) {
+    if (validate_config(config)) {
         syslog(LOG_ERR, "Invalid configuration!");
+        return 1;
+    }
+
+    // Build the prefix tree
+    if (build_prefix_tree(config)) {
+        syslog(LOG_ERR, "Failed to build prefix tree!");
         return 1;
     }
 
