@@ -297,3 +297,24 @@ width=25\n\
 }
 END_TEST
 
+START_TEST(test_build_radix)
+{
+    statsite_config config;
+    int res = config_from_filename(NULL, &config);
+
+    histogram_config c1 = {"foo", 100, 200, 10, 0, NULL, 0};
+    histogram_config c2 = {"bar", 100, 200, 10, 0, NULL, 0};
+    histogram_config c3 = {"baz", 100, 200, 10, 0, NULL, 0};
+    config.hist_configs = &c1;
+    c1.next = &c2;
+    c2.next = &c3;
+
+    fail_unless(build_prefix_tree(&config) == 0);
+    fail_unless(config.histograms != NULL);
+
+    histogram_config *conf = NULL;
+    fail_unless(radix_search(config.histograms, "baz", (void**)&conf) == 0);
+    fail_unless(conf == &c3);
+}
+END_TEST
+

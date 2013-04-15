@@ -370,3 +370,34 @@ int validate_config(statsite_config *config) {
     return res;
 }
 
+/**
+ * Builds the radix tree for prefix matching
+ * @return 0 on success
+ */
+int build_prefix_tree(statsite_config *config) {
+    // Do nothing if there is no config
+    if (!config->hist_configs)
+        return 0;
+
+    // Initialize the radix tree
+    radix_tree *t = malloc(sizeof(radix_tree));
+    config->histograms = t;
+    int res = radix_init(t);
+    if (res) goto ERR;
+
+    // Add all the prefixes
+    histogram_config *current = config->hist_configs;
+    void **val;
+    while (!res && current) {
+        val = (void**)&current;
+        res = radix_insert(t, current->prefix, val);
+        current = current->next;
+    }
+
+    if (!res)
+        return res;
+ERR:
+    free(t);
+    return 1;
+}
+

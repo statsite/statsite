@@ -70,4 +70,10 @@ int sane_histograms(histogram_config *config);
  */
 char* join_path(char *path, char *part2);
 
+/**
+ * Builds the radix tree for prefix matching
+ * @return 0 on success
+ */
+int build_prefix_tree(statsite_config *config);
+
 #endif
