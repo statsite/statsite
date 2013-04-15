@@ -9,6 +9,9 @@
  *
  */
 
+#ifndef RADIX_H
+#define RADIX_H
+
 typedef struct {
     char *key;
     void *value;
@@ -77,3 +80,4 @@ int radix_longest_prefix(radix_tree *t, char *key, void **value);
  */
 int radix_foreach(radix_tree *t, void *data, int(*iter_func)(void* data, char *key, void *value));
 
+#endif
