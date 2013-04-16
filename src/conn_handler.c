@@ -25,6 +25,9 @@
 #define BIN_OUT_STDDEV  0x5
 #define BIN_OUT_MIN     0x6
 #define BIN_OUT_MAX     0x7
+#define BIN_OUT_HIST_FLOOR    0x8
+#define BIN_OUT_HIST_BIN      0x9
+#define BIN_OUT_HIST_CEIL     0xa
 #define BIN_OUT_PCT     0x80
 
 /* Static method declarations */
@@ -132,6 +135,9 @@ static int stream_bin_writer(FILE *pipe, uint64_t timestamp, unsigned char type,
 
 static int stream_formatter_bin(FILE *pipe, void *data, metric_type type, char *name, void *value) {
     #define STREAM_BIN(...) if (stream_bin_writer(pipe, ((struct timeval *)data)->tv_sec, __VA_ARGS__, name)) return 1;
+    #define STREAM_UINT(val) if (!fwrite(&val, sizeof(unsigned int), 1, pipe)) return 1;
+    timer_hist *t;
+    int i;
     switch (type) {
         case KEY_VAL:
             STREAM_BIN(BIN_TYPE_KV, BIN_OUT_NO_TYPE, *(double*)value);
@@ -148,16 +154,29 @@ static int stream_formatter_bin(FILE *pipe, void *data, metric_type type, char *
             break;
 
         case TIMER:
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_SUM, timer_sum(value));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_SUM_SQ, timer_squared_sum(value));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MEAN, timer_mean(value));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_COUNT, timer_count(value));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_STDDEV, timer_stddev(value));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MIN, timer_min(value));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MAX, timer_max(value));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 50, timer_query(value, 0.5));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 95, timer_query(value, 0.95));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 99, timer_query(value, 0.99));
+            t = (timer_hist*)value;
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_SUM, timer_sum(&t->tm));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_SUM_SQ, timer_squared_sum(&t->tm));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MEAN, timer_mean(&t->tm));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_COUNT, timer_count(&t->tm));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_STDDEV, timer_stddev(&t->tm));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MIN, timer_min(&t->tm));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MAX, timer_max(&t->tm));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 50, timer_query(&t->tm, 0.5));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 95, timer_query(&t->tm, 0.95));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 99, timer_query(&t->tm, 0.99));
+
+            // Binary streaming for histograms
+            if (t->conf) {
+                STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_HIST_FLOOR, t->conf->min_val);
+                STREAM_UINT(t->counts[0]);
+                for (i=0; i < t->conf->num_bins-2; i++) {
+                    STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_HIST_BIN, t->conf->min_val+(t->conf->bin_width*i));
+                    STREAM_UINT(t->counts[i+1]);
+                }
+                STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_HIST_CEIL, t->conf->max_val);
+                STREAM_UINT(t->counts[i+1]);
+            }
             break;
 
         default:
