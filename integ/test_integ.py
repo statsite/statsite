@@ -33,6 +33,13 @@ flush_interval = 1
 port = %d
 udp_port = %d
 stream_cmd = %s
+
+[histogram1]
+prefix=has_hist
+min=10
+max=90
+width=10
+
 """ % (port, port, cmd)
     open(config_path, "w").write(conf)
 
@@ -143,6 +150,27 @@ class TestInteg(object):
         assert "timers.noobs.median|49.000000" in out
         assert "timers.noobs.p95|95.000000" in out
         assert "timers.noobs.p99|99.000000" in out
+
+    def test_histogram(self, servers):
+        "Tests adding keys with histograms"
+        server, _, output = servers
+        msg = ""
+        for x in xrange(100):
+            msg += "has_hist.test:%d|ms\n" % x
+        server.sendall(msg)
+
+        wait_file(output)
+        out = open(output).read()
+        assert "timers.has_hist.test.histogram.bin_<10.00|10" in out
+        assert "timers.has_hist.test.histogram.bin_10.00|10" in out
+        assert "timers.has_hist.test.histogram.bin_20.00|10" in out
+        assert "timers.has_hist.test.histogram.bin_30.00|10" in out
+        assert "timers.has_hist.test.histogram.bin_40.00|10" in out
+        assert "timers.has_hist.test.histogram.bin_50.00|10" in out
+        assert "timers.has_hist.test.histogram.bin_60.00|10" in out
+        assert "timers.has_hist.test.histogram.bin_70.00|10" in out
+        assert "timers.has_hist.test.histogram.bin_80.00|10" in out
+        assert "timers.has_hist.test.histogram.bin_>90.00|10" in out
 
 
 class TestIntegUDP(object):

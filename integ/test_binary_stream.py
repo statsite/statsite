@@ -21,6 +21,7 @@ except ImportError:
 
 
 BINARY_HEADER = struct.Struct("<BBHd")
+COUNT_VAL = struct.Struct("<I")
 BIN_TYPES = {"kv": 1, "c": 2, "ms": 3}
 
 BINARY_OUT_HEADER = struct.Struct("<QBBHd")
@@ -35,6 +36,9 @@ VAL_TYPE_MAP = {
     "stddev": 5,
     "min": 6,
     "max": 7,
+    "hist_min": 8,
+    "hist_bin": 9,
+    "hist_max": 10,
     "percentile": 128,
 }
 
@@ -61,6 +65,13 @@ port = %d
 udp_port = %d
 stream_cmd = %s
 binary_stream = yes
+
+[histogram1]
+prefix=has_hist
+min=10
+max=90
+width=10
+
 """ % (port, port, cmd)
     open(config_path, "w").write(conf)
 
@@ -120,6 +131,10 @@ def format_output(time, key, type, val_type, val):
     prefix = BINARY_OUT_HEADER.pack(int(time), type, val_type, len(key) + 1, val)
     return prefix + key + "\0"
 
+def format_output_count(time, key, type, val_type, val, count):
+    "Formats a response line that includes a count, for histograms"
+    prefix = format_output(time, key, type, val_type, val)
+    return prefix + COUNT_VAL.pack(count)
 
 def wait_file(path, timeout=5):
     "Waits on a file to be make"
@@ -180,16 +195,42 @@ class TestInteg(object):
         if format_output(now - 1, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum"], 4950) in out:
             now = now - 1
 
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum"], 4950)
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum sq"], 328350)
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["min"], 0)
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["max"], 99)
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["count"], 100)
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["stddev"], 29.011492)
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["mean"], 49.5)
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P50"], 49)
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P95"], 95)
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P99"], 99)
+        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum"], 4950) in out
+        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum sq"], 328350) in out
+        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["min"], 0) in out
+        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["max"], 99) in out
+        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["count"], 100) in out
+        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["stddev"], 29.011491975882016) in out
+        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["mean"], 49.5) in out
+        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P50"], 49) in out
+        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P95"], 95) in out
+        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P99"], 99) in out
+
+    def test_histogram(self, servers):
+        "Tests streaming of histogram values"
+        server, _, output = servers
+        msg = ""
+        for x in xrange(100):
+            msg += format("has_hist.test", "ms", x)
+        server.sendall(msg)
+        wait_file(output)
+        now = time.time()
+        out = open(output).read()
+
+        # Adjust for time drift
+        if format_output(now - 1, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum"], 4950) in out:
+            now = now - 1
+
+        assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_min"], 10, 10) in out
+        assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 10, 10) in out
+        assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 20, 10) in out
+        assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 30, 10) in out
+        assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 40, 10) in out
+        assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 50, 10) in out
+        assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 60, 10) in out
+        assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 70, 10) in out
+        assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 80, 10) in out
+        assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_max"], 90, 10) in out
 
 
 if __name__ == "__main__":
