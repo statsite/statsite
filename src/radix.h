@@ -24,7 +24,6 @@ typedef struct radix_node {
 } radix_node;
 
 typedef struct {
-    unsigned int size;
     radix_node root;
 } radix_tree;
 
