@@ -54,7 +54,8 @@ static statsite_config *GLOBAL_CONFIG;
 void init_conn_handler(statsite_config *config) {
     // Make the initial metrics object
     metrics *m = malloc(sizeof(metrics));
-    int res = init_metrics(config->timer_eps, (double*)&QUANTILES, NUM_QUANTILES, m);
+    int res = init_metrics(config->timer_eps, (double*)&QUANTILES, NUM_QUANTILES,
+            config->histograms, m);
     assert(res == 0);
     GLOBAL_METRICS = m;
 
@@ -185,7 +186,8 @@ static void* flush_thread(void *arg) {
 void flush_interval_trigger() {
     // Make a new metrics object
     metrics *m = malloc(sizeof(metrics));
-    init_metrics(GLOBAL_METRICS->eps, (double*)&QUANTILES, NUM_QUANTILES, m);
+    init_metrics(GLOBAL_METRICS->eps, (double*)&QUANTILES, NUM_QUANTILES,
+            GLOBAL_CONFIG->histograms, m);
 
     // Swap with the new one
     metrics *old = GLOBAL_METRICS;
