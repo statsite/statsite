@@ -82,15 +82,10 @@ static int value_to_int(const char *val, int *result) {
  * and write the value out.
  * @arg val The string value
  * @arg result The destination for the result
- * @return 0 on success, -EINVAL on error.
+ * @return 1 on success, -EINVAL on error.
  */
 static int value_to_double(const char *val, double *result) {
-    double res = strtod(val, NULL);
-    if (res == 0) {
-        return 0;
-    }
-    *result = res;
-    return 1;
+    return sscanf(val, "%lf", result);
 }
 
 /**
@@ -119,7 +114,7 @@ static int histogram_callback(void* user, const char* section, const char* name,
     // Switch on the config
     #define NAME_MATCH(param) (strcasecmp(param, name) == 0)
 
-    int res = 0;
+    int res = 1;
     if (NAME_MATCH("prefix")) {
         in_progress->parts |= 1;
         in_progress->prefix = strdup(value);
@@ -236,6 +231,9 @@ int config_from_filename(char *filename, statsite_config *config) {
     int res = ini_parse(filename, config_callback, config);
     if (res == -1) {
         return -ENOENT;
+    } else if (res) {
+        syslog(LOG_ERR, "Failed to parse config on line: %d", res);
+        return -res;
     }
 
     // Check for an unfinished histogram
