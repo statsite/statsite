@@ -53,12 +53,12 @@ static bool value_to_bool(const char *val, bool *result) {
 
     if (VAL_MATCH("true") || VAL_MATCH("yes") || VAL_MATCH("1")) {
         *result = true;
-        return 0;
+        return 1;
     } else if (VAL_MATCH("false") || VAL_MATCH("no") || VAL_MATCH("0")) {
         *result = false;
-        return 0;
+        return 1;
     }
-    return 1;
+    return 0;
 }
 
 /**
