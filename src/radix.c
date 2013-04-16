@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <strings.h>
+#include <string.h>
 #include "radix.h"
 
 /**
