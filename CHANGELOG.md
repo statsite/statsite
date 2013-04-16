@@ -1,3 +1,9 @@
+# 0.4.0
+
+ * Adding support for histogram calculations on timers
+ * Improved error reporting when parsing config file
+ * Git SHA: 1d3dc82
+
 # 0.3.5
 
  * Cleanup of the networking code, reliability improvements,
