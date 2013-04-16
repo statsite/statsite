@@ -50,6 +50,7 @@ a re-implementation of the Python version of statsite
 <li>Min/Max</li>
 <li>Standard deviation</li>
 <li>Median, Percentile 95, Percentile 99</li>
+<li>Histograms</li>
 </ul>
 </li>
 <li>Send counters that statsite will aggregate</li>
@@ -78,6 +79,12 @@ and aggregated using the Cormode-Muthurkrishnan algorithm from
 This means that the percentile values are not perfectly accurate,
 and are subject to a specifiable error epsilon. This allows us to
 store only a fraction of the samples.</p>
+
+<p>Histograms can also be optionally maintained for timer values.
+The minimum and maximum values along with the bin widths must
+be specified in advance, and as samples are recieved the bins
+are updated. Statsite supports multiple histograms configurations,
+and uses a longest-prefix match policy.</p>
 
 <h2>Install</h2>
 
@@ -116,6 +123,18 @@ log_level = INFO
 flush_interval = 10
 timer_eps = 0.01
 stream_cmd = python sinks/graphite.py localhost 2003
+
+[histogram_api]
+prefix=api
+min=0
+max=100
+width=5
+
+[histogram_default]
+prefix=
+min=0
+max=200
+width=20
 </code></pre>
 
 <p>Then run statsite, pointing it to that file::</p>
@@ -225,7 +244,7 @@ characters. It may also be faster.</p>
 
 <p>Each command is sent to the sink in the following manner:</p>
 
-<pre><code>&lt;Timestamp&gt;&lt;Metric Type&gt;&lt;Value Type&gt;&lt;Key Length&gt;&lt;Value&gt;&lt;Key&gt;
+<pre><code>&lt;Timestamp&gt;&lt;Metric Type&gt;&lt;Value Type&gt;&lt;Key Length&gt;&lt;Value&gt;&lt;Key&gt;[&lt;Count&gt;]
 </code></pre>
 
 <p>Most of these are the same as the binary protocol. There are a few.
@@ -247,6 +266,9 @@ which is the current Unix timestamp. The Metric type is one of:</p>
 <li>0x5 : Standard deviation</li>
 <li>0x6 : Minimum Value</li>
 <li>0x7 : Maximum Value</li>
+<li>0x8 : Histogram Floor Value</li>
+<li>0x9 : Histogram Bin Value</li>
+<li>0xa : Histogram Ceiling Value</li>
 <li>0x80 OR <code>percentile</code> :  If the type OR's with 128 (0x80), then it is a
 percentile amount. The amount is OR'd with 0x80 to provide the type. For
 example (0x80 | 0x32) = 0xb2 is the 50% percentile or medium. The 95th
@@ -254,6 +276,16 @@ percentile is (0x80 | 0xdf) = 0xdf.</li>
 </ul><p>The key length is a 2 byte unsigned integer representing the key length
 terminated by a NULL character. The Value is an IEEE754 double. Lastly,
 the key is a NULL-terminated character stream.</p>
+
+<p>The final <code>&lt;Count&gt;</code> field is only set for histogram values.
+It is always provided as an unsigned 32 bit integer value. Histograms use the
+value field to specify the bin, and the count field for the entries in that
+bin. The special values for histogram floor and ceiling indicate values that
+were outside the specified histogram range. For example, if the min value was
+50 and the max 200, then HISTOGRAM_FLOOR will have value 50, and the count is
+the number of entires which were below this minimum value. The ceiling is the same
+but visa versa. For bin values, the value is the minimum value of the bin, up to
+but not including the next bin.</p>
 
 <p>To enable the binary sink protocol, add a configuration variable <code>binary_stream</code>
 to the configuration file with the value <code>yes</code>. An example sink is provided in
