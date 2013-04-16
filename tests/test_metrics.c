@@ -13,7 +13,7 @@ START_TEST(test_metrics_init_and_destroy)
 {
     metrics m;
     double quants[] = {0.5, 0.90, 0.99};
-    int res = init_metrics(0.01, (double*)&quants, 3, &m);
+    int res = init_metrics(0.01, (double*)&quants, 3, NULL, &m);
     fail_unless(res == 0);
 
     res = destroy_metrics(&m);
