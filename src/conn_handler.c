@@ -16,6 +16,7 @@
 #define BIN_TYPE_KV      0x1
 #define BIN_TYPE_COUNTER 0x2
 #define BIN_TYPE_TIMER   0x3
+#define BIN_TYPE_SET     0x4
 
 #define BIN_OUT_NO_TYPE 0x0
 #define BIN_OUT_SUM     0x1
@@ -81,6 +82,10 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
 
         case COUNTER:
             STREAM("counts.%s|%f|%lld\n", name, counter_sum(value));
+            break;
+
+        case SET:
+            STREAM("sets.%s|%lld|%lld\n", name, set_size(value));
             break;
 
         case TIMER:
@@ -151,6 +156,10 @@ static int stream_formatter_bin(FILE *pipe, void *data, metric_type type, char *
             STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_STDDEV, counter_stddev(value));
             STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_MIN, counter_min(value));
             STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_MAX, counter_max(value));
+            break;
+
+        case SET:
+            STREAM_BIN(BIN_TYPE_SET, BIN_OUT_COUNT, set_size(value));
             break;
 
         case TIMER:
