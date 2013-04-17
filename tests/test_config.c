@@ -84,6 +84,7 @@ port = 10000\n\
 udp_port = 10001\n\
 flush_interval = 120\n\
 timer_eps = 0.005\n\
+set_eps = 0.03\n\
 stream_cmd = foo\n\
 log_level = INFO\n\
 daemonize = true\n\
@@ -103,6 +104,7 @@ pid_file = /tmp/statsite.pid\n";
     fail_unless(config.udp_port == 10001);
     fail_unless(strcmp(config.log_level, "INFO") == 0);
     fail_unless(config.timer_eps == 0.005);
+    fail_unless(config.set_eps == 0.03);
     fail_unless(strcmp(config.stream_cmd, "foo") == 0);
     fail_unless(config.flush_interval == 120);
     fail_unless(config.daemonize == true);
@@ -214,11 +216,37 @@ START_TEST(test_sane_histograms)
     c = (histogram_config){"foo", 0, 1000, 0.5, 0, NULL, 0};
     fail_unless(sane_histograms(&c) == 1);
 
+    c = (histogram_config){"foo", 0, 1000, 2, 0, NULL, 0};
+    fail_unless(sane_histograms(&c) == 0);
+    fail_unless(c.num_bins == 502);
+
     c = (histogram_config){"foo", 0, 100, 5, 0, NULL, 0};
     fail_unless(sane_histograms(&c) == 0);
     fail_unless(c.num_bins == 22);
 }
 END_TEST
+
+START_TEST(test_sane_set_eps)
+{
+    unsigned char prec;
+    fail_unless(sane_set_precision(-0.01, &prec) == 1);
+    fail_unless(sane_set_precision(1.0, &prec) == 1);
+    fail_unless(sane_set_precision(0.5, &prec) == 1);
+
+    fail_unless(sane_set_precision(0.2, &prec) == 0);
+    fail_unless(prec == 5);
+    fail_unless(sane_set_precision(0.1, &prec) == 0);
+    fail_unless(prec == 7);
+    fail_unless(sane_set_precision(0.03, &prec) == 0);
+    fail_unless(prec == 11);
+    fail_unless(sane_set_precision(0.01, &prec) == 0);
+    fail_unless(prec == 14);
+
+    fail_unless(sane_set_precision(0.001, &prec) == 1);
+}
+END_TEST
+
+
 
 START_TEST(test_config_histograms)
 {

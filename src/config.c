@@ -380,6 +380,7 @@ int sane_set_precision(double eps, unsigned char *precision) {
 cause increased memory use.");
     }
 
+    *precision = minimum_prec;
     return 0;
 }
 

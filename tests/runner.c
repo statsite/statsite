@@ -113,6 +113,7 @@ int main(void)
     tcase_add_test(tc8, test_sane_timer_eps);
     tcase_add_test(tc8, test_sane_flush_interval);
     tcase_add_test(tc8, test_sane_histograms);
+    tcase_add_test(tc8, test_sane_set_eps);
     tcase_add_test(tc8, test_config_histograms);
     tcase_add_test(tc8, test_build_radix);
 
