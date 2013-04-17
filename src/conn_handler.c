@@ -159,7 +159,7 @@ static int stream_formatter_bin(FILE *pipe, void *data, metric_type type, char *
             break;
 
         case SET:
-            STREAM_BIN(BIN_TYPE_SET, BIN_OUT_COUNT, set_size(value));
+            STREAM_BIN(BIN_TYPE_SET, BIN_OUT_SUM, set_size(value));
             break;
 
         case TIMER:
