@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include "config.h"
 #include "ini.h"
+#include "hll.h"
 
 /**
  * Static pointer used for
@@ -39,6 +40,8 @@ static const statsite_config DEFAULT_CONFIG = {
     NULL,               // Do not track number of messages received
     NULL,               // No histograms by default
     NULL,
+    0.02,               // 2% goal uses precision 12
+    12,                 // Set precision 12, 1.6% variance
 };
 
 /**
@@ -188,6 +191,8 @@ static int config_callback(void* user, const char* section, const char* name, co
     // Handle the double cases
     } else if (NAME_MATCH("timer_eps")) {
         return value_to_double(value, &config->timer_eps);
+    } else if (NAME_MATCH("set_eps")) {
+        return value_to_double(value, &config->set_eps);
 
     // Copy the string values
     } else if (NAME_MATCH("log_level")) {
@@ -343,12 +348,38 @@ int sane_histograms(histogram_config *config) {
         } else if (config->num_bins > 128) {
             syslog(LOG_WARNING, "Histogram bin count very high! Bins: %d Prefix: %s",
                     config->num_bins, config->prefix);
-            return 1;
         }
 
         // Inspect the next config
         config = config->next;
     }
+    return 0;
+}
+
+int sane_set_precision(double eps, unsigned char *precision) {
+    // Determine the minimum precision needed
+    int minimum_prec = hll_precision_for_error(eps);
+    if (minimum_prec < 0) {
+        syslog(LOG_ERR, "Set epsilon must be between 0 and 1!");
+        return 1;
+    }
+
+    // Check if the precision is within range
+    if (minimum_prec < HLL_MIN_PRECISION) {
+        syslog(LOG_ERR, "Set epsilon too high!");
+        return 1;
+    }
+    if (minimum_prec > HLL_MAX_PRECISION) {
+        syslog(LOG_ERR, "Set epsilon too low! Memory use would be prohibitive.");
+        return 1;
+    }
+
+    // Warn if the precision is very high
+    if (minimum_prec > 15) {
+        syslog(LOG_WARNING, "Set epsilon low, high precision could \
+cause increased memory use.");
+    }
+
     return 0;
 }
 
@@ -364,6 +395,7 @@ int validate_config(statsite_config *config) {
     res |= sane_timer_eps(config->timer_eps);
     res |= sane_flush_interval(config->flush_interval);
     res |= sane_histograms(config->hist_configs);
+    res |= sane_set_precision(config->set_eps, &config->set_precision);
 
     return res;
 }

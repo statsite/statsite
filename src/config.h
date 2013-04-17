@@ -36,6 +36,8 @@ typedef struct {
     char *input_counter;
     histogram_config *hist_configs;
     radix_tree *histograms;
+    double set_eps;
+    unsigned char set_precision;
 } statsite_config;
 
 /**
@@ -60,6 +62,7 @@ int sane_log_level(char *log_level, int *syslog_level);
 int sane_timer_eps(double eps);
 int sane_flush_interval(int intv);
 int sane_histograms(histogram_config *config);
+int sane_set_precision(double eps, unsigned char *precision);
 
 /**
  * Joins two strings as part of a path,
