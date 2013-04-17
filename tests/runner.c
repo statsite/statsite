@@ -10,6 +10,7 @@
 #include "test_streaming.c"
 #include "test_config.c"
 #include "test_radix.c"
+#include "test_hll.c"
 
 int main(void)
 {
@@ -25,6 +26,7 @@ int main(void)
     TCase *tc7 = tcase_create("streaming");
     TCase *tc8 = tcase_create("config");
     TCase *tc9 = tcase_create("radix");
+    TCase *tc10 = tcase_create("hyperloglog");
     SRunner *sr = srunner_create(s1);
     int nf;
 
@@ -119,6 +121,18 @@ int main(void)
     tcase_add_test(tc9, test_radix_search);
     tcase_add_test(tc9, test_radix_longest_prefix);
     tcase_add_test(tc9, test_radix_foreach);
+
+    // Add the hll tests
+    suite_add_tcase(s1, tc10);
+    tcase_add_test(tc10, test_hll_init_bad);
+    tcase_add_test(tc10, test_hll_init_and_destroy);
+    tcase_add_test(tc10, test_hll_add);
+    tcase_add_test(tc10, test_hll_add_hash);
+    tcase_add_test(tc10, test_hll_add_size);
+    tcase_add_test(tc10, test_hll_size);
+    tcase_add_test(tc10, test_hll_error_bound);
+    tcase_add_test(tc10, test_hll_precision_for_error);
+
 
     srunner_run_all(sr, CK_ENV);
     nf = srunner_ntests_failed(sr);
