@@ -12,6 +12,8 @@ env_statsite_without_err = Environment(CCFLAGS = '-g -std=c99 -D_GNU_SOURCE -O3 
 objs = env_statsite_with_err.Object('src/hashmap', 'src/hashmap.c')           + \
         env_statsite_with_err.Object('src/heap', 'src/heap.c')                + \
         env_statsite_with_err.Object('src/radix', 'src/radix.c')              + \
+        env_statsite_with_err.Object('src/hll_constants', 'src/hll_constants.c') + \
+        env_statsite_with_err.Object('src/hll', 'src/hll.c') + \
         env_statsite_with_err.Object('src/cm_quantile', 'src/cm_quantile.c')  + \
         env_statsite_with_err.Object('src/timer', 'src/timer.c')              + \
         env_statsite_with_err.Object('src/counter', 'src/counter.c')          + \
