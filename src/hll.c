@@ -2,6 +2,11 @@
  * Based on the Google paper
  * "HyperLogLog in Practice: Algorithmic Engineering of a
 State of The Art Cardinality Estimation Algorithm"
+ *
+ * We implement a HyperLogLog using 6 bits for register,
+ * and a 64bit hash function. For our needs, we always use
+ * a dense representation and avoid the sparse/dense conversions.
+ *
  */
 #include <stdlib.h>
 #include <math.h>
