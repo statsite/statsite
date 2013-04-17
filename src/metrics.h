@@ -6,6 +6,7 @@
 #include "counter.h"
 #include "timer.h"
 #include "hashmap.h"
+#include "set.h"
 
 typedef enum {
     UNKNOWN,
