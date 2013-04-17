@@ -13,7 +13,7 @@ START_TEST(test_metrics_init_and_destroy)
 {
     metrics m;
     double quants[] = {0.5, 0.90, 0.99};
-    int res = init_metrics(0.01, (double*)&quants, 3, NULL, &m);
+    int res = init_metrics(0.01, (double*)&quants, 3, NULL, 12, &m);
     fail_unless(res == 0);
 
     res = destroy_metrics(&m);
@@ -95,6 +95,10 @@ static int iter_test_all_cb(void *data, metric_type type, char *key, void *val) 
             if (strcmp(key, "baz") == 0 && timer_sum(val) == 11)
                 *o = *o | 1 << 4;
             break;
+        case SET:
+            if (strcmp(key, "zip") == 0 && set_size(val) == 2)
+                *o = *o | 1 << 5;
+            break;
         default:
             return 1;
     }
@@ -118,9 +122,12 @@ START_TEST(test_metrics_add_all_iter)
     fail_unless(metrics_add_sample(&m, TIMER, "baz", 1) == 0);
     fail_unless(metrics_add_sample(&m, TIMER, "baz", 10) == 0);
 
+    fail_unless(metrics_set_update(&m, "zip", "foo") == 0);
+    fail_unless(metrics_set_update(&m, "zip", "wow") == 0);
+
     int okay = 0;
     fail_unless(metrics_iter(&m, (void*)&okay, iter_test_all_cb) == 0);
-    fail_unless(okay == 31);
+    fail_unless(okay == 63);
 
     res = destroy_metrics(&m);
     fail_unless(res == 0);
@@ -156,7 +163,7 @@ START_TEST(test_metrics_histogram)
 
     metrics m;
     double quants[] = {0.5, 0.90, 0.99};
-    res = init_metrics(0.01, (double*)&quants, 3, config.histograms, &m);
+    res = init_metrics(0.01, (double*)&quants, 3, config.histograms, 12, &m);
     fail_unless(res == 0);
 
     fail_unless(metrics_add_sample(&m, TIMER, "baz", 1) == 0);
