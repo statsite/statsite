@@ -273,8 +273,8 @@ void final_flush() {
  */
 int handle_client_connect(statsite_conn_handler *handle) {
     // Try to read the magic character, bail if no data
-    unsigned char magic = 0;
-    if (peek_client_bytes(handle->conn, 1, &magic) == -1) return 0;
+    unsigned char magic;
+    if (unlikely(peek_client_byte(handle->conn, &magic) == -1)) return 0;
 
     // Check the magic byte
     if (magic == BINARY_MAGIC_BYTE)
@@ -403,21 +403,20 @@ ERR_RET:
 
 // Handles the binary set command
 // Return 0 on success, -1 on error, -2 if missing data
-static int handle_binary_set(statsite_conn_handler *handle, uint16_t *header) {
+static int handle_binary_set(statsite_conn_handler *handle, uint16_t *header, int should_free) {
     /*
      * Abort if we haven't received the command
      * header[1] is the key length
      * header[2] is the set length
      */
-    int val_bytes = header[1] + header[2];
-    if (unlikely(available_bytes(handle->conn) < MIN_BINARY_HEADER_SIZE + val_bytes))
-        return -2;
-
-    // Read the both values now
     char *key;
-    int should_free;
-    seek_client_bytes(handle->conn, MIN_BINARY_HEADER_SIZE);
-    read_client_bytes(handle->conn, val_bytes, &key, &should_free);
+    int val_bytes = header[1] + header[2];
+
+    // Read the full command if available
+    if (unlikely(should_free)) free(header);
+    if (read_client_bytes(handle->conn, MIN_BINARY_HEADER_SIZE + val_bytes, (char**)&header, &should_free))
+        return -2;
+    key = ((char*)header) + MIN_BINARY_HEADER_SIZE;
 
     // Verify the null terminators
     if (unlikely(*(key + header[1] - 1))) {
@@ -437,11 +436,11 @@ static int handle_binary_set(statsite_conn_handler *handle, uint16_t *header) {
     metrics_set_update(GLOBAL_METRICS, key, key+header[1]);
 
     // Make sure to free the command buffer if we need to
-    if (unlikely(should_free)) free(key);
+    if (unlikely(should_free)) free(header);
     return 0;
 
 ERR_RET:
-    if (unlikely(should_free)) free(key);
+    if (unlikely(should_free)) free(header);
     return -1;
 }
 
@@ -452,27 +451,26 @@ ERR_RET:
  */
 static int handle_binary_client_connect(statsite_conn_handler *handle) {
     metric_type type;
-    int status, should_free;
-    char *key;
     uint16_t key_len;
-    unsigned char header[MAX_BINARY_HEADER_SIZE];
+    int should_free;
+    unsigned char *cmd, *key;
     while (1) {
         // Peek and check for the header. This is up to 12 bytes.
         // Magic byte - 1 byte
         // Metric type - 1 byte
         // Key length - 2 bytes
         // Metric value - 8 bytes OR Set Length 2 bytes
-        status = peek_client_bytes(handle->conn, MIN_BINARY_HEADER_SIZE, (char*)&header);
-        if (status == -1) return 0; // Return if no command is available
+        if (peek_client_bytes(handle->conn, MIN_BINARY_HEADER_SIZE, (char**)&cmd, &should_free))
+            return 0;  // Return if no command is available
 
         // Check for the magic byte
-        if (unlikely(header[0] != BINARY_MAGIC_BYTE)) {
-            syslog(LOG_WARNING, "Received command from binary stream without magic byte! Byte: %u", header[0]);
-            return -1;
+        if (unlikely(cmd[0] != BINARY_MAGIC_BYTE)) {
+            syslog(LOG_WARNING, "Received command from binary stream without magic byte! Byte: %u", cmd[0]);
+            goto ERR_RET;
         }
 
         // Get the metric type
-        switch (header[1]) {
+        switch (cmd[1]) {
             case BIN_TYPE_KV:
                 type = KEY_VAL;
                 break;
@@ -485,7 +483,7 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
 
             // Special case set handling
             case BIN_TYPE_SET:
-                switch (handle_binary_set(handle, (uint16_t*)&header)) {
+                switch (handle_binary_set(handle, (uint16_t*)cmd, should_free)) {
                     case -1:
                         return -1;
                     case -2:
@@ -495,29 +493,23 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
                 }
 
             default:
-                syslog(LOG_WARNING, "Received command from binary stream with unknown type: %u!", header[1]);
-                return -1;
+                syslog(LOG_WARNING, "Received command from binary stream with unknown type: %u!", cmd[1]);
+                goto ERR_RET;
         }
 
-        // Extract the key length and value
-        memcpy(&key_len, &header[2], 2);
-
         // Abort if we haven't received the full key, wait for the data
-        if (unlikely(available_bytes(handle->conn) < MAX_BINARY_HEADER_SIZE + key_len))
+        key_len = *(uint16_t*)(cmd+2);
+
+        // Read the full command if available
+        if (unlikely(should_free)) free(cmd);
+        if (read_client_bytes(handle->conn, MAX_BINARY_HEADER_SIZE + key_len, (char**)&cmd, &should_free))
             return 0;
-
-        // Read the full header in (peek+seek to avoid another should_free)
-        peek_client_bytes(handle->conn, MAX_BINARY_HEADER_SIZE, (char*)&header);
-        seek_client_bytes(handle->conn, MAX_BINARY_HEADER_SIZE);
-
-        // Read the key now
-        read_client_bytes(handle->conn, key_len, &key, &should_free);
+        key = cmd + MAX_BINARY_HEADER_SIZE;
 
         // Verify the key contains a null terminator
         if (unlikely(*(key + key_len - 1))) {
             syslog(LOG_WARNING, "Received command from binary stream with non-null terminated key: %.*s!", key_len, key);
-            if (unlikely(should_free)) free(key);
-            return -1;
+            goto ERR_RET;
         }
 
         // Increment the input counter
@@ -525,13 +517,15 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
             metrics_add_sample(GLOBAL_METRICS, COUNTER, GLOBAL_CONFIG->input_counter, 1);
 
         // Add the sample
-        metrics_add_sample(GLOBAL_METRICS, type, key, *(double*)&header[4]);
+        metrics_add_sample(GLOBAL_METRICS, type, key, *(double*)(cmd+4));
 
         // Make sure to free the command buffer if we need to
-        if (unlikely(should_free)) free(key);
+        if (unlikely(should_free)) free(cmd);
     }
-
     return 0;
+ERR_RET:
+    if (unlikely(should_free)) free(cmd);
+    return -1;
 }
 
 
