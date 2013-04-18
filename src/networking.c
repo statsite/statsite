@@ -463,7 +463,7 @@ void enter_networking_loop(statsite_networking *netconf, int *should_run) {
     ev_set_userdata(&data);
 
     // Run forever until we are told to halt
-    while (*should_run) {
+    while (likely(*should_run)) {
         ev_run(EVRUN_ONCE);
     }
     return;
