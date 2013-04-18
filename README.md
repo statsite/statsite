@@ -15,7 +15,6 @@ Features
   - Min/Max
   - Standard deviation
   - Median, Percentile 95, Percentile 99
-  - Histograms
 * Send counters that statsite will aggregate
 * Binary protocol
 
@@ -45,12 +44,6 @@ and aggregated using the Cormode-Muthurkrishnan algorithm from
 This means that the percentile values are not perfectly accurate,
 and are subject to a specifiable error epsilon. This allows us to
 store only a fraction of the samples.
-
-Histograms can also be optionally maintained for timer values.
-The minimum and maximum values along with the bin widths must
-be specified in advance, and as samples are recieved the bins
-are updated. Statsite supports multiple histograms configurations,
-and uses a longest-prefix match policy.
 
 Install
 -------
@@ -89,18 +82,6 @@ Here is an example configuration file::
     flush_interval = 10
     timer_eps = 0.01
     stream_cmd = python sinks/graphite.py localhost 2003
-
-    [histogram_api]
-    prefix=api
-    min=0
-    max=100
-    width=5
-
-    [histogram_default]
-    prefix=
-    min=0
-    max=200
-    width=20
 
 Then run statsite, pointing it to that file::
 
@@ -204,7 +185,7 @@ characters. It may also be faster.
 
 Each command is sent to the sink in the following manner:
 
-    <Timestamp><Metric Type><Value Type><Key Length><Value><Key>[<Count>]
+    <Timestamp><Metric Type><Value Type><Key Length><Value><Key>
 
 Most of these are the same as the binary protocol. There are a few.
 changes however. The Timestamp is sent as an 8 byte unsigned integer,
@@ -224,9 +205,6 @@ The value type is one of:
 * 0x5 : Standard deviation
 * 0x6 : Minimum Value
 * 0x7 : Maximum Value
-* 0x8 : Histogram Floor Value
-* 0x9 : Histogram Bin Value
-* 0xa : Histogram Ceiling Value
 * 0x80 OR `percentile` :  If the type OR's with 128 (0x80), then it is a
     percentile amount. The amount is OR'd with 0x80 to provide the type. For
     example (0x80 | 0x32) = 0xb2 is the 50% percentile or medium. The 95th
@@ -235,16 +213,6 @@ The value type is one of:
 The key length is a 2 byte unsigned integer representing the key length
 terminated by a NULL character. The Value is an IEEE754 double. Lastly,
 the key is a NULL-terminated character stream.
-
-The final `<Count>` field is only set for histogram values.
-It is always provided as an unsigned 32 bit integer value. Histograms use the
-value field to specify the bin, and the count field for the entries in that
-bin. The special values for histogram floor and ceiling indicate values that
-were outside the specified histogram range. For example, if the min value was
-50 and the max 200, then HISTOGRAM\_FLOOR will have value 50, and the count is
-the number of entires which were below this minimum value. The ceiling is the same
-but visa versa. For bin values, the value is the minimum value of the bin, up to
-but not including the next bin.
 
 To enable the binary sink protocol, add a configuration variable `binary_stream`
 to the configuration file with the value `yes`. An example sink is provided in

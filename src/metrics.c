@@ -19,16 +19,14 @@ struct cb_info {
  * @arg eps The maximum error for the quantiles
  * @arg quantiles A sorted array of double quantile values, must be on (0, 1)
  * @arg num_quants The number of entries in the quantiles array
- * @arg histograms A radix tree with histogram settings
  * @return 0 on success.
  */
-int init_metrics(double eps, double *quantiles, uint32_t num_quants, radix_tree *histograms, metrics *m) {
+int init_metrics(double eps, double *quantiles, uint32_t num_quants, metrics *m) {
     // Copy the inputs
     m->eps = eps;
     m->num_quants = num_quants;
     m->quantiles = malloc(num_quants * sizeof(double));
     memcpy(m->quantiles, quantiles, num_quants * sizeof(double));
-    m->histograms = histograms;
 
     // Allocate the hashmaps
     int res = hashmap_init(0, &m->counters);
@@ -53,7 +51,7 @@ int init_metrics(double eps, double *quantiles, uint32_t num_quants, radix_tree 
  */
 int init_metrics_defaults(metrics *m) {
     double quants[] = {0.5, 0.95, 0.99};
-    return init_metrics(0.01, (double*)&quants, 3, NULL, m);
+    return init_metrics(0.01, (double*)&quants, 3, m);
 }
 
 /**
@@ -131,43 +129,19 @@ int metrics_add_set_sample(metrics* m, char* name, char *val) {
  * @arg val The sample to add
  * @return 0 on success.
  */
- int metrics_add_timer_sample(metrics *m, char *name, double val) {
-    timer_hist *t;
-    histogram_config *conf;
+int metrics_add_timer_sample(metrics *m, char *name, double val) {    
+    timer *t;
     int res = hashmap_get(m->timers, name, (void**)&t);
 
     // New timer
     if (res == -1) {
-        t = malloc(sizeof(timer_hist));
-        init_timer(m->eps, m->quantiles, m->num_quants, &t->tm);
+        t = malloc(sizeof(timer));
+        init_timer(m->eps, m->quantiles, m->num_quants, t);
         hashmap_put(m->timers, name, t);
     }    
-
-    // Check if we have any histograms configured
-    if (m->histograms && !radix_longest_prefix(m->histograms, name, (void**)&conf)) {
-        t->conf = conf;
-        t->counts = calloc(conf->num_bins, sizeof(unsigned int));
-    } else {
-        t->conf = NULL;
-        t->counts = NULL;
-    }
-    
-
-    // Add the histogram value
-    if (t->conf) {
-        conf = t->conf;
-        if (val < conf->min_val)
-            t->counts[0]++;
-        else if (val >= conf->max_val)
-            t->counts[conf->num_bins - 1]++;
-        else {
-            int idx = ((val - conf->min_val) / conf->bin_width) + 1;
-            t->counts[idx]++;
-        }
-    }
-
+    int r = timer_add_sample(t, val);
     // Add the sample value
-    return timer_add_sample(&t->tm, val);
+    return r;
 }
 
 /**
@@ -267,9 +241,8 @@ static int set_delete_cb(void* data, const char* key, void* value) {
 
 // Timer map cleanup
 static int timer_delete_cb(void *data, const char *key, void *value) {
-    timer_hist *t = value;
-    destroy_timer(&t->tm);
-    if (t->counts) free(t->counts);
+    timer *t = value;
+    destroy_timer(t);
     free(t);
     return 0;
 }

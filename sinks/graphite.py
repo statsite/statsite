@@ -44,11 +44,7 @@ class GraphiteStore(object):
         # Construct the output
         metrics = [m.split("|") for m in metrics if m]
         self.logger.info("Outputting %d metrics" % len(metrics))
-        if not self.prefix:
-            lines = ["%s %s %s" % (k, v, ts) for k, v, ts in metrics]
-        else:
-            lines = ["%s.%s %s %s" % (self.prefix, k, v, ts) for k, v, ts in metrics]
-        data = "\n".join(lines) + "\n"
+        data = "\n".join(["%s.%s %s %s" % (self.prefix, k, v, ts) for k, v, ts in metrics]) + "\n"
 
         # Serialize writes to the socket
         try:
@@ -95,3 +91,4 @@ if __name__ == "__main__":
     # Flush
     graphite.flush(metrics.split("\n"))
     graphite.close()
+

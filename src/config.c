@@ -11,14 +11,6 @@
 #include "ini.h"
 
 /**
- * Static pointer used for
- * while we are still parsing the configs
- * for a histogram.
- */
-static char* histogram_section;
-static histogram_config *in_progress;
-
-/**
  * Default statsite_config values. Should create
  * filters that are about 300KB initially, and suited
  * to grow quickly.
@@ -36,8 +28,6 @@ static const statsite_config DEFAULT_CONFIG = {
     "/var/run/statsite.pid", // Default pidfile path
     0,                  // Do not use binary output by default
     NULL,               // Do not track number of messages received
-    NULL,               // No histograms by default
-    NULL,
 };
 
 /**
@@ -52,12 +42,12 @@ static bool value_to_bool(const char *val, bool *result) {
 
     if (VAL_MATCH("true") || VAL_MATCH("yes") || VAL_MATCH("1")) {
         *result = true;
-        return 1;
+        return 0;
     } else if (VAL_MATCH("false") || VAL_MATCH("no") || VAL_MATCH("0")) {
         *result = false;
-        return 1;
+        return 0;
     }
-    return 0;
+    return 1;
 }
 
 /**
@@ -81,68 +71,15 @@ static int value_to_int(const char *val, int *result) {
  * and write the value out.
  * @arg val The string value
  * @arg result The destination for the result
- * @return 1 on success, -EINVAL on error.
+ * @return 0 on success, -EINVAL on error.
  */
 static int value_to_double(const char *val, double *result) {
-    return sscanf(val, "%lf", result);
-}
-
-/**
- * Callback function to use with INIH for parsing histogram configs
- * @arg user Opaque value. Actually a statsite_config pointer
- * @arg name The config name
- * @value = The config value
- * @return 1 on success
- */
-static int histogram_callback(void* user, const char* section, const char* name, const char* value) {
-    // Make sure we don't change sections with an unfinished config
-    if (in_progress && strcasecmp(histogram_section, section)) {
-        syslog(LOG_WARNING, "Unfinished configuration for section: %s", histogram_section);
+    double res = strtod(val, NULL);
+    if (res == 0) {
         return 0;
     }
-
-    // Ensure we have something in progress
-    if (!in_progress) {
-        in_progress = calloc(1, sizeof(histogram_config));
-        histogram_section = strdup(section);
-    }
-
-    // Cast the user handle
-    statsite_config *config = (statsite_config*)user;
-
-    // Switch on the config
-    #define NAME_MATCH(param) (strcasecmp(param, name) == 0)
-
-    int res = 1;
-    if (NAME_MATCH("prefix")) {
-        in_progress->parts |= 1;
-        in_progress->prefix = strdup(value);
-
-    } else if (NAME_MATCH("min")) {
-        in_progress->parts |= 1 << 1;
-        res = value_to_double(value, &in_progress->min_val);
-
-    } else if (NAME_MATCH("max")) {
-        in_progress->parts |= 1 << 2;
-        res = value_to_double(value, &in_progress->max_val);
-
-    } else if (NAME_MATCH("width")) {
-        in_progress->parts |= 1 << 3;
-        res = value_to_double(value, &in_progress->bin_width);
-
-    } else {
-        syslog(LOG_NOTICE, "Unrecognized histogram config parameter: %s", value);
-    }
-
-    // Check if this config is done, and push into the list of configs
-    if (in_progress->parts == 15) {
-        in_progress->next = config->hist_configs;
-        config->hist_configs = in_progress;
-        in_progress = NULL;
-        free(histogram_section);
-        histogram_section = NULL;
-    }
-    return res;
+    *result = res;
+    return 0;
 }
 
 /**
@@ -154,11 +91,6 @@ static int histogram_callback(void* user, const char* section, const char* name,
  * @return 1 on success.
  */
 static int config_callback(void* user, const char* section, const char* name, const char* value) {
-    // Specially handle histogram sections
-    if (strncasecmp("histogram", section, 9) == 0) {
-        return histogram_callback(user, section, name, value);
-    }
-
     // Ignore any non-statsite sections
     if (strcasecmp("statsite", section) != 0) {
         return 0;
@@ -230,18 +162,6 @@ int config_from_filename(char *filename, statsite_config *config) {
     int res = ini_parse(filename, config_callback, config);
     if (res == -1) {
         return -ENOENT;
-    } else if (res) {
-        syslog(LOG_ERR, "Failed to parse config on line: %d", res);
-        return -res;
-    }
-
-    // Check for an unfinished histogram
-    if (in_progress) {
-        syslog(LOG_WARNING, "Unfinished configuration for section: %s", histogram_section);
-        free(histogram_section);
-        free(in_progress);
-        in_progress = NULL;
-        histogram_section = NULL;
     }
 
     return 0;
@@ -317,40 +237,6 @@ int sane_flush_interval(int intv) {
     return 0;
 }
 
-int sane_histograms(histogram_config *config) {
-    while (config) {
-        // Ensure sane upper / lower
-        if (config->min_val >= config->max_val) {
-            syslog(LOG_ERR, "Histogram min value must be less than max value! Prefix: %s", config->prefix);
-            return 1;
-        }
-
-        // Check width
-        if (config->bin_width <= 0) {
-            syslog(LOG_ERR, "Histogram bin width must be greater than 0! Prefix: %s", config->prefix);
-            return 1;
-        }
-
-        // Compute the number of bins
-        // We divide the range by bin width, and add 2 for the less than min, and more than max bins
-        config->num_bins = ((config->max_val - config->min_val) / config->bin_width) + 2;
-
-        // Check that the count is sane
-        if (config->num_bins > 1024) {
-            syslog(LOG_ERR, "Histogram bin count cannot exceed 1024! Prefix: %s", config->prefix);
-            return 1;
-        } else if (config->num_bins > 128) {
-            syslog(LOG_WARNING, "Histogram bin count very high! Bins: %d Prefix: %s",
-                    config->num_bins, config->prefix);
-            return 1;
-        }
-
-        // Inspect the next config
-        config = config->next;
-    }
-    return 0;
-}
-
 /**
  * Validates the configuration
  * @arg config The config object to validate.
@@ -362,39 +248,7 @@ int validate_config(statsite_config *config) {
     res |= sane_log_level(config->log_level, &config->syslog_log_level);
     res |= sane_timer_eps(config->timer_eps);
     res |= sane_flush_interval(config->flush_interval);
-    res |= sane_histograms(config->hist_configs);
 
     return res;
-}
-
-/**
- * Builds the radix tree for prefix matching
- * @return 0 on success
- */
-int build_prefix_tree(statsite_config *config) {
-    // Do nothing if there is no config
-    if (!config->hist_configs)
-        return 0;
-
-    // Initialize the radix tree
-    radix_tree *t = malloc(sizeof(radix_tree));
-    config->histograms = t;
-    int res = radix_init(t);
-    if (res) goto ERR;
-
-    // Add all the prefixes
-    histogram_config *current = config->hist_configs;
-    void **val;
-    while (!res && current) {
-        val = (void**)&current;
-        res = radix_insert(t, current->prefix, val);
-        current = current->next;
-    }
-
-    if (!res)
-        return res;
-ERR:
-    free(t);
-    return 1;
 }
 

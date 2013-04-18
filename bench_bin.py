@@ -3,7 +3,7 @@ import time
 import random
 import struct
 
-NUM = 1024 * 1024
+NUM = 1024 * 1024 * 4
 KEYS = ["test", "foobar", "zipzap"]
 VALS = [32, 100, 82, 101, 5, 6, 42, 73]
 
@@ -31,16 +31,13 @@ s = socket.socket()
 s.connect(("localhost", 8125))
 start = time.time()
 
-total = 0
-while True:
-    current = 0
-    while current < len(METS):
-        msg = "".join(METS[current:current + 1024])
-        current += 1024
-        total += 1024
-        s.sendall(msg)
+current = 0
+while current < len(METS):
+    msg = "".join(METS[current:current + 1024])
+    current += 1024
+    s.sendall(msg)
 
-    diff = time.time() - start
-    ops_s = total / diff
-    print "%0.2f sec\t - %.0f ops/sec" % (diff, ops_s)
+s.close()
+end = time.time()
+print NUM / (end - start), "ops/sec", (end - start), "sec"
 

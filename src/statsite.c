@@ -137,14 +137,9 @@ int main(int argc, char **argv) {
     }
 
     // Validate the config file
-    if (validate_config(config)) {
+    int validate_res = validate_config(config);
+    if (validate_res != 0) {
         syslog(LOG_ERR, "Invalid configuration!");
-        return 1;
-    }
-
-    // Build the prefix tree
-    if (build_prefix_tree(config)) {
-        syslog(LOG_ERR, "Failed to build prefix tree!");
         return 1;
     }
 
@@ -195,14 +190,21 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    // Setup signal handlers
+    // Start the network workers
+    pthread_t thread;
+    pthread_create(&thread, NULL, (void*(*)(void*))start_networking_worker, netconf);
+
+    /**
+     * Loop forever, until we get a signal that
+     * indicates we should shutdown.
+     */
     signal(SIGPIPE, SIG_IGN);       // Ignore SIG_IGN
     signal(SIGHUP, SIG_IGN);        // Ignore SIG_IGN
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
-
-    // Join the networking loop, blocks until exit
-    enter_networking_loop(netconf, &SHOULD_RUN);
+    while (SHOULD_RUN) {
+        sleep(1);
+    }
 
     // Begin the shutdown/cleanup
     shutdown_networking(netconf);
