@@ -92,6 +92,10 @@ void setup_syslog() {
  * when we get signals such as SIGINT, SIGTERM.
  */
 void signal_handler(int signum) {
+    if (!SHOULD_RUN) {
+        syslog(LOG_WARNING, "Received signal [%s] while exiting! Terminating", strsignal(signum));
+        exit(1);
+    }
     SHOULD_RUN = 0;  // Stop running now
     syslog(LOG_WARNING, "Received signal [%s]! Exiting...", strsignal(signum));
 }
