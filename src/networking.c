@@ -48,6 +48,9 @@
  */
 #define CONN_BUF_MULTIPLIER 2
 
+// Macro to provide branch meta-data
+#define likely(x)       __builtin_expect((x),1)
+#define unlikely(x)     __builtin_expect((x),0)
 
 /**
  * Stores the thread specific user data.
@@ -538,7 +541,7 @@ void close_client_connection(conn_info *conn) {
 int extract_to_terminator(statsite_conn_info *conn, char terminator, char **buf, int *buf_len, int *should_free) {
     // First we need to find the terminator...
     char *term_addr = NULL;
-    if (conn->input.write_cursor < conn->input.read_cursor) {
+    if (unlikely(conn->input.write_cursor < conn->input.read_cursor)) {
         /*
          * We need to scan from the read cursor to the end of
          * the buffer, and then from the start of the buffer to
@@ -640,13 +643,19 @@ uint64_t available_bytes(statsite_conn_info *conn) {
  */
 int peek_client_bytes(statsite_conn_info *conn, int bytes, char* buf) {
     // Ensure we have sufficient data
-    if (bytes > circbuf_used_buf(&conn->input)) return -1;
+    if (unlikely(bytes > circbuf_used_buf(&conn->input))) return -1;
 
-    // Copy the bytes
-    int offset = conn->input.read_cursor;
-    int buf_size = conn->input.buf_size;
-    for (int i=0; i < bytes; i++) {
-        buf[i] = conn->input.buffer[(offset + i) % buf_size];
+    // Check if we can do a memcpy
+    if (likely(conn->input.write_cursor - conn->input.read_cursor > bytes)) {
+        memcpy(buf, conn->input.buffer+conn->input.read_cursor, bytes);
+
+    } else {
+        // Copy the bytes
+        int offset = conn->input.read_cursor;
+        int buf_size = conn->input.buf_size;
+        for (int i=0; i < bytes; i++) {
+            buf[i] = conn->input.buffer[(offset + i) % buf_size];
+        }
     }
 
     return 0;
@@ -662,7 +671,7 @@ int peek_client_bytes(statsite_conn_info *conn, int bytes, char* buf) {
  * @return 0 on success, -1 if there is insufficient data.
  */
 int seek_client_bytes(statsite_conn_info *conn, int bytes) {
-    if (bytes > circbuf_used_buf(&conn->input)) return -1;
+    if (unlikely(bytes > circbuf_used_buf(&conn->input))) return -1;
     circbuf_advance_read(&conn->input, bytes);
     return 0;
 }
@@ -677,10 +686,10 @@ int seek_client_bytes(statsite_conn_info *conn, int bytes) {
  * @return 0 on success, -1 if there is insufficient data.
  */
 int read_client_bytes(statsite_conn_info *conn, int bytes, char** buf, int* should_free) {
-    if (bytes > circbuf_used_buf(&conn->input)) return -1;
+    if (unlikely(bytes > circbuf_used_buf(&conn->input))) return -1;
 
     // Handle the wrap around case
-    if (conn->input.write_cursor < conn->input.read_cursor) {
+    if (unlikely(conn->input.write_cursor < conn->input.read_cursor)) {
         // Check if we can use a contiguous chunk
         int end_size = conn->input.buf_size - conn->input.read_cursor;
         if (end_size >= bytes) {
