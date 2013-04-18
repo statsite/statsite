@@ -42,14 +42,15 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle);
 static int buffer_after_terminator(char *buf, int buf_len, char terminator, char **after_term, int *after_len);
 
 /* These are the quantiles we track */
-static double QUANTILES[] = {0.5, 0.95, 0.99};
-static int NUM_QUANTILES = 3;
+static const double QUANTILES[] = {0.5, 0.95, 0.99};
+static const int NUM_QUANTILES = 3;
 
 // This is the magic byte that indicates we are handling
 // a binary command, instead of an ASCII command. We use
 // 170 (0xaa) value.
-static unsigned char BINARY_MAGIC_BYTE = 0xaa;
-static int BINARY_HEADER_SIZE = 12;
+static const unsigned char BINARY_MAGIC_BYTE = 0xaa;
+static const int MAX_BINARY_HEADER_SIZE = 12;
+static const int MIN_BINARY_HEADER_SIZE = 6;
 
 /**
  * This is the current metrics object we are using
@@ -400,6 +401,49 @@ ERR_RET:
     return -1;
 }
 
+// Handles the binary set command
+// Return 0 on success, -1 on error, -2 if missing data
+static int handle_binary_set(statsite_conn_handler *handle, uint16_t *header) {
+    /*
+     * Abort if we haven't received the command
+     * header[1] is the key length
+     * header[2] is the set length
+     */
+    int val_bytes = header[1] + header[2];
+    if (unlikely(available_bytes(handle->conn) < MIN_BINARY_HEADER_SIZE + val_bytes))
+        return -2;
+
+    // Read the both values now
+    char *key;
+    int should_free;
+    seek_client_bytes(handle->conn, MIN_BINARY_HEADER_SIZE);
+    read_client_bytes(handle->conn, val_bytes, &key, &should_free);
+
+    // Verify the null terminators
+    if (unlikely(*(key + header[1] - 1))) {
+        syslog(LOG_WARNING, "Received command from binary stream with non-null terminated key: %.*s!", header[1], key);
+        goto ERR_RET;
+    }
+    if (unlikely(*(key + val_bytes - 1))) {
+        syslog(LOG_WARNING, "Received command from binary stream with non-null terminated set key: %.*s!", header[2], key+header[1]);
+        goto ERR_RET;
+    }
+
+    // Increment the input counter
+    if (GLOBAL_CONFIG->input_counter)
+        metrics_add_sample(GLOBAL_METRICS, COUNTER, GLOBAL_CONFIG->input_counter, 1);
+
+    // Update the set
+    metrics_set_update(GLOBAL_METRICS, key, key+header[1]);
+
+    // Make sure to free the command buffer if we need to
+    if (unlikely(should_free)) free(key);
+    return 0;
+
+ERR_RET:
+    if (unlikely(should_free)) free(key);
+    return -1;
+}
 
 /**
  * Invoked to handle binary commands.
@@ -411,14 +455,14 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
     int status, should_free;
     char *key;
     uint16_t key_len;
-    unsigned char header[BINARY_HEADER_SIZE];
+    unsigned char header[MAX_BINARY_HEADER_SIZE];
     while (1) {
-        // Peek and check for the header. This is 12 bytes.
+        // Peek and check for the header. This is up to 12 bytes.
         // Magic byte - 1 byte
         // Metric type - 1 byte
         // Key length - 2 bytes
-        // Metric value - 8 bytes
-        status = peek_client_bytes(handle->conn, BINARY_HEADER_SIZE, (char*)&header);
+        // Metric value - 8 bytes OR Set Length 2 bytes
+        status = peek_client_bytes(handle->conn, MIN_BINARY_HEADER_SIZE, (char*)&header);
         if (status == -1) return 0; // Return if no command is available
 
         // Check for the magic byte
@@ -438,9 +482,18 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
             case BIN_TYPE_TIMER:
                 type = TIMER;
                 break;
+
+            // Special case set handling
             case BIN_TYPE_SET:
-                type = SET;
-                break;
+                switch (handle_binary_set(handle, (uint16_t*)&header)) {
+                    case -1:
+                        return -1;
+                    case -2:
+                        return 0;
+                    default:
+                        continue;
+                }
+
             default:
                 syslog(LOG_WARNING, "Received command from binary stream with unknown type: %u!", header[1]);
                 return -1;
@@ -450,11 +503,12 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
         memcpy(&key_len, &header[2], 2);
 
         // Abort if we haven't received the full key, wait for the data
-        if (unlikely(available_bytes(handle->conn) < BINARY_HEADER_SIZE + key_len))
+        if (unlikely(available_bytes(handle->conn) < MAX_BINARY_HEADER_SIZE + key_len))
             return 0;
 
-        // Seek past the header
-        seek_client_bytes(handle->conn, BINARY_HEADER_SIZE);
+        // Read the full header in (peek+seek to avoid another should_free)
+        peek_client_bytes(handle->conn, MAX_BINARY_HEADER_SIZE, (char*)&header);
+        seek_client_bytes(handle->conn, MAX_BINARY_HEADER_SIZE);
 
         // Read the key now
         read_client_bytes(handle->conn, key_len, &key, &should_free);
@@ -466,10 +520,11 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
             return -1;
         }
 
-        // Add the sample
+        // Increment the input counter
         if (GLOBAL_CONFIG->input_counter)
             metrics_add_sample(GLOBAL_METRICS, COUNTER, GLOBAL_CONFIG->input_counter, 1);
 
+        // Add the sample
         metrics_add_sample(GLOBAL_METRICS, type, key, *(double*)&header[4]);
 
         // Make sure to free the command buffer if we need to
