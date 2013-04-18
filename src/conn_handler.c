@@ -287,8 +287,9 @@ int handle_client_connect(statsite_conn_handler *handle) {
  */
 static double str2double(const char *s, char **end) {
     double val = 0.0;
+    char neg = 0;
     if (*s == '-') {
-        val *= -1;
+        neg = 1;
         s++;
     }
     for (; *s >= '0' && *s <= '9'; s++) {
@@ -304,6 +305,7 @@ static double str2double(const char *s, char **end) {
         }
         val += frac / pow(10.0, digits);
     }
+    if (neg) val *= -1.0;
     if (end) *end = (char*)s;
     return val;
 }
