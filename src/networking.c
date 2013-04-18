@@ -632,35 +632,55 @@ uint64_t available_bytes(statsite_conn_info *conn) {
     return circbuf_used_buf(&conn->input);
 }
 
+/**
+ * Lets the caller look at the next byte
+ * @arg conn The client connectoin
+ * @arg byte The output byte
+ * @return 0 on success, -1 if there is no data.
+ */
+int peek_client_byte(statsite_conn_info *conn, unsigned char* byte) {
+    if (unlikely(!circbuf_used_buf(&conn->input))) return -1;
+    *byte = *(unsigned char*)(conn->input.buffer+conn->input.read_cursor);
+    return 0;
+}
 
 /**
  * This method is used to peek into the input buffer without
- * causing input to be consumed.
+ * causing input to be consumed. It attempts to use the data
+ * in-place, similar to read_client_bytes.
  * @arg conn The client connection
  * @arg bytes The number of bytes to peek
- * @arg buf The output buffer to write to
+ * @arg buf Output parameter, sets the start of the buffer.
+ * @arg should_free Output parameter, should the buffer be freed by the caller.
  * @return 0 on success, -1 if there is insufficient data.
  */
-int peek_client_bytes(statsite_conn_info *conn, int bytes, char* buf) {
-    // Ensure we have sufficient data
+int peek_client_bytes(statsite_conn_info *conn, int bytes, char** buf, int* should_free) {
     if (unlikely(bytes > circbuf_used_buf(&conn->input))) return -1;
 
-    // Check if we can do a memcpy
-    if (likely(conn->input.write_cursor - conn->input.read_cursor > bytes)) {
-        memcpy(buf, conn->input.buffer+conn->input.read_cursor, bytes);
+    // Handle the wrap around case
+    if (unlikely(conn->input.write_cursor < conn->input.read_cursor)) {
+        // Check if we can use a contiguous chunk
+        int end_size = conn->input.buf_size - conn->input.read_cursor;
+        if (end_size >= bytes) {
+            *buf = conn->input.buffer + conn->input.read_cursor;
+            *should_free = 0;
 
-    } else {
-        // Copy the bytes
-        int offset = conn->input.read_cursor;
-        int buf_size = conn->input.buf_size;
-        for (int i=0; i < bytes; i++) {
-            buf[i] = conn->input.buffer[(offset + i) % buf_size];
+        // Otherwise, allocate a dynamic slab, and copy
+        } else {
+            *buf = malloc(bytes);
+            memcpy(*buf, conn->input.buffer + conn->input.read_cursor, end_size);
+            memcpy(*buf + end_size, conn->input.buffer, bytes - end_size);
+            *should_free = 1;
         }
+
+    // Handle the contiguous case
+    } else {
+        *buf = conn->input.buffer + conn->input.read_cursor;
+        *should_free = 0;
     }
 
     return 0;
 }
-
 
 /**
  * This method is used to seek the input buffer without

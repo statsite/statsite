@@ -66,14 +66,24 @@ int extract_to_terminator(statsite_conn_info *conn, char terminator, char **buf,
 uint64_t available_bytes(statsite_conn_info *conn);
 
 /**
+ * Lets the caller look at the next byte
+ * @arg conn The client connectoin
+ * @arg byte The output byte
+ * @return 0 on success, -1 if there is no data.
+ */
+int peek_client_byte(statsite_conn_info *conn, unsigned char* byte);
+
+/**
  * This method is used to peek into the input buffer without
- * causing input to be consumed.
+ * causing input to be consumed. It attempts to use the data
+ * in-place, similar to read_client_bytes.
  * @arg conn The client connection
  * @arg bytes The number of bytes to peek
- * @arg buf The output buffer to write to
+ * @arg buf Output parameter, sets the start of the buffer.
+ * @arg should_free Output parameter, should the buffer be freed by the caller.
  * @return 0 on success, -1 if there is insufficient data.
  */
-int peek_client_bytes(statsite_conn_info *conn, int bytes, char* buf);
+int peek_client_bytes(statsite_conn_info *conn, int bytes, char** buf, int* should_free);
 
 /**
  * This method is used to seek the input buffer without
