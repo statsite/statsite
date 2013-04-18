@@ -1,3 +1,15 @@
+# 0.4.0
+
+ * Adding support for histogram calculations on timers
+ * Improved error reporting when parsing config file
+ * Git SHA: 1d3dc82
+
+# 0.3.5
+
+ * Cleanup of the networking code, reliability improvements,
+   reduced memory footprint.
+ * Git SHA: 4eb5e5e
+
 # 0.3.4
 
  * Compatibility with statsd sampling flag for counters

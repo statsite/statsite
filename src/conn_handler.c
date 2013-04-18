@@ -24,6 +24,9 @@
 #define BIN_OUT_STDDEV  0x5
 #define BIN_OUT_MIN     0x6
 #define BIN_OUT_MAX     0x7
+#define BIN_OUT_HIST_FLOOR    0x8
+#define BIN_OUT_HIST_BIN      0x9
+#define BIN_OUT_HIST_CEIL     0xa
 #define BIN_OUT_PCT     0x80
 
 /* Static method declarations */
@@ -53,7 +56,8 @@ static statsite_config *GLOBAL_CONFIG;
 void init_conn_handler(statsite_config *config) {
     // Make the initial metrics object
     metrics *m = malloc(sizeof(metrics));
-    int res = init_metrics(config->timer_eps, (double*)&QUANTILES, NUM_QUANTILES, m);
+    int res = init_metrics(config->timer_eps, (double*)&QUANTILES, NUM_QUANTILES,
+            config->histograms, m);
     assert(res == 0);
     GLOBAL_METRICS = m;
 
@@ -68,6 +72,8 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
     #define STREAM(...) if (fprintf(pipe, __VA_ARGS__, (long long)tv->tv_sec) < 0) return 1;
 
     struct timeval *tv = data;
+    timer_hist *t;
+    int i;
     switch (type) {
         case KEY_VAL:
             syslog(LOG_DEBUG, "gauges.%s|%f\n", name, *(double*)value);
@@ -81,17 +87,27 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
 
         case TIMER:
             syslog(LOG_DEBUG, "timers.%s.sum|%f\n", name, timer_sum(value));
+            
+	    t = (timer_hist*)value;
+            STREAM("timers.%s.sum|%f|%lld\n", name, timer_sum(&t->tm));
+            STREAM("timers.%s.sum_sq|%f|%lld\n", name, timer_squared_sum(&t->tm));
+            STREAM("timers.%s.mean|%f|%lld\n", name, timer_mean(&t->tm));
+            STREAM("timers.%s.lower|%f|%lld\n", name, timer_min(&t->tm));
+            STREAM("timers.%s.upper|%f|%lld\n", name, timer_max(&t->tm));
+            STREAM("timers.%s.count|%lld|%lld\n", name, timer_count(&t->tm));
+            STREAM("timers.%s.stdev|%f|%lld\n", name, timer_stddev(&t->tm));
+            STREAM("timers.%s.median|%f|%lld\n", name, timer_query(&t->tm, 0.5));
+            STREAM("timers.%s.p95|%f|%lld\n", name, timer_query(&t->tm, 0.95));
+            STREAM("timers.%s.p99|%f|%lld\n", name, timer_query(&t->tm, 0.99));
 
-            STREAM("timers.%s.sum|%f|%lld\n", name, timer_sum(value));
-            STREAM("timers.%s.sum_sq|%f|%lld\n", name, timer_squared_sum(value));
-            STREAM("timers.%s.mean|%f|%lld\n", name, timer_mean(value));
-            STREAM("timers.%s.lower|%f|%lld\n", name, timer_min(value));
-            STREAM("timers.%s.upper|%f|%lld\n", name, timer_max(value));
-            STREAM("timers.%s.count|%lld|%lld\n", name, timer_count(value));
-            STREAM("timers.%s.stdev|%f|%lld\n", name, timer_stddev(value));
-            STREAM("timers.%s.median|%f|%lld\n", name, timer_query(value, 0.5));
-            STREAM("timers.%s.p95|%f|%lld\n", name, timer_query(value, 0.95));
-            STREAM("timers.%s.p99|%f|%lld\n", name, timer_query(value, 0.99));
+            // Stream the histogram values
+            if (t->conf) {
+                STREAM("timers.%s.histogram.bin_<%0.2f|%u|%lld\n", name, t->conf->min_val, t->counts[0]);
+                for (i=0; i < t->conf->num_bins-2; i++) {
+                    STREAM("timers.%s.histogram.bin_%0.2f|%u|%lld\n", name, t->conf->min_val+(t->conf->bin_width*i), t->counts[i+1]);
+                }
+                STREAM("timers.%s.histogram.bin_>%0.2f|%u|%lld\n", name, t->conf->max_val, t->counts[i+1]);
+            }
             break;
 
         case SET:
@@ -128,6 +144,9 @@ static int stream_bin_writer(FILE *pipe, uint64_t timestamp, unsigned char type,
 
 static int stream_formatter_bin(FILE *pipe, void *data, metric_type type, char *name, void *value) {
     #define STREAM_BIN(...) if (stream_bin_writer(pipe, ((struct timeval *)data)->tv_sec, __VA_ARGS__, name)) return 1;
+    #define STREAM_UINT(val) if (!fwrite(&val, sizeof(unsigned int), 1, pipe)) return 1;
+    timer_hist *t;
+    int i;
     switch (type) {
         case KEY_VAL:
             STREAM_BIN(BIN_TYPE_KV, BIN_OUT_NO_TYPE, *(double*)value);
@@ -144,16 +163,29 @@ static int stream_formatter_bin(FILE *pipe, void *data, metric_type type, char *
             break;
 
         case TIMER:
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_SUM, timer_sum(value));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_SUM_SQ, timer_squared_sum(value));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MEAN, timer_mean(value));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_COUNT, timer_count(value));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_STDDEV, timer_stddev(value));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MIN, timer_min(value));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MAX, timer_max(value));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 50, timer_query(value, 0.5));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 95, timer_query(value, 0.95));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 99, timer_query(value, 0.99));
+            t = (timer_hist*)value;
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_SUM, timer_sum(&t->tm));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_SUM_SQ, timer_squared_sum(&t->tm));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MEAN, timer_mean(&t->tm));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_COUNT, timer_count(&t->tm));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_STDDEV, timer_stddev(&t->tm));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MIN, timer_min(&t->tm));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MAX, timer_max(&t->tm));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 50, timer_query(&t->tm, 0.5));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 95, timer_query(&t->tm, 0.95));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 99, timer_query(&t->tm, 0.99));
+
+            // Binary streaming for histograms
+            if (t->conf) {
+                STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_HIST_FLOOR, t->conf->min_val);
+                STREAM_UINT(t->counts[0]);
+                for (i=0; i < t->conf->num_bins-2; i++) {
+                    STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_HIST_BIN, t->conf->min_val+(t->conf->bin_width*i));
+                    STREAM_UINT(t->counts[i+1]);
+                }
+                STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_HIST_CEIL, t->conf->max_val);
+                STREAM_UINT(t->counts[i+1]);
+            }
             break;
 
         case SET:
@@ -202,7 +234,8 @@ static void* flush_thread(void *arg) {
 void flush_interval_trigger() {
     // Make a new metrics object
     metrics *m = malloc(sizeof(metrics));
-    init_metrics(GLOBAL_METRICS->eps, (double*)&QUANTILES, NUM_QUANTILES, m);
+    init_metrics(GLOBAL_METRICS->eps, (double*)&QUANTILES, NUM_QUANTILES,
+            GLOBAL_CONFIG->histograms, m);
 
     // Swap with the new one
     metrics *old = GLOBAL_METRICS;
@@ -293,7 +326,6 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
                 default:
                     type = UNKNOWN;
                     syslog(LOG_WARNING, "Received unknown metric type! Input: %c", *type_str);
-                    close_client_connection(handle->conn);
                     if (should_free) free(buf);
                     return -1;
             }
@@ -322,14 +354,12 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
                     metrics_add_sample(GLOBAL_METRICS, type, buf, val);
                 } else {
                     syslog(LOG_WARNING, "Failed value conversion! Input: %s", val_str);
-                    close_client_connection(handle->conn);
                     if (should_free) free(buf);
                     return -1;
                 }
             }
         } else {
             syslog(LOG_WARNING, "Failed parse metric! Input: %s", buf);
-            close_client_connection(handle->conn);
             if (should_free) free(buf);
             return -1;
         }
@@ -367,7 +397,6 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
         // Check for the magic byte
         if (header[0] != BINARY_MAGIC_BYTE) {
             syslog(LOG_WARNING, "Received command from binary stream without magic byte! Byte: %u", header[0]);
-            close_client_connection(handle->conn);
             return -1;
         }
 
@@ -386,7 +415,6 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
             default:
                 type = UNKNOWN;
                 syslog(LOG_WARNING, "Received command from binary stream with unknown type: %u!", type_input);
-                close_client_connection(handle->conn);
                 return -1;
         }
 
@@ -407,7 +435,6 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
         // Verify the key contains a null terminator
         if (*(key + key_len - 1) != 0) {
             syslog(LOG_WARNING, "Received command from binary stream with non-null terminated key: %.*s!", key_len, key);
-            close_client_connection(handle->conn);
             if (should_free) free(key);
             return -1;
         }

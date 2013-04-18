@@ -9,6 +9,7 @@
 #include "test_metrics.c"
 #include "test_streaming.c"
 #include "test_config.c"
+#include "test_radix.c"
 
 int main(void)
 {
@@ -23,6 +24,7 @@ int main(void)
     TCase *tc6 = tcase_create("metrics");
     TCase *tc7 = tcase_create("streaming");
     TCase *tc8 = tcase_create("config");
+    TCase *tc9 = tcase_create("radix");
     SRunner *sr = srunner_create(s1);
     int nf;
 
@@ -84,6 +86,7 @@ int main(void)
     tcase_add_test(tc6, test_metrics_empty_iter);
     tcase_add_test(tc6, test_metrics_add_iter);
     tcase_add_test(tc6, test_metrics_add_all_iter);
+    tcase_add_test(tc6, test_metrics_histogram);
 
     // Add the streaming tests
     suite_add_tcase(s1, tc7);
@@ -105,6 +108,17 @@ int main(void)
     tcase_add_test(tc8, test_sane_log_level);
     tcase_add_test(tc8, test_sane_timer_eps);
     tcase_add_test(tc8, test_sane_flush_interval);
+    tcase_add_test(tc8, test_sane_histograms);
+    tcase_add_test(tc8, test_config_histograms);
+    tcase_add_test(tc8, test_build_radix);
+
+    // Add the radix tests
+    suite_add_tcase(s1, tc9);
+    tcase_add_test(tc9, test_radix_init_and_destroy);
+    tcase_add_test(tc9, test_radix_insert);
+    tcase_add_test(tc9, test_radix_search);
+    tcase_add_test(tc9, test_radix_longest_prefix);
+    tcase_add_test(tc9, test_radix_foreach);
 
     srunner_run_all(sr, CK_ENV);
     nf = srunner_ntests_failed(sr);

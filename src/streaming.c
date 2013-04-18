@@ -74,7 +74,7 @@ int stream_to_command(metrics *m, void *data, stream_callback cb, char *cmd) {
 
     // Wait for termination
     do {
-        sleep(1);
+        usleep(100000);
         if (waitpid(pid, &status, 0) < 0) break;
     } while (!WIFEXITED(status));
 

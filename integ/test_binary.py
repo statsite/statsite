@@ -30,7 +30,7 @@ def pytest_funcarg__servers(request):
 
     # Make the command
     output = "%s/output" % tmpdir
-    cmd = "cat > %s" % output
+    cmd = "cat >> %s" % output
 
     # Write the configuration
     port = random.randrange(10000, 65000)
@@ -70,7 +70,7 @@ stream_cmd = %s
             break
         except Exception, e:
             print e
-            time.sleep(0.3)
+            time.sleep(0.5)
 
     # Die now
     if not connected:
@@ -94,12 +94,23 @@ def format(key, type, val):
     return mesg
 
 
+def wait_file(path, timeout=5):
+    "Waits on a file to be make"
+    start = time.time()
+    while not os.path.isfile(path) and time.time() - start < timeout:
+        time.sleep(0.1)
+    if not os.path.isfile(path):
+        raise Exception("Timed out waiting for file %s" % path)
+    while os.path.getsize(path) == 0 and time.time() - start < timeout:
+        time.sleep(0.1)
+
+
 class TestInteg(object):
     def test_kv(self, servers):
         "Tests adding kv pairs"
         server, _, output = servers
         server.sendall(format("tubez", "kv", 100))
-        time.sleep(1)
+        wait_file(output)
         now = time.time()
         out = open(output).read()
         assert out in ("kv.tubez|100.000000|%d\n" % now, "kv.tubez|100.000000|%d\n" % (now - 1))
@@ -110,7 +121,7 @@ class TestInteg(object):
         server.sendall(format("foobar", "c", 100))
         server.sendall(format("foobar", "c", 200))
         server.sendall(format("foobar", "c", 300))
-        time.sleep(1)
+        wait_file(output)
         now = time.time()
         out = open(output).read()
         assert out in ("counts.foobar|600.000000|%d\n" % now, "counts.foobar|600.000000|%d\n" % (now - 1))
@@ -122,7 +133,7 @@ class TestInteg(object):
         for x in xrange(100):
             msg += format("noobs", "ms", x)
         server.sendall(msg)
-        time.sleep(1)
+        wait_file(output)
         out = open(output).read()
         print out
         assert "timers.noobs.sum|4950" in out
@@ -142,7 +153,7 @@ class TestIntegUDP(object):
         "Tests adding kv pairs"
         _, server, output = servers
         server.sendall(format("tubez", "kv", 100))
-        time.sleep(1)
+        wait_file(output)
         now = time.time()
         out = open(output).read()
         assert out in ("kv.tubez|100.000000|%d\n" % now, "kv.tubez|100.000000|%d\n" % (now - 1))
@@ -153,7 +164,7 @@ class TestIntegUDP(object):
         server.sendall(format("foobar", "c", 100))
         server.sendall(format("foobar", "c", 200))
         server.sendall(format("foobar", "c", 300))
-        time.sleep(1)
+        wait_file(output)
         now = time.time()
         out = open(output).read()
         assert out in ("counts.foobar|600.000000|%d\n" % now, "counts.foobar|600.000000|%d\n" % (now - 1))
@@ -165,7 +176,7 @@ class TestIntegUDP(object):
         for x in xrange(100):
             msg += format("noobs", "ms", x)
         server.sendall(msg)
-        time.sleep(1)
+        wait_file(output)
         out = open(output).read()
         print out
         assert "timers.noobs.sum|4950" in out
