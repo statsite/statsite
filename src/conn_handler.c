@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include <sys/time.h>
 #include <netinet/in.h>
+#include <math.h>
 #include "metrics.h"
 #include "streaming.h"
 #include "conn_handler.h"
@@ -30,6 +31,10 @@
 #define BIN_OUT_HIST_BIN      0x9
 #define BIN_OUT_HIST_CEIL     0xa
 #define BIN_OUT_PCT     0x80
+
+// Macro to provide branch meta-data
+#define likely(x)       __builtin_expect((x),1)
+#define unlikely(x)     __builtin_expect((x),0)
 
 /* Static method declarations */
 static int handle_binary_client_connect(statsite_conn_handler *handle);
@@ -277,6 +282,31 @@ int handle_client_connect(statsite_conn_handler *handle) {
         return handle_ascii_client_connect(handle);
 }
 
+/**
+ * Simple string to double conversion
+ */
+static double str2double(const char *s, char **end) {
+    double val = 0.0;
+    if (*s == '-') {
+        val *= -1;
+        s++;
+    }
+    for (; *s >= '0' && *s <= '9'; s++) {
+        val = (val * 10.0) + (*s - '0');
+    }
+    if (*s == '.') {
+        s++;
+        double frac = 0.0;
+        int digits = 0;
+        for (; *s >= '0' && *s <= '9'; s++) {
+            frac = (frac * 10.0) + (*s - '0');
+            digits++;
+        }
+        val += frac / pow(10.0, digits);
+    }
+    if (end) *end = (char*)s;
+    return val;
+}
 
 /**
  * Invoked to handle ASCII commands. This is the default
@@ -297,63 +327,75 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
         // Check for a valid metric
         // Scan for the colon
         status = buffer_after_terminator(buf, buf_len, ':', &val_str, &after_len);
-        if (!status) status |= buffer_after_terminator(val_str, after_len, '|', &type_str, &after_len);
-        if (status == 0) {
-            // Convert the type
-            switch (*type_str) {
-                case 'c':
-                    type = COUNTER;
-                    break;
-                case 'm':
-                    type = TIMER;
-                    break;
-                case 'k':
-                case 'g':
-                    type = KEY_VAL;
-                    break;
-                default:
-                    type = UNKNOWN;
-                    syslog(LOG_WARNING, "Received unknown metric type! Input: %c", *type_str);
-                    if (should_free) free(buf);
-                    return -1;
-            }
-
-            // Convert the value to a double
-            endptr = NULL;
-            val = strtod(val_str, &endptr);
-
-            // Handle counter sampling if applicable
-            if (type == COUNTER && !buffer_after_terminator(type_str, after_len, '@', &sample_str, &after_len)) {
-                sample_rate = strtod(sample_str, &endptr);
-                if (sample_rate > 0 && sample_rate <= 1) {
-                    // Magnify the value
-                    val = val * (1.0 / sample_rate);
-                }
-            }
-
-            // Store the sample if we did the conversion
-            if (val != 0 || endptr != val_str) {
-                if (GLOBAL_CONFIG->input_counter != NULL)
-                    metrics_add_sample(GLOBAL_METRICS, COUNTER, GLOBAL_CONFIG->input_counter, 1);
-
-                metrics_add_sample(GLOBAL_METRICS, type, buf, val);
-            } else {
-                syslog(LOG_WARNING, "Failed value conversion! Input: %s", val_str);
-                if (should_free) free(buf);
-                return -1;
-
-            }
-        } else {
+        if (likely(!status)) status |= buffer_after_terminator(val_str, after_len, '|', &type_str, &after_len);
+        if (unlikely(status)) {
             syslog(LOG_WARNING, "Failed parse metric! Input: %s", buf);
-            if (should_free) free(buf);
-            return -1;
+            goto ERR_RET;
         }
 
+        // Convert the type
+        switch (*type_str) {
+            case 'c':
+                type = COUNTER;
+                break;
+            case 'm':
+                type = TIMER;
+                break;
+            case 'k':
+            case 'g':
+                type = KEY_VAL;
+                break;
+            case 's':
+                type = SET;
+                break;
+            default:
+                type = UNKNOWN;
+                syslog(LOG_WARNING, "Received unknown metric type! Input: %c", *type_str);
+                goto ERR_RET;
+        }
+
+        // Increment the number of inputs received
+        if (GLOBAL_CONFIG->input_counter)
+            metrics_add_sample(GLOBAL_METRICS, COUNTER, GLOBAL_CONFIG->input_counter, 1);
+
+        // Fast track the set-updates
+        if (type == SET) {
+            metrics_set_update(GLOBAL_METRICS, buf, val_str);
+            goto END_LOOP;
+        }
+
+        // Convert the value to a double
+        val = str2double(val_str, &endptr);
+        if (unlikely(endptr == val_str)) {
+            syslog(LOG_WARNING, "Failed value conversion! Input: %s", val_str);
+            goto ERR_RET;
+        }
+
+        // Handle counter sampling if applicable
+        if (type == COUNTER && !buffer_after_terminator(type_str, after_len, '@', &sample_str, &after_len)) {
+            sample_rate = str2double(sample_str, &endptr);
+            if (unlikely(endptr == sample_str)) {
+                syslog(LOG_WARNING, "Failed sample rate conversion! Input: %s", sample_str);
+                goto ERR_RET;
+            }
+            if (sample_rate > 0 && sample_rate <= 1) {
+                // Magnify the value
+                val = val * (1.0 / sample_rate);
+            }
+        }
+
+        // Store the sample
+        metrics_add_sample(GLOBAL_METRICS, type, buf, val);
+
+END_LOOP:
         // Make sure to free the command buffer if we need to
         if (should_free) free(buf);
     }
 
     return 0;
+ERR_RET:
+    if (should_free) free(buf);
+    return -1;
 }
 
 
