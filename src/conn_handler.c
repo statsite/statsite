@@ -408,10 +408,8 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
     metric_type type;
     int status, should_free;
     char *key;
-    unsigned char header[BINARY_HEADER_SIZE];
-    uint8_t type_input;
-    double val;
     uint16_t key_len;
+    unsigned char header[BINARY_HEADER_SIZE];
     while (1) {
         // Peek and check for the header. This is 12 bytes.
         // Magic byte - 1 byte
@@ -422,14 +420,13 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
         if (status == -1) return 0; // Return if no command is available
 
         // Check for the magic byte
-        if (header[0] != BINARY_MAGIC_BYTE) {
+        if (unlikely(header[0] != BINARY_MAGIC_BYTE)) {
             syslog(LOG_WARNING, "Received command from binary stream without magic byte! Byte: %u", header[0]);
             return -1;
         }
 
         // Get the metric type
-        type_input = header[1];
-        switch (type_input) {
+        switch (header[1]) {
             case BIN_TYPE_KV:
                 type = KEY_VAL;
                 break;
@@ -439,18 +436,19 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
             case BIN_TYPE_TIMER:
                 type = TIMER;
                 break;
+            case BIN_TYPE_SET:
+                type = SET;
+                break;
             default:
-                type = UNKNOWN;
-                syslog(LOG_WARNING, "Received command from binary stream with unknown type: %u!", type_input);
+                syslog(LOG_WARNING, "Received command from binary stream with unknown type: %u!", header[1]);
                 return -1;
         }
 
         // Extract the key length and value
         memcpy(&key_len, &header[2], 2);
-        memcpy(&val, &header[4], 8);
 
         // Abort if we haven't received the full key, wait for the data
-        if (available_bytes(handle->conn) < BINARY_HEADER_SIZE + key_len)
+        if (unlikely(available_bytes(handle->conn) < BINARY_HEADER_SIZE + key_len))
             return 0;
 
         // Seek past the header
@@ -460,20 +458,20 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
         read_client_bytes(handle->conn, key_len, &key, &should_free);
 
         // Verify the key contains a null terminator
-        if (*(key + key_len - 1) != 0) {
+        if (unlikely(*(key + key_len - 1))) {
             syslog(LOG_WARNING, "Received command from binary stream with non-null terminated key: %.*s!", key_len, key);
-            if (should_free) free(key);
+            if (unlikely(should_free)) free(key);
             return -1;
         }
 
         // Add the sample
-        if (GLOBAL_CONFIG->input_counter != NULL)
+        if (GLOBAL_CONFIG->input_counter)
             metrics_add_sample(GLOBAL_METRICS, COUNTER, GLOBAL_CONFIG->input_counter, 1);
 
-        metrics_add_sample(GLOBAL_METRICS, type, key, val);
+        metrics_add_sample(GLOBAL_METRICS, type, key, *(double*)&header[4]);
 
         // Make sure to free the command buffer if we need to
-        if (should_free) free(key);
+        if (unlikely(should_free)) free(key);
     }
 
     return 0;
