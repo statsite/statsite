@@ -172,6 +172,18 @@ class TestInteg(object):
         assert "timers.has_hist.test.histogram.bin_80.00|10" in out
         assert "timers.has_hist.test.histogram.bin_>90.00|10" in out
 
+    def test_sets(self, servers):
+        "Tests adding kv pairs"
+        server, _, output = servers
+        server.sendall("zip:foo|s\n")
+        server.sendall("zip:bar|s\n")
+        server.sendall("zip:baz|s\n")
+
+        wait_file(output)
+        now = time.time()
+        out = open(output).read()
+        assert out in ("sets.zip|3|%d\n" % now, "sets.zip|3|%d\n" % (now - 1))
+
 
 class TestIntegUDP(object):
     def test_kv(self, servers):
@@ -245,6 +257,18 @@ class TestIntegUDP(object):
         assert "timers.noobs.median|49.000000" in out
         assert "timers.noobs.p95|95.000000" in out
         assert "timers.noobs.p99|99.000000" in out
+
+    def test_sets(self, servers):
+        "Tests adding kv pairs"
+        _, server, output = servers
+        server.sendall("zip:foo|s\n")
+        server.sendall("zip:bar|s\n")
+        server.sendall("zip:baz|s\n")
+
+        wait_file(output)
+        now = time.time()
+        out = open(output).read()
+        assert out in ("sets.zip|3|%d\n" % now, "sets.zip|3|%d\n" % (now - 1))
 
 
 class TestIntegBindAddress(object):

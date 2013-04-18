@@ -21,8 +21,9 @@ except ImportError:
 
 
 BINARY_HEADER = struct.Struct("<BBHd")
+BINARY_SET_HEADER = struct.Struct("<BBHH")
 COUNT_VAL = struct.Struct("<I")
-BIN_TYPES = {"kv": 1, "c": 2, "ms": 3}
+BIN_TYPES = {"kv": 1, "c": 2, "ms": 3, "set": 4}
 
 BINARY_OUT_HEADER = struct.Struct("<QBBHd")
 BINARY_OUT_LEN = 20
@@ -123,6 +124,18 @@ def format(key, type, val):
     type_num = BIN_TYPES[type]
     header = BINARY_HEADER.pack(170, type_num, key_len, float(val))
     mesg = header + key + "\0"
+    return mesg
+
+
+def format_set(key, val):
+    "Formats a binary set message for statsite"
+    key = str(key)
+    key_len = len(key) + 1
+    val = str(val)
+    val_len = len(val) + 1
+    type_num = BIN_TYPES["set"]
+    header = BINARY_SET_HEADER.pack(170, type_num, key_len, val_len)
+    mesg = "".join([header, key, "\0", val, "\0"])
     return mesg
 
 
@@ -231,6 +244,21 @@ class TestInteg(object):
         assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 70, 10) in out
         assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 80, 10) in out
         assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_max"], 90, 10) in out
+
+    def test_sets(self, servers):
+        "Tests adding sets"
+        server, _, output = servers
+        server.sendall(format_set("zip", "foo"))
+        server.sendall(format_set("zip", "bar"))
+        server.sendall(format_set("zip", "baz"))
+        wait_file(output)
+        now = time.time()
+        out = open(output).read()
+
+        # Adjust for time drift
+        if format_output(now - 1, "zip", BIN_TYPES["set"], VAL_TYPE_MAP["sum"], 3) in out:
+            now = now - 1
+        assert format_output(now, "zip", BIN_TYPES["set"], VAL_TYPE_MAP["sum"], 3) in out
 
 
 if __name__ == "__main__":

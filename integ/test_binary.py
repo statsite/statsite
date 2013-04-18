@@ -20,7 +20,8 @@ except ImportError:
 
 
 BINARY_HEADER = struct.Struct("<BBHd")
-BIN_TYPES = {"kv": 1, "c": 2, "ms": 3}
+BINARY_SET_HEADER = struct.Struct("<BBHH")
+BIN_TYPES = {"kv": 1, "c": 2, "ms": 3, "set": 4}
 
 
 def pytest_funcarg__servers(request):
@@ -93,6 +94,17 @@ def format(key, type, val):
     mesg = header + key + "\0"
     return mesg
 
+def format_set(key, val):
+    "Formats a binary set message for statsite"
+    key = str(key)
+    key_len = len(key) + 1
+    val = str(val)
+    val_len = len(val) + 1
+    type_num = BIN_TYPES["set"]
+    header = BINARY_SET_HEADER.pack(170, type_num, key_len, val_len)
+    mesg = "".join([header, key, "\0", val, "\0"])
+    return mesg
+
 
 def wait_file(path, timeout=5):
     "Waits on a file to be make"
@@ -147,6 +159,16 @@ class TestInteg(object):
         assert "timers.noobs.p95|95.000000" in out
         assert "timers.noobs.p99|99.000000" in out
 
+    def test_sets(self, servers):
+        "Tests adding kv pairs"
+        server, _, output = servers
+        server.sendall(format_set("zip", "foo"))
+        server.sendall(format_set("zip", "bar"))
+        server.sendall(format_set("zip", "baz"))
+        wait_file(output)
+        out = open(output).read()
+        assert "sets.zip|3|" in out
+
 
 class TestIntegUDP(object):
     def test_kv(self, servers):
@@ -189,6 +211,16 @@ class TestIntegUDP(object):
         assert "timers.noobs.median|49.000000" in out
         assert "timers.noobs.p95|95.000000" in out
         assert "timers.noobs.p99|99.000000" in out
+
+    def test_sets(self, servers):
+        "Tests adding kv pairs"
+        _, server, output = servers
+        server.sendall(format_set("zip", "foo"))
+        server.sendall(format_set("zip", "bar"))
+        server.sendall(format_set("zip", "baz"))
+        wait_file(output)
+        out = open(output).read()
+        assert "sets.zip|3|" in out
 
 
 if __name__ == "__main__":
