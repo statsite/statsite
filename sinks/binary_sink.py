@@ -14,7 +14,8 @@ PREFIX_SIZE = 20
 TYPE_MAP = {
     1: "kv",
     2: "counter",
-    3: "timer"
+    3: "timer",
+    4: "set",
 }
 VAL_TYPE_MAP = {
     0: "kv",
