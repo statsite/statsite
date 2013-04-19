@@ -1,3 +1,8 @@
+# 0.4.5
+
+ * Adding support for sets for cardinality estimation
+ * Improved command parsing speed dramatically
+
 # 0.4.0
 
  * Adding support for histogram calculations on timers
