@@ -2,6 +2,8 @@
 
  * Adding support for sets for cardinality estimation
  * Improved command parsing speed dramatically
+ * Multiple interrupts will cause statsite to exit, previously
+   a bug could cause statsite to hang
 
 # 0.4.0
 
