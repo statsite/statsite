@@ -195,8 +195,8 @@ Each command is sent to statsite over the same ports with this header:
 
 Then depending on the metric type, it is followed by either:
 
-* <Value><Key>
-* <Set Length><Key><Set Key>
+    <Value><Key>
+    <Set Length><Key><Set Key>
 
 The "Magic Byte" is the value 0xaa (170). This switches the internal
 processing from the ASCII mode to binary. The metric type is one of:
