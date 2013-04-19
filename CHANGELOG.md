@@ -4,6 +4,7 @@
  * Improved command parsing speed dramatically
  * Multiple interrupts will cause statsite to exit, previously
    a bug could cause statsite to hang
+ * Git SHA: 8eb1e90
 
 # 0.4.0
 
