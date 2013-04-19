@@ -35,9 +35,7 @@
 </h1>
 
 <p>This is a stats aggregation server. Statsite is based heavily
-on Etsy's StatsD <a href="https://github.com/etsy/statsd">https://github.com/etsy/statsd</a>. This is
-a re-implementation of the Python version of statsite
-<a href="https://github.com/kiip/statsite">https://github.com/kiip/statsite</a>.</p>
+on Etsy's StatsD <a href="https://github.com/etsy/statsd">https://github.com/etsy/statsd</a>.</p>
 
 <h2>Features</h2>
 
@@ -54,6 +52,7 @@ a re-implementation of the Python version of statsite
 </ul>
 </li>
 <li>Send counters that statsite will aggregate</li>
+<li>Sets for cardinality measurements</li>
 <li>Binary protocol</li>
 </ul><h2>Architecture</h2>
 
@@ -71,7 +70,7 @@ free to handle the metrics as it sees fit.</p>
 to any number of sinks (Graphite, SQL databases, etc). There
 is an included Python script that ships metrics to graphite.</p>
 
-<p>Additionally, statsite tries to minimize memory usage by not
+<p>Statsite tries to minimize memory usage by not
 storing all the metrics that are received. Counter values are
 aggregated as they are received, and timer values are stored
 and aggregated using the Cormode-Muthurkrishnan algorithm from
@@ -85,6 +84,19 @@ The minimum and maximum values along with the bin widths must
 be specified in advance, and as samples are recieved the bins
 are updated. Statsite supports multiple histograms configurations,
 and uses a longest-prefix match policy.</p>
+
+<p>Handling of Sets in statsite depend on the number of
+entries received. For small cardinalities (&lt;64 currently),
+statsite will count exactly the number of unique items. For
+larger sets, it switches to using a HyperLogLog to estimate
+cardinalities with high accuracy and low space utilization.
+This allows statsite to estimate huge set sizes without
+retaining all the values. The parameters of the HyperLogLog
+can be tuned to provide greater accuracy at the cost of memory.</p>
+
+<p>The HyperLogLog is based on the Google paper, "HyperLogLog in
+Practice: Algorithmic Engineering of a State of The Art Cardinality
+Estimation Algorithm".</p>
 
 <h2>Install</h2>
 
@@ -122,6 +134,7 @@ udp_port = 8125
 log_level = INFO
 flush_interval = 10
 timer_eps = 0.01
+set_eps = 0.02
 stream_cmd = python sinks/graphite.py localhost 2003
 
 [histogram_api]
@@ -162,7 +175,9 @@ looks like the following (where the flag is optional)::</p>
 <li>
 <code>ms</code> - Timer.</li>
 <li>
-<code>c</code> - Counter.</li>
+<code>c</code>  - Counter.</li>
+<li>
+<code>s</code>  - Unique Set</li>
 </ul><p>After the flush interval, the counters and timers of the same key are
 aggregated and this is sent to the store.</p>
 
@@ -189,6 +204,16 @@ queries we've seen in the last second on MySQL::</p>
 <pre><code>inventory:-7|c
 </code></pre>
 
+<p>Sets count the unique items, so if statsite gets::</p>
+
+<pre><code>users:abe|s
+users:zoe|s
+users:bob|s
+users:abe|s
+</code></pre>
+
+<p>Then it will emit a count 3 for the number of uniques it has seen.</p>
+
 <h2>Writing Statsite Sinks</h2>
 
 <p>Statsite only ships with a graphite sink by default, but any executable
@@ -208,9 +233,15 @@ a lightweight binary protocol. This can be used if you want to make use
 of special characters such as the colon, pipe character, or newlines. It
 is also marginally faster to process, and may provide 10-20% more throughput.</p>
 
-<p>Each command is sent to statsite over the same ports in the following manner:</p>
+<p>Each command is sent to statsite over the same ports with this header:</p>
 
-<pre><code>&lt;Magic Byte&gt;&lt;Metric Type&gt;&lt;Key Length&gt;&lt;Value&gt;&lt;Key&gt;
+<pre><code>&lt;Magic Byte&gt;&lt;Metric Type&gt;&lt;Key Length&gt;
+</code></pre>
+
+<p>Then depending on the metric type, it is followed by either:</p>
+
+<pre><code>&lt;Value&gt;&lt;Key&gt;
+&lt;Set Length&gt;&lt;Key&gt;&lt;Set Key&gt;
 </code></pre>
 
 <p>The "Magic Byte" is the value 0xaa (170). This switches the internal
@@ -220,14 +251,20 @@ processing from the ASCII mode to binary. The metric type is one of:</p>
 <li>0x1 : Key value / Gauge</li>
 <li>0x2 : Counter</li>
 <li>0x3 : Timer</li>
+<li>0x4 : Set</li>
 </ul><p>The key length is a 2 byte unsigned integer with the length of the
 key, INCLUDING a NULL terminator. The key must include a null terminator,
 and it's length must include this.</p>
 
-<p>The value is a standard IEEE754 double value, which is 8 bytes in length.</p>
-
-<p>Lastly, the key is provided as a byte stream which is <code>Key Length</code> long,
+<p>If the metric type is K/V, Counter or Timer, then we expect a value and
+a key. The value is a standard IEEE754 double value, which is 8 bytes in length.
+The key is provided as a byte stream which is <code>Key Length</code> long,
 terminated by a NULL (0) byte.</p>
+
+<p>If the metric type is Set, then we expect the length of a set key,
+provided like the key length. The key should then be followed by
+an additional Set Key, which is <code>Set Length</code> long, terminated
+by a NULL (0) byte.</p>
 
 <p>All of these values must be transmitted in Little Endian order.</p>
 
@@ -255,11 +292,12 @@ which is the current Unix timestamp. The Metric type is one of:</p>
 <li>0x1 : Key value / Gauge</li>
 <li>0x2 : Counter</li>
 <li>0x3 : Timer</li>
+<li>0x4 : Set</li>
 </ul><p>The value type is one of:</p>
 
 <ul>
 <li>0x0 : No type (Key/Value)</li>
-<li>0x1 : Sum</li>
+<li>0x1 : Sum (Also used for Sets)</li>
 <li>0x2 : Sum Squared</li>
 <li>0x3 : Mean</li>
 <li>0x4 : Count</li>
