@@ -1,3 +1,7 @@
+# 0.4.6 (unreleased)
+
+ * Fixed bug with HLL bias correction
+
 # 0.4.5
 
  * Adding support for sets for cardinality estimation
