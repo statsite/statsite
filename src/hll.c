@@ -169,7 +169,7 @@ static int binary_search(double val, int num, const double *array) {
     int low=0, mid, high=num-1;
     while (low < high) {
         mid = (low + high) / 2;
-        if (val < array[mid]) {
+        if (val > array[mid]) {
             low = mid + 1;
         } else if (val == array[mid]) {
             return mid;
