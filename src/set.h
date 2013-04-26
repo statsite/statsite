@@ -1,44 +1,62 @@
-/*
- * Author: Kuba Podgorski
- *
- * Header for the Set functions and data definitions
- */
+#include <stdint.h>
+#include "hll.h"
 
 #ifndef SET_H
 #define SET_H
 
- // Structure for a single set entry (BST node)
-typedef struct set_entry {
-	// value for this entry
-    char* value;
-    
-    // left/less BST node
-    struct set_entry* le;
+/**
+ * This is the maximum number of items
+ * we represent exactly before switching
+ * to a HyperLogLog
+ */
+#define SET_MAX_EXACT 64
 
-    // right/greater BST node
-    struct set_entry* gt;
-} set_entry;
+typedef enum {
+    EXACT,      // Exact representation, used for small cardinalities
+    APPROX      // Approximate representation, used for large cardinalities
+} set_type;
 
+typedef struct {
+    unsigned char precision;
+    uint32_t count;
+    uint64_t *hashes;
+} exact_set;
 
-// Main struct for representing the set of unique entries
-typedef struct set {    
-	// the number of entries (elements) in the set 
-    int active_entries;
-    
-    // pointer to the BST (Binary Search Tree)
-    set_entry* entry;
-} set;
+typedef struct {
+    set_type type;
+    union {
+        hll_t h;
+        exact_set s;
+    } store;
+} set_t;
 
-// Functions
+/**
+ * Initializes a new set
+ * @arg precision The precision to use when converting to an HLL
+ * @arg s The set to initialize
+ * @return 0 on success.
+ */
+int set_init(unsigned char precision, set_t *s);
 
-void set_init(set *);
+/**
+ * Destroys the set
+ * @return 0 on sucess
+ */
+int set_destroy(set_t *s);
 
-int set_size(set *);
+/**
+ * Adds a new key to the set
+ * @arg s The set to add to
+ * @arg key The key to add
+ */
+void set_add(set_t *s, char *key);
 
-int set_add(set *, char *);
+/**
+ * Returns the size of the set. May be approximate.
+ * @arg s The set to query
+ * @return The size of the set.
+ */
+uint64_t set_size(set_t *s);
 
-int set_foreach(set *, int (*func_callback)(char *, void **), void **);
-
-void set_destroy(set *);
 
 #endif

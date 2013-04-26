@@ -9,6 +9,7 @@
 #include <assert.h>
 #include <strings.h>
 #include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include "heap.h"
 
@@ -375,3 +376,5 @@ void heap_foreach(heap* h, void (*func)(void*,void*)) {
         func(entry->key, entry->value);
     }
 }
+
+

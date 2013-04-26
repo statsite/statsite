@@ -1,101 +1,85 @@
-check_check-check_check_exit.o check_check-check_check_exit.o:  \
- check_check_exit.c /usr/include/stdlib.h /usr/include/Availability.h \
-  /usr/include/AvailabilityInternal.h /usr/include/_types.h \
-  /usr/include/sys/_types.h /usr/include/sys/cdefs.h \
-  /usr/include/machine/_types.h /usr/include/i386/_types.h \
-  /usr/include/sys/wait.h /usr/include/sys/signal.h \
-  /usr/include/sys/appleapiopts.h /usr/include/machine/signal.h \
-  /usr/include/i386/signal.h /usr/include/i386/_structs.h \
-  /usr/include/sys/_structs.h /usr/include/machine/_structs.h \
-  /usr/include/mach/i386/_structs.h /usr/include/sys/resource.h \
-  /usr/include/machine/endian.h /usr/include/i386/endian.h \
-  /usr/include/sys/_endian.h /usr/include/libkern/_OSByteOrder.h \
-  /usr/include/libkern/i386/_OSByteOrder.h /usr/include/alloca.h \
-  /usr/include/machine/types.h /usr/include/i386/types.h \
-  /usr/include/i386/_types.h /usr/include/stdio.h \
-  /usr/include/secure/_stdio.h /usr/include/secure/_common.h \
-  /usr/include/string.h /usr/include/secure/_string.h \
-  /usr/include/unistd.h /usr/include/sys/unistd.h \
-  /usr/include/sys/select.h /usr/include/sys/_select.h ../src/check.h \
-  /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/stddef.h \
-  /usr/include/sys/types.h check_check.h
+check_check-check_check_exit.o: check_check_exit.c /usr/include/stdlib.h \
+ /usr/include/features.h /usr/include/bits/predefs.h \
+ /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h \
+ /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h \
+ /usr/lib/gcc/x86_64-linux-gnu/4.4.3/include/stddef.h \
+ /usr/include/bits/stdlib.h /usr/include/stdio.h \
+ /usr/include/bits/types.h /usr/include/bits/typesizes.h \
+ /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
+ /usr/lib/gcc/x86_64-linux-gnu/4.4.3/include/stdarg.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/include/bits/stdio.h /usr/include/bits/stdio2.h \
+ /usr/include/string.h /usr/include/bits/string.h \
+ /usr/include/bits/string2.h /usr/include/endian.h \
+ /usr/include/bits/endian.h /usr/include/bits/string3.h \
+ /usr/include/unistd.h /usr/include/bits/posix_opt.h \
+ /usr/include/bits/confname.h /usr/include/bits/unistd.h ../src/check.h \
+ /usr/include/sys/types.h /usr/include/time.h check_check.h
 
 /usr/include/stdlib.h:
 
-/usr/include/Availability.h:
+/usr/include/features.h:
 
-/usr/include/AvailabilityInternal.h:
-
-/usr/include/_types.h:
-
-/usr/include/sys/_types.h:
+/usr/include/bits/predefs.h:
 
 /usr/include/sys/cdefs.h:
 
-/usr/include/machine/_types.h:
+/usr/include/bits/wordsize.h:
 
-/usr/include/i386/_types.h:
+/usr/include/gnu/stubs.h:
 
-/usr/include/sys/wait.h:
+/usr/include/gnu/stubs-64.h:
 
-/usr/include/sys/signal.h:
+/usr/lib/gcc/x86_64-linux-gnu/4.4.3/include/stddef.h:
 
-/usr/include/sys/appleapiopts.h:
-
-/usr/include/machine/signal.h:
-
-/usr/include/i386/signal.h:
-
-/usr/include/i386/_structs.h:
-
-/usr/include/sys/_structs.h:
-
-/usr/include/machine/_structs.h:
-
-/usr/include/mach/i386/_structs.h:
-
-/usr/include/sys/resource.h:
-
-/usr/include/machine/endian.h:
-
-/usr/include/i386/endian.h:
-
-/usr/include/sys/_endian.h:
-
-/usr/include/libkern/_OSByteOrder.h:
-
-/usr/include/libkern/i386/_OSByteOrder.h:
-
-/usr/include/alloca.h:
-
-/usr/include/machine/types.h:
-
-/usr/include/i386/types.h:
-
-/usr/include/i386/_types.h:
+/usr/include/bits/stdlib.h:
 
 /usr/include/stdio.h:
 
-/usr/include/secure/_stdio.h:
+/usr/include/bits/types.h:
 
-/usr/include/secure/_common.h:
+/usr/include/bits/typesizes.h:
+
+/usr/include/libio.h:
+
+/usr/include/_G_config.h:
+
+/usr/include/wchar.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/4.4.3/include/stdarg.h:
+
+/usr/include/bits/stdio_lim.h:
+
+/usr/include/bits/sys_errlist.h:
+
+/usr/include/bits/stdio.h:
+
+/usr/include/bits/stdio2.h:
 
 /usr/include/string.h:
 
-/usr/include/secure/_string.h:
+/usr/include/bits/string.h:
+
+/usr/include/bits/string2.h:
+
+/usr/include/endian.h:
+
+/usr/include/bits/endian.h:
+
+/usr/include/bits/string3.h:
 
 /usr/include/unistd.h:
 
-/usr/include/sys/unistd.h:
+/usr/include/bits/posix_opt.h:
 
-/usr/include/sys/select.h:
+/usr/include/bits/confname.h:
 
-/usr/include/sys/_select.h:
+/usr/include/bits/unistd.h:
 
 ../src/check.h:
 
-/usr/lib/gcc/i686-apple-darwin10/4.2.1/include/stddef.h:
-
 /usr/include/sys/types.h:
+
+/usr/include/time.h:
 
 check_check.h:

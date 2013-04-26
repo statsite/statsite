@@ -30,8 +30,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-build_triplet = i386-apple-darwin12.3.0
-host_triplet = i386-apple-darwin12.3.0
+build_triplet = x86_64-unknown-linux-gnu
+host_triplet = x86_64-unknown-linux-gnu
 subdir = doc
 DIST_COMMON = $(check_TEXINFOS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/stamp-vti \
@@ -76,13 +76,13 @@ examplesrcDATA_INSTALL = $(INSTALL_DATA)
 exampletestsDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(example_DATA) $(examplesrc_DATA) $(exampletests_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /Users/podgorj/workspace/statsite/deps/check-0.9.8/build-aux/missing --run aclocal-1.10
-AMTAR = ${SHELL} /Users/podgorj/workspace/statsite/deps/check-0.9.8/build-aux/missing --run tar
+ACLOCAL = ${SHELL} /vagrant/deps/check-0.9.8/build-aux/missing --run aclocal-1.10
+AMTAR = ${SHELL} /vagrant/deps/check-0.9.8/build-aux/missing --run tar
 AR = ar
-AUTOCONF = ${SHELL} /Users/podgorj/workspace/statsite/deps/check-0.9.8/build-aux/missing --run autoconf
-AUTOHEADER = ${SHELL} /Users/podgorj/workspace/statsite/deps/check-0.9.8/build-aux/missing --run autoheader
-AUTOMAKE = ${SHELL} /Users/podgorj/workspace/statsite/deps/check-0.9.8/build-aux/missing --run automake-1.10
-AWK = gawk
+AUTOCONF = ${SHELL} /vagrant/deps/check-0.9.8/build-aux/missing --run autoconf
+AUTOHEADER = ${SHELL} /vagrant/deps/check-0.9.8/build-aux/missing --run autoheader
+AUTOMAKE = ${SHELL} /vagrant/deps/check-0.9.8/build-aux/missing --run automake-1.10
+AWK = mawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
 CFLAGS = -g -O2 -Wall -ansi -pedantic -Wextra -Wstrict-prototypes -Wmissing-prototypes -Wwrite-strings -Wno-variadic-macros
@@ -95,42 +95,42 @@ CPPFLAGS =
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
-DSYMUTIL = dsymutil
+DSYMUTIL = 
 DUMPBIN = 
-ECHO_C = \c
-ECHO_N = 
+ECHO_C = 
+ECHO_N = -n
 ECHO_T = 
-EGREP = /usr/bin/grep -E
+EGREP = /bin/grep -E
 ENABLE_SUBUNIT = 0
 EXEEXT = 
-FGREP = /usr/bin/grep -F
+FGREP = /bin/grep -F
 GCOV = gcov
 GCOV_CFLAGS = 
 GCOV_LIBS = 
 GENHTML = false
-GREP = /usr/bin/grep
+GREP = /bin/grep
 INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LCOV = false
-LD = /usr/libexec/gcc/i686-apple-darwin10/4.2.1/ld
+LD = /usr/bin/ld -m elf_x86_64
 LDFLAGS = 
 LIBOBJS = 
 LIBS = 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
-LIPO = lipo
+LIPO = 
 LN_S = ln -s
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /Users/podgorj/workspace/statsite/deps/check-0.9.8/build-aux/missing --run makeinfo
-MKDIR_P = ../build-aux/install-sh -c -d
-NM = /usr/bin/nm
-NMEDIT = nmedit
-OBJDUMP = false
+MAKEINFO = ${SHELL} /vagrant/deps/check-0.9.8/build-aux/missing --run makeinfo
+MKDIR_P = /bin/mkdir -p
+NM = /usr/bin/nm -B
+NMEDIT = 
+OBJDUMP = objdump
 OBJEXT = o
-OTOOL = otool
-OTOOL64 = :
+OTOOL = 
+OTOOL64 = 
 PACKAGE = check
 PACKAGE_BUGREPORT = check-devel at lists dot sourceforge dot net
 PACKAGE_NAME = Check
@@ -139,19 +139,19 @@ PACKAGE_TARNAME = check
 PACKAGE_VERSION = 0.9.8
 PATH_SEPARATOR = :
 PTHREAD_CC = gcc
-PTHREAD_CFLAGS = -D_THREAD_SAFE 
+PTHREAD_CFLAGS = -pthread
 PTHREAD_LIBS = 
 RANLIB = ranlib
-SED = /opt/local/bin/gsed
+SED = /bin/sed
 SET_MAKE = 
-SHELL = /bin/sh
+SHELL = /bin/bash
 STRIP = strip
 TEX = false
 VERSION = 0.9.8
-abs_builddir = /Users/podgorj/workspace/statsite/deps/check-0.9.8/doc
-abs_srcdir = /Users/podgorj/workspace/statsite/deps/check-0.9.8/doc
-abs_top_builddir = /Users/podgorj/workspace/statsite/deps/check-0.9.8
-abs_top_srcdir = /Users/podgorj/workspace/statsite/deps/check-0.9.8
+abs_builddir = /vagrant/deps/check-0.9.8/doc
+abs_srcdir = /vagrant/deps/check-0.9.8/doc
+abs_top_builddir = /vagrant/deps/check-0.9.8
+abs_top_srcdir = /vagrant/deps/check-0.9.8
 ac_ct_CC = gcc
 ac_ct_DUMPBIN = 
 acx_pthread_config = 
@@ -161,33 +161,33 @@ am__quote =
 am__tar = ${AMTAR} chof - "$$tardir"
 am__untar = ${AMTAR} xf -
 bindir = ${exec_prefix}/bin
-build = i386-apple-darwin12.3.0
+build = x86_64-unknown-linux-gnu
 build_alias = 
-build_cpu = i386
-build_os = darwin12.3.0
-build_vendor = apple
+build_cpu = x86_64
+build_os = linux-gnu
+build_vendor = unknown
 builddir = .
 datadir = ${datarootdir}
 datarootdir = ${prefix}/share
 docdir = $(datadir)/doc/$(PACKAGE)
 dvidir = ${docdir}
 exec_prefix = ${prefix}
-host = i386-apple-darwin12.3.0
+host = x86_64-unknown-linux-gnu
 host_alias = 
-host_cpu = i386
-host_os = darwin12.3.0
-host_vendor = apple
+host_cpu = x86_64
+host_os = linux-gnu
+host_vendor = unknown
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = $(SHELL) /Users/podgorj/workspace/statsite/deps/check-0.9.8/build-aux/install-sh
+install_sh = $(SHELL) /vagrant/deps/check-0.9.8/build-aux/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
 localstatedir = ${prefix}/var
-lt_ECHO = /bin/echo
+lt_ECHO = echo
 mandir = ${datarootdir}/man
-mkdir_p = $(top_builddir)/build-aux/install-sh -c -d
+mkdir_p = /bin/mkdir -p
 oldincludedir = /usr/include
 pdfdir = ${docdir}
 prefix = /usr/local
@@ -730,47 +730,47 @@ $(srcdir)/check.texi: money.1-2.h.diff \
 # think that means there is an error
 money.1-2.h.diff: $(eg_src)/money.1.h $(eg_src)/money.2.h
 	cd $(eg_root); \
-	diff -u src/money.1.h src/money.2.h > /Users/podgorj/workspace/statsite/deps/check-0.9.8/doc/$@ || test $$? -eq 1; \
+	diff -u src/money.1.h src/money.2.h > /vagrant/deps/check-0.9.8/doc/$@ || test $$? -eq 1; \
 	cd -;
 
 money.1-3.c.diff: $(eg_src)/money.1.c $(eg_src)/money.3.c
 	cd $(eg_root); \
-	diff -u src/money.1.c src/money.3.c > /Users/podgorj/workspace/statsite/deps/check-0.9.8/doc/$@ || test $$? -eq 1; \
+	diff -u src/money.1.c src/money.3.c > /vagrant/deps/check-0.9.8/doc/$@ || test $$? -eq 1; \
 	cd -;
 
 money.3-4.c.diff: $(eg_src)/money.3.c $(eg_src)/money.4.c
 	cd $(eg_root); \
-	diff -u src/money.3.c src/money.4.c > /Users/podgorj/workspace/statsite/deps/check-0.9.8/doc/$@ || test $$? -eq 1; \
+	diff -u src/money.3.c src/money.4.c > /vagrant/deps/check-0.9.8/doc/$@ || test $$? -eq 1; \
 	cd -;
 
 money.4-5.c.diff: $(eg_src)/money.4.c $(eg_src)/money.5.c
 	cd $(eg_root); \
-	diff -u src/money.4.c src/money.5.c > /Users/podgorj/workspace/statsite/deps/check-0.9.8/doc/$@ || test $$? -eq 1; \
+	diff -u src/money.4.c src/money.5.c > /vagrant/deps/check-0.9.8/doc/$@ || test $$? -eq 1; \
 	cd -;
 
 money.5-6.c.diff: $(eg_src)/money.5.c $(eg_src)/money.6.c
 	cd $(eg_root); \
-	diff -u src/money.5.c src/money.6.c > /Users/podgorj/workspace/statsite/deps/check-0.9.8/doc/$@ || test $$? -eq 1; \
+	diff -u src/money.5.c src/money.6.c > /vagrant/deps/check-0.9.8/doc/$@ || test $$? -eq 1; \
 	cd -;
 
 check_money.1-2.c.diff: $(eg_tests)/check_money.1.c $(eg_tests)/check_money.2.c
 	cd $(eg_root); \
-	diff -u tests/check_money.1.c tests/check_money.2.c > /Users/podgorj/workspace/statsite/deps/check-0.9.8/doc/$@ || test $$? -eq 1; \
+	diff -u tests/check_money.1.c tests/check_money.2.c > /vagrant/deps/check-0.9.8/doc/$@ || test $$? -eq 1; \
 	cd -;
 
 check_money.2-3.c.diff: $(eg_tests)/check_money.2.c $(eg_tests)/check_money.3.c
 	cd $(eg_root); \
-	diff -u tests/check_money.2.c tests/check_money.3.c > /Users/podgorj/workspace/statsite/deps/check-0.9.8/doc/$@ || test $$? -eq 1; \
+	diff -u tests/check_money.2.c tests/check_money.3.c > /vagrant/deps/check-0.9.8/doc/$@ || test $$? -eq 1; \
 	cd -;
 
 check_money.3-6.c.diff: $(eg_tests)/check_money.3.c $(eg_tests)/check_money.6.c
 	cd $(eg_root); \
-	diff -u tests/check_money.3.c tests/check_money.6.c > /Users/podgorj/workspace/statsite/deps/check-0.9.8/doc/$@ || test $$? -eq 1; \
+	diff -u tests/check_money.3.c tests/check_money.6.c > /vagrant/deps/check-0.9.8/doc/$@ || test $$? -eq 1; \
 	cd -;
 
 check_money.6-7.c.diff: $(eg_tests)/check_money.6.c $(eg_tests)/check_money.7.c
 	cd $(eg_root); \
-	diff -u tests/check_money.6.c tests/check_money.7.c > /Users/podgorj/workspace/statsite/deps/check-0.9.8/doc/$@ || test $$? -eq 1; \
+	diff -u tests/check_money.6.c tests/check_money.7.c > /vagrant/deps/check-0.9.8/doc/$@ || test $$? -eq 1; \
 	cd -;
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

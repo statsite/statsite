@@ -7,6 +7,7 @@
  */
 #include <sys/stat.h>
 #include <ctype.h>
+#include <errno.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,7 +18,7 @@
 #include "config.h"
 #include "conn_handler.h"
 #include "networking.h"
- 
+
 /**
  * By default we should run. Our signal
  * handler updates this variable to allow the
@@ -91,6 +92,10 @@ void setup_syslog() {
  * when we get signals such as SIGINT, SIGTERM.
  */
 void signal_handler(int signum) {
+    if (!SHOULD_RUN) {
+        syslog(LOG_WARNING, "Received signal [%s] while exiting! Terminating", strsignal(signum));
+        exit(1);
+    }
     SHOULD_RUN = 0;  // Stop running now
     syslog(LOG_WARNING, "Received signal [%s]! Exiting...", strsignal(signum));
 }
@@ -119,6 +124,7 @@ int write_pidfile(char *pid_file, pid_t pid) {
     return 0;
 }
 
+
 int main(int argc, char **argv) {
     // Initialize syslog
     setup_syslog();
@@ -137,9 +143,14 @@ int main(int argc, char **argv) {
     }
 
     // Validate the config file
-    int validate_res = validate_config(config);
-    if (validate_res != 0) {
+    if (validate_config(config)) {
         syslog(LOG_ERR, "Invalid configuration!");
+        return 1;
+    }
+
+    // Build the prefix tree
+    if (build_prefix_tree(config)) {
+        syslog(LOG_ERR, "Failed to build prefix tree!");
         return 1;
     }
 
@@ -190,21 +201,14 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    // Start the network workers
-    pthread_t thread;
-    pthread_create(&thread, NULL, (void*(*)(void*))start_networking_worker, netconf);
-
-    /**
-     * Loop forever, until we get a signal that
-     * indicates we should shutdown.
-     */
+    // Setup signal handlers
     signal(SIGPIPE, SIG_IGN);       // Ignore SIG_IGN
     signal(SIGHUP, SIG_IGN);        // Ignore SIG_IGN
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
-    while (SHOULD_RUN) {
-        sleep(1);
-    }
+
+    // Join the networking loop, blocks until exit
+    enter_networking_loop(netconf, &SHOULD_RUN);
 
     // Begin the shutdown/cleanup
     shutdown_networking(netconf);

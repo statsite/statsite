@@ -10,7 +10,7 @@
 #include <string.h>
 #include <math.h>
 #include <limits.h>
-
+#include <stdio.h>
 #include "heap.h"
 #include "cm_quantile.h"
 

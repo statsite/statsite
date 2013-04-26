@@ -3,6 +3,20 @@
 #include <stdint.h>
 #include <syslog.h>
 #include <stdbool.h>
+#include "radix.h"
+
+
+// Represents the configuration of a histogram
+typedef struct histogram_config {
+    char *prefix;
+    double min_val;
+    double max_val;
+    double bin_width;
+    int num_bins;
+    struct histogram_config *next;
+    char parts;
+} histogram_config;
+
 
 /**
  * Stores our configuration
@@ -20,6 +34,10 @@ typedef struct {
     char *pid_file;
     bool binary_stream;
     char *input_counter;
+    histogram_config *hist_configs;
+    radix_tree *histograms;
+    double set_eps;
+    unsigned char set_precision;
 } statsite_config;
 
 /**
@@ -43,6 +61,8 @@ int validate_config(statsite_config *config);
 int sane_log_level(char *log_level, int *syslog_level);
 int sane_timer_eps(double eps);
 int sane_flush_interval(int intv);
+int sane_histograms(histogram_config *config);
+int sane_set_precision(double eps, unsigned char *precision);
 
 /**
  * Joins two strings as part of a path,
@@ -52,5 +72,11 @@ int sane_flush_interval(int intv);
  * @return A new string, that uses a malloc()'d buffer.
  */
 char* join_path(char *path, char *part2);
+
+/**
+ * Builds the radix tree for prefix matching
+ * @return 0 on success
+ */
+int build_prefix_tree(statsite_config *config);
 
 #endif

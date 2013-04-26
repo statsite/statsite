@@ -20,7 +20,8 @@ except ImportError:
 
 
 BINARY_HEADER = struct.Struct("<BBHd")
-BIN_TYPES = {"kv": 1, "c": 2, "ms": 3}
+BINARY_SET_HEADER = struct.Struct("<BBHH")
+BIN_TYPES = {"kv": 1, "c": 2, "ms": 3, "set": 4}
 
 
 def pytest_funcarg__servers(request):
@@ -30,7 +31,7 @@ def pytest_funcarg__servers(request):
 
     # Make the command
     output = "%s/output" % tmpdir
-    cmd = "cat > %s" % output
+    cmd = "cat >> %s" % output
 
     # Write the configuration
     port = random.randrange(10000, 65000)
@@ -70,7 +71,7 @@ stream_cmd = %s
             break
         except Exception, e:
             print e
-            time.sleep(0.3)
+            time.sleep(0.5)
 
     # Die now
     if not connected:
@@ -93,13 +94,35 @@ def format(key, type, val):
     mesg = header + key + "\0"
     return mesg
 
+def format_set(key, val):
+    "Formats a binary set message for statsite"
+    key = str(key)
+    key_len = len(key) + 1
+    val = str(val)
+    val_len = len(val) + 1
+    type_num = BIN_TYPES["set"]
+    header = BINARY_SET_HEADER.pack(170, type_num, key_len, val_len)
+    mesg = "".join([header, key, "\0", val, "\0"])
+    return mesg
+
+
+def wait_file(path, timeout=5):
+    "Waits on a file to be make"
+    start = time.time()
+    while not os.path.isfile(path) and time.time() - start < timeout:
+        time.sleep(0.1)
+    if not os.path.isfile(path):
+        raise Exception("Timed out waiting for file %s" % path)
+    while os.path.getsize(path) == 0 and time.time() - start < timeout:
+        time.sleep(0.1)
+
 
 class TestInteg(object):
     def test_kv(self, servers):
         "Tests adding kv pairs"
         server, _, output = servers
         server.sendall(format("tubez", "kv", 100))
-        time.sleep(1)
+        wait_file(output)
         now = time.time()
         out = open(output).read()
         assert out in ("kv.tubez|100.000000|%d\n" % now, "kv.tubez|100.000000|%d\n" % (now - 1))
@@ -110,7 +133,7 @@ class TestInteg(object):
         server.sendall(format("foobar", "c", 100))
         server.sendall(format("foobar", "c", 200))
         server.sendall(format("foobar", "c", 300))
-        time.sleep(1)
+        wait_file(output)
         now = time.time()
         out = open(output).read()
         assert out in ("counts.foobar|600.000000|%d\n" % now, "counts.foobar|600.000000|%d\n" % (now - 1))
@@ -122,7 +145,7 @@ class TestInteg(object):
         for x in xrange(100):
             msg += format("noobs", "ms", x)
         server.sendall(msg)
-        time.sleep(1)
+        wait_file(output)
         out = open(output).read()
         print out
         assert "timers.noobs.sum|4950" in out
@@ -135,6 +158,16 @@ class TestInteg(object):
         assert "timers.noobs.median|49.000000" in out
         assert "timers.noobs.p95|95.000000" in out
         assert "timers.noobs.p99|99.000000" in out
+
+    def test_sets(self, servers):
+        "Tests adding kv pairs"
+        server, _, output = servers
+        server.sendall(format_set("zip", "foo"))
+        server.sendall(format_set("zip", "bar"))
+        server.sendall(format_set("zip", "baz"))
+        wait_file(output)
+        out = open(output).read()
+        assert "sets.zip|3|" in out
 
 
 class TestIntegUDP(object):
@@ -142,7 +175,7 @@ class TestIntegUDP(object):
         "Tests adding kv pairs"
         _, server, output = servers
         server.sendall(format("tubez", "kv", 100))
-        time.sleep(1)
+        wait_file(output)
         now = time.time()
         out = open(output).read()
         assert out in ("kv.tubez|100.000000|%d\n" % now, "kv.tubez|100.000000|%d\n" % (now - 1))
@@ -153,7 +186,7 @@ class TestIntegUDP(object):
         server.sendall(format("foobar", "c", 100))
         server.sendall(format("foobar", "c", 200))
         server.sendall(format("foobar", "c", 300))
-        time.sleep(1)
+        wait_file(output)
         now = time.time()
         out = open(output).read()
         assert out in ("counts.foobar|600.000000|%d\n" % now, "counts.foobar|600.000000|%d\n" % (now - 1))
@@ -165,7 +198,7 @@ class TestIntegUDP(object):
         for x in xrange(100):
             msg += format("noobs", "ms", x)
         server.sendall(msg)
-        time.sleep(1)
+        wait_file(output)
         out = open(output).read()
         print out
         assert "timers.noobs.sum|4950" in out
@@ -178,6 +211,16 @@ class TestIntegUDP(object):
         assert "timers.noobs.median|49.000000" in out
         assert "timers.noobs.p95|95.000000" in out
         assert "timers.noobs.p99|99.000000" in out
+
+    def test_sets(self, servers):
+        "Tests adding kv pairs"
+        _, server, output = servers
+        server.sendall(format_set("zip", "foo"))
+        server.sendall(format_set("zip", "bar"))
+        server.sendall(format_set("zip", "baz"))
+        wait_file(output)
+        out = open(output).read()
+        assert "sets.zip|3|" in out
 
 
 if __name__ == "__main__":

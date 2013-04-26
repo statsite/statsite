@@ -13,7 +13,7 @@ START_TEST(test_metrics_init_and_destroy)
 {
     metrics m;
     double quants[] = {0.5, 0.90, 0.99};
-    int res = init_metrics(0.01, (double*)&quants, 3, &m);
+    int res = init_metrics(0.01, (double*)&quants, 3, NULL, 12, &m);
     fail_unless(res == 0);
 
     res = destroy_metrics(&m);
@@ -95,6 +95,10 @@ static int iter_test_all_cb(void *data, metric_type type, char *key, void *val) 
             if (strcmp(key, "baz") == 0 && timer_sum(val) == 11)
                 *o = *o | 1 << 4;
             break;
+        case SET:
+            if (strcmp(key, "zip") == 0 && set_size(val) == 2)
+                *o = *o | 1 << 5;
+            break;
         default:
             return 1;
     }
@@ -118,9 +122,63 @@ START_TEST(test_metrics_add_all_iter)
     fail_unless(metrics_add_sample(&m, TIMER, "baz", 1) == 0);
     fail_unless(metrics_add_sample(&m, TIMER, "baz", 10) == 0);
 
+    fail_unless(metrics_set_update(&m, "zip", "foo") == 0);
+    fail_unless(metrics_set_update(&m, "zip", "wow") == 0);
+
     int okay = 0;
     fail_unless(metrics_iter(&m, (void*)&okay, iter_test_all_cb) == 0);
-    fail_unless(okay == 31);
+    fail_unless(okay == 63);
+
+    res = destroy_metrics(&m);
+    fail_unless(res == 0);
+}
+END_TEST
+
+static int iter_test_histogram(void *data, metric_type type, char *key, void *val) {
+    int *o = data;
+    timer_hist *t = val;
+    if (strcmp(key, "baz") == 0 && t->conf && t->counts) {
+        // Verify the counts
+        if (t->counts[0] == 1 && t->counts[1] == 1 && t->counts[6] == 1 && t->counts[11] == 1) {
+            *o = *o | 1;
+        }
+    } else if (strcmp(key, "zip") == 0 && !t->conf && !t->counts) {
+        *o = *o | 1 << 1;
+    } else
+        return 1;
+    return 0;
+}
+
+START_TEST(test_metrics_histogram)
+{
+    statsite_config config;
+    int res = config_from_filename(NULL, &config);
+
+    // Build a histogram config
+    histogram_config c1 = {"foo", 0, 200, 20, 12, NULL, 0};
+    histogram_config c2 = {"baz", 0, 20, 2, 12, NULL, 0};
+    config.hist_configs = &c1;
+    c1.next = &c2;
+    fail_unless(build_prefix_tree(&config) == 0);
+
+    metrics m;
+    double quants[] = {0.5, 0.90, 0.99};
+    res = init_metrics(0.01, (double*)&quants, 3, config.histograms, 12, &m);
+    fail_unless(res == 0);
+
+    fail_unless(metrics_add_sample(&m, TIMER, "baz", 1) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "baz", 10) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "baz", -1) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "baz", 50) == 0);
+
+    fail_unless(metrics_add_sample(&m, TIMER, "zip", 1) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "zip", 10) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "zip", -1) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "zip", 50) == 0);
+
+    int okay = 0;
+    fail_unless(metrics_iter(&m, (void*)&okay, iter_test_histogram) == 0);
+    fail_unless(okay == 3);
 
     res = destroy_metrics(&m);
     fail_unless(res == 0);
