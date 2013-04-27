@@ -83,7 +83,7 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
     int i;
     switch (type) {
         case KEY_VAL:
-            STREAM("kv.%s|%f|%lld\n", name, *(double*)value);
+            STREAM("gauges.%s|%f|%lld\n", name, *(double*)value);
             break;
 
         case COUNTER:

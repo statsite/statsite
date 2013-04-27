@@ -18,3 +18,5 @@ test_runner
 statsite
 .vagrant
 *.pyc
+
+.DS_Store
