@@ -1,6 +1,7 @@
 # 0.4.6 (unreleased)
 
  * Fixed bug with HLL bias correction
+ * Fixed bug in exact sets, previously would over count
 
 # 0.4.5
 
