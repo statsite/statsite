@@ -22,3 +22,5 @@ statsite
 .DS_Store
 
 *.swp
+
+*.ini

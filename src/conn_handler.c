@@ -216,9 +216,10 @@ static void* flush_thread(void *arg) {
     stream_callback cb = (GLOBAL_CONFIG->binary_stream)? stream_formatter_bin: stream_formatter;
 
     // Stream the records
-    int res = stream_to_command(m, &tv, cb, GLOBAL_CONFIG->stream_cmd);
+    char *cmd = GLOBAL_CONFIG->stream_cmd;
+    int res = stream_to_command(m, &tv, cb,cmd);
     if (res != 0) {
-        syslog(LOG_WARNING, "Streaming command exited with status %d", res);
+	syslog(LOG_WARNING, "Streaming command '%s' exited with status: '%s'", cmd, strerror(res));
     }
 
     // Cleanup
