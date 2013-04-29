@@ -33,6 +33,24 @@ START_TEST(test_set_add_size_exact)
 }
 END_TEST
 
+START_TEST(test_set_add_size_exact_dedup)
+{
+    set_t s;
+    fail_unless(set_init(12, &s) == 0);
+    fail_unless(set_size(&s) == 0);
+
+    char buf[100];
+    fail_unless(sprintf((char*)&buf, "test"));
+
+    for (int i=0; i < SET_MAX_EXACT; i++) {
+        set_add(&s, (char*)&buf);
+        fail_unless(set_size(&s) == 1);
+    }
+
+    fail_unless(set_destroy(&s) == 0);
+}
+END_TEST
+
 START_TEST(test_set_error_bound)
 {
     // Precision 14 -> variance of 1%

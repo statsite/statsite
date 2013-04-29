@@ -79,7 +79,7 @@ void set_add(set_t *s, char *key) {
 
             // Check if we can fit this in the array
             if (i < SET_MAX_EXACT) {
-                s->store.s.hashes[i] = out[i];
+                s->store.s.hashes[i] = out[1];
                 s->store.s.count++;
                 return;
             }

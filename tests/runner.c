@@ -140,6 +140,7 @@ int main(void)
     suite_add_tcase(s1, tc11);
     tcase_add_test(tc11, test_set_init_destroy);
     tcase_add_test(tc11, test_set_add_size_exact);
+    tcase_add_test(tc11, test_set_add_size_exact_dedup);
     tcase_add_test(tc11, test_set_error_bound);
 
 
