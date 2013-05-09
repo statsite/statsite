@@ -20,7 +20,6 @@ statsite
 *.pyc
 
 .DS_Store
+config
 
 *.swp
-
-*.ini
