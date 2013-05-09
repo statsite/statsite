@@ -6,6 +6,7 @@
  * front ends.
  */
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <ctype.h>
 #include <errno.h>
 #include <pthread.h>
@@ -160,6 +161,7 @@ int main(int argc, char **argv) {
     // Daemonize
     if (config->daemonize) {
         pid_t pid, sid;
+        int fd;
         syslog(LOG_INFO, "Daemonizing.");
         pid = fork();
 
@@ -185,9 +187,12 @@ int main(int argc, char **argv) {
             return 1;
         }
 
-        close(STDIN_FILENO);
-        close(STDOUT_FILENO);
-        close(STDERR_FILENO);
+        if ((fd = open("/dev/null", O_RDWR, 0)) != -1) {
+          dup2(fd, STDIN_FILENO);
+          dup2(fd, STDOUT_FILENO);
+          dup2(fd, STDERR_FILENO);
+          if (fd > STDERR_FILENO) close(fd);
+        }
     }
 
     // Log that we are starting up
