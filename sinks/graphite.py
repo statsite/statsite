@@ -5,6 +5,7 @@ import sys
 import socket
 import logging
 
+
 class GraphiteStore(object):
     def __init__(self, host="localhost", port=2003, prefix="statsite", attempts=3):
         """
@@ -32,7 +33,6 @@ class GraphiteStore(object):
         self.attempts = attempts
         self.sock = self._create_socket()
         self.logger = logging.getLogger("statsite.graphitestore")
-        self.logger.setLevel(logging.INFO)
 
     def flush(self, metrics):
         """
@@ -82,25 +82,16 @@ class GraphiteStore(object):
         self.logger.critical("Failed to flush to Graphite! Gave up after %d attempts." % self.attempts)
 
 
-def main(metrics, host="localhost", port=2003, prefix="statsite", attempts=3):
-    if metrics == None: return
-
+if __name__ == "__main__":
     # Initialize the logger
     logging.basicConfig()
 
     # Intialize from our arguments
-    graphite = GraphiteStore(host, port, prefix, attempts)
+    graphite = GraphiteStore(*sys.argv[1:])
+
+    # Get all the inputs
+    metrics = sys.stdin.read()
 
     # Flush
     graphite.flush(metrics.split("\n"))
     graphite.close()
-
-
-
-
-
-if __name__ == "__main__":
-    # Get all the inputs
-    metrics = sys.stdin.read()
-    
-    main(metrics, *sys.argv[1:])
