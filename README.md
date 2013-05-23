@@ -216,6 +216,7 @@ processing from the ASCII mode to binary. The metric type is one of:
 * 0x2 : Counter
 * 0x3 : Timer
 * 0x4 : Set
+* 0x5 : Gauge
 
 The key length is a 2 byte unsigned integer with the length of the
 key, INCLUDING a NULL terminator. The key must include a null terminator,
