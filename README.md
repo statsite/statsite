@@ -132,7 +132,7 @@ Messages must be terminated by newlines (`\n`).
 Currently supported message types:
 
 * `kv` - Simple Key/Value.
-* `g`  - Same as `kv`, compatibility with statsd gauges
+* `g`  - Gauge, similar to `kv` but only the last value per key is retained
 * `ms` - Timer.
 * `c`  - Counter.
 * `s`  - Unique Set
@@ -171,14 +171,25 @@ Then it will emit a count 3 for the number of uniques it has seen.
 Writing Statsite Sinks
 ---------------------
 
-Statsite only ships with a graphite sink by default, but any executable
-can be used as a sink. The sink should read its inputs from stdin, where
+Statsite only ships with a graphite sink by default, but ANY executable
+or script  can be used as a sink. The sink should read its inputs from stdin, where
 each metric is in the form::
 
-    key|val|timestamp
+    key|val|timestamp\n
 
 Each metric is separated by a newline. The process should terminate with
 an exit code of 0 to indicate success.
+
+Here is an example of the simplest possible Python sink:
+
+    #!/usr/bin/env python
+    import sys
+
+    lines = sys.stdin.read().split("\n")
+    metrics = [l.split("|") for l in lines]
+
+    for key, value, timestamp in metrics:
+        print key, value, timestamp
 
 
 Binary Protocol
