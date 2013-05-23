@@ -1,3 +1,11 @@
+# 0.5.0
+
+ * Adding support from gauges. Previously, gauges were handled
+ as key/value pairs internally meaning each new gauge would generate
+ a corresponding output. Now gauges update the same value, and only the
+ last value is retained, which is how statsd behaves.
+ * Git SHA: f872039
+
 # 0.4.6
 
  * Fixed bug with HLL bias correction
