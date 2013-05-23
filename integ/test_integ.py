@@ -106,6 +106,16 @@ class TestInteg(object):
         out = open(output).read()
         assert out in ("kv.tubez|100.000000|%d\n" % now, "kv.tubez|100.000000|%d\n" % (now - 1))
 
+    def test_gauges(self, servers):
+        "Tests adding gauges"
+        server, _, output = servers
+        server.sendall("g1:1|g\n")
+        server.sendall("g1:50|g\n")
+        wait_file(output)
+        now = time.time()
+        out = open(output).read()
+        assert out in ("gauges.g1|50.000000|%d\n" % now, "gauges.g1|50.000000|%d\n" % (now - 1))
+
     def test_counters(self, servers):
         "Tests adding kv pairs"
         server, _, output = servers
@@ -194,6 +204,16 @@ class TestIntegUDP(object):
         now = time.time()
         out = open(output).read()
         assert out in ("kv.tubez|100.000000|%d\n" % now, "kv.tubez|100.000000|%d\n" % (now - 1))
+
+    def test_gauges(self, servers):
+        "Tests adding gauges"
+        _, server, output = servers
+        server.sendall("g1:1|g\n")
+        server.sendall("g1:50|g\n")
+        wait_file(output)
+        now = time.time()
+        out = open(output).read()
+        assert out in ("gauges.g1|50.000000|%d\n" % now, "gauges.g1|50.000000|%d\n" % (now - 1))
 
     def test_bad_kv(self, servers):
         "Tests adding a bad value, followed by a valid kv pair"
