@@ -88,7 +88,7 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
             break;
 
         case GAUGE:
-            STREAM("gauge.%s|%f|%lld\n", name, ((gauge_t*)value)->value);
+            STREAM("gauges.%s|%f|%lld\n", name, ((gauge_t*)value)->value);
             break;
 
         case COUNTER:
