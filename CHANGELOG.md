@@ -1,7 +1,8 @@
-# 0.4.6 (unreleased)
+# 0.4.6
 
  * Fixed bug with HLL bias correction
  * Fixed bug in exact sets, previously would over count
+ * Git SHA: af7d4b6
 
 # 0.4.5
 
