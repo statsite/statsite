@@ -171,7 +171,7 @@ looks like the following (where the flag is optional)::</p>
 <li>
 <code>kv</code> - Simple Key/Value.</li>
 <li>
-<code>g</code>  - Same as <code>kv</code>, compatibility with statsd gauges</li>
+<code>g</code>  - Gauge, similar to <code>kv</code> but only the last value per key is retained</li>
 <li>
 <code>ms</code> - Timer.</li>
 <li>
@@ -216,15 +216,27 @@ users:abe|s
 
 <h2>Writing Statsite Sinks</h2>
 
-<p>Statsite only ships with a graphite sink by default, but any executable
-can be used as a sink. The sink should read its inputs from stdin, where
+<p>Statsite only ships with a graphite sink by default, but ANY executable
+or script  can be used as a sink. The sink should read its inputs from stdin, where
 each metric is in the form::</p>
 
-<pre><code>key|val|timestamp
+<pre><code>key|val|timestamp\n
 </code></pre>
 
 <p>Each metric is separated by a newline. The process should terminate with
 an exit code of 0 to indicate success.</p>
+
+<p>Here is an example of the simplest possible Python sink:</p>
+
+<pre><code>#!/usr/bin/env python
+import sys
+
+lines = sys.stdin.read().split("\n")
+metrics = [l.split("|") for l in lines]
+
+for key, value, timestamp in metrics:
+    print key, value, timestamp
+</code></pre>
 
 <h2>Binary Protocol</h2>
 
@@ -252,6 +264,7 @@ processing from the ASCII mode to binary. The metric type is one of:</p>
 <li>0x2 : Counter</li>
 <li>0x3 : Timer</li>
 <li>0x4 : Set</li>
+<li>0x5 : Gauge</li>
 </ul><p>The key length is a 2 byte unsigned integer with the length of the
 key, INCLUDING a NULL terminator. The key must include a null terminator,
 and it's length must include this.</p>
