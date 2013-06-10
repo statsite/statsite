@@ -31,13 +31,15 @@
         <hr>
 
         <section id="main_content">
-          <h1>Statsite <a href="https://travis-ci.org/armon/statsite"><img src="https://travis-ci.org/armon/statsite.png" alt="Build Status"></a>
+          <h1>
+<a name="statsite-" class="anchor" href="#statsite-"><span class="octicon octicon-link"></span></a>Statsite <a href="https://travis-ci.org/armon/statsite"><img src="https://travis-ci.org/armon/statsite.png" alt="Build Status"></a>
 </h1>
 
 <p>This is a stats aggregation server. Statsite is based heavily
 on Etsy's StatsD <a href="https://github.com/etsy/statsd">https://github.com/etsy/statsd</a>.</p>
 
-<h2>Features</h2>
+<h2>
+<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h2>
 
 <ul>
 <li>Basic key/value metrics</li>
@@ -54,7 +56,8 @@ on Etsy's StatsD <a href="https://github.com/etsy/statsd">https://github.com/ets
 <li>Send counters that statsite will aggregate</li>
 <li>Sets for cardinality measurements</li>
 <li>Binary protocol</li>
-</ul><h2>Architecture</h2>
+</ul><h2>
+<a name="architecture" class="anchor" href="#architecture"><span class="octicon octicon-link"></span></a>Architecture</h2>
 
 <p>Statsite is designed to be both highly performant,
 and very flexible. To achieve this, it implements the stats
@@ -98,7 +101,8 @@ can be tuned to provide greater accuracy at the cost of memory.</p>
 Practice: Algorithmic Engineering of a State of The Art Cardinality
 Estimation Algorithm".</p>
 
-<h2>Install</h2>
+<h2>
+<a name="install" class="anchor" href="#install"><span class="octicon octicon-link"></span></a>Install</h2>
 
 <p>Download and build from source::</p>
 
@@ -123,7 +127,8 @@ $ scons test_runner
 
 <p>At this point, the test code should build successfully.</p>
 
-<h2>Usage</h2>
+<h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
 
 <p>Statsite is configured using a simple INI file.
 Here is an example configuration file::</p>
@@ -155,7 +160,58 @@ width=20
 <pre><code>statsite -f /etc/statsite.conf
 </code></pre>
 
-<h2>Protocol</h2>
+<p>A full list of configuration options is below.</p>
+
+<h2>
+<a name="configuration-options" class="anchor" href="#configuration-options"><span class="octicon octicon-link"></span></a>Configuration Options</h2>
+
+<p>Each statsite configuration option is documented below. Statsite configuration
+options must exist in the <code>statsite</code> section of the INI file:</p>
+
+<ul>
+<li><p>tcp_port : Integer, sets the tcp port to listen on. Default 8125.</p></li>
+<li><p>port: Same as above. For compatibility.</p></li>
+<li><p>udp_port : Integer, sets the udp port. Currently listened on
+            but otherwise unused. Default 8125.</p></li>
+<li><p>bind_address : The address to bind on. Defaults to 0.0.0.0</p></li>
+<li><p>log_level : The logging level that statsite should use. One of:
+DEBUG, INFO, WARN, ERROR, or CRITICAL. All logs go to syslog,
+and stderr if that is a TTY. Default is DEBUG.</p></li>
+<li><p>flush_interval : How often the metrics should be flushed to the
+sink in seconds. Defaults to 10 seconds.</p></li>
+<li><p>timer_eps : The upper bound on error for timer estimates. Defaults
+to 1%. Decreasing this value causes more memory utilization per timer.</p></li>
+<li><p>set_eps : The upper bound on error for unique set estimates. Defaults
+to 2%. Decreasing this value causes more memory utilization per set.</p></li>
+<li><p>stream_cmd : This is the command that statsite invokes every
+<code>flush_interval</code> seconds to handle the metrics. It can be any executable.
+It should read inputs over stdin and exit with status code 0 on success.</p></li>
+<li><p>input_counter : If set, statsite will count how many commands it received
+in the flush interval, and the count will be emitted under this name. For
+example if set to "numStats", then statsite will emit "counter.numStats" with
+the number of samples it has received.</p></li>
+<li><p>daemonize : Should statsite daemonize. Defaults to 0.</p></li>
+<li><p>pid_file : When daemonizing, where to put the pid file. Defaults
+to /var/run/statsite.pid</p></li>
+<li><p>binary_stream : Should data be streamed to the stream_cmd in
+binary form instead of ASCI form. Defaults to 0.</p></li>
+</ul><p>In addition to global configurations, statsite supports histograms
+as well. Histograms are configured one per section, and the INI
+section must start with the work <code>histogram</code>. These are the recognized
+options:</p>
+
+<ul>
+<li><p>prefix : This is the key prefix to match on. The longest matching prefix
+is used. If the prefix is blank, it is the default for all keys.</p></li>
+<li><p>min : Floating value. The minimum bound on the histogram. Values below
+this go into a special bucket containing everything less than this value.</p></li>
+<li><p>max: Floating value. The maximum bound on the histogram. Values above
+this go into a special bucket containing everything more than this value.</p></li>
+<li><p>width : Floating value. The width of each bucket between the min and max.</p></li>
+</ul><p>Each histogram section must specify all options to be valid.</p>
+
+<h2>
+<a name="protocol" class="anchor" href="#protocol"><span class="octicon octicon-link"></span></a>Protocol</h2>
 
 <p>By default, Statsite will listen for TCP and UDP connections. A message
 looks like the following (where the flag is optional)::</p>
@@ -214,7 +270,8 @@ users:abe|s
 
 <p>Then it will emit a count 3 for the number of uniques it has seen.</p>
 
-<h2>Writing Statsite Sinks</h2>
+<h2>
+<a name="writing-statsite-sinks" class="anchor" href="#writing-statsite-sinks"><span class="octicon octicon-link"></span></a>Writing Statsite Sinks</h2>
 
 <p>Statsite only ships with a graphite sink by default, but ANY executable
 or script  can be used as a sink. The sink should read its inputs from stdin, where
@@ -238,7 +295,8 @@ for key, value, timestamp in metrics:
     print key, value, timestamp
 </code></pre>
 
-<h2>Binary Protocol</h2>
+<h2>
+<a name="binary-protocol" class="anchor" href="#binary-protocol"><span class="octicon octicon-link"></span></a>Binary Protocol</h2>
 
 <p>In addition to the statsd compatible ASCII protocol, statsite includes
 a lightweight binary protocol. This can be used if you want to make use
@@ -286,7 +344,8 @@ by a NULL (0) byte.</p>
 <pre><code>0xaa 0x02 0x0600 0x0000000000006940 0x436f6e6e7300
 </code></pre>
 
-<h2>Binary Sink Protocol</h2>
+<h2>
+<a name="binary-sink-protocol" class="anchor" href="#binary-sink-protocol"><span class="octicon octicon-link"></span></a>Binary Sink Protocol</h2>
 
 <p>It is also possible to have the data streamed to be represented
 in a binary format. Again, this is used if you want to use the reserved
