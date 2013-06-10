@@ -119,6 +119,73 @@ Then run statsite, pointing it to that file::
 
     statsite -f /etc/statsite.conf
 
+A full list of configuration options is below.
+
+Configuration Options
+---------------------
+
+Each statsite configuration option is documented below. Statsite configuration
+options must exist in the `statsite` section of the INI file:
+
+ * tcp\_port : Integer, sets the tcp port to listen on. Default 8125.
+
+ * port: Same as above. For compatibility.
+
+ * udp\_port : Integer, sets the udp port. Currently listened on
+                but otherwise unused. Default 8125.
+
+ * bind\_address : The address to bind on. Defaults to 0.0.0.0
+
+ * log\_level : The logging level that statsite should use. One of:
+    DEBUG, INFO, WARN, ERROR, or CRITICAL. All logs go to syslog,
+    and stderr if that is a TTY. Default is DEBUG.
+
+ * flush\_interval : How often the metrics should be flushed to the
+    sink in seconds. Defaults to 10 seconds.
+
+ * timer\_eps : The upper bound on error for timer estimates. Defaults
+   to 1%. Decreasing this value causes more memory utilization per timer.
+
+ * set\_eps : The upper bound on error for unique set estimates. Defaults
+   to 2%. Decreasing this value causes more memory utilization per set.
+
+ * stream\_cmd : This is the command that statsite invokes every
+  `flush_interval` seconds to handle the metrics. It can be any executable.
+  It should read inputs over stdin and exit with status code 0 on success.
+
+ * input\_counter : If set, statsite will count how many commands it received
+  in the flush interval, and the count will be emitted under this name. For
+  example if set to "numStats", then statsite will emit "counter.numStats" with
+  the number of samples it has received.
+
+ * daemonize : Should statsite daemonize. Defaults to 0.
+
+ * pid\_file : When daemonizing, where to put the pid file. Defaults
+   to /var/run/statsite.pid
+
+ * binary\_stream : Should data be streamed to the stream\_cmd in
+   binary form instead of ASCI form. Defaults to 0.
+
+
+In addition to global configurations, statsite supports histograms
+as well. Histograms are configured one per section, and the INI
+section must start with the work `histogram`. These are the recognized
+options:
+
+ * prefix : This is the key prefix to match on. The longest matching prefix
+ is used. If the prefix is blank, it is the default for all keys.
+
+ * min : Floating value. The minimum bound on the histogram. Values below
+ this go into a special bucket containing everything less than this value.
+
+ * max: Floating value. The maximum bound on the histogram. Values above
+ this go into a special bucket containing everything more than this value.
+
+ * width : Floating value. The width of each bucket between the min and max.
+
+Each histogram section must specify all options to be valid.
+
+
 Protocol
 --------
 
