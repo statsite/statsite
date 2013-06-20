@@ -6,6 +6,7 @@
 static int counter_delete_cb(void *data, const char *key, void *value);
 static int timer_delete_cb(void *data, const char *key, void *value);
 static int set_delete_cb(void *data, const char *key, void *value);
+static int gauge_delete_cb(void *data, const char *key, void *value);
 static int iter_cb(void *data, const char *key, void *value);
 
 struct cb_info {
@@ -39,6 +40,8 @@ int init_metrics(double timer_eps, double *quantiles, uint32_t num_quants, radix
     res = hashmap_init(0, &m->timers);
     if (res) return res;
     res = hashmap_init(0, &m->sets);
+    if (res) return res;
+    res = hashmap_init(0, &m->gauges);
     if (res) return res;
 
     // Set the head of our linked list to null
@@ -87,6 +90,10 @@ int destroy_metrics(metrics *m) {
     // Nuke the timers
     hashmap_iter(m->sets, set_delete_cb, NULL);
     hashmap_destroy(m->sets);
+
+    // Nuke the gauges
+    hashmap_iter(m->gauges, gauge_delete_cb, NULL);
+    hashmap_destroy(m->gauges);
 
     return 0;
 }
@@ -174,6 +181,27 @@ static int metrics_add_kv(metrics *m, char *name, double val) {
 }
 
 /**
+ * Sets a guage value
+ * @arg name The name of the gauge
+ * @arg val The value to set
+ * @return 0 on success
+ */
+static int metrics_set_gauge(metrics *m, char *name, double val) {
+    gauge_t *g;
+    int res = hashmap_get(m->gauges, name, (void**)&g);
+
+    // New gauge
+    if (res == -1) {
+        g = malloc(sizeof(gauge_t));
+        hashmap_put(m->gauges, name, g);
+    }
+
+    // Set the value
+    g->value = val;
+    return 0;
+}
+
+/**
  * Adds a new sampled value
  * arg type The type of the metrics
  * @arg name The name of the metric
@@ -184,6 +212,9 @@ int metrics_add_sample(metrics *m, metric_type type, char *name, double val) {
     switch (type) {
         case KEY_VAL:
             return metrics_add_kv(m, name, val);
+
+        case GAUGE:
+            return metrics_set_gauge(m, name, val);
 
         case COUNTER:
             return metrics_increment_counter(m, name, val);
@@ -250,6 +281,11 @@ int metrics_iter(metrics *m, void *data, metric_callback cb) {
     should_break = hashmap_iter(m->timers, iter_cb, &info);
     if (should_break) return should_break;
 
+    // Send the gauges
+    info.type = GAUGE;
+    should_break = hashmap_iter(m->gauges, iter_cb, &info);
+    if (should_break) return should_break;
+
     // Send the sets
     info.type = SET;
     should_break = hashmap_iter(m->sets, iter_cb, &info);
@@ -277,6 +313,13 @@ static int set_delete_cb(void *data, const char *key, void *value) {
     set_t *s = value;
     set_destroy(s);
     free(s);
+    return 0;
+}
+
+// Gauge map cleanup
+static int gauge_delete_cb(void *data, const char *key, void *value) {
+    gauge_t *g = value;
+    free(g);
     return 0;
 }
 

@@ -11,6 +11,7 @@
 typedef enum {
     UNKNOWN,
     KEY_VAL,
+    GAUGE,
     COUNTER,
     TIMER,
     SET
@@ -31,9 +32,14 @@ typedef struct {
 } timer_hist;
 
 typedef struct {
+    double value;
+} gauge_t;
+
+typedef struct {
     hashmap *counters;  // Hashmap of name -> counter structs
     hashmap *timers;    // Map of name -> timer_hist structs
     hashmap *sets;      // Map of name -> set_t structs
+    hashmap *gauges;    // Map of name -> guage struct
     key_val *kv_vals;   // Linked list of key_val structs
     double timer_eps;   // The error for timers
     double *quantiles;  // Array of quantiles

@@ -16,6 +16,7 @@ TYPE_MAP = {
     2: "counter",
     3: "timer",
     4: "set",
+    5: "gauge"
 }
 VAL_TYPE_MAP = {
     0: "kv",

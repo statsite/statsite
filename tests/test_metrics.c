@@ -99,6 +99,12 @@ static int iter_test_all_cb(void *data, metric_type type, char *key, void *val) 
             if (strcmp(key, "zip") == 0 && set_size(val) == 2)
                 *o = *o | 1 << 5;
             break;
+        case GAUGE:
+            if (strcmp(key, "g1") == 0 && ((gauge_t*)val)->value == 200)
+                *o = *o | 1 << 6;
+            if (strcmp(key, "g2") == 0 && ((gauge_t*)val)->value == 42)
+                *o = *o | 1 << 7;
+            break;
         default:
             return 1;
     }
@@ -114,6 +120,10 @@ START_TEST(test_metrics_add_all_iter)
     fail_unless(metrics_add_sample(&m, KEY_VAL, "test", 100) == 0);
     fail_unless(metrics_add_sample(&m, KEY_VAL, "test2", 42) == 0);
 
+    fail_unless(metrics_add_sample(&m, GAUGE, "g1", 1) == 0);
+    fail_unless(metrics_add_sample(&m, GAUGE, "g1", 200) == 0);
+    fail_unless(metrics_add_sample(&m, GAUGE, "g2", 42) == 0);
+
     fail_unless(metrics_add_sample(&m, COUNTER, "foo", 4) == 0);
     fail_unless(metrics_add_sample(&m, COUNTER, "foo", 6) == 0);
     fail_unless(metrics_add_sample(&m, COUNTER, "bar", 10) == 0);
@@ -127,7 +137,7 @@ START_TEST(test_metrics_add_all_iter)
 
     int okay = 0;
     fail_unless(metrics_iter(&m, (void*)&okay, iter_test_all_cb) == 0);
-    fail_unless(okay == 63);
+    fail_unless(okay == 255);
 
     res = destroy_metrics(&m);
     fail_unless(res == 0);

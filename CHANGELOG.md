@@ -1,6 +1,17 @@
-# 0.4.6 (unreleased)
+# 0.5.0
+
+ * Adding support from gauges. Previously, gauges were handled
+ as key/value pairs internally meaning each new gauge would generate
+ a corresponding output. Now gauges update the same value, and only the
+ last value is retained, which is how statsd behaves.
+ * Fix from @dccmx to prevent a SIGPIPE on linux when statsite is daemonized
+ * Git SHA: f872039
+
+# 0.4.6
 
  * Fixed bug with HLL bias correction
+ * Fixed bug in exact sets, previously would over count
+ * Git SHA: af7d4b6
 
 # 0.4.5
 
