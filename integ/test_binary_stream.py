@@ -23,7 +23,7 @@ except ImportError:
 BINARY_HEADER = struct.Struct("<BBHd")
 BINARY_SET_HEADER = struct.Struct("<BBHH")
 COUNT_VAL = struct.Struct("<I")
-BIN_TYPES = {"kv": 1, "c": 2, "ms": 3, "set": 4}
+BIN_TYPES = {"kv": 1, "c": 2, "ms": 3, "set": 4, "g": 5}
 
 BINARY_OUT_HEADER = struct.Struct("<QBBHd")
 BINARY_OUT_LEN = 20
@@ -170,6 +170,16 @@ class TestInteg(object):
         out = open(output).read()
         assert out in (format_output(now, "tubez", BIN_TYPES["kv"], VAL_TYPE_MAP["kv"], 100),
                        format_output(now - 1, "tubez", BIN_TYPES["kv"], VAL_TYPE_MAP["kv"], 100))
+
+    def test_gauges(self, servers):
+        "Tests streaming gauges"
+        server, _, output = servers
+        server.sendall(format("g1", "g", 500))
+        wait_file(output)
+        now = time.time()
+        out = open(output).read()
+        assert out in (format_output(now, "g1", BIN_TYPES["g"], VAL_TYPE_MAP["kv"], 500),
+                       format_output(now - 1, "g1", BIN_TYPES["g"], VAL_TYPE_MAP["kv"], 500))
 
     def test_counters(self, servers):
         "Tests adding kv pairs"
