@@ -67,11 +67,11 @@ Estimation Algorithm".
 Install
 -------
 
-Download and build from source::
+Download and build from source. This requires `scons` to be available,
+available usually through a system package manager. Steps:
 
     $ git clone https://github.com/armon/statsite.git
     $ cd statsite
-    $ pip install SCons  # Uses the Scons build system, may not be necessary
     $ scons
     $ ./statsite
 
