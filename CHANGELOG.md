@@ -1,3 +1,13 @@
+# 0.5.1
+
+* Adding support for delta updates to gauges. An important change in behavior
+is that sending multiple negative value gauages will accumulate instead of
+using the last value that is set. This is due to the ambiguity between setting
+a negative value and applying a delta update. This does not apply to the
+binary protocol.
+* Improve the graphite sink from @pasku
+* Git SHA: 3fe9b9a
+
 # 0.5.0
 
  * Adding support from gauges. Previously, gauges were handled
