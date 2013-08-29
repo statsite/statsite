@@ -184,20 +184,25 @@ static int metrics_add_kv(metrics *m, char *name, double val) {
  * Sets a guage value
  * @arg name The name of the gauge
  * @arg val The value to set
+ * @arg delta Is this a delta update
  * @return 0 on success
  */
-static int metrics_set_gauge(metrics *m, char *name, double val) {
+static int metrics_set_gauge(metrics *m, char *name, double val, bool delta) {
     gauge_t *g;
     int res = hashmap_get(m->gauges, name, (void**)&g);
 
     // New gauge
     if (res == -1) {
         g = malloc(sizeof(gauge_t));
+        g->value = 0;
         hashmap_put(m->gauges, name, g);
     }
 
-    // Set the value
-    g->value = val;
+    if (delta) {
+        g->value += val;
+    } else {
+        g->value = val;
+    }
     return 0;
 }
 
@@ -214,7 +219,10 @@ int metrics_add_sample(metrics *m, metric_type type, char *name, double val) {
             return metrics_add_kv(m, name, val);
 
         case GAUGE:
-            return metrics_set_gauge(m, name, val);
+            return metrics_set_gauge(m, name, val, false);
+
+        case GAUGE_DELTA:
+            return metrics_set_gauge(m, name, val, true);
 
         case COUNTER:
             return metrics_increment_counter(m, name, val);

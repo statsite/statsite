@@ -14,11 +14,12 @@
 /*
  * Binary defines
  */
-#define BIN_TYPE_KV      0x1
-#define BIN_TYPE_COUNTER 0x2
-#define BIN_TYPE_TIMER   0x3
-#define BIN_TYPE_SET     0x4
-#define BIN_TYPE_GAUGE   0x5
+#define BIN_TYPE_KV             0x1
+#define BIN_TYPE_COUNTER        0x2
+#define BIN_TYPE_TIMER          0x3
+#define BIN_TYPE_SET            0x4
+#define BIN_TYPE_GAUGE          0x5
+#define BIN_TYPE_GAUGE_DELTA    0x6
 
 #define BIN_OUT_NO_TYPE 0x0
 #define BIN_OUT_SUM     0x1
@@ -358,6 +359,15 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
                 break;
             case 'g':
                 type = GAUGE;
+
+                // Check if this is a delta update
+                switch (*val_str) {
+                    case '+':
+                        // Advance past the + to avoid breaking str2double
+                        val_str++;
+                    case '-':
+                        type = GAUGE_DELTA;
+                }
                 break;
             case 's':
                 type = SET;
@@ -493,6 +503,9 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
                 break;
             case BIN_TYPE_GAUGE:
                 type = GAUGE;
+                break;
+            case BIN_TYPE_GAUGE_DELTA:
+                type = GAUGE_DELTA;
                 break;
 
             // Special case set handling

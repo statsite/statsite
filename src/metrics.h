@@ -14,7 +14,8 @@ typedef enum {
     GAUGE,
     COUNTER,
     TIMER,
-    SET
+    SET,
+    GAUGE_DELTA
 } metric_type;
 
 typedef struct key_val {
