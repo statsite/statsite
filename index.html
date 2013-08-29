@@ -35,15 +35,24 @@
 <a name="statsite-" class="anchor" href="#statsite-"><span class="octicon octicon-link"></span></a>Statsite <a href="https://travis-ci.org/armon/statsite"><img src="https://travis-ci.org/armon/statsite.png" alt="Build Status"></a>
 </h1>
 
-<p>This is a stats aggregation server. Statsite is based heavily
-on Etsy's StatsD <a href="https://github.com/etsy/statsd">https://github.com/etsy/statsd</a>.</p>
+<p>Statsite is a metrics aggregation server. Statsite is based heavily
+on Etsy's StatsD <a href="https://github.com/etsy/statsd">https://github.com/etsy/statsd</a>, and is wire compatible.</p>
 
 <h2>
 <a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h2>
 
 <ul>
-<li>Basic key/value metrics</li>
-<li>Send timer data, statsite will calculate:
+<li>Multiple metric types
+
+<ul>
+<li>Key / Value</li>
+<li>Gauges</li>
+<li>Counters</li>
+<li>Timers</li>
+<li>Sets</li>
+</ul>
+</li>
+<li>Efficient summary metrics for timer data:
 
 <ul>
 <li>Mean</li>
@@ -53,9 +62,15 @@ on Etsy's StatsD <a href="https://github.com/etsy/statsd">https://github.com/ets
 <li>Histograms</li>
 </ul>
 </li>
-<li>Send counters that statsite will aggregate</li>
-<li>Sets for cardinality measurements</li>
+<li>Dynamic set implementation:
+
+<ul>
+<li>Exactly counts for small sets</li>
+<li>HyperLogLog for large sets</li>
+</ul>
+</li>
 <li>Binary protocol</li>
+<li>Fast (Up to 10M+ keys per second)</li>
 </ul><h2>
 <a name="architecture" class="anchor" href="#architecture"><span class="octicon octicon-link"></span></a>Architecture</h2>
 
@@ -104,12 +119,13 @@ Estimation Algorithm".</p>
 <h2>
 <a name="install" class="anchor" href="#install"><span class="octicon octicon-link"></span></a>Install</h2>
 
-<p>Download and build from source::</p>
+<p>Download and build from source. This requires <code>scons</code> to be available,
+available usually through a system package manager. Steps:</p>
 
 <pre><code>$ git clone https://github.com/armon/statsite.git
 $ cd statsite
 $ pip install SCons  # Uses the Scons build system, may not be necessary
-$ scons
+$ make
 $ ./statsite
 </code></pre>
 
@@ -122,7 +138,7 @@ $ make
 # make install
 # ldconfig (necessary on some Linux distros)
 $ cd ../../
-$ scons test_runner
+$ make test
 </code></pre>
 
 <p>At this point, the test code should build successfully.</p>
@@ -236,6 +252,9 @@ looks like the following (where the flag is optional)::</p>
 </ul><p>After the flush interval, the counters and timers of the same key are
 aggregated and this is sent to the store.</p>
 
+<p>Gauges also support "delta" updates, which are supported by prefixing the
+value with either a <code>+</code> or a <code>-</code>.</p>
+
 <p>Examples:</p>
 
 <p>The following is a simple key/value pair, in this case reporting how many
@@ -254,9 +273,11 @@ queries we've seen in the last second on MySQL::</p>
 <pre><code>rewards:1|c
 </code></pre>
 
-<p>And this example decrements the "inventory" counter by 7::</p>
+<p>Here we initialize a gauge and then modify its value::</p>
 
-<pre><code>inventory:-7|c
+<pre><code>inventory:100|g
+inventory:-5|g
+inventory:+2|g
 </code></pre>
 
 <p>Sets count the unique items, so if statsite gets::</p>
@@ -322,6 +343,7 @@ processing from the ASCII mode to binary. The metric type is one of:</p>
 <li>0x3 : Timer</li>
 <li>0x4 : Set</li>
 <li>0x5 : Gauge</li>
+<li>0x6 : Gauge Delta update</li>
 </ul><p>The key length is a 2 byte unsigned integer with the length of the
 key, INCLUDING a NULL terminator. The key must include a null terminator,
 and it's length must include this.</p>
@@ -360,7 +382,7 @@ changes however. The Timestamp is sent as an 8 byte unsigned integer,
 which is the current Unix timestamp. The Metric type is one of:</p>
 
 <ul>
-<li>0x1 : Key value / Gauge</li>
+<li>0x1 : Key value</li>
 <li>0x2 : Counter</li>
 <li>0x3 : Timer</li>
 <li>0x4 : Set</li>
