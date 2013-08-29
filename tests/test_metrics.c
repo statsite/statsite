@@ -195,3 +195,37 @@ START_TEST(test_metrics_histogram)
 }
 END_TEST
 
+static int iter_test_gauge(void *data, metric_type type, char *key, void *val) {
+    int *o = data;
+    if (strcmp(key, "g1") == 0 && ((gauge_t*)val)->value == 42) {
+        *o = *o | 1;
+    } else if (strcmp(key, "g2") == 0 && ((gauge_t*)val)->value == 100) {
+        *o = *o | (1 << 1);
+    } else if (strcmp(key, "g3") == 0 && ((gauge_t*)val)->value == -100) {
+        *o = *o | (1 << 2);
+    } else
+        return 1;
+    return 0;
+}
+
+START_TEST(test_metrics_gauges)
+{
+    metrics m;
+    int res = init_metrics_defaults(&m);
+    fail_unless(res == 0);
+
+    fail_unless(metrics_add_sample(&m, GAUGE, "g1", 1) == 0);
+    fail_unless(metrics_add_sample(&m, GAUGE_DELTA, "g1", 41) == 0);
+
+    fail_unless(metrics_add_sample(&m, GAUGE_DELTA, "g2", 100) == 0);
+    fail_unless(metrics_add_sample(&m, GAUGE_DELTA, "g3", -100) == 0);
+
+    int okay = 0;
+    fail_unless(metrics_iter(&m, (void*)&okay, iter_test_gauge) == 0);
+    fail_unless(okay == 7);
+
+    res = destroy_metrics(&m);
+    fail_unless(res == 0);
+}
+END_TEST
+

@@ -21,7 +21,7 @@ except ImportError:
 
 BINARY_HEADER = struct.Struct("<BBHd")
 BINARY_SET_HEADER = struct.Struct("<BBHH")
-BIN_TYPES = {"kv": 1, "c": 2, "ms": 3, "set": 4, "g": 5}
+BIN_TYPES = {"kv": 1, "c": 2, "ms": 3, "set": 4, "g": 5, "delta": 6}
 
 
 def pytest_funcarg__servers(request):
@@ -137,6 +137,26 @@ class TestInteg(object):
         out = open(output).read()
         assert out in ("gauges.g1|120.000000|%d\n" % now, "gauges.g1|120.000000|%d\n" % (now - 1))
 
+    def test_gauges_delta(self, servers):
+        "Tests adding gauges"
+        server, _, output = servers
+        server.sendall(format("gd", "delta", 50))
+        server.sendall(format("gd", "delta", 50))
+        wait_file(output)
+        now = time.time()
+        out = open(output).read()
+        assert out in ("gauges.gd|100.000000|%d\n" % now, "gauges.gd|100.000000|%d\n" % (now - 1))
+
+    def test_gauges_delta_neg(self, servers):
+        "Tests adding gauges"
+        server, _, output = servers
+        server.sendall(format("gd", "delta", -50))
+        server.sendall(format("gd", "delta", -50))
+        wait_file(output)
+        now = time.time()
+        out = open(output).read()
+        assert out in ("gauges.gd|-100.000000|%d\n" % now, "gauges.gd|-100.000000|%d\n" % (now - 1))
+
     def test_counters(self, servers):
         "Tests adding kv pairs"
         server, _, output = servers
@@ -199,6 +219,26 @@ class TestIntegUDP(object):
         now = time.time()
         out = open(output).read()
         assert out in ("gauges.g1|120.000000|%d\n" % now, "gauges.g1|120.000000|%d\n" % (now - 1))
+
+    def test_gauges_delta(self, servers):
+        "Tests adding gauges"
+        _, server, output = servers
+        server.sendall(format("gd", "delta", 50))
+        server.sendall(format("gd", "delta", 50))
+        wait_file(output)
+        now = time.time()
+        out = open(output).read()
+        assert out in ("gauges.gd|100.000000|%d\n" % now, "gauges.gd|100.000000|%d\n" % (now - 1))
+
+    def test_gauges_delta_neg(self, servers):
+        "Tests adding gauges"
+        _, server, output = servers
+        server.sendall(format("gd", "delta", -50))
+        server.sendall(format("gd", "delta", -50))
+        wait_file(output)
+        now = time.time()
+        out = open(output).read()
+        assert out in ("gauges.gd|-100.000000|%d\n" % now, "gauges.gd|-100.000000|%d\n" % (now - 1))
 
     def test_counters(self, servers):
         "Tests adding kv pairs"

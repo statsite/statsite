@@ -91,6 +91,7 @@ int main(void)
     tcase_add_test(tc6, test_metrics_add_iter);
     tcase_add_test(tc6, test_metrics_add_all_iter);
     tcase_add_test(tc6, test_metrics_histogram);
+    tcase_add_test(tc6, test_metrics_gauges);
 
     // Add the streaming tests
     suite_add_tcase(s1, tc7);
