@@ -1,22 +1,29 @@
 Statsite [![Build Status](https://travis-ci.org/armon/statsite.png)](https://travis-ci.org/armon/statsite)
 ========
 
-This is a stats aggregation server. Statsite is based heavily
-on Etsy's StatsD <https://github.com/etsy/statsd>.
+Statsite is a metrics aggregation server. Statsite is based heavily
+on Etsy's StatsD <https://github.com/etsy/statsd>, and is wire compatible.
 
 Features
 --------
 
-* Basic key/value metrics
-* Send timer data, statsite will calculate:
+* Multiple metric types
+  - Key / Value
+  - Gauges
+  - Counters
+  - Timers
+  - Sets
+* Efficient summary metrics for timer data:
   - Mean
   - Min/Max
   - Standard deviation
   - Median, Percentile 95, Percentile 99
   - Histograms
-* Send counters that statsite will aggregate
-* Sets for cardinality measurements
+* Dynamic set implementation:
+  - Exactly counts for small sets
+  - HyperLogLog for large sets
 * Binary protocol
+* Fast (Up to 10M+ keys per second)
 
 
 Architecture
@@ -72,7 +79,7 @@ Download and build from source::
     $ git clone https://github.com/armon/statsite.git
     $ cd statsite
     $ pip install SCons  # Uses the Scons build system, may not be necessary
-    $ scons
+    $ make
     $ ./statsite
 
 Building the test code may generate errors if libcheck is not available.
@@ -84,7 +91,7 @@ To build the test code successfully, do the following::
     # make install
     # ldconfig (necessary on some Linux distros)
     $ cd ../../
-    $ scons test_runner
+    $ make test
 
 At this point, the test code should build successfully.
 
@@ -206,6 +213,9 @@ Currently supported message types:
 After the flush interval, the counters and timers of the same key are
 aggregated and this is sent to the store.
 
+Gauges also support "delta" updates, which are supported by prefixing the
+value with either a `+` or a `-`.
+
 Examples:
 
 The following is a simple key/value pair, in this case reporting how many
@@ -221,9 +231,11 @@ The next example is increments the "rewards" counter by 1::
 
     rewards:1|c
 
-And this example decrements the "inventory" counter by 7::
+Here we initialize a gauge and then modify its value::
 
-    inventory:-7|c
+    inventory:100|g
+    inventory:-5|g
+    inventory:+2|g
 
 Sets count the unique items, so if statsite gets::
 
@@ -283,6 +295,7 @@ processing from the ASCII mode to binary. The metric type is one of:
 * 0x3 : Timer
 * 0x4 : Set
 * 0x5 : Gauge
+* 0x6 : Gauge Delta update
 
 The key length is a 2 byte unsigned integer with the length of the
 key, INCLUDING a NULL terminator. The key must include a null terminator,
@@ -321,10 +334,11 @@ Most of these are the same as the binary protocol. There are a few.
 changes however. The Timestamp is sent as an 8 byte unsigned integer,
 which is the current Unix timestamp. The Metric type is one of:
 
-* 0x1 : Key value / Gauge
+* 0x1 : Key value
 * 0x2 : Counter
 * 0x3 : Timer
 * 0x4 : Set
+* 0x5 : Gauge
 
 The value type is one of:
 
