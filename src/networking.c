@@ -196,6 +196,10 @@ static int setup_udp_listener(statsite_networking *netconf) {
         return 1;
     }
 
+    // Put the socket in non-blocking mode
+    int flags = fcntl(udp_listener_fd, F_GETFL, 0);
+    fcntl(udp_listener_fd, F_SETFL, flags | O_NONBLOCK);
+
     // Allocate a connection object for the UDP socket,
     // ensure a min-buffer size of 64K
     conn_info *conn = get_conn();
@@ -371,54 +375,56 @@ static int read_client_data(conn_info *conn) {
  * of what to do.
  */
 static void handle_udp_message(ev_io *watch, int ready_events) {
-    // Get the associated connection struct
-    conn_info *conn = watch->data;
+    while (1) {
+        // Get the associated connection struct
+        conn_info *conn = watch->data;
 
-    // Clear the input buffer
-    circbuf_clear(&conn->input);
+        // Clear the input buffer
+        circbuf_clear(&conn->input);
 
-    // Build the IO vectors to perform the read
-    struct iovec vectors[2];
-    int num_vectors;
-    circbuf_setup_readv_iovec(&conn->input, (struct iovec*)&vectors, &num_vectors);
+        // Build the IO vectors to perform the read
+        struct iovec vectors[2];
+        int num_vectors;
+        circbuf_setup_readv_iovec(&conn->input, (struct iovec*)&vectors, &num_vectors);
 
-    /*
-     * Issue the read, always use the first vector.
-     * since we just cleared the buffer, and it should
-     * be a contiguous buffer.
-     */
-    assert(num_vectors == 1);
-    ssize_t read_bytes = recv(watch->fd, vectors[0].iov_base,
-                                vectors[0].iov_len, 0);
+        /*
+         * Issue the read, always use the first vector.
+         * since we just cleared the buffer, and it should
+         * be a contiguous buffer.
+         */
+        assert(num_vectors == 1);
+        ssize_t read_bytes = recv(watch->fd, vectors[0].iov_base,
+                                    vectors[0].iov_len, 0);
 
-    // Make sure we actually read something
-    if (read_bytes == 0) {
-        syslog(LOG_DEBUG, "Got empty UDP packet. [%d]\n", watch->fd);
-        return;
+        // Make sure we actually read something
+        if (read_bytes == 0) {
+            syslog(LOG_DEBUG, "Got empty UDP packet. [%d]\n", watch->fd);
+            return;
 
-    } else if (read_bytes == -1) {
-        if (errno != EAGAIN && errno != EINTR) {
-            syslog(LOG_ERR, "Failed to recv() from connection [%d]! %s.",
-                    watch->fd, strerror(errno));
+        } else if (read_bytes == -1) {
+            if (errno != EAGAIN && errno != EINTR) {
+                syslog(LOG_ERR, "Failed to recv() from connection [%d]! %s.",
+                        watch->fd, strerror(errno));
+            }
+            return;
         }
-        return;
+
+        // Update the write cursor
+        circbuf_advance_write(&conn->input, read_bytes);
+
+        // UDP clients don't need to append newlines to the messages like
+        // TCP clients do, but our parser requires them.  Append one if
+        // it's not present.
+        if (conn->input.buffer[conn->input.write_cursor - 1] != '\n')
+            circbuf_write(&conn->input, "\n", 1);
+
+        // Get the user data
+        worker_ev_userdata *data = ev_userdata();
+
+        // Invoke the connection handler
+        statsite_conn_handler handle = {data->netconf->config, watch->data};
+        handle_client_connect(&handle);
     }
-
-    // Update the write cursor
-    circbuf_advance_write(&conn->input, read_bytes);
-
-    // UDP clients don't need to append newlines to the messages like
-    // TCP clients do, but our parser requires them.  Append one if
-    // it's not present.
-    if (conn->input.buffer[conn->input.write_cursor - 1] != '\n')
-        circbuf_write(&conn->input, "\n", 1);
-
-    // Get the user data
-    worker_ev_userdata *data = ev_userdata();
-
-    // Invoke the connection handler
-    statsite_conn_handler handle = {data->netconf->config, watch->data};
-    handle_client_connect(&handle);
 }
 
 
