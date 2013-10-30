@@ -1,3 +1,7 @@
+# 0.5.2 (unreleased)
+
+* Minor optimization to increase UDP throughput
+
 # 0.5.1
 
 * Adding support for delta updates to gauges. An important change in behavior
