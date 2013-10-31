@@ -215,7 +215,7 @@ After the flush interval, the counters and timers of the same key are
 aggregated and this is sent to the store.
 
 Gauges also support "delta" updates, which are supported by prefixing the
-value with either a `+` or a `-`.
+value with either a `+` or a `-`. This implies you can't explicitly set a gauge to a negative number without first setting it to zero.
 
 Examples:
 
