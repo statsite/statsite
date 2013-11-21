@@ -23,7 +23,9 @@ make %{?_smp_mflags}
 
 %install
 mkdir -vp $RPM_BUILD_ROOT/usr/bin
+mkdir -vp $RPM_BUILD_ROOT/usr/libexec/%{name}
 install -m 755 statsite $RPM_BUILD_ROOT/usr/bin
+cp -a sinks $RPM_BUILD_ROOT/usr/libexec/%{name}
 
 %clean
 make clean
@@ -34,6 +36,11 @@ make clean
 %doc CHANGELOG.md
 %doc README.md
 /usr/bin/statsite
+/usr/libexec/statsite/sinks
 
 %changelog
+* Wed Nov 20 2013 Vito Laurenza <vitolaurenza@hotmail.com>
+- Added 'sinks', which I overlooked initially.
 
+* Fri Nov 15 2013 Vito Laurenza <vitolaurenza@hotmail.com>
+- Initial release.
