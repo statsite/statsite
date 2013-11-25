@@ -70,7 +70,8 @@ on Etsy's StatsD <a href="https://github.com/etsy/statsd">https://github.com/ets
 </ul>
 </li>
 <li>Binary protocol</li>
-<li>Fast (Up to 10M+ keys per second)</li>
+<li>TCP, UDP, and STDIN</li>
+<li>Fast</li>
 </ul><h2>
 <a name="architecture" class="anchor" href="#architecture"><span class="octicon octicon-link"></span></a>Architecture</h2>
 
@@ -185,10 +186,11 @@ width=20
 options must exist in the <code>statsite</code> section of the INI file:</p>
 
 <ul>
-<li><p>tcp_port : Integer, sets the TCP port to listen on. Default 8125.</p></li>
+<li><p>tcp_port : Integer, sets the TCP port to listen on. Default 8125. 0 to disable.</p></li>
 <li><p>port: Same as above. For compatibility.</p></li>
-<li><p>udp_port : Integer, sets the UDP port. Default 8125.</p></li>
+<li><p>udp_port : Integer, sets the UDP port. Default 8125. 0 to disable.</p></li>
 <li><p>bind_address : The address to bind on. Defaults to 0.0.0.0</p></li>
+<li><p>parse_stdin: Enables parsing stdin as an input stream. Defaults to 0.</p></li>
 <li><p>log_level : The logging level that statsite should use. One of:
 DEBUG, INFO, WARN, ERROR, or CRITICAL. All logs go to syslog,
 and stderr if that is a TTY. Default is DEBUG.</p></li>
@@ -253,7 +255,7 @@ looks like the following (where the flag is optional)::</p>
 aggregated and this is sent to the store.</p>
 
 <p>Gauges also support "delta" updates, which are supported by prefixing the
-value with either a <code>+</code> or a <code>-</code>.</p>
+value with either a <code>+</code> or a <code>-</code>. This implies you can't explicitly set a gauge to a negative number without first setting it to zero.</p>
 
 <p>Examples:</p>
 
