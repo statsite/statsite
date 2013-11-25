@@ -15,6 +15,7 @@ START_TEST(test_config_get_default)
     fail_unless(res == 0);
     fail_unless(config.tcp_port == 8125);
     fail_unless(config.udp_port == 8125);
+    fail_unless(config.parse_stdin == false);
     fail_unless(strcmp(config.log_level, "DEBUG") == 0);
     fail_unless(config.syslog_log_level == LOG_DEBUG);
     fail_unless(config.timer_eps == 1e-2);
@@ -37,6 +38,7 @@ START_TEST(test_config_bad_file)
     // Should get the defaults...
     fail_unless(config.tcp_port == 8125);
     fail_unless(config.udp_port == 8125);
+    fail_unless(config.parse_stdin == false);
     fail_unless(strcmp(config.log_level, "DEBUG") == 0);
     fail_unless(config.syslog_log_level == LOG_DEBUG);
     fail_unless(config.timer_eps == 1e-2);
@@ -62,6 +64,7 @@ START_TEST(test_config_empty_file)
     // Should get the defaults...
     fail_unless(config.tcp_port == 8125);
     fail_unless(config.udp_port == 8125);
+    fail_unless(config.parse_stdin == false);
     fail_unless(strcmp(config.log_level, "DEBUG") == 0);
     fail_unless(config.syslog_log_level == LOG_DEBUG);
     fail_unless(config.timer_eps == 1e-2);
@@ -82,6 +85,7 @@ START_TEST(test_config_basic_config)
     char *buf = "[statsite]\n\
 port = 10000\n\
 udp_port = 10001\n\
+parse_stdin = true\n\
 flush_interval = 120\n\
 timer_eps = 0.005\n\
 set_eps = 0.03\n\
@@ -102,6 +106,7 @@ pid_file = /tmp/statsite.pid\n";
     // Should get the config
     fail_unless(config.tcp_port == 10000);
     fail_unless(config.udp_port == 10001);
+    fail_unless(config.parse_stdin == true);
     fail_unless(strcmp(config.log_level, "INFO") == 0);
     fail_unless(config.timer_eps == 0.005);
     fail_unless(config.set_eps == 0.03);

@@ -29,6 +29,7 @@ static const statsite_config DEFAULT_CONFIG = {
     8125,               // TCP defaults to 8125
     8125,               // UDP on 8125
     "0.0.0.0",          // Listen on all IPv4 addresses
+    false,              // Do not parse stdin by default
     "DEBUG",            // DEBUG level
     LOG_DEBUG,
     0.01,               // Default 1% error
@@ -183,6 +184,8 @@ static int config_callback(void* user, const char* section, const char* name, co
         return value_to_int(value, &config->udp_port);
     } else if (NAME_MATCH("flush_interval")) {
          return value_to_int(value, &config->flush_interval);
+    } else if (NAME_MATCH("parse_stdin")) {
+        return value_to_bool(value, &config->parse_stdin);
     } else if (NAME_MATCH("daemonize")) {
         return value_to_bool(value, &config->daemonize);
     } else if (NAME_MATCH("binary_stream")) {

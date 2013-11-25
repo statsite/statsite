@@ -25,6 +25,7 @@ typedef struct {
     int tcp_port;
     int udp_port;
     char *bind_address;
+    bool parse_stdin;
     char *log_level;
     int syslog_log_level;
     double timer_eps;
