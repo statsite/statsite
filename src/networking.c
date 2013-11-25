@@ -88,6 +88,7 @@ struct statsite_networking {
     statsite_config *config;
     ev_io tcp_client;
     ev_io udp_client;
+    conn_info *stdin_client;
     ev_timer flush_timer;
 };
 
@@ -158,6 +159,9 @@ static int setup_tcp_listener(statsite_networking *netconf) {
         return 1;
     }
 
+    syslog(LOG_INFO, "Listening on tcp '%s:%d'",
+           netconf->config->bind_address, netconf->config->tcp_port);
+
     // Create the libev objects
     ev_io_init(&netconf->tcp_client, handle_new_client,
                 tcp_listener_fd, EV_READ);
@@ -216,10 +220,37 @@ static int setup_udp_listener(statsite_networking *netconf) {
     }
     netconf->udp_client.data = conn;
 
+    syslog(LOG_INFO, "Listening on udp '%s:%d'.",
+           netconf->config->bind_address, netconf->config->udp_port);
+
     // Create the libev objects
     ev_io_init(&netconf->udp_client, handle_udp_message,
                 udp_listener_fd, EV_READ);
     ev_io_start(&netconf->udp_client);
+    return 0;
+}
+
+/**
+ * Initializes the stdin listener.
+ * @arg netconf The network configuration
+ * @return 0 on success.
+ */
+static int setup_stdin_listener(statsite_networking *netconf) {
+    if (!netconf->config->parse_stdin) {
+        syslog(LOG_INFO, "stdin is disabled");
+        return 0;
+    }
+
+    // Log we are listening
+    syslog(LOG_INFO, "Listening on stdin.");
+
+    // Create an associated conn object
+    conn_info *conn = get_conn();
+    netconf->stdin_client = conn;
+
+    // Initialize the libev stuff
+    ev_io_init(&conn->client, invoke_event_handler, STDIN_FILENO, EV_READ);
+    ev_io_start(&conn->client);
     return 0;
 }
 
@@ -250,8 +281,15 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
         return 1;
     }
 
+    // Setup the stdin listener
+    int res = setup_stdin_listener(netconf);
+    if (res != 0) {
+        free(netconf);
+        return 1;
+    }
+
     // Setup the TCP listener
-    int res = setup_tcp_listener(netconf);
+    res = setup_tcp_listener(netconf);
     if (res != 0) {
         free(netconf);
         return 1;
@@ -267,10 +305,6 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
         free(netconf);
         return 1;
     }
-
-    syslog(LOG_INFO, "Listening on tcp '%s:%d' udp '%s:%d'.",
-           netconf->config->bind_address, netconf->config->tcp_port,
-           netconf->config->bind_address, netconf->config->udp_port);
 
     // Setup the timer
     ev_timer_init(&netconf->flush_timer, handle_flush_event, config->flush_interval, config->flush_interval);
@@ -499,6 +533,10 @@ int shutdown_networking(statsite_networking *netconf) {
     if ev_is_active(&netconf->udp_client) {
         ev_io_stop(&netconf->udp_client);
         close(netconf->udp_client.fd);
+    }
+    if (netconf->stdin_client != NULL) {
+        close_client_connection(netconf->stdin_client);
+        netconf->stdin_client = NULL;
     }
 
     // Stop the other timers
