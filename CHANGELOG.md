@@ -1,3 +1,7 @@
+# 0.6.1 (unreleased)
+
+* Removed dependency on C++ compiler
+
 # 0.6.0
 
 * Support streaming input metrics over stdin
