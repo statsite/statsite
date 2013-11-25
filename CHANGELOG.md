@@ -1,6 +1,9 @@
-# 0.5.2 (unreleased)
+# 0.6.0
 
-* Minor optimization to increase UDP throughput
+* Support streaming input metrics over stdin
+* TCP/UDP listeners can be disabled by setting the port to 0
+* Increased UDP throughput
+* Git SHA: 5169f98
 
 # 0.5.1
 
