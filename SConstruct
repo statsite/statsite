@@ -1,7 +1,7 @@
 import platform
 
-envmurmur = Environment(CPPPATH = ['deps/murmurhash/'], CPPFLAGS="-fno-exceptions -O3")
-murmur = envmurmur.Library('murmur', Glob("deps/murmurhash/*.cpp"))
+envmurmur = Environment(CPATH = ['deps/murmurhash/'], CFLAGS="-std=c99 -O3")
+murmur = envmurmur.Library('murmur', Glob("deps/murmurhash/*.c"))
 
 envinih = Environment(CPATH = ['deps/inih/'], CFLAGS="-O3")
 inih = envinih.Library('inih', Glob("deps/inih/*.c"))
