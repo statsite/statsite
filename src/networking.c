@@ -120,6 +120,10 @@ static int circbuf_write(circular_buffer *buf, char *in, uint64_t bytes);
  * @return 0 on success.
  */
 static int setup_tcp_listener(statsite_networking *netconf) {
+    if (netconf->config->tcp_port == 0) {
+        syslog(LOG_INFO, "TCP port is disabled");
+        return 0;
+    }
     struct sockaddr_in addr;
     struct in_addr bind_addr;
     bzero(&addr, sizeof(addr));
@@ -167,6 +171,10 @@ static int setup_tcp_listener(statsite_networking *netconf) {
  * @return 0 on success.
  */
 static int setup_udp_listener(statsite_networking *netconf) {
+    if (netconf->config->udp_port == 0) {
+        syslog(LOG_INFO, "UDP port is disabled");
+        return 0;
+    }
     struct sockaddr_in addr;
     struct in_addr bind_addr;
     bzero(&addr, sizeof(addr));
@@ -252,8 +260,10 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
     // Setup the UDP listener
     res = setup_udp_listener(netconf);
     if (res != 0) {
-        ev_io_stop(&netconf->tcp_client);
-        close(netconf->tcp_client.fd);
+        if ev_is_active(&netconf->tcp_client) {
+            ev_io_stop(&netconf->tcp_client);
+            close(netconf->tcp_client.fd);
+        }
         free(netconf);
         return 1;
     }
@@ -482,10 +492,14 @@ void enter_networking_loop(statsite_networking *netconf, int *should_run) {
  */
 int shutdown_networking(statsite_networking *netconf) {
     // Stop listening for new connections
-    ev_io_stop(&netconf->tcp_client);
-    close(netconf->tcp_client.fd);
-    ev_io_stop(&netconf->udp_client);
-    close(netconf->udp_client.fd);
+    if ev_is_active(&netconf->tcp_client) {
+        ev_io_stop(&netconf->tcp_client);
+        close(netconf->tcp_client.fd);
+    }
+    if ev_is_active(&netconf->udp_client) {
+        ev_io_stop(&netconf->udp_client);
+        close(netconf->udp_client.fd);
+    }
 
     // Stop the other timers
     ev_timer_stop(&netconf->flush_timer);
