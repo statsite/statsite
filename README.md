@@ -23,7 +23,8 @@ Features
   - Exactly counts for small sets
   - HyperLogLog for large sets
 * Binary protocol
-* Fast (Up to 10M+ keys per second)
+* TCP, UDP, and STDIN
+* Fast
 
 
 Architecture
@@ -135,13 +136,15 @@ Configuration Options
 Each statsite configuration option is documented below. Statsite configuration
 options must exist in the `statsite` section of the INI file:
 
- * tcp\_port : Integer, sets the TCP port to listen on. Default 8125.
+ * tcp\_port : Integer, sets the TCP port to listen on. Default 8125. 0 to disable.
 
  * port: Same as above. For compatibility.
 
- * udp\_port : Integer, sets the UDP port. Default 8125.
+ * udp\_port : Integer, sets the UDP port. Default 8125. 0 to disable.
 
  * bind\_address : The address to bind on. Defaults to 0.0.0.0
+
+ * parse\_stdin: Enables parsing stdin as an input stream. Defaults to 0.
 
  * log\_level : The logging level that statsite should use. One of:
     DEBUG, INFO, WARN, ERROR, or CRITICAL. All logs go to syslog,
