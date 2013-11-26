@@ -298,7 +298,7 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
     // Setup the UDP listener
     res = setup_udp_listener(netconf);
     if (res != 0) {
-        if ev_is_active(&netconf->tcp_client) {
+        if (ev_is_active(&netconf->tcp_client)) {
             ev_io_stop(&netconf->tcp_client);
             close(netconf->tcp_client.fd);
         }
@@ -526,11 +526,11 @@ void enter_networking_loop(statsite_networking *netconf, int *should_run) {
  */
 int shutdown_networking(statsite_networking *netconf) {
     // Stop listening for new connections
-    if ev_is_active(&netconf->tcp_client) {
+    if (ev_is_active(&netconf->tcp_client)) {
         ev_io_stop(&netconf->tcp_client);
         close(netconf->tcp_client.fd);
     }
-    if ev_is_active(&netconf->udp_client) {
+    if (ev_is_active(&netconf->udp_client)) {
         ev_io_stop(&netconf->udp_client);
         close(netconf->udp_client.fd);
     }

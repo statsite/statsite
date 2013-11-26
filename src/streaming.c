@@ -66,7 +66,7 @@ int stream_to_command(metrics *m, void *data, stream_callback cb, char *cmd) {
     struct callback_info info = {f, data, cb};
 
     // Start iterating
-    res = metrics_iter(m, &info, stream_cb);
+    metrics_iter(m, &info, stream_cb);
 
     // Close everything out
     fclose(f);
