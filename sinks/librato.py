@@ -1,5 +1,5 @@
 """
-Supports flushing metrics to Librato
+Supports flushing statsite metrics to Librato
 """
 import sys
 import socket
@@ -18,7 +18,7 @@ class LibratoStore(object):
         Raises a :class:`ValueError` on bad arguments.
 
         :Parameters:
-            - `conffile`: YAML configuration file.
+            - `conffile`: INI configuration file.
         """
         #
 
@@ -48,7 +48,7 @@ class LibratoStore(object):
 
     def parse_conf(self, conffile):
         """
-        Parses conf from YAML hash.
+        Loads configuration from an INI format file.
         """
 
         sect = "librato"
@@ -59,12 +59,12 @@ class LibratoStore(object):
         if config.has_option(sect, 'email'):
             self.email = config.get(sect, 'email')
         else:
-            raise Exception("email must be set in config")
+            raise ValueError("email must be set in config")
 
         if config.has_option(sect, 'token'):
             self.token = config.get(sect, 'token')
         else:
-            raise Exception("token must be set in config")
+            raise ValueError("token must be set in config")
 
         if config.has_option(sect, 'api'):
             self.api = config.get(sect, 'api')
