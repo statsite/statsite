@@ -11,16 +11,51 @@ import urllib2
 import json
 import os
 
+##
+# Librato sink for statsite
+# =========================
+#
+# Use with the following stream command:
+#
+#  stream_command = python sinks/librato.py librato.ini
+#
+# The Librato sink takes an INI format configuration file as a single
+# argument. The following is an example configuration:
+#
+# Configuration example:
+# ---------------------
+#
+# [librato]
+# email = john@example.com
+# token = 02ac4003c4fcd11bf9cee34e34263155dc7ba1906c322d167db6ab4b2cd2082b
+# source_regex = ^([^-]+)--
+# floor_time_secs = 60
+#
+# Options:
+# -------
+#
+#  - email / token: Librato account credentials (required).
+#  - source: Source name to use for samples, defaults to hostname if not set.
+#  - source_regex: Source name regex extraction see:
+#                  https://github.com/librato/statsd-librato-backend#setting-the-source-per-metric
+#  - floor_time_secs: Floor samples to this time (should match statsite flush_interval.
+#  - prefix: Metric name prefix to set for all metrics.
+#
+###
+
 class LibratoStore(object):
     def __init__(self, conffile="/etc/statsite/librato.ini"):
         """
         Implements an interface that allows metrics to be persisted to Librato.
-        Raises a :class:`ValueError` on bad arguments.
+
+        Raises a :class:`ValueError` on bad arguments or `Exception` on missing
+        configuration section.
 
         :Parameters:
             - `conffile`: INI configuration file.
         """
-        #
+
+        self.logger = logging.getLogger("statsite.librato")
 
         self.api = "https://metrics-api.librato.com"
         self.parse_conf(conffile)
@@ -28,7 +63,6 @@ class LibratoStore(object):
         self.sink_name = "statsite-librato"
         self.sink_version = "0.0.1"
 
-        self.logger = logging.getLogger("statsite.librato")
         self.flush_timeout_secs = 5
         self.gauges = {}
 
@@ -59,6 +93,9 @@ class LibratoStore(object):
 
         config = ConfigParser.RawConfigParser()
         config.read(conffile)
+
+        if not config.has_section(sect):
+            raise Exception("Can not locate config section 'librato'")
 
         if config.has_option(sect, 'email'):
             self.email = config.get(sect, 'email')
