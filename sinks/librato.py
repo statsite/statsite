@@ -32,6 +32,9 @@ class LibratoStore(object):
         self.flush_timeout_secs = 5
         self.gauges = {}
 
+        # Limit our payload sizes
+        self.max_metrics_payload = 500
+
         self.timer_re = re.compile("^timers\.")
         self.type_re = re.compile("^(timers|counts|gauges|sets)\.(.+)$")
 
@@ -170,26 +173,12 @@ class LibratoStore(object):
 
             self.add_measure(k, vs, ts)
 
-    def flush(self):
+    def flush_payload(self, headers, g):
         """
-        POST a collection of gauges to Librato.
+        POST a payload to Librato.
         """
 
-        # Nothing to do
-        if len(self.gauges) == 0:
-            return
-
-        headers = {
-            'Content-Type': 'application/json',
-            'User-Agent': self.build_user_agent(),
-            'Authorization': 'Basic %s' % self.build_basic_auth()
-            }
-
-        gauges = []
-        for g in self.gauges.values():
-            gauges.append(g)
-
-        body = json.dumps({ 'gauges' : gauges })
+        body = json.dumps({ 'gauges' : g })
 
         url = "%s/v1/metrics" % (self.api)
         req = urllib2.Request(url, body, headers)
@@ -205,6 +194,35 @@ class LibratoStore(object):
         except IOError as error:
             self.logger.warning('Error when sending metrics Librato (%s)' % \
                                 (error.reason))
+
+    def flush(self):
+        """
+        POST a collection of gauges to Librato.
+        """
+
+        # Nothing to do
+        if len(self.gauges) == 0:
+            return
+
+        headers = {
+            'Content-Type': 'application/json',
+            'User-Agent': self.build_user_agent(),
+            'Authorization': 'Basic %s' % self.build_basic_auth()
+            }
+
+        metrics = []
+        count = 0
+        for g in self.gauges.values():
+            metrics.append(g)
+            count += 1
+
+            if count >= self.max_metrics_payload:
+                self.flush_payload(headers, metrics)
+                count = 0
+                metrics = []
+
+        if count > 0:
+            self.flush_payload(headers, metrics)
 
     def build_basic_auth(self):
         base64string = base64.encodestring('%s:%s' % (self.email, self.token))
