@@ -32,6 +32,7 @@ class LibratoStore(object):
         self.flush_timeout_secs = 5
         self.gauges = {}
 
+        self.timer_re = re.compile("^timers\.")
         self.type_re = re.compile("^(timers|counts|gauges|sets)\.(.+)$")
 
         self.sfx_map = {
@@ -95,7 +96,7 @@ class LibratoStore(object):
         else:
             self.prefix = None
 
-    def split_complex_metric(self, name):
+    def split_timer_metric(self, name):
         m = self.sfx_re.match(name)
         if m != None:
             if self.sfx_map[m.group(2)] != None:
@@ -116,9 +117,9 @@ class LibratoStore(object):
 
         value = float(value)
         source = self.source
+        istimer = self.timer_re.match(key) != None
         name = self.type_re.match(key).group(2)
 
-        subf = 'value'
         # Match the source regex
         if self.source_re != None:
             m = self.source_re.match(name)
@@ -126,7 +127,9 @@ class LibratoStore(object):
                 source = m.group(1)
                 name = name[0:m.pos] + name[m.pos + len(m.group(0)):]
 
-        name, subf = self.split_complex_metric(name)
+        subf = None
+        if istimer:
+            name, subf = self.split_timer_metric(name)
         if subf == None:
             subf = 'value'
 
