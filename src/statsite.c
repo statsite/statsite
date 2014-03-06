@@ -64,6 +64,11 @@ int parse_cmd_line_args(int argc, char **argv, char **config_file) {
                 return 1;
         }
     }
+    if ( optind < argc )
+    {
+        fprintf(stderr, "Unknown option `%s`.\n", argv[optind]);
+        return 1;
+    }
 
     // Check if we need to show usage
     if (enable_help) {
