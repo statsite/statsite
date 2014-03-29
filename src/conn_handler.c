@@ -84,23 +84,23 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
     timer_hist *t;
     int i;
     switch (type) {
-        case KEY_VAL:
+        case KEY_VAL: syslog(LOG_DEBUG, "kv.%s|%f\n", name, *(double*)value);            
             STREAM("kv.%s|%f|%lld\n", name, *(double*)value);
             break;
 
-        case GAUGE:
+        case GAUGE: syslog(LOG_DEBUG, "gauges.%s|%f\n", name, ((gauge_t*)value)->value);
             STREAM("gauges.%s|%f|%lld\n", name, ((gauge_t*)value)->value);
             break;
 
-        case COUNTER:
+        case COUNTER: syslog(LOG_DEBUG, "counts.%s|%f\n", name, counter_sum(value));
             STREAM("counts.%s|%f|%lld\n", name, counter_sum(value));
             break;
 
-        case SET:
+        case SET: syslog(LOG_DEBUG, "sets.%s|%d\n", name, set_size(value));        
             STREAM("sets.%s|%lld|%lld\n", name, set_size(value));
             break;
 
-        case TIMER:
+        case TIMER: syslog(LOG_DEBUG, "timers.%s.sum|%f\n", name, timer_sum(value));
             t = (timer_hist*)value;
             STREAM("timers.%s.sum|%f|%lld\n", name, timer_sum(&t->tm));
             STREAM("timers.%s.sum_sq|%f|%lld\n", name, timer_squared_sum(&t->tm));
@@ -226,9 +226,10 @@ static void* flush_thread(void *arg) {
     stream_callback cb = (GLOBAL_CONFIG->binary_stream)? stream_formatter_bin: stream_formatter;
 
     // Stream the records
-    int res = stream_to_command(m, &tv, cb, GLOBAL_CONFIG->stream_cmd);
+    char *cmd = GLOBAL_CONFIG->stream_cmd;
+    int res = stream_to_command(m, &tv, cb,cmd);
     if (res != 0) {
-        syslog(LOG_WARNING, "Streaming command exited with status %d", res);
+	syslog(LOG_WARNING, "Streaming command '%s' exited with status: '%s'", cmd, strerror(res));
     }
 
     // Cleanup
