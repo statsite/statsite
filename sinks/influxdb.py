@@ -157,12 +157,12 @@ class InfluxDBStore(object):
     
 
 
-def main(metrics, cfg="/etc/statsite/influxdb.ini", lvl='INFO'):    
+def main(metrics, *argv):    
     # Initialize the logger
     logging.basicConfig()    
 
     # Intialize from our arguments
-    influxdb = InfluxDBStore(cfg, lvl)
+    influxdb = InfluxDBStore(*argv[0:])
 
     # Flush 
     influxdb.flush(metrics.splitlines())
