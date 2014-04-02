@@ -70,7 +70,7 @@ class LibratoStore(object):
         self.max_metrics_payload = 500
 
         self.timer_re = re.compile("^timers\.")
-        self.type_re = re.compile("^(timers|counts|gauges|sets)\.(.+)$")
+        self.type_re = re.compile("^(kv|timers|counts|gauges|sets)\.(.+)$")
 
         self.sfx_map = {
             'sum': 'sum',
