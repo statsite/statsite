@@ -11,5 +11,5 @@ if __name__ == "__main__":
     metrics = sys.stdin.read()
 
     graphite.main(metrics, host="localhost", port=2003, prefix="statsite")    
-    influxdb.main(metrics, "/etc/statsite/influxdb.ini", "INFO")
+    influxdb.main(metrics, "/etc/statsite/influxdb.ini")
 

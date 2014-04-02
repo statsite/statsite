@@ -86,16 +86,18 @@ class GraphiteStore(object):
 
 
 
-def main(metrics, host="localhost", port=2003, prefix="statsite", attempts=3):
+def main(metrics, *argv):
+
     # Initialize the logger
     logging.basicConfig()
 
     # Intialize from our arguments
-    graphite = GraphiteStore(host, port, prefix, attempts)
+    graphite = GraphiteStore(*argv[0:])
 
     # Flush
     graphite.flush(metrics.splitlines())
     graphite.close()
+
 
 
 if __name__ == "__main__":
