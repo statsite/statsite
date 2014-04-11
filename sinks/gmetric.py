@@ -37,6 +37,9 @@
 #
 # Version 3.1 - 30-Apr-2011 Author: Adam Tygart
 #   Added Spoofing support
+#
+# Version 3.2 - 11-Apr-2014 Author: Eugene Alekseev
+# Adapted to use as statsite 'sink' to ganglia.
 
 
 import sys
@@ -156,37 +159,45 @@ def gmetric_read(msg):
     return values
 
 def classify_type(value):
-    if value.isnum():
+    if not value:
+        return None
+    try:
         ivalue = int(value)
+    except ValueError:
+        return 'string'
+    if ivalue < 0:
+        if ivalue < -2147483648:
+            return None
+        elif ivalue < -32768:
+            return 'int32'
+        else:
+            return 'int16'
+    else:
         if ivalue < 65536:
             return 'uint16'
         elif ivalue < 4294967296:
             return 'uint32'
-    else:
-        return 'string'
     return None
 
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--protocol', metavar='protocol', nargs=1, default='udp', help="The gmetric internet protocol, either udp or multicast, default udp.")
-    parser.add_argument('--host', metavar='host', nargs=1, default='127.0.0.1', help="GMond aggregator hostname to send data to.")
-    parser.add_argument('--port', metavar='port', nargs=1, default='8649', help="GMond aggregator port to send data to.")
+    parser.add_argument('--protocol', metavar='protocol', nargs='?', default='udp', help="The gmetric internet protocol, either udp or multicast, default udp.")
+    parser.add_argument('--host', metavar='host', nargs='?', default='127.0.0.1', help="GMond aggregator hostname to send data to.")
+    parser.add_argument('--port', metavar='port', nargs='?', default='8649', help="GMond aggregator port to send data to.")
     parser.add_argument('--name', metavar='name', nargs=1, help="The name of the metric. Can be ommited and read from stdin.")
     parser.add_argument('--value', metavar='value', nargs=1, help="The value of the metric. Can be ommited and read from stdin.")
-    parser.add_argument('--units', metavar='units', nargs=1, default='', help="The units for the value, e.g. 'kb/sec'")
-    parser.add_argument('--slope', metavar='slope', nargs=1, default='both', help="The sign of the derivative of the value over time, one of zero, positive, negative, both, default=both.")
-    parser.add_argument('--type', metavar='type', nargs=1, help="The value data type, one of string, int8, uint8, int16, uint16, int32, uint32, float, double")
-    parser.add_argument('--tmax', metavar='tmax', nargs=1, default='60', help="The maximum time in seconds between gmetric calls, default 60.")
-    parser.add_argument('--dmin', metavar='dmin', nargs=1, default='0', help="The lifetime in seconds of this metric, default=0, meaning unlimited.")
-    parser.add_argument('--group', metavar='group', nargs=1, default='', help="Group metric belongs to. If not specified Ganglia will show it as no_group.")
-    parser.add_argument('--spoof', metavar='spoof', nargs=1, default='', help="The address to spoof (ip:host). If not specified the metric will not be spoofed.")
+    parser.add_argument('--units', metavar='units', nargs='?', default='', help="The units for the value, e.g. 'kb/sec'")
+    parser.add_argument('--slope', metavar='slope', nargs='?', default='both', help="The sign of the derivative of the value over time, one of zero, positive, negative, both, default=both.")
+    parser.add_argument('--type', metavar='type', nargs='?', help="The value data type, one of string, int8, uint8, int16, uint16, int32, uint32, float, double")
+    parser.add_argument('--tmax', metavar='tmax', nargs='?', default='60', help="The maximum time in seconds between gmetric calls, default 60.")
+    parser.add_argument('--dmin', metavar='dmin', nargs='?', default='0', help="The lifetime in seconds of this metric, default=0, meaning unlimited.")
+    parser.add_argument('--group', metavar='group', nargs='?', default='', help="Group metric belongs to. If not specified Ganglia will show it as no_group.")
+    parser.add_argument('--spoof', metavar='spoof', nargs='?', default='', help="The address to spoof (ip:host). If not specified the metric will not be spoofed.")
     parser.add_argument('--stdin', action='store_true', help="Read metrics from stdin. in 'key|value|timestamp' format.")
     
     p = parser.parse_args()
-
-    print p
 
     if p.stdin:
         lines = sys.stdin.read().split("\n")
@@ -196,11 +207,12 @@ if __name__ == '__main__':
     else:
         sys.exit(1)
 
-    print metrics    
     g = Gmetric(p.host, p.port, p.protocol)
     for key, value, timestamp in metrics:
         if not p.type:
             metric_type = classify_type(value)
+            if metric_type == None:
+                sys.exit(2)
         else:
             metric_type = p.type
         print metric_type
