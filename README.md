@@ -22,6 +22,11 @@ Features
 * Dynamic set implementation:
   - Exactly counts for small sets
   - HyperLogLog for large sets
+* Included sinks:
+  - Graphite
+  - InfluxDB
+  - Ganglia
+  - Liberato
 * Binary protocol
 * TCP, UDP, and STDIN
 * Fast
