@@ -43,6 +43,12 @@ static const statsite_config DEFAULT_CONFIG = {
     NULL,
     0.02,               // 2% goal uses precision 12
     12,                 // Set precision 12, 1.6% variance
+    true,               // Use type prefixes by default
+    "counts.",          // Default vaules for prefixes
+    "gauges.",
+    "timers.",
+    "sets.",
+    "kv."
 };
 
 /**
@@ -190,6 +196,8 @@ static int config_callback(void* user, const char* section, const char* name, co
         return value_to_bool(value, &config->daemonize);
     } else if (NAME_MATCH("binary_stream")) {
         return value_to_bool(value, &config->binary_stream);
+    } else if (NAME_MATCH("use_type_prefix")) {
+        return value_to_bool(value, &config->use_type_prefix);
 
     // Handle the double cases
     } else if (NAME_MATCH("timer_eps")) {
@@ -208,6 +216,16 @@ static int config_callback(void* user, const char* section, const char* name, co
         config->input_counter = strdup(value);
     } else if (NAME_MATCH("bind_address")) {
         config->bind_address = strdup(value);
+    } else if (NAME_MATCH("counts_prefix")) {
+        config->counts_prefix = strdup(value);
+    } else if (NAME_MATCH("gauges_prefix")) {
+        config->gauges_prefix = strdup(value);
+    } else if (NAME_MATCH("timers_prefix")) {
+        config->timers_prefix = strdup(value);
+    } else if (NAME_MATCH("sets_prefix")) {
+        config->sets_prefix = strdup(value);
+    } else if (NAME_MATCH("kv_prefix")) {
+        config->kv_prefix = strdup(value);
 
     // Unknown parameter?
     } else {

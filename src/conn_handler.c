@@ -82,44 +82,55 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
     #define STREAM(...) if (fprintf(pipe, __VA_ARGS__, (long long)tv->tv_sec) < 0) return 1;
     struct timeval *tv = data;
     timer_hist *t;
+    char *key_prefix = "";
     int i;
     switch (type) {
         case KEY_VAL:
-            STREAM("kv.%s|%f|%lld\n", name, *(double*)value);
+            if(GLOBAL_CONFIG->use_type_prefix)
+                key_prefix=GLOBAL_CONFIG->kv_prefix;
+            STREAM("%s%s|%f|%lld\n", key_prefix, name, *(double*)value);
             break;
 
         case GAUGE:
-            STREAM("gauges.%s|%f|%lld\n", name, ((gauge_t*)value)->value);
+            if(GLOBAL_CONFIG->use_type_prefix)
+                key_prefix=GLOBAL_CONFIG->gauges_prefix;
+            STREAM("%s%s|%f|%lld\n", key_prefix, name, ((gauge_t*)value)->value);
             break;
 
         case COUNTER:
-            STREAM("counts.%s|%f|%lld\n", name, counter_sum(value));
+            if(GLOBAL_CONFIG->use_type_prefix)
+                key_prefix=GLOBAL_CONFIG->counts_prefix;
+            STREAM("%s%s|%f|%lld\n", key_prefix, name, counter_sum(value));
             break;
 
         case SET:
-            STREAM("sets.%s|%lld|%lld\n", name, set_size(value));
+            if(GLOBAL_CONFIG->use_type_prefix)
+                key_prefix=GLOBAL_CONFIG->sets_prefix;
+            STREAM("%s%s|%lld|%lld\n", key_prefix, name, set_size(value));
             break;
 
         case TIMER:
+            if(GLOBAL_CONFIG->use_type_prefix)
+                key_prefix=GLOBAL_CONFIG->timers_prefix;
             t = (timer_hist*)value;
-            STREAM("timers.%s.sum|%f|%lld\n", name, timer_sum(&t->tm));
-            STREAM("timers.%s.sum_sq|%f|%lld\n", name, timer_squared_sum(&t->tm));
-            STREAM("timers.%s.mean|%f|%lld\n", name, timer_mean(&t->tm));
-            STREAM("timers.%s.lower|%f|%lld\n", name, timer_min(&t->tm));
-            STREAM("timers.%s.upper|%f|%lld\n", name, timer_max(&t->tm));
-            STREAM("timers.%s.count|%lld|%lld\n", name, timer_count(&t->tm));
-            STREAM("timers.%s.stdev|%f|%lld\n", name, timer_stddev(&t->tm));
-            STREAM("timers.%s.median|%f|%lld\n", name, timer_query(&t->tm, 0.5));
-            STREAM("timers.%s.p95|%f|%lld\n", name, timer_query(&t->tm, 0.95));
-            STREAM("timers.%s.p99|%f|%lld\n", name, timer_query(&t->tm, 0.99));
+            STREAM("%s%s.sum|%f|%lld\n", key_prefix, name, timer_sum(&t->tm));
+            STREAM("%s%s.sum_sq|%f|%lld\n", key_prefix, name, timer_squared_sum(&t->tm));
+            STREAM("%s%s.mean|%f|%lld\n", key_prefix, name, timer_mean(&t->tm));
+            STREAM("%s%s.lower|%f|%lld\n", key_prefix, name, timer_min(&t->tm));
+            STREAM("%s%s.upper|%f|%lld\n", key_prefix, name, timer_max(&t->tm));
+            STREAM("%s%s.count|%lld|%lld\n", key_prefix, name, timer_count(&t->tm));
+            STREAM("%s%s.stdev|%f|%lld\n", key_prefix, name, timer_stddev(&t->tm));
+            STREAM("%s%s.median|%f|%lld\n", key_prefix, name, timer_query(&t->tm, 0.5));
+            STREAM("%s%s.p95|%f|%lld\n", key_prefix, name, timer_query(&t->tm, 0.95));
+            STREAM("%s%s.p99|%f|%lld\n", key_prefix, name, timer_query(&t->tm, 0.99));
 
             // Stream the histogram values
             if (t->conf) {
-                STREAM("timers.%s.histogram.bin_<%0.2f|%u|%lld\n", name, t->conf->min_val, t->counts[0]);
+                STREAM("%s%s.histogram.bin_<%0.2f|%u|%lld\n", key_prefix, name, t->conf->min_val, t->counts[0]);
                 for (i=0; i < t->conf->num_bins-2; i++) {
-                    STREAM("timers.%s.histogram.bin_%0.2f|%u|%lld\n", name, t->conf->min_val+(t->conf->bin_width*i), t->counts[i+1]);
+                    STREAM("%s%s.histogram.bin_%0.2f|%u|%lld\n", key_prefix, name, t->conf->min_val+(t->conf->bin_width*i), t->counts[i+1]);
                 }
-                STREAM("timers.%s.histogram.bin_>%0.2f|%u|%lld\n", name, t->conf->max_val, t->counts[i+1]);
+                STREAM("%s%s.histogram.bin_>%0.2f|%u|%lld\n", key_prefix, name, t->conf->max_val, t->counts[i+1]);
             }
             break;
 

@@ -39,6 +39,12 @@ typedef struct {
     radix_tree *histograms;
     double set_eps;
     unsigned char set_precision;
+    bool use_type_prefix;
+    char* counts_prefix;
+    char* gauges_prefix;
+    char* timers_prefix;
+    char* sets_prefix;
+    char* kv_prefix;
 } statsite_config;
 
 /**
