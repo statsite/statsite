@@ -1,6 +1,7 @@
 # 0.6.1 (unreleased)
 
 * Removed dependency on C++ compiler
+* Support for 'h' as an alias of 'ms'
 
 # 0.6.0
 

@@ -351,6 +351,7 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
             case 'c':
                 type = COUNTER;
                 break;
+            case 'h':
             case 'm':
                 type = TIMER;
                 break;
