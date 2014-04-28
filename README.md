@@ -186,7 +186,7 @@ options must exist in the `statsite` section of the INI file:
  
  * kv_prefix, gauges_prefix, counts_prefix, sets_prefix, timer_prefix: prefix for
    each message type. Defaults to respectively: kv. gauges. counts. sets. timers.
-   Values are ignored if use_type_prefix set to 0.
+   Values will be ignored if use_type_prefix set to 0.
 
 In addition to global configurations, statsite supports histograms
 as well. Histograms are configured one per section, and the INI
