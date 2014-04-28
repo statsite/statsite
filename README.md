@@ -181,6 +181,12 @@ options must exist in the `statsite` section of the INI file:
  * binary\_stream : Should data be streamed to the stream\_cmd in
    binary form instead of ASCI form. Defaults to 0.
 
+ * use_type_prefix: Should prefixes with message type be added to the messages.
+   Defaults to 1.
+ 
+ * kv_prefix, gauges_prefix, counts_prefix, sets_prefix, timer_prefix: prefix for
+   each message type. Defaults to respectively: kv. gauges. counts. sets. timers.
+   Values are ignored if use_type_prefix set to 0.
 
 In addition to global configurations, statsite supports histograms
 as well. Histograms are configured one per section, and the INI
