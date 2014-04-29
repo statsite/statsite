@@ -5,6 +5,17 @@
 #include <stdbool.h>
 #include "radix.h"
 
+typedef enum {
+    UNKNOWN,
+    KEY_VAL,
+    GAUGE,
+    COUNTER,
+    TIMER,
+    SET,
+    GAUGE_DELTA
+} metric_type;
+
+#define METRIC_TYPES 7
 
 // Represents the configuration of a histogram
 typedef struct histogram_config {
@@ -41,10 +52,12 @@ typedef struct {
     unsigned char set_precision;
     bool use_type_prefix;
     char* counts_prefix;
+    char* global_prefix;
     char* gauges_prefix;
     char* timers_prefix;
     char* sets_prefix;
     char* kv_prefix;
+    char* prefix[METRIC_TYPES];
 } statsite_config;
 
 /**
@@ -56,6 +69,13 @@ typedef struct {
  * @return 0 on success, negative on error.
  */
 int config_from_filename(char *filename, statsite_config *config);
+
+/**
+ * Gets a final prefix string for each message type
+ * @arg config Output. The config object to prepare strings.
+ */
+
+int prepare_prefixes(statsite_config *config);
 
 /**
  * Validates the configuration

@@ -8,16 +8,6 @@
 #include "hashmap.h"
 #include "set.h"
 
-typedef enum {
-    UNKNOWN,
-    KEY_VAL,
-    GAUGE,
-    COUNTER,
-    TIMER,
-    SET,
-    GAUGE_DELTA
-} metric_type;
-
 typedef struct key_val {
     char *name;
     double val;

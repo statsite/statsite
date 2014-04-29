@@ -44,11 +44,12 @@ static const statsite_config DEFAULT_CONFIG = {
     0.02,               // 2% goal uses precision 12
     12,                 // Set precision 12, 1.6% variance
     true,               // Use type prefixes by default
-    "counts.",          // Default vaules for prefixes
-    "gauges.",
-    "timers.",
-    "sets.",
-    "kv."
+    "",                 // Global prefix
+    "counts",           // Default vaules for prefixes
+    "gauges",
+    "timers",
+    "sets",
+    "kv"
 };
 
 /**
@@ -216,6 +217,8 @@ static int config_callback(void* user, const char* section, const char* name, co
         config->input_counter = strdup(value);
     } else if (NAME_MATCH("bind_address")) {
         config->bind_address = strdup(value);
+    } else if (NAME_MATCH("global_prefix")) {
+        config->global_prefix = strdup(value);
     } else if (NAME_MATCH("counts_prefix")) {
         config->counts_prefix = strdup(value);
     } else if (NAME_MATCH("gauges_prefix")) {
@@ -238,6 +241,45 @@ static int config_callback(void* user, const char* section, const char* name, co
 }
 
 /**
+ * Gets a final prefix string for each message type
+ * @arg config Output. The config object to prepare strings.
+ */
+
+int prepare_prefixes(statsite_config *config)
+{
+	// This temporary variably will be concatenated with other prefixes
+	char* prefixes_to_prepare[6] = {
+			config->counts_prefix,
+			config->gauges_prefix,
+			config->timers_prefix,
+			config->sets_prefix,
+			config->kv_prefix,
+			NULL
+	};
+	int c;
+	char* current_prefix;
+
+	for(c=0; prefixes_to_prepare[c]; c++) {
+		// Possible two extra dots and ASCII 0
+	    current_prefix = malloc(strlen(config->global_prefix)+strlen(prefixes_to_prepare[c])+3);
+
+	    if(strlen(config->global_prefix)) {
+	        strcat(current_prefix,config->global_prefix);
+	        strcat(current_prefix,".");
+	    }
+	    if(strlen(prefixes_to_prepare[c]) && config->use_type_prefix)
+	    {
+	        strcat(current_prefix,prefixes_to_prepare[c]);
+	        strcat(current_prefix,".");
+	    }
+	    free(prefixes_to_prepare[c]);
+	    prefixes_to_prepare[c] = current_prefix;
+	}
+
+	return 0;
+}
+
+/**
  * Initializes the configuration from a filename.
  * Reads the file as an INI configuration, and sets up the
  * config object.
@@ -245,6 +287,7 @@ static int config_callback(void* user, const char* section, const char* name, co
  * @arg config Output. The config object to initialize.
  * @return 0 on success, negative on error.
  */
+
 int config_from_filename(char *filename, statsite_config *config) {
     // Initialize to the default values
     memcpy(config, &DEFAULT_CONFIG, sizeof(statsite_config));
