@@ -45,7 +45,7 @@ static const statsite_config DEFAULT_CONFIG = {
     12,                 // Set precision 12, 1.6% variance
     true,               // Use type prefixes by default
     "",                 // Global prefix
-    {"", "kv", "gauge", "count", "timer", "set", ""}
+    {"", "kv", "gauges", "counts", "timers", "sets", ""}
 };
 
 /**
