@@ -138,7 +138,6 @@ int main(int argc, char **argv) {
     // Parse the config file
     statsite_config *config = calloc(1, sizeof(statsite_config));
     int config_res = config_from_filename(config_file, config);
-    prepare_prefixes(config);
     if (config_res != 0) {
         syslog(LOG_ERR, "Failed to read the configuration file!");
         return 1;
@@ -149,6 +148,9 @@ int main(int argc, char **argv) {
         syslog(LOG_ERR, "Invalid configuration!");
         return 1;
     }
+
+    // Set prefixes for each message type
+    prepare_prefixes(config);
 
     // Build the prefix tree
     if (build_prefix_tree(config)) {

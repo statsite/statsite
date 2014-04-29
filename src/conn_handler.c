@@ -85,7 +85,7 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
     int i;
     switch (type) {
         case KEY_VAL:
-		STREAM("%s%s|%f|%lld\n", GLOBAL_CONFIG->prefixes[type], name, *(double*)value);
+            STREAM("%s%s|%f|%lld\n", GLOBAL_CONFIG->prefixes[type], name, *(double*)value);
             break;
 
         case GAUGE:
