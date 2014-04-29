@@ -43,7 +43,7 @@ static const statsite_config DEFAULT_CONFIG = {
     NULL,
     0.02,               // 2% goal uses precision 12
     12,                 // Set precision 12, 1.6% variance
-    false,               // Use type prefixes by default
+    true,               // Use type prefixes by default
     "",                 // Global prefix
     {"", "kv", "gauge", "count", "timer", "set", ""}
 };
