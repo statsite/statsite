@@ -43,13 +43,9 @@ static const statsite_config DEFAULT_CONFIG = {
     NULL,
     0.02,               // 2% goal uses precision 12
     12,                 // Set precision 12, 1.6% variance
-    true,               // Use type prefixes by default
+    false,               // Use type prefixes by default
     "",                 // Global prefix
-    "counts",           // Default vaules for prefixes
-    "gauges",
-    "timers",
-    "sets",
-    "kv"
+    {"", "kv", "gauge", "count", "timer", "set", ""}
 };
 
 /**
@@ -220,15 +216,15 @@ static int config_callback(void* user, const char* section, const char* name, co
     } else if (NAME_MATCH("global_prefix")) {
         config->global_prefix = strdup(value);
     } else if (NAME_MATCH("counts_prefix")) {
-        config->counts_prefix = strdup(value);
+        config->prefixes[COUNTER] = strdup(value);
     } else if (NAME_MATCH("gauges_prefix")) {
-        config->gauges_prefix = strdup(value);
+        config->prefixes[GAUGE] = strdup(value);
     } else if (NAME_MATCH("timers_prefix")) {
-        config->timers_prefix = strdup(value);
+        config->prefixes[TIMER] = strdup(value);
     } else if (NAME_MATCH("sets_prefix")) {
-        config->sets_prefix = strdup(value);
+        config->prefixes[SET] = strdup(value);
     } else if (NAME_MATCH("kv_prefix")) {
-        config->kv_prefix = strdup(value);
+        config->prefixes[KEY_VAL] = strdup(value);
 
     // Unknown parameter?
     } else {
@@ -248,32 +244,37 @@ static int config_callback(void* user, const char* section, const char* name, co
 int prepare_prefixes(statsite_config *config)
 {
 	// This temporary variably will be concatenated with other prefixes
-	char* prefixes_to_prepare[6] = {
-			config->counts_prefix,
-			config->gauges_prefix,
-			config->timers_prefix,
-			config->sets_prefix,
-			config->kv_prefix,
-			NULL
+	int prefixes_to_prepare = 5;
+	metric_type prefixes[METRIC_TYPES] = {
+			KEY_VAL,
+			GAUGE,
+			COUNTER,
+			TIMER,
+			SET
 	};
 	int c;
+	metric_type current_prefix_t;
 	char* current_prefix;
 
-	for(c=0; prefixes_to_prepare[c]; c++) {
-		// Possible two extra dots and ASCII 0
-	    current_prefix = malloc(strlen(config->global_prefix)+strlen(prefixes_to_prepare[c])+3);
+	for(c=0; c<prefixes_to_prepare; c++) {
+
+		current_prefix_t = prefixes[c];
+		// Possible two extra dots plus ASCII 0
+		puts("qwe");
+	    current_prefix = calloc(sizeof(char),strlen(config->global_prefix)+strlen(config->prefixes[current_prefix_t])+3);
 
 	    if(strlen(config->global_prefix)) {
 	        strcat(current_prefix,config->global_prefix);
 	        strcat(current_prefix,".");
 	    }
-	    if(strlen(prefixes_to_prepare[c]) && config->use_type_prefix)
+	    if(strlen(config->prefixes[current_prefix_t]) && config->use_type_prefix)
 	    {
-	        strcat(current_prefix,prefixes_to_prepare[c]);
+	        strcat(current_prefix,config->prefixes[current_prefix_t]);
 	        strcat(current_prefix,".");
 	    }
-	    free(prefixes_to_prepare[c]);
-	    prefixes_to_prepare[c] = current_prefix;
+	    //free(config->prefixes[current_prefix_t]);
+	    printf("%i %s \n",current_prefix_t,current_prefix);
+	    config->prefixes[current_prefix_t] = current_prefix;
 	}
 
 	return 0;

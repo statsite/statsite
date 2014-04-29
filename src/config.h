@@ -51,13 +51,8 @@ typedef struct {
     double set_eps;
     unsigned char set_precision;
     bool use_type_prefix;
-    char* counts_prefix;
     char* global_prefix;
-    char* gauges_prefix;
-    char* timers_prefix;
-    char* sets_prefix;
-    char* kv_prefix;
-    char* prefix[METRIC_TYPES];
+    char* prefixes[METRIC_TYPES];
 } statsite_config;
 
 /**
