@@ -85,41 +85,41 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
     int i;
     switch (type) {
         case KEY_VAL:
-            STREAM("%s%s|%f|%lld\n", GLOBAL_CONFIG->prefixes[type], name, *(double*)value);
+            STREAM("%s%s|%f|%lld\n", GLOBAL_CONFIG->prefixes_final[type], name, *(double*)value);
             break;
 
         case GAUGE:
-            STREAM("%s%s|%f|%lld\n", GLOBAL_CONFIG->prefixes[type], name, ((gauge_t*)value)->value);
+            STREAM("%s%s|%f|%lld\n", GLOBAL_CONFIG->prefixes_final[type], name, ((gauge_t*)value)->value);
             break;
 
         case COUNTER:
-            STREAM("%s%s|%f|%lld\n", GLOBAL_CONFIG->prefixes[type], name, counter_sum(value));
+            STREAM("%s%s|%f|%lld\n", GLOBAL_CONFIG->prefixes_final[type], name, counter_sum(value));
             break;
 
         case SET:
-            STREAM("%s%s|%lld|%lld\n", GLOBAL_CONFIG->prefixes[type], name, set_size(value));
+            STREAM("%s%s|%lld|%lld\n", GLOBAL_CONFIG->prefixes_final[type], name, set_size(value));
             break;
 
         case TIMER:
             t = (timer_hist*)value;
-            STREAM("%s%s.sum|%f|%lld\n", GLOBAL_CONFIG->prefixes[type], name, timer_sum(&t->tm));
-            STREAM("%s%s.sum_sq|%f|%lld\n", GLOBAL_CONFIG->prefixes[type], name, timer_squared_sum(&t->tm));
-            STREAM("%s%s.mean|%f|%lld\n", GLOBAL_CONFIG->prefixes[type], name, timer_mean(&t->tm));
-            STREAM("%s%s.lower|%f|%lld\n", GLOBAL_CONFIG->prefixes[type], name, timer_min(&t->tm));
-            STREAM("%s%s.upper|%f|%lld\n", GLOBAL_CONFIG->prefixes[type], name, timer_max(&t->tm));
-            STREAM("%s%s.count|%lld|%lld\n", GLOBAL_CONFIG->prefixes[type], name, timer_count(&t->tm));
-            STREAM("%s%s.stdev|%f|%lld\n", GLOBAL_CONFIG->prefixes[type], name, timer_stddev(&t->tm));
-            STREAM("%s%s.median|%f|%lld\n", GLOBAL_CONFIG->prefixes[type], name, timer_query(&t->tm, 0.5));
-            STREAM("%s%s.p95|%f|%lld\n", GLOBAL_CONFIG->prefixes[type], name, timer_query(&t->tm, 0.95));
-            STREAM("%s%s.p99|%f|%lld\n", GLOBAL_CONFIG->prefixes[type], name, timer_query(&t->tm, 0.99));
+            STREAM("%s%s.sum|%f|%lld\n", GLOBAL_CONFIG->prefixes_final[type], name, timer_sum(&t->tm));
+            STREAM("%s%s.sum_sq|%f|%lld\n", GLOBAL_CONFIG->prefixes_final[type], name, timer_squared_sum(&t->tm));
+            STREAM("%s%s.mean|%f|%lld\n", GLOBAL_CONFIG->prefixes_final[type], name, timer_mean(&t->tm));
+            STREAM("%s%s.lower|%f|%lld\n", GLOBAL_CONFIG->prefixes_final[type], name, timer_min(&t->tm));
+            STREAM("%s%s.upper|%f|%lld\n", GLOBAL_CONFIG->prefixes_final[type], name, timer_max(&t->tm));
+            STREAM("%s%s.count|%lld|%lld\n", GLOBAL_CONFIG->prefixes_final[type], name, timer_count(&t->tm));
+            STREAM("%s%s.stdev|%f|%lld\n", GLOBAL_CONFIG->prefixes_final[type], name, timer_stddev(&t->tm));
+            STREAM("%s%s.median|%f|%lld\n", GLOBAL_CONFIG->prefixes_final[type], name, timer_query(&t->tm, 0.5));
+            STREAM("%s%s.p95|%f|%lld\n", GLOBAL_CONFIG->prefixes_final[type], name, timer_query(&t->tm, 0.95));
+            STREAM("%s%s.p99|%f|%lld\n", GLOBAL_CONFIG->prefixes_final[type], name, timer_query(&t->tm, 0.99));
 
             // Stream the histogram values
             if (t->conf) {
-                STREAM("%s%s.histogram.bin_<%0.2f|%u|%lld\n", GLOBAL_CONFIG->prefixes[type], name, t->conf->min_val, t->counts[0]);
+                STREAM("%s%s.histogram.bin_<%0.2f|%u|%lld\n", GLOBAL_CONFIG->prefixes_final[type], name, t->conf->min_val, t->counts[0]);
                 for (i=0; i < t->conf->num_bins-2; i++) {
-                    STREAM("%s%s.histogram.bin_%0.2f|%u|%lld\n", GLOBAL_CONFIG->prefixes[type], name, t->conf->min_val+(t->conf->bin_width*i), t->counts[i+1]);
+                    STREAM("%s%s.histogram.bin_%0.2f|%u|%lld\n", GLOBAL_CONFIG->prefixes_final[type], name, t->conf->min_val+(t->conf->bin_width*i), t->counts[i+1]);
                 }
-                STREAM("%s%s.histogram.bin_>%0.2f|%u|%lld\n", GLOBAL_CONFIG->prefixes[type], name, t->conf->max_val, t->counts[i+1]);
+                STREAM("%s%s.histogram.bin_>%0.2f|%u|%lld\n", GLOBAL_CONFIG->prefixes_final[type], name, t->conf->max_val, t->counts[i+1]);
             }
             break;
 

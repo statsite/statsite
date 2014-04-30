@@ -53,6 +53,7 @@ typedef struct {
     bool use_type_prefix;
     char* global_prefix;
     char* prefixes[METRIC_TYPES];
+    char* prefixes_final[METRIC_TYPES];
 } statsite_config;
 
 /**

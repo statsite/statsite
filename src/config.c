@@ -45,7 +45,8 @@ static const statsite_config DEFAULT_CONFIG = {
     12,                 // Set precision 12, 1.6% variance
     true,               // Use type prefixes by default
     "",                 // Global prefix
-    {"", "kv", "gauges", "counts", "timers", "sets", ""}
+    {"", "kv", "gauges", "counts", "timers", "sets", ""},
+    {}
 };
 
 /**
@@ -272,9 +273,8 @@ int prepare_prefixes(statsite_config *config)
 	        strcat(current_prefix,config->prefixes[current_prefix_t]);
 	        strcat(current_prefix,".");
 	    }
-	    //free(config->prefixes[current_prefix_t]);
-	    printf("%i %s \n",current_prefix_t,current_prefix);
-	    config->prefixes[current_prefix_t] = current_prefix;
+	    free(config->prefixes_final[current_prefix_t]);
+	    config->prefixes_final[current_prefix_t] = current_prefix;
 	}
 
 	return 0;
