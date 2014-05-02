@@ -244,40 +244,39 @@ static int config_callback(void* user, const char* section, const char* name, co
 
 int prepare_prefixes(statsite_config *config)
 {
-	// This temporary variably will be concatenated with other prefixes
-	int prefixes_to_prepare = 5;
-	metric_type prefixes[METRIC_TYPES] = {
-			KEY_VAL,
-			GAUGE,
-			COUNTER,
-			TIMER,
-			SET
-	};
-	int c;
-	metric_type current_prefix_t;
-	char* current_prefix;
+    // This temporary variably will be concatenated with other prefixes
+    int prefixes_to_prepare = 5;
+    metric_type prefixes[METRIC_TYPES] = {
+        KEY_VAL,
+        GAUGE,
+        COUNTER,
+        TIMER,
+        SET
+    };
+    int c;
+    metric_type current_prefix_t;
+    char* global_prefix_delim = "";
+    char* type_prefix_delim = "";
 
-	for(c=0; c<prefixes_to_prepare; c++) {
+    for(c=0; c<prefixes_to_prepare; c++) {
+        current_prefix_t = prefixes[c];
+       // Should we use delimiter for global prefix
+       if(strlen(config->global_prefix))
+            global_prefix_delim = ".";
+       else
+            global_prefix_delim = "";
+       // And for type prefix
+       if(strlen(config->prefixes[current_prefix_t]) && config->use_type_prefix)
+            type_prefix_delim = ".";
+       else
+            type_prefix_delim = "";
 
-		current_prefix_t = prefixes[c];
-		// Possible two extra dots plus ASCII 0
-		puts("qwe");
-	    current_prefix = calloc(sizeof(char),strlen(config->global_prefix)+strlen(config->prefixes[current_prefix_t])+3);
+       free(config->prefixes_final[current_prefix_t]);
+       asprintf(&(config->prefixes_final[current_prefix_t]),"%s%s%s%s",config->global_prefix,global_prefix_delim,
+                config->prefixes[current_prefix_t],type_prefix_delim);
+    }
 
-	    if(strlen(config->global_prefix)) {
-	        strcat(current_prefix,config->global_prefix);
-	        strcat(current_prefix,".");
-	    }
-	    if(strlen(config->prefixes[current_prefix_t]) && config->use_type_prefix)
-	    {
-	        strcat(current_prefix,config->prefixes[current_prefix_t]);
-	        strcat(current_prefix,".");
-	    }
-	    free(config->prefixes_final[current_prefix_t]);
-	    config->prefixes_final[current_prefix_t] = current_prefix;
-	}
-
-	return 0;
+    return 0;
 }
 
 /**
