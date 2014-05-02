@@ -260,20 +260,20 @@ int prepare_prefixes(statsite_config *config)
 
     for(c=0; c<prefixes_to_prepare; c++) {
         current_prefix_t = prefixes[c];
-       // Should we use delimiter for global prefix
-       if(strlen(config->global_prefix))
+        // Should we use delimiter for global prefix
+        if(strlen(config->global_prefix))
             global_prefix_delim = ".";
-       else
+        else
             global_prefix_delim = "";
-       // And for type prefix
-       if(strlen(config->prefixes[current_prefix_t]) && config->use_type_prefix)
+        // And for type prefix
+        if(strlen(config->prefixes[current_prefix_t]) && config->use_type_prefix)
             type_prefix_delim = ".";
-       else
+        else
             type_prefix_delim = "";
 
-       free(config->prefixes_final[current_prefix_t]);
-       asprintf(&(config->prefixes_final[current_prefix_t]),"%s%s%s%s",config->global_prefix,global_prefix_delim,
-                config->prefixes[current_prefix_t],type_prefix_delim);
+        free(config->prefixes_final[current_prefix_t]);
+        asprintf(&(config->prefixes_final[current_prefix_t]),"%s%s%s%s",config->global_prefix,global_prefix_delim,
+                 config->prefixes[current_prefix_t],type_prefix_delim);
     }
 
     return 0;
