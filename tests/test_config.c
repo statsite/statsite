@@ -351,3 +351,151 @@ START_TEST(test_build_radix)
 }
 END_TEST
 
+START_TEST(test_sane_prefixes)
+{
+    int fh = open("/tmp/sane_prefixes", O_CREAT|O_RDWR, 0777);
+    char *buf = "[statsite]\n\
+use_type_prefix = true\n\
+kv_prefix = keyVALUE.1-2_3\n\
+gauges_prefix =\n\
+counts_prefix=foo.counts.bar";
+    write(fh, buf, strlen(buf));
+    fchmod(fh, 777);
+    close(fh);
+
+    // Should get the config
+    statsite_config config;
+    int res = config_from_filename("/tmp/sane_prefixes", &config);
+    fail_unless(res == 0);
+    // And prepare prefixes
+    res = prepare_prefixes(&config);
+    fail_unless(res == 0);
+
+    // Values from config
+    
+    fail_unless(strcmp(config.prefixes_final[KEY_VAL], "keyVALUE.1-2_3.") == 0);
+    fail_unless(strcmp(config.prefixes_final[GAUGE], "") == 0);
+    fail_unless(strcmp(config.prefixes_final[COUNTER], "foo.counts.bar.") == 0);
+    // Default values
+    fail_unless(strcmp(config.prefixes_final[TIMER], "timers.") == 0);
+    fail_unless(strcmp(config.prefixes_final[SET], "sets.") == 0);
+
+    unlink("/tmp/sane_prefixes");
+
+    fh = open("/tmp/sane_prefixes", O_CREAT|O_RDWR, 0777);
+
+    buf = "[statsite]\n\
+use_type_prefix = 0\n\
+kv_prefix = keyVALUE.1-2_3\n\
+gauges_prefix =\n\
+counts_prefix=foo.sets.bar";
+    write(fh, buf, strlen(buf));
+    fchmod(fh, 777);
+    close(fh);
+
+    // Should get the config
+    res = config_from_filename("/tmp/sane_prefixes", &config);
+    fail_unless(res == 0);
+    // And prepare prefixes
+    res = prepare_prefixes(&config);
+    fail_unless(res == 0);
+
+    // Values from config
+    fail_unless(strcmp(config.prefixes_final[KEY_VAL], "") == 0);
+    fail_unless(strcmp(config.prefixes_final[GAUGE], "") == 0);
+    fail_unless(strcmp(config.prefixes_final[COUNTER], "") == 0);
+    // Default values
+    fail_unless(strcmp(config.prefixes_final[TIMER], "") == 0);
+    fail_unless(strcmp(config.prefixes_final[SET], "") == 0);
+
+    unlink("/tmp/sane_prefixes");
+
+    fh = open("/tmp/sane_prefixes", O_CREAT|O_RDWR, 0777);
+
+    buf = "[statsite]\n\
+use_type_prefix = 0\n\
+global_prefix = statsite\n\
+kv_prefix = keyVALUE.1-2_3\n\
+gauges_prefix =\n\
+counts_prefix=foo.sets.bar";
+    write(fh, buf, strlen(buf));
+    fchmod(fh, 777);
+    close(fh);
+
+    // Should get the config
+    res = config_from_filename("/tmp/sane_prefixes", &config);
+    fail_unless(res == 0);
+    // And prepare prefixes
+    res = prepare_prefixes(&config);
+    fail_unless(res == 0);
+
+    // Values from config
+    fail_unless(strcmp(config.prefixes_final[KEY_VAL], "statsite.") == 0);
+    fail_unless(strcmp(config.prefixes_final[GAUGE], "statsite.") == 0);
+    fail_unless(strcmp(config.prefixes_final[COUNTER], "statsite.") == 0);
+    // Default values
+    fail_unless(strcmp(config.prefixes_final[TIMER], "statsite.") == 0);
+    fail_unless(strcmp(config.prefixes_final[SET], "statsite.") == 0);
+
+    unlink("/tmp/sane_prefixes");
+}
+END_TEST
+
+START_TEST(test_sane_global_prefix)
+{
+    int fh = open("/tmp/global_prefix", O_CREAT|O_RDWR, 0777);
+    char *buf = "[statsite]\n\
+port = 10000\n\
+udp_port = 10001\n\
+parse_stdin = true\n\
+flush_interval = 120\n\
+timer_eps = 0.005\n\
+set_eps = 0.03\n\
+stream_cmd = foo\n\
+log_level = INFO\n\
+daemonize = true\n\
+binary_stream = true\n\
+input_counter = foobar\n\
+pid_file = /tmp/statsite.pid\n\
+global_prefix = statsd\n\
+use_type_prefix = 1\n\
+kv_prefix = keyvalue\n\
+gauges_prefix =\n\
+sets_prefix=foo.sets.bar";
+    write(fh, buf, strlen(buf));
+    fchmod(fh, 777);
+    close(fh);
+
+    // Should get the config
+    statsite_config config;
+    int res = config_from_filename("/tmp/global_prefix", &config);
+    fail_unless(res == 0);
+    // And prepare prefixes
+    res = prepare_prefixes(&config);
+    fail_unless(res == 0);
+
+    // Ensure that we didn't affect other values
+    fail_unless(config.tcp_port == 10000);
+    fail_unless(config.udp_port == 10001);
+    fail_unless(config.parse_stdin == true);
+    fail_unless(strcmp(config.log_level, "INFO") == 0);
+    fail_unless(config.timer_eps == (double)0.005);
+    fail_unless(config.set_eps == (double)0.03);
+    fail_unless(strcmp(config.stream_cmd, "foo") == 0);
+    fail_unless(config.flush_interval == 120);
+    fail_unless(config.daemonize == true);
+    fail_unless(config.binary_stream == true);
+    fail_unless(strcmp(config.pid_file, "/tmp/statsite.pid") == 0);
+    fail_unless(strcmp(config.input_counter, "foobar") == 0);
+
+    // Values from config
+    fail_unless(strcmp(config.prefixes_final[KEY_VAL], "statsd.keyvalue.") == 0);
+    fail_unless(strcmp(config.prefixes_final[GAUGE], "statsd.") == 0);
+    fail_unless(strcmp(config.prefixes_final[SET], "statsd.foo.sets.bar.") == 0);
+    // Default values
+    fail_unless(strcmp(config.prefixes_final[TIMER], "statsd.timers.") == 0);
+    fail_unless(strcmp(config.prefixes_final[COUNTER], "statsd.counts.") == 0);
+
+    unlink("/tmp/global_prefix");
+}
+END_TEST
