@@ -187,7 +187,7 @@ options must exist in the `statsite` section of the INI file:
  * global\_prefix : Prefix that will be added to all messages.
    Defaults to empty string
    
- * kv\_prefix, gauges\_prefix, counts\_prefix, sets\_prefix, timer\_prefix : prefix for
+ * kv\_prefix, gauges\_prefix, counts\_prefix, sets\_prefix, timers\_prefix : prefix for
    each message type. Defaults to respectively: kv, gauges, counts, sets, timers.
    Values will be ignored if use_type_prefix set to 0.
 
