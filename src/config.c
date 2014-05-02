@@ -245,6 +245,7 @@ static int config_callback(void* user, const char* section, const char* name, co
 int prepare_prefixes(statsite_config *config)
 {
     // This temporary variably will be concatenated with other prefixes
+    int res;
     int prefixes_to_prepare = 5;
     metric_type prefixes[METRIC_TYPES] = {
         KEY_VAL,
@@ -272,8 +273,9 @@ int prepare_prefixes(statsite_config *config)
             type_prefix_delim = "";
 
         free(config->prefixes_final[current_prefix_t]);
-        asprintf(&(config->prefixes_final[current_prefix_t]),"%s%s%s%s",config->global_prefix,global_prefix_delim,
+        res = asprintf(&(config->prefixes_final[current_prefix_t]),"%s%s%s%s",config->global_prefix,global_prefix_delim,
                  config->prefixes[current_prefix_t],type_prefix_delim);
+        assert(res != -1);
     }
 
     return 0;
