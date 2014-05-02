@@ -18,7 +18,7 @@ START_TEST(test_config_get_default)
     fail_unless(config.parse_stdin == false);
     fail_unless(strcmp(config.log_level, "DEBUG") == 0);
     fail_unless(config.syslog_log_level == LOG_DEBUG);
-    fail_unless(config.timer_eps == 1e-2);
+    fail_unless(config.timer_eps == (double)1e-2);
     fail_unless(strcmp(config.stream_cmd, "cat") == 0);
     fail_unless(config.flush_interval == 10);
     fail_unless(config.daemonize == false);
@@ -41,7 +41,7 @@ START_TEST(test_config_bad_file)
     fail_unless(config.parse_stdin == false);
     fail_unless(strcmp(config.log_level, "DEBUG") == 0);
     fail_unless(config.syslog_log_level == LOG_DEBUG);
-    fail_unless(config.timer_eps == 1e-2);
+    fail_unless(config.timer_eps == (double)1e-2);
     fail_unless(strcmp(config.stream_cmd, "cat") == 0);
     fail_unless(config.flush_interval == 10);
     fail_unless(config.daemonize == false);
@@ -67,7 +67,7 @@ START_TEST(test_config_empty_file)
     fail_unless(config.parse_stdin == false);
     fail_unless(strcmp(config.log_level, "DEBUG") == 0);
     fail_unless(config.syslog_log_level == LOG_DEBUG);
-    fail_unless(config.timer_eps == 1e-2);
+    fail_unless(config.timer_eps == (double)1e-2);
     fail_unless(strcmp(config.stream_cmd, "cat") == 0);
     fail_unless(config.flush_interval == 10);
     fail_unless(config.daemonize == false);
@@ -108,8 +108,8 @@ pid_file = /tmp/statsite.pid\n";
     fail_unless(config.udp_port == 10001);
     fail_unless(config.parse_stdin == true);
     fail_unless(strcmp(config.log_level, "INFO") == 0);
-    fail_unless(config.timer_eps == 0.005);
-    fail_unless(config.set_eps == 0.03);
+    fail_unless(config.timer_eps == (double)0.005);
+    fail_unless(config.set_eps == (double)0.03);
     fail_unless(strcmp(config.stream_cmd, "foo") == 0);
     fail_unless(config.flush_interval == 120);
     fail_unless(config.daemonize == true);
@@ -299,7 +299,7 @@ width=25\n\
     fail_unless(config.tcp_port == 10000);
     fail_unless(config.udp_port == 10001);
     fail_unless(strcmp(config.log_level, "INFO") == 0);
-    fail_unless(config.timer_eps == 0.005);
+    fail_unless(config.timer_eps == (double)0.005);
     fail_unless(strcmp(config.stream_cmd, "foo") == 0);
     fail_unless(config.flush_interval == 120);
     fail_unless(config.daemonize == true);
