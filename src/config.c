@@ -258,23 +258,27 @@ int prepare_prefixes(statsite_config *config)
     metric_type current_prefix_t;
     char* global_prefix_delim = "";
     char* type_prefix_delim = "";
+    char* current_prefix = "";
 
     for(c=0; c<prefixes_to_prepare; c++) {
         current_prefix_t = prefixes[c];
+        current_prefix = config->prefixes[current_prefix_t];
         // Should we use delimiter for global prefix
         if(strlen(config->global_prefix))
             global_prefix_delim = ".";
         else
             global_prefix_delim = "";
         // And for type prefix
-        if(strlen(config->prefixes[current_prefix_t]) && config->use_type_prefix)
+        if(strlen(current_prefix) && config->use_type_prefix)
             type_prefix_delim = ".";
-        else
+        else {
+            current_prefix = "";
             type_prefix_delim = "";
+        }
 
         free(config->prefixes_final[current_prefix_t]);
         res = asprintf(&(config->prefixes_final[current_prefix_t]),"%s%s%s%s",config->global_prefix,global_prefix_delim,
-                 config->prefixes[current_prefix_t],type_prefix_delim);
+                 current_prefix,type_prefix_delim);
         assert(res != -1);
     }
 
