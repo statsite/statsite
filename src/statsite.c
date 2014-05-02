@@ -150,7 +150,10 @@ int main(int argc, char **argv) {
     }
 
     // Set prefixes for each message type
-    prepare_prefixes(config);
+    if (prepare_prefixes(config)) {
+        syslog(LOG_ERR, "Failed to get prefixes!");
+        return 1;
+    }
 
     // Build the prefix tree
     if (build_prefix_tree(config)) {
