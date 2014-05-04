@@ -221,6 +221,13 @@ the number of samples it has received.</p></li>
 to /var/run/statsite.pid</p></li>
 <li><p>binary_stream : Should data be streamed to the stream_cmd in
 binary form instead of ASCI form. Defaults to 0.</p></li>
+<li><p>use_type_prefix : Should prefixes with message type be added to the messages.
+Does not affect global_prefix. Defaults to 1.</p></li>
+<li><p>global_prefix : Prefix that will be added to all messages.
+Defaults to empty string.</p></li>
+<li><p>kv_prefix, gauges_prefix, counts_prefix, sets_prefix, timers_prefix : prefix for
+each message type. Defaults to respectively: "kv.", "gauges.", "counts.",
+"sets.", "timers.". Values will be ignored if use_type_prefix set to 0.</p></li>
 </ul><p>In addition to global configurations, statsite supports histograms
 as well. Histograms are configured one per section, and the INI
 section must start with the work <code>histogram</code>. These are the recognized
