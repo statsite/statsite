@@ -182,14 +182,14 @@ options must exist in the `statsite` section of the INI file:
    binary form instead of ASCI form. Defaults to 0.
 
  * use\_type\_prefix : Should prefixes with message type be added to the messages.
-   Does not affect global\_prefix. Defaults to 1. 
-   
+   Does not affect global\_prefix. Defaults to 1.
+
  * global\_prefix : Prefix that will be added to all messages.
-   Defaults to empty string
-   
+   Defaults to empty string.
+
  * kv\_prefix, gauges\_prefix, counts\_prefix, sets\_prefix, timers\_prefix : prefix for
-   each message type. Defaults to respectively: kv, gauges, counts, sets, timers.
-   Values will be ignored if use_type_prefix set to 0.
+   each message type. Defaults to respectively: "kv.", "gauges.", "counts.",
+   "sets.", "timers.". Values will be ignored if use_type_prefix set to 0.
 
 In addition to global configurations, statsite supports histograms
 as well. Histograms are configured one per section, and the INI
