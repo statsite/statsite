@@ -45,7 +45,7 @@ static const statsite_config DEFAULT_CONFIG = {
     12,                 // Set precision 12, 1.6% variance
     true,               // Use type prefixes by default
     "",                 // Global prefix
-    {"", "kv", "gauges", "counts", "timers", "sets", ""},
+    {"", "kv.", "gauges.", "counts.", "timers.", "sets.", ""},
     {}
 };
 
@@ -244,44 +244,19 @@ static int config_callback(void* user, const char* section, const char* name, co
 
 int prepare_prefixes(statsite_config *config)
 {
-    // This temporary variably will be concatenated with other prefixes
     int res;
-    int prefixes_to_prepare = 5;
-    metric_type prefixes[METRIC_TYPES] = {
-        KEY_VAL,
-        GAUGE,
-        COUNTER,
-        TIMER,
-        SET
-    };
-    int c;
-    metric_type current_prefix_t;
-    char* global_prefix_delim = "";
-    char* type_prefix_delim = "";
-    char* current_prefix = "";
-
-    for(c=0; c<prefixes_to_prepare; c++) {
-        current_prefix_t = prefixes[c];
-        current_prefix = config->prefixes[current_prefix_t];
-        // Should we use delimiter for global prefix
-        if(strlen(config->global_prefix))
-            global_prefix_delim = ".";
-        else
-            global_prefix_delim = "";
-        // And for type prefix
-        if(strlen(current_prefix) && config->use_type_prefix)
-            type_prefix_delim = ".";
-        else {
-            current_prefix = "";
-            type_prefix_delim = "";
+    char *final_prefix, *type_prefix = "";
+    for (int i=0; i < METRIC_TYPES; i++) {
+        // Get the type prefix
+        if (config->use_type_prefix) {
+            type_prefix = config->prefixes[i];
         }
 
-        free(config->prefixes_final[current_prefix_t]);
-        res = asprintf(&(config->prefixes_final[current_prefix_t]),"%s%s%s%s",config->global_prefix,global_prefix_delim,
-                 current_prefix,type_prefix_delim);
+        // Create the new prefix
+        res = asprintf(&final_prefix, "%s%s", config->global_prefix, type_prefix);
         assert(res != -1);
+        config->prefixes_final[i] = final_prefix;
     }
-
     return 0;
 }
 

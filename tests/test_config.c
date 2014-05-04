@@ -358,7 +358,8 @@ START_TEST(test_sane_prefixes)
 use_type_prefix = true\n\
 kv_prefix = keyVALUE.1-2_3\n\
 gauges_prefix =\n\
-counts_prefix=foo.counts.bar";
+counts_prefix=foo.counts.bar.\n\
+";
     write(fh, buf, strlen(buf));
     fchmod(fh, 777);
     close(fh);
@@ -372,10 +373,10 @@ counts_prefix=foo.counts.bar";
     fail_unless(res == 0);
 
     // Values from config
-    
-    fail_unless(strcmp(config.prefixes_final[KEY_VAL], "keyVALUE.1-2_3.") == 0);
+    fail_unless(strcmp(config.prefixes_final[KEY_VAL], "keyVALUE.1-2_3") == 0);
     fail_unless(strcmp(config.prefixes_final[GAUGE], "") == 0);
     fail_unless(strcmp(config.prefixes_final[COUNTER], "foo.counts.bar.") == 0);
+
     // Default values
     fail_unless(strcmp(config.prefixes_final[TIMER], "timers.") == 0);
     fail_unless(strcmp(config.prefixes_final[SET], "sets.") == 0);
@@ -396,6 +397,7 @@ counts_prefix=foo.sets.bar";
     // Should get the config
     res = config_from_filename("/tmp/sane_prefixes", &config);
     fail_unless(res == 0);
+
     // And prepare prefixes
     res = prepare_prefixes(&config);
     fail_unless(res == 0);
@@ -404,6 +406,7 @@ counts_prefix=foo.sets.bar";
     fail_unless(strcmp(config.prefixes_final[KEY_VAL], "") == 0);
     fail_unless(strcmp(config.prefixes_final[GAUGE], "") == 0);
     fail_unless(strcmp(config.prefixes_final[COUNTER], "") == 0);
+
     // Default values
     fail_unless(strcmp(config.prefixes_final[TIMER], "") == 0);
     fail_unless(strcmp(config.prefixes_final[SET], "") == 0);
@@ -414,7 +417,7 @@ counts_prefix=foo.sets.bar";
 
     buf = "[statsite]\n\
 use_type_prefix = 0\n\
-global_prefix = statsite\n\
+global_prefix = statsite.\n\
 kv_prefix = keyVALUE.1-2_3\n\
 gauges_prefix =\n\
 counts_prefix=foo.sets.bar";
@@ -425,6 +428,7 @@ counts_prefix=foo.sets.bar";
     // Should get the config
     res = config_from_filename("/tmp/sane_prefixes", &config);
     fail_unless(res == 0);
+
     // And prepare prefixes
     res = prepare_prefixes(&config);
     fail_unless(res == 0);
@@ -433,6 +437,7 @@ counts_prefix=foo.sets.bar";
     fail_unless(strcmp(config.prefixes_final[KEY_VAL], "statsite.") == 0);
     fail_unless(strcmp(config.prefixes_final[GAUGE], "statsite.") == 0);
     fail_unless(strcmp(config.prefixes_final[COUNTER], "statsite.") == 0);
+
     // Default values
     fail_unless(strcmp(config.prefixes_final[TIMER], "statsite.") == 0);
     fail_unless(strcmp(config.prefixes_final[SET], "statsite.") == 0);
@@ -457,11 +462,11 @@ daemonize = true\n\
 binary_stream = true\n\
 input_counter = foobar\n\
 pid_file = /tmp/statsite.pid\n\
-global_prefix = statsd\n\
+global_prefix = statsd.\n\
 use_type_prefix = 1\n\
-kv_prefix = keyvalue\n\
+kv_prefix = keyvalue.\n\
 gauges_prefix =\n\
-sets_prefix=foo.sets.bar";
+sets_prefix=foo.sets.bar.";
     write(fh, buf, strlen(buf));
     fchmod(fh, 777);
     close(fh);
@@ -492,10 +497,10 @@ sets_prefix=foo.sets.bar";
     fail_unless(strcmp(config.prefixes_final[KEY_VAL], "statsd.keyvalue.") == 0);
     fail_unless(strcmp(config.prefixes_final[GAUGE], "statsd.") == 0);
     fail_unless(strcmp(config.prefixes_final[SET], "statsd.foo.sets.bar.") == 0);
+
     // Default values
     fail_unless(strcmp(config.prefixes_final[TIMER], "statsd.timers.") == 0);
     fail_unless(strcmp(config.prefixes_final[COUNTER], "statsd.counts.") == 0);
-
     unlink("/tmp/global_prefix");
 }
 END_TEST
