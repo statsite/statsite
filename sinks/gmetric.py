@@ -230,6 +230,5 @@ if __name__ == '__main__':
                 sys.exit(2)
         else:
             metric_type = p.type
-        print metric_type
         g.send(key, value, TYPE=metric_type, UNITS=p.units, SLOPE=p.slope, TMAX=p.tmax, DMAX=p.dmin, GROUP=p.group, SPOOF=p.spoof)
     sys.exit(0)
