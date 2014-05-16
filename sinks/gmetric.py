@@ -60,6 +60,12 @@ slope_int2str = {0: 'zero',
                  3: 'both',
                  4: 'unspecified'}
 
+class TransportError(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
 
 class Gmetric:
     """
@@ -76,12 +82,21 @@ class Gmetric:
         if protocol not in self.protocol:
             raise ValueError("Protocol must be one of: " + str(self.protocol))
 
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        for res in socket.getaddrinfo(host, port, socket.AF_UNSPEC, socket.SOCK_DGRAM):
+            af, socktype, proto, canonname, sa = res
+            try:
+                self.socket = socket.socket(af, socktype, proto)
+                self.hostport = (sa[0], sa[1])
+            except socket.error, e:
+                self.socket = None
+                continue
+            break
+        if self.socket is None:
+            raise TransportError("Could not open socket.")
+
         if protocol == 'multicast':
             self.socket.setsockopt(socket.IPPROTO_IP,
                                    socket.IP_MULTICAST_TTL, 20)
-        self.hostport = (host, int(port))
-        #self.socket.connect(self.hostport)
 
     def send(self, NAME, VAL, TYPE='string', UNITS='', SLOPE='both',
              TMAX=60, DMAX=0, GROUP="", SPOOF=""):
@@ -215,6 +230,5 @@ if __name__ == '__main__':
                 sys.exit(2)
         else:
             metric_type = p.type
-        print metric_type
         g.send(key, value, TYPE=metric_type, UNITS=p.units, SLOPE=p.slope, TMAX=p.tmax, DMAX=p.dmin, GROUP=p.group, SPOOF=p.spoof)
     sys.exit(0)
