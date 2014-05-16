@@ -1,6 +1,8 @@
 # 0.7.0 (Unreleased)
 
 * Support for IPv6. Thanks to @ealekseev [GH-57]
+* Support for `extended_counters` option to expose more
+  summary information about counters.
 
 # 0.6.5
 
