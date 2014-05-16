@@ -54,6 +54,7 @@ typedef struct {
     char* global_prefix;
     char* prefixes[METRIC_TYPES];
     char* prefixes_final[METRIC_TYPES];
+    bool extended_counters;
 } statsite_config;
 
 /**

@@ -25,7 +25,7 @@ START_TEST(test_config_get_default)
     fail_unless(config.binary_stream == false);
     fail_unless(strcmp(config.pid_file, "/var/run/statsite.pid") == 0);
     fail_unless(config.input_counter == NULL);
-
+    fail_unless(config.extended_counters == false);
 }
 END_TEST
 
@@ -94,7 +94,8 @@ log_level = INFO\n\
 daemonize = true\n\
 binary_stream = true\n\
 input_counter = foobar\n\
-pid_file = /tmp/statsite.pid\n";
+pid_file = /tmp/statsite.pid\n\
+extended_counters = true\n";
     write(fh, buf, strlen(buf));
     fchmod(fh, 777);
     close(fh);
@@ -116,6 +117,7 @@ pid_file = /tmp/statsite.pid\n";
     fail_unless(config.binary_stream == true);
     fail_unless(strcmp(config.pid_file, "/tmp/statsite.pid") == 0);
     fail_unless(strcmp(config.input_counter, "foobar") == 0);
+    fail_unless(config.extended_counters == true);
 
     unlink("/tmp/basic_config");
 }

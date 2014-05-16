@@ -46,7 +46,8 @@ static const statsite_config DEFAULT_CONFIG = {
     true,               // Use type prefixes by default
     "",                 // Global prefix
     {"", "kv.", "gauges.", "counts.", "timers.", "sets.", ""},
-    {}
+    {},
+    false,              // Extended counts off by default
 };
 
 /**
@@ -196,6 +197,8 @@ static int config_callback(void* user, const char* section, const char* name, co
         return value_to_bool(value, &config->binary_stream);
     } else if (NAME_MATCH("use_type_prefix")) {
         return value_to_bool(value, &config->use_type_prefix);
+    } else if (NAME_MATCH("extended_counters")) {
+        return value_to_bool(value, &config->extended_counters);
 
     // Handle the double cases
     } else if (NAME_MATCH("timer_eps")) {
