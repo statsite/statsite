@@ -28,7 +28,7 @@ static histogram_config *in_progress;
 static const statsite_config DEFAULT_CONFIG = {
     8125,               // TCP defaults to 8125
     8125,               // UDP on 8125
-    "0.0.0.0",          // Listen on all IPv4 addresses
+    "::",               // Listen on all addresses
     false,              // Do not parse stdin by default
     "DEBUG",            // DEBUG level
     LOG_DEBUG,

@@ -7,9 +7,13 @@
 #include <sys/uio.h>
 #include <syslog.h>
 #include <unistd.h>
+#include <netdb.h>
 
 #include "networking.h"
 #include "conn_handler.h"
+
+// Length of string to represent maximum port of 65535
+#define MAX_PORT_LEN 6
 
 #define EV_STANDALONE 1
 #define EV_API_STATIC 1
@@ -125,32 +129,45 @@ static int setup_tcp_listener(statsite_networking *netconf) {
         syslog(LOG_INFO, "TCP port is disabled");
         return 0;
     }
-    struct sockaddr_in addr;
-    struct in_addr bind_addr;
-    bzero(&addr, sizeof(addr));
-    bzero(&bind_addr, sizeof(bind_addr));
-    addr.sin_family = PF_INET;
-    addr.sin_port = htons(netconf->config->tcp_port);
-
-    int ret = inet_pton(AF_INET, netconf->config->bind_address, &bind_addr);
-    if (ret != 1) {
-        syslog(LOG_ERR, "Invalid IPv4 address '%s'!", netconf->config->bind_address);
-        return 1;
-    }
-    addr.sin_addr = bind_addr;
-
-    // Make the socket, bind and listen
-    int tcp_listener_fd = socket(PF_INET, SOCK_STREAM, 0);
+    struct addrinfo hints;
+    struct addrinfo *result, *rp;
+    int s;
+    int tcp_listener_fd;
     int optval = 1;
-    if (setsockopt(tcp_listener_fd, SOL_SOCKET,
-                SO_REUSEADDR, &optval, sizeof(optval))) {
-        syslog(LOG_ERR, "Failed to set SO_REUSEADDR! Err: %s", strerror(errno));
-        close(tcp_listener_fd);
+    char tcp_port[MAX_PORT_LEN];
+
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
+    hints.ai_socktype = SOCK_STREAM; /* Datagram socket */
+    hints.ai_flags = AI_PASSIVE;
+    hints.ai_protocol = 0;          /* Any protocol */
+    hints.ai_canonname = NULL;
+    hints.ai_addr = NULL;
+    hints.ai_next = NULL;
+
+    snprintf(tcp_port, MAX_PORT_LEN, "%d", netconf->config->tcp_port);
+    
+    s = getaddrinfo(netconf->config->bind_address, tcp_port, &hints, &result);
+    if (s != 0) {
+        syslog(LOG_ERR, "getaddrinfo: %s\n", gai_strerror(s));
         return 1;
     }
-    if (bind(tcp_listener_fd, (struct sockaddr*)&addr, sizeof(addr)) != 0) {
+    for (rp = result; rp != NULL; rp = rp->ai_next) {
+        tcp_listener_fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+        if (tcp_listener_fd == -1)
+            continue;
+        if (setsockopt(tcp_listener_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval))) {
+            syslog(LOG_ERR, "Failed to set SO_REUSEADDR! Err: %s", strerror(errno));
+            close(tcp_listener_fd);
+            continue;
+        }
+        if (bind(tcp_listener_fd, rp->ai_addr, rp->ai_addrlen) == 0)
+            break;
         syslog(LOG_ERR, "Failed to bind on TCP socket! Err: %s", strerror(errno));
         close(tcp_listener_fd);
+    }
+    if (rp == NULL) {               /* No address succeeded */
+        syslog(LOG_ERR, "Failed to bind on any TCP socket!\n");
         return 1;
     }
     if (listen(tcp_listener_fd, BACKLOG_SIZE) != 0) {
@@ -179,32 +196,45 @@ static int setup_udp_listener(statsite_networking *netconf) {
         syslog(LOG_INFO, "UDP port is disabled");
         return 0;
     }
-    struct sockaddr_in addr;
-    struct in_addr bind_addr;
-    bzero(&addr, sizeof(addr));
-    bzero(&bind_addr, sizeof(bind_addr));
-    addr.sin_family = PF_INET;
-    addr.sin_port = htons(netconf->config->udp_port);
-
-    int ret = inet_pton(AF_INET, netconf->config->bind_address, &bind_addr);
-    if (ret != 1) {
-        syslog(LOG_ERR, "Invalid IPv4 address '%s'!", netconf->config->bind_address);
-        return 1;
-    }
-    addr.sin_addr = bind_addr;
-
-    // Make the socket, bind and listen
-    int udp_listener_fd = socket(PF_INET, SOCK_DGRAM, 0);
+    struct addrinfo hints;
+    struct addrinfo *result, *rp;
+    int s;
+    int udp_listener_fd;
     int optval = 1;
-    if (setsockopt(udp_listener_fd, SOL_SOCKET,
-                SO_REUSEADDR, &optval, sizeof(optval))) {
-        syslog(LOG_ERR, "Failed to set SO_REUSEADDR! Err: %s", strerror(errno));
-        close(udp_listener_fd);
+    char udp_port[MAX_PORT_LEN];
+
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
+    hints.ai_socktype = SOCK_DGRAM; /* Datagram socket */
+    hints.ai_flags = AI_PASSIVE;
+    hints.ai_protocol = 0;          /* Any protocol */
+    hints.ai_canonname = NULL;
+    hints.ai_addr = NULL;
+    hints.ai_next = NULL;
+
+    snprintf(udp_port, MAX_PORT_LEN, "%d", netconf->config->udp_port);
+
+    s = getaddrinfo(netconf->config->bind_address, udp_port, &hints, &result);
+    if (s != 0) {
+        syslog(LOG_ERR, "getaddrinfo: %s\n", gai_strerror(s));
         return 1;
     }
-    if (bind(udp_listener_fd, (struct sockaddr*)&addr, sizeof(addr)) != 0) {
+    for (rp = result; rp != NULL; rp = rp->ai_next) {
+        udp_listener_fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+        if (udp_listener_fd == -1)
+            continue;
+        if (setsockopt(udp_listener_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval))) {
+            syslog(LOG_ERR, "Failed to set SO_REUSEADDR! Err: %s", strerror(errno));
+            close(udp_listener_fd);
+            continue;
+        }
+        if (bind(udp_listener_fd, rp->ai_addr, rp->ai_addrlen) == 0)
+            break;
         syslog(LOG_ERR, "Failed to bind on UDP socket! Err: %s", strerror(errno));
         close(udp_listener_fd);
+    }
+    if (rp == NULL) {               /* No address succeeded */
+        syslog(LOG_ERR, "Failed to bind on any UDP socket!\n");
         return 1;
     }
 
