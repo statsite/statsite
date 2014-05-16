@@ -1,3 +1,7 @@
+# 0.7.0 (Unreleased)
+
+* Support for IPv6. Thanks to @ealekseev [GH-57]
+
 # 0.6.5
 
 * Removed dependency on C++ compiler
