@@ -160,6 +160,27 @@ class TestInteg(object):
         out = open(output).read()
         assert out in ("counts.foobar|6000.000000|%d\n" % now, "counts.foobar|6000.000000|%d\n" % (now - 1))
 
+    def test_meters_alias(self, servers):
+        "Tests adding timing data with the 'h' alias"
+        server, _, output = servers
+        msg = ""
+        for x in xrange(100):
+            msg += "val:%d|h\n" % x
+        server.sendall(msg)
+
+        wait_file(output)
+        out = open(output).read()
+        assert "timers.val.sum|4950" in out
+        assert "timers.val.sum_sq|328350" in out
+        assert "timers.val.mean|49.500000" in out
+        assert "timers.val.lower|0.000000" in out
+        assert "timers.val.upper|99.000000" in out
+        assert "timers.val.count|100" in out
+        assert "timers.val.stdev|29.011492" in out
+        assert "timers.val.median|49.000000" in out
+        assert "timers.val.p95|95.000000" in out
+        assert "timers.val.p99|99.000000" in out
+
     def test_meters(self, servers):
         "Tests adding kv pairs"
         server, _, output = servers

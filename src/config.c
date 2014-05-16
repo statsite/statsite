@@ -43,6 +43,10 @@ static const statsite_config DEFAULT_CONFIG = {
     NULL,
     0.02,               // 2% goal uses precision 12
     12,                 // Set precision 12, 1.6% variance
+    true,               // Use type prefixes by default
+    "",                 // Global prefix
+    {"", "kv.", "gauges.", "counts.", "timers.", "sets.", ""},
+    {}
 };
 
 /**
@@ -190,6 +194,8 @@ static int config_callback(void* user, const char* section, const char* name, co
         return value_to_bool(value, &config->daemonize);
     } else if (NAME_MATCH("binary_stream")) {
         return value_to_bool(value, &config->binary_stream);
+    } else if (NAME_MATCH("use_type_prefix")) {
+        return value_to_bool(value, &config->use_type_prefix);
 
     // Handle the double cases
     } else if (NAME_MATCH("timer_eps")) {
@@ -208,6 +214,18 @@ static int config_callback(void* user, const char* section, const char* name, co
         config->input_counter = strdup(value);
     } else if (NAME_MATCH("bind_address")) {
         config->bind_address = strdup(value);
+    } else if (NAME_MATCH("global_prefix")) {
+        config->global_prefix = strdup(value);
+    } else if (NAME_MATCH("counts_prefix")) {
+        config->prefixes[COUNTER] = strdup(value);
+    } else if (NAME_MATCH("gauges_prefix")) {
+        config->prefixes[GAUGE] = strdup(value);
+    } else if (NAME_MATCH("timers_prefix")) {
+        config->prefixes[TIMER] = strdup(value);
+    } else if (NAME_MATCH("sets_prefix")) {
+        config->prefixes[SET] = strdup(value);
+    } else if (NAME_MATCH("kv_prefix")) {
+        config->prefixes[KEY_VAL] = strdup(value);
 
     // Unknown parameter?
     } else {
@@ -220,6 +238,29 @@ static int config_callback(void* user, const char* section, const char* name, co
 }
 
 /**
+ * Gets a final prefix string for each message type
+ * @arg config Output. The config object to prepare strings.
+ */
+
+int prepare_prefixes(statsite_config *config)
+{
+    int res;
+    char *final_prefix, *type_prefix = "";
+    for (int i=0; i < METRIC_TYPES; i++) {
+        // Get the type prefix
+        if (config->use_type_prefix) {
+            type_prefix = config->prefixes[i];
+        }
+
+        // Create the new prefix
+        res = asprintf(&final_prefix, "%s%s", config->global_prefix, type_prefix);
+        assert(res != -1);
+        config->prefixes_final[i] = final_prefix;
+    }
+    return 0;
+}
+
+/**
  * Initializes the configuration from a filename.
  * Reads the file as an INI configuration, and sets up the
  * config object.
@@ -227,6 +268,7 @@ static int config_callback(void* user, const char* section, const char* name, co
  * @arg config Output. The config object to initialize.
  * @return 0 on success, negative on error.
  */
+
 int config_from_filename(char *filename, statsite_config *config) {
     // Initialize to the default values
     memcpy(config, &DEFAULT_CONFIG, sizeof(statsite_config));

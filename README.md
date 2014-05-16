@@ -22,6 +22,11 @@ Features
 * Dynamic set implementation:
   - Exactly counts for small sets
   - HyperLogLog for large sets
+* Included sinks:
+  - Graphite
+  - InfluxDB
+  - Ganglia
+  - Liberato
 * Binary protocol
 * TCP, UDP, and STDIN
 * Fast
@@ -55,7 +60,7 @@ store only a fraction of the samples.
 
 Histograms can also be optionally maintained for timer values.
 The minimum and maximum values along with the bin widths must
-be specified in advance, and as samples are recieved the bins
+be specified in advance, and as samples are received the bins
 are updated. Statsite supports multiple histograms configurations,
 and uses a longest-prefix match policy.
 
@@ -174,8 +179,17 @@ options must exist in the `statsite` section of the INI file:
    to /var/run/statsite.pid
 
  * binary\_stream : Should data be streamed to the stream\_cmd in
-   binary form instead of ASCI form. Defaults to 0.
+   binary form instead of ASCII form. Defaults to 0.
 
+ * use\_type\_prefix : Should prefixes with message type be added to the messages.
+   Does not affect global\_prefix. Defaults to 1.
+
+ * global\_prefix : Prefix that will be added to all messages.
+   Defaults to empty string.
+
+ * kv\_prefix, gauges\_prefix, counts\_prefix, sets\_prefix, timers\_prefix : prefix for
+   each message type. Defaults to respectively: "kv.", "gauges.", "counts.",
+   "sets.", "timers.". Values will be ignored if use_type_prefix set to 0.
 
 In addition to global configurations, statsite supports histograms
 as well. Histograms are configured one per section, and the INI
@@ -253,7 +267,7 @@ Then it will emit a count 3 for the number of uniques it has seen.
 Writing Statsite Sinks
 ---------------------
 
-Statsite only ships with a graphite sink by default, but ANY executable
+Statsite ships with graphite, librato, gmetric, and influxdb sinks, but ANY executable
 or script  can be used as a sink. The sink should read its inputs from stdin, where
 each metric is in the form::
 

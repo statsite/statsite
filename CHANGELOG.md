@@ -1,6 +1,10 @@
-# 0.6.1 (unreleased)
+# 0.6.5
 
 * Removed dependency on C++ compiler
+* Support for 'h' as an alias of 'ms'
+* Support for configurable global_prefix, and type specific
+  prefixes thanks to @melkor217
+* Git SHA: c004e50
 
 # 0.6.0
 

@@ -70,7 +70,7 @@ class LibratoStore(object):
         self.max_metrics_payload = 500
 
         self.timer_re = re.compile("^timers\.")
-        self.type_re = re.compile("^(timers|counts|gauges|sets)\.(.+)$")
+        self.type_re = re.compile("^(kv|timers|counts|gauges|sets)\.(.+)$")
 
         self.sfx_map = {
             'sum': 'sum',
@@ -229,8 +229,12 @@ class LibratoStore(object):
             self.logger.warning('Failed to send metrics to Librato: Code: %d. Response: %s' % \
                                 (error.code, body))
         except IOError as error:
-            self.logger.warning('Error when sending metrics Librato (%s)' % \
-                                (error.reason))
+            if hasattr(error, 'reason'):
+                self.logger.warning('Error when sending metrics Librato (%s)' % (error.reason))
+            elif hasattr(error, 'code'):
+                self.logger.warning('Error when sending metrics Librato (%s)' % (error.code))
+            else:   
+                self.logger.warning('Error when sending metrics Librato and I dunno why')
 
     def flush(self):
         """
