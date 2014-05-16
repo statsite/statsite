@@ -191,6 +191,10 @@ options must exist in the `statsite` section of the INI file:
    each message type. Defaults to respectively: "kv.", "gauges.", "counts.",
    "sets.", "timers.". Values will be ignored if use_type_prefix set to 0.
 
+ * extended_counters : If enabled, the counter output is extended to include
+   all the computed summary values. Otherwise, the counter is emitted as just
+   the sum value. Defaults to 0.
+
 In addition to global configurations, statsite supports histograms
 as well. Histograms are configured one per section, and the INI
 section must start with the work `histogram`. These are the recognized
@@ -225,6 +229,7 @@ Currently supported message types:
 * `kv` - Simple Key/Value.
 * `g`  - Gauge, similar to `kv` but only the last value per key is retained
 * `ms` - Timer.
+* `h`  - Alias for timer
 * `c`  - Counter.
 * `s`  - Unique Set
 
@@ -371,7 +376,7 @@ The value type is one of:
 * 0x8 : Histogram Floor Value
 * 0x9 : Histogram Bin Value
 * 0xa : Histogram Ceiling Value
-* 0xb : Count Rate
+* 0xb : Count Rate (Sum / Flush Interval)
 * 0x80 OR `percentile` :  If the type OR's with 128 (0x80), then it is a
     percentile amount. The amount is OR'd with 0x80 to provide the type. For
     example (0x80 | 0x32) = 0xb2 is the 50% percentile or medium. The 95th
