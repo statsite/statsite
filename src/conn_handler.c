@@ -32,6 +32,7 @@
 #define BIN_OUT_HIST_FLOOR    0x8
 #define BIN_OUT_HIST_BIN      0x9
 #define BIN_OUT_HIST_CEIL     0xa
+#define BIN_OUT_RATE     0xb
 #define BIN_OUT_PCT     0x80
 
 // Macro to provide branch meta-data
@@ -95,6 +96,8 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
 
         case COUNTER:
             STREAM("%s%s|%f|%lld\n", prefix, name, counter_sum(value));
+            STREAM("%s%s.rate|%f|%lld\n", prefix, name, counter_sum(value) / GLOBAL_CONFIG->flush_interval);
+            STREAM("%s%s.count|%lld|%lld\n", prefix, name, counter_count(value));
             break;
 
         case SET:
@@ -173,6 +176,7 @@ static int stream_formatter_bin(FILE *pipe, void *data, metric_type type, char *
             STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_STDDEV, counter_stddev(value));
             STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_MIN, counter_min(value));
             STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_MAX, counter_max(value));
+            STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_RATE, counter_sum(value) / GLOBAL_CONFIG->flush_interval);
             break;
 
         case SET:
