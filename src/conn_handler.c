@@ -95,9 +95,18 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
             break;
 
         case COUNTER:
-            STREAM("%s%s|%f|%lld\n", prefix, name, counter_sum(value));
-            STREAM("%s%s.rate|%f|%lld\n", prefix, name, counter_sum(value) / GLOBAL_CONFIG->flush_interval);
-            STREAM("%s%s.count|%lld|%lld\n", prefix, name, counter_count(value));
+            if (GLOBAL_CONFIG->extended_counters) {
+                STREAM("%s%s.count|%lld|%lld\n", prefix, name, counter_count(value));
+                STREAM("%s%s.mean|%f|%lld\n", prefix, name, counter_mean(value));
+                STREAM("%s%s.stdev|%f|%lld\n", prefix, name, counter_stddev(value));
+                STREAM("%s%s.sum|%f|%lld\n", prefix, name, counter_sum(value));
+                STREAM("%s%s.sum_sq|%f|%lld\n", prefix, name, counter_squared_sum(value));
+                STREAM("%s%s.lower|%f|%lld\n", prefix, name, counter_min(value));
+                STREAM("%s%s.upper|%f|%lld\n", prefix, name, counter_max(value));
+                STREAM("%s%s.rate|%f|%lld\n", prefix, name, counter_sum(value) / GLOBAL_CONFIG->flush_interval);
+            } else {
+                STREAM("%s%s|%f|%lld\n", prefix, name, counter_sum(value));
+            }
             break;
 
         case SET:
