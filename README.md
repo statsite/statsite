@@ -371,6 +371,7 @@ The value type is one of:
 * 0x8 : Histogram Floor Value
 * 0x9 : Histogram Bin Value
 * 0xa : Histogram Ceiling Value
+* 0xb : Count Rate
 * 0x80 OR `percentile` :  If the type OR's with 128 (0x80), then it is a
     percentile amount. The amount is OR'd with 0x80 to provide the type. For
     example (0x80 | 0x32) = 0xb2 is the 50% percentile or medium. The 95th

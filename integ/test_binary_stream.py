@@ -40,6 +40,7 @@ VAL_TYPE_MAP = {
     "hist_min": 8,
     "hist_bin": 9,
     "hist_max": 10,
+    "rate": 11,
     "percentile": 128,
 }
 
@@ -202,6 +203,7 @@ class TestInteg(object):
         assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["stddev"], 100) in out
         assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["min"], 100) in out
         assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["max"], 300) in out
+        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["rate"], 600) in out
 
     def test_meters(self, servers):
         "Tests adding kv pairs"

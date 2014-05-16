@@ -146,7 +146,8 @@ class TestInteg(object):
         wait_file(output)
         now = time.time()
         out = open(output).read()
-        assert out in ("counts.foobar|600.000000|%d\n" % now, "counts.foobar|600.000000|%d\n" % (now - 1))
+        assert out in ("counts.foobar|600.000000|%d\ncounts.foobar.rate|600.000000|%d\ncounts.foobar.count|3|%d\n" % (now,now,now),
+                       "counts.foobar|600.000000|%d\ncounts.foobar.rate|600.000000|%d\ncounts.foobar.count|3|%d\n" % (now - 1, now - 1, now - 1))
 
     def test_counters_sample(self, servers):
         "Tests adding kv pairs"
@@ -158,7 +159,8 @@ class TestInteg(object):
         wait_file(output)
         now = time.time()
         out = open(output).read()
-        assert out in ("counts.foobar|6000.000000|%d\n" % now, "counts.foobar|6000.000000|%d\n" % (now - 1))
+        assert out in ("counts.foobar|6000.000000|%d\ncounts.foobar.rate|6000.000000|%d\ncounts.foobar.count|3|%d\n" % (now,now,now),
+                       "counts.foobar|6000.000000|%d\ncounts.foobar.rate|6000.000000|%d\ncounts.foobar.count|3|%d\n" % (now - 1, now - 1, now - 1))
 
     def test_meters_alias(self, servers):
         "Tests adding timing data with the 'h' alias"
@@ -295,7 +297,8 @@ class TestIntegUDP(object):
         wait_file(output)
         now = time.time()
         out = open(output).read()
-        assert out in ("counts.foobar|600.000000|%d\n" % now, "counts.foobar|600.000000|%d\n" % (now - 1))
+        assert out in ("counts.foobar|600.000000|%d\ncounts.foobar.rate|600.000000|%d\ncounts.foobar.count|3|%d\n" % (now,now,now),
+                       "counts.foobar|600.000000|%d\ncounts.foobar.rate|600.000000|%d\ncounts.foobar.count|3|%d\n" % (now - 1, now - 1, now - 1))
 
     def test_counters_sample(self, servers):
         "Tests adding kv pairs"
@@ -306,7 +309,8 @@ class TestIntegUDP(object):
         wait_file(output)
         now = time.time()
         out = open(output).read()
-        assert out in ("counts.foobar|6000.000000|%d\n" % now, "counts.foobar|6000.000000|%d\n" % (now - 1))
+        assert out in ("counts.foobar|6000.000000|%d\ncounts.foobar.rate|6000.000000|%d\ncounts.foobar.count|3|%d\n" % (now,now,now),
+                       "counts.foobar|6000.000000|%d\ncounts.foobar.rate|6000.000000|%d\ncounts.foobar.count|3|%d\n" % (now - 1, now - 1, now - 1))
 
     def test_counters_no_newlines(self, servers):
         "Tests adding counters without a trailing new line"
@@ -317,7 +321,8 @@ class TestIntegUDP(object):
         wait_file(output)
         now = time.time()
         out = open(output).read()
-        assert out in ("counts.zip|600.000000|%d\n" % now, "counts.zip|600.000000|%d\n" % (now - 1))
+        assert out in ("counts.zip|600.000000|%d\ncounts.zip.rate|600.000000|%d\ncounts.zip.count|3|%d\n" % (now,now,now),
+                       "counts.zip|600.000000|%d\ncounts.zip.rate|600.000000|%d\ncounts.zip.count|3|%d\n" % (now - 1, now - 1, now - 1))
 
     def test_meters(self, servers):
         "Tests adding kv pairs"
