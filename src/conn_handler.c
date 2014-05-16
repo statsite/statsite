@@ -125,6 +125,7 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
             STREAM("%s%s.median|%f|%lld\n", prefix, name, timer_query(&t->tm, 0.5));
             STREAM("%s%s.p95|%f|%lld\n", prefix, name, timer_query(&t->tm, 0.95));
             STREAM("%s%s.p99|%f|%lld\n", prefix, name, timer_query(&t->tm, 0.99));
+            STREAM("%s%s.rate|%f|%lld\n", prefix, name, timer_sum(&t->tm) / GLOBAL_CONFIG->flush_interval);
 
             // Stream the histogram values
             if (t->conf) {

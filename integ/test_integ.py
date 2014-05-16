@@ -182,6 +182,7 @@ class TestInteg(object):
         assert "timers.val.median|49.000000" in out
         assert "timers.val.p95|95.000000" in out
         assert "timers.val.p99|99.000000" in out
+        assert "timers.val.rate|4950" in out
 
     def test_meters(self, servers):
         "Tests adding kv pairs"
@@ -203,6 +204,7 @@ class TestInteg(object):
         assert "timers.noobs.median|49.000000" in out
         assert "timers.noobs.p95|95.000000" in out
         assert "timers.noobs.p99|99.000000" in out
+        assert "timers.noobs.rate|4950" in out
 
     def test_histogram(self, servers):
         "Tests adding keys with histograms"
@@ -343,6 +345,7 @@ class TestIntegUDP(object):
         assert "timers.noobs.median|49.000000" in out
         assert "timers.noobs.p95|95.000000" in out
         assert "timers.noobs.p99|99.000000" in out
+        assert "timers.noobs.rate|4950" in out
 
     def test_sets(self, servers):
         "Tests adding kv pairs"
