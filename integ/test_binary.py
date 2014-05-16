@@ -166,8 +166,8 @@ class TestInteg(object):
         wait_file(output)
         now = time.time()
         out = open(output).read()
-        assert out in ("counts.foobar|600.000000|%d\ncounts.foobar.rate|600.000000|%d\ncounts.foobar.count|3|%d\n" % (now,now,now),
-                       "counts.foobar|600.000000|%d\ncounts.foobar.rate|600.000000|%d\ncounts.foobar.count|3|%d\n" % (now - 1, now - 1, now - 1))
+        assert out in ("counts.foobar|600.000000|%d\n" % (now),
+                       "counts.foobar|600.000000|%d\n" % (now - 1))
 
     def test_meters(self, servers):
         "Tests adding kv pairs"
@@ -250,8 +250,8 @@ class TestIntegUDP(object):
         wait_file(output)
         now = time.time()
         out = open(output).read()
-        assert out in ("counts.foobar|600.000000|%d\ncounts.foobar.rate|600.000000|%d\ncounts.foobar.count|3|%d\n" % (now,now,now),
-                       "counts.foobar|600.000000|%d\ncounts.foobar.rate|600.000000|%d\ncounts.foobar.count|3|%d\n" % (now - 1, now - 1, now - 1))
+        assert out in ("counts.foobar|600.000000|%d\n" % (now),
+                       "counts.foobar|600.000000|%d\n" % (now - 1))
 
     def test_meters(self, servers):
         "Tests adding kv pairs"
