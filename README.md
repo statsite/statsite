@@ -26,7 +26,7 @@ Features
   - Graphite
   - InfluxDB
   - Ganglia
-  - Liberato
+  - Librato
 * Binary protocol
 * TCP, UDP, and STDIN
 * Fast
