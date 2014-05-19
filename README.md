@@ -141,75 +141,75 @@ Configuration Options
 Each statsite configuration option is documented below. Statsite configuration
 options must exist in the `statsite` section of the INI file:
 
- * tcp\_port : Integer, sets the TCP port to listen on. Default 8125. 0 to disable.
+* tcp\_port : Integer, sets the TCP port to listen on. Default 8125. 0 to disable.
 
- * port: Same as above. For compatibility.
+* port: Same as above. For compatibility.
 
- * udp\_port : Integer, sets the UDP port. Default 8125. 0 to disable.
+* udp\_port : Integer, sets the UDP port. Default 8125. 0 to disable.
 
- * bind\_address : The address to bind on. Defaults to 0.0.0.0
+* bind\_address : The address to bind on. Defaults to 0.0.0.0
 
- * parse\_stdin: Enables parsing stdin as an input stream. Defaults to 0.
+* parse\_stdin: Enables parsing stdin as an input stream. Defaults to 0.
 
- * log\_level : The logging level that statsite should use. One of:
-    DEBUG, INFO, WARN, ERROR, or CRITICAL. All logs go to syslog,
-    and stderr if that is a TTY. Default is DEBUG.
+* log\_level : The logging level that statsite should use. One of:
+  DEBUG, INFO, WARN, ERROR, or CRITICAL. All logs go to syslog,
+  and stderr if that is a TTY. Default is DEBUG.
 
- * flush\_interval : How often the metrics should be flushed to the
-    sink in seconds. Defaults to 10 seconds.
+* flush\_interval : How often the metrics should be flushed to the
+  sink in seconds. Defaults to 10 seconds.
 
- * timer\_eps : The upper bound on error for timer estimates. Defaults
-   to 1%. Decreasing this value causes more memory utilization per timer.
+* timer\_eps : The upper bound on error for timer estimates. Defaults
+  to 1%. Decreasing this value causes more memory utilization per timer.
 
- * set\_eps : The upper bound on error for unique set estimates. Defaults
-   to 2%. Decreasing this value causes more memory utilization per set.
+* set\_eps : The upper bound on error for unique set estimates. Defaults
+  to 2%. Decreasing this value causes more memory utilization per set.
 
- * stream\_cmd : This is the command that statsite invokes every
+* stream\_cmd : This is the command that statsite invokes every
   `flush_interval` seconds to handle the metrics. It can be any executable.
   It should read inputs over stdin and exit with status code 0 on success.
 
- * input\_counter : If set, statsite will count how many commands it received
+* input\_counter : If set, statsite will count how many commands it received
   in the flush interval, and the count will be emitted under this name. For
   example if set to "numStats", then statsite will emit "counter.numStats" with
   the number of samples it has received.
 
- * daemonize : Should statsite daemonize. Defaults to 0.
+* daemonize : Should statsite daemonize. Defaults to 0.
 
- * pid\_file : When daemonizing, where to put the pid file. Defaults
-   to /var/run/statsite.pid
+* pid\_file : When daemonizing, where to put the pid file. Defaults
+  to /var/run/statsite.pid
 
- * binary\_stream : Should data be streamed to the stream\_cmd in
-   binary form instead of ASCII form. Defaults to 0.
+* binary\_stream : Should data be streamed to the stream\_cmd in
+  binary form instead of ASCII form. Defaults to 0.
 
- * use\_type\_prefix : Should prefixes with message type be added to the messages.
-   Does not affect global\_prefix. Defaults to 1.
+* use\_type\_prefix : Should prefixes with message type be added to the messages.
+  Does not affect global\_prefix. Defaults to 1.
 
- * global\_prefix : Prefix that will be added to all messages.
-   Defaults to empty string.
+* global\_prefix : Prefix that will be added to all messages.
+  Defaults to empty string.
 
- * kv\_prefix, gauges\_prefix, counts\_prefix, sets\_prefix, timers\_prefix : prefix for
-   each message type. Defaults to respectively: "kv.", "gauges.", "counts.",
-   "sets.", "timers.". Values will be ignored if use_type_prefix set to 0.
+* kv\_prefix, gauges\_prefix, counts\_prefix, sets\_prefix, timers\_prefix : prefix for
+  each message type. Defaults to respectively: "kv.", "gauges.", "counts.",
+  "sets.", "timers.". Values will be ignored if use_type_prefix set to 0.
 
- * extended_counters : If enabled, the counter output is extended to include
-   all the computed summary values. Otherwise, the counter is emitted as just
-   the sum value. Defaults to 0.
+* extended_counters : If enabled, the counter output is extended to include
+  all the computed summary values. Otherwise, the counter is emitted as just
+  the sum value. Defaults to 0.
 
 In addition to global configurations, statsite supports histograms
 as well. Histograms are configured one per section, and the INI
 section must start with the work `histogram`. These are the recognized
 options:
 
- * prefix : This is the key prefix to match on. The longest matching prefix
- is used. If the prefix is blank, it is the default for all keys.
+* prefix : This is the key prefix to match on. The longest matching prefix
+  is used. If the prefix is blank, it is the default for all keys.
 
- * min : Floating value. The minimum bound on the histogram. Values below
- this go into a special bucket containing everything less than this value.
+* min : Floating value. The minimum bound on the histogram. Values below
+  this go into a special bucket containing everything less than this value.
 
- * max: Floating value. The maximum bound on the histogram. Values above
- this go into a special bucket containing everything more than this value.
+* max: Floating value. The maximum bound on the histogram. Values above
+  this go into a special bucket containing everything more than this value.
 
- * width : Floating value. The width of each bucket between the min and max.
+* width : Floating value. The width of each bucket between the min and max.
 
 Each histogram section must specify all options to be valid.
 
