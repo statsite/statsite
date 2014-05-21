@@ -1,5 +1,7 @@
+%global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
+
 Name:		statsite
-Version:	0.5.1
+Version:	0.7.0
 Release:	1%{?dist}
 Summary:	A C implementation of statsd.
 Group:		Applications
@@ -22,21 +24,48 @@ https://github.com/etsy/statsd, and is wire compatible.
 make %{?_smp_mflags}
 
 %install
-mkdir -vp $RPM_BUILD_ROOT/usr/bin
+mkdir -vp $RPM_BUILD_ROOT/usr/sbin
+mkdir -vp $RPM_BUILD_ROOT/etc/init.d
+mkdir -vp $RPM_BUILD_ROOT/etc/%{name}
 mkdir -vp $RPM_BUILD_ROOT/usr/libexec/%{name}
-install -m 755 statsite $RPM_BUILD_ROOT/usr/bin
+install -m 755 statsite $RPM_BUILD_ROOT/usr/sbin
+install -m 755 statsite.initscript $RPM_BUILD_ROOT/etc/init.d/statsite
+install -m 644 statsite.conf.example $RPM_BUILD_ROOT/etc/%{name}/statsite.conf
 cp -a sinks $RPM_BUILD_ROOT/usr/libexec/%{name}
 
 %clean
 make clean
+[ "%{buildroot}" != "/" ] && rm -rf %{buildroot}
+
+%post
+/sbin/chkconfig --add %{name}
+/sbin/chkconfig %{name} off
+
+%preun
+if [ "$1" = 0 ] ; then
+    %{monit_bin} stop %{appname}
+    /sbin/service %{appname} stop > /dev/null 2>&1
+    /sbin/chkconfig --del %{appname}
+fi
+exit 0
 
 %files
 %defattr(-,root,root,-)
 %doc LICENSE
 %doc CHANGELOG.md
 %doc README.md
-/usr/bin/statsite
-/usr/libexec/statsite/sinks
+%doc statsite.conf.example
+%config /etc/%{name}/statsite.conf
+%attr(755, root, root) /usr/sbin/statsite
+%attr(755, root, root) /etc/init.d/statsite
+%dir /usr/libexec/statsite
+%dir /usr/libexec/statsite/sinks
+%attr(755, root, root) /usr/libexec/statsite/sinks/binary_sink.py
+%attr(755, root, root) /usr/libexec/statsite/sinks/librato.py
+%attr(755, root, root) /usr/libexec/statsite/sinks/statsite_json_sink.rb
+%attr(755, root, root) /usr/libexec/statsite/sinks/gmetric.py
+%attr(755, root, root) /usr/libexec/statsite/sinks/influxdb.py
+%attr(755, root, root) /usr/libexec/statsite/sinks/graphite.py
 
 %changelog
 * Wed Nov 20 2013 Vito Laurenza <vitolaurenza@hotmail.com>
