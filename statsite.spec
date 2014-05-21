@@ -68,6 +68,10 @@ exit 0
 %attr(755, root, root) /usr/libexec/statsite/sinks/graphite.py
 
 %changelog
+* Tue May 20 2014 Marcelo Teixeira Monteiro <marcelotmonteiro@gmail.com>
+- Added initscript and config file
+- small improvements
+
 * Wed Nov 20 2013 Vito Laurenza <vitolaurenza@hotmail.com>
 - Added 'sinks', which I overlooked initially.
 
