@@ -1,0 +1,78 @@
+#!/bin/sh
+#
+# statsite        Startup script for statsite
+#
+# chkconfig: - 85 15
+# processname: statsite
+# config: /etc/statsite/statsite.conf
+# config: /etc/sysconfig/statsite
+# pidfile: /var/run/statsite.pid
+# description: Statsite is a metrics aggregation server
+#
+### BEGIN INIT INFO
+# Provides: statsite
+# Required-Start: $local_fs $remote_fs $network
+# Required-Stop: $local_fs $remote_fs $network
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: start and stop statsite
+### END INIT INFO
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+if [ -f /etc/sysconfig/statsite ]; then
+    . /etc/sysconfig/statsite
+fi
+
+prog=statsite
+statsite=${STATSITE-/usr/sbin/statsite}
+conffile=${CONFFILE-/etc/statsite/statsite.conf}
+pidfile=${PIDFILE-/var/run/statsite.pid}
+RETVAL=0
+
+start() {
+    echo -n $"Starting $prog: "
+
+    daemon --pidfile=${pidfile} ${statsite} -f ${conffile}
+    RETVAL=$?
+    echo
+    return $RETVAL
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    killproc -p ${pidfile} ${prog}
+    RETVAL=$?
+    echo
+    [ $RETVAL = 0 ] && rm -f ${pidfile}
+}
+
+rh_status() {
+    status -p ${pidfile} ${statsite}
+}
+
+# See how we were called.
+case "$1" in
+    start)
+        rh_status >/dev/null 2>&1 && exit 0
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        rh_status
+        RETVAL=$?
+        ;;
+    restart)
+        configtest -q || exit $RETVAL
+        stop
+        start
+        ;;
+    *)
+        echo $"Usage: $prog {start|stop|restart|status|help}"
+        RETVAL=2
+esac
+
+exit $RETVAL
