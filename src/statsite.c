@@ -106,7 +106,7 @@ void signal_handler(int signum) {
  */
 void usr1_signal_handler(int signum) {
     syslog(LOG_WARNING, "Received [%s]! Here are the buckets that we currently have:", strsignal(signum));
-    hashmap_iter(BUCKET_TIME, bucket_stats_cb, NULL);
+    hashmap_iter(METRICS_BUCKETS, bucket_stats_cb, NULL);
 }
 
 

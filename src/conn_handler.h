@@ -3,6 +3,7 @@
 #include "config.h"
 #include "networking.h"
 #include "hashmap.h"
+#include "metrics.h"
 
 /**
  * This structure is used to communicate
@@ -15,8 +16,12 @@ typedef struct {
 } statsite_conn_handler;
 
 /** Bucket Support **/
-hashmap *METRIC_BUCKETS;
-hashmap *BUCKET_TIME;
+hashmap *METRICS_BUCKETS;
+typedef struct {
+    time_t *time;
+    metrics *metrics;
+} metrics_bucket;
+
 int bucket_stats_cb(void *data, const char *key, void *value);
 
 /**

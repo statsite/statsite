@@ -51,11 +51,6 @@ typedef struct {
     unsigned char set_precision; // The precision for sets
 } metrics;
 
-typedef struct {
-    time_t *time;
-    metrics *metrics;
-} bucket_metrics;
-
 typedef int(*metric_callback)(void *data, metric_type type, char *name, void *val);
 
 /**

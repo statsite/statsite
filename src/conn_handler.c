@@ -64,8 +64,9 @@ static statsite_config *GLOBAL_CONFIG;
  * Invoked by the signal handler
  */
 int bucket_stats_cb(void *data, const char *key, void *value) {
-    syslog(LOG_INFO, "Bucket: %s, Timestamp: %lld", key, *(long long *)value);
-    return 1;
+    metrics_bucket *bm = (metrics_bucket *)value;
+    syslog(LOG_INFO, "Bucket: %s, Timestamp: %lld", key, *(long long *)bm->time);
+    return 0;
 }
 
 /**
@@ -78,8 +79,7 @@ void init_conn_handler(statsite_config *config) {
             config->histograms, config->set_precision, m);
     assert(res == 0);
     GLOBAL_METRICS = m;
-    hashmap_init(0, &BUCKET_TIME);
-    hashmap_init(0, &METRIC_BUCKETS);
+    hashmap_init(0, &METRICS_BUCKETS);
 
     // Store the config
     GLOBAL_CONFIG = config;
@@ -226,7 +226,7 @@ static int stream_formatter_bin(FILE *pipe, void *data, metric_type type, char *
  */
 static void* flush_thread(void *arg) {
     // Cast the args
-    bucket_metrics *bm = arg;
+    metrics_bucket *bm = arg;
     struct timeval tv;
 
     if (bm->time != NULL) {
@@ -258,16 +258,15 @@ static void* flush_thread(void *arg) {
  * Invoked to when we've reached the flush interval timeout
  */
 void flush_interval_trigger(char *bucket_name) {
-    bucket_metrics *bm = malloc(sizeof(bucket_metrics));
+    metrics_bucket *bm;
     if (bucket_name != NULL) {
-        hashmap_get(BUCKET_TIME, bucket_name, (void **)&(bm->time));
-        int res = hashmap_get(METRIC_BUCKETS, bucket_name, (void**)&(bm->metrics));
-        hashmap_delete(METRIC_BUCKETS, bucket_name);
-        hashmap_delete(BUCKET_TIME, bucket_name);
+        int res = hashmap_get(METRICS_BUCKETS, bucket_name, (void**)&bm);
+        hashmap_delete(METRICS_BUCKETS, bucket_name);
         // It's part of the socket read buf shoudn't be freed individually
         // free(bucket_name);
     } else {
         // Make a new metrics object
+        bm = malloc(sizeof(metrics_bucket));
         bm->time = NULL;
         metrics *m_new = malloc(sizeof(metrics));
         init_metrics(GLOBAL_CONFIG->timer_eps, (double*)&QUANTILES, NUM_QUANTILES,
@@ -290,7 +289,7 @@ void flush_interval_trigger(char *bucket_name) {
 void final_flush() {
     // Get the last set of metrics
     // XXX Handle buckets
-    bucket_metrics *bm = malloc(sizeof(bucket_metrics));
+    metrics_bucket *bm = malloc(sizeof(metrics_bucket));
     bm->metrics = GLOBAL_METRICS;
     bm->time = NULL;
     GLOBAL_METRICS = NULL;
@@ -362,6 +361,7 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
     // Look for the next command line
     char *buf, *key, *val_str, *type_str, *sample_str, *endptr, *bucket;
     metric_type type;
+    metrics_bucket *bm;
     metrics *m;
     int buf_len, should_free, status, i, after_len, bucket_len;
     double val, sample_rate;
@@ -425,25 +425,25 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
 
         // Handle START_BUCKET & END_BUCKET commands
         if (type == START_BUCKET) {
-            int res = hashmap_get(METRIC_BUCKETS, buf, (void**)&m);
+            bm = malloc(sizeof(metrics_bucket));
+            int res = hashmap_get(METRICS_BUCKETS, buf, (void**)&bm);
             // Bucket already exists
             if (res == 0) {
                 syslog(LOG_WARNING, "Got START_BUCKET for an existing bucket: %s, ignoring...", buf);
                 goto END_LOOP;
             }
-            m = malloc(sizeof(metrics));
+            bm->metrics = malloc(sizeof(metrics));
             res = init_metrics(GLOBAL_CONFIG->timer_eps, (double*)&QUANTILES, NUM_QUANTILES,
-                    GLOBAL_CONFIG->histograms, GLOBAL_CONFIG->set_precision, m);
+                    GLOBAL_CONFIG->histograms, GLOBAL_CONFIG->set_precision, bm->metrics);
             assert(res == 0);
-            hashmap_put(METRIC_BUCKETS, buf, m);
-            time_t *bucket_time = malloc(sizeof(time_t));
-            *bucket_time = (time_t)val;
-            hashmap_put(BUCKET_TIME, buf, bucket_time);
+            bm->time = malloc(sizeof(time_t));
+            *(bm->time) = (time_t)val;
+            hashmap_put(METRICS_BUCKETS, buf, bm);
             goto END_LOOP;
         }
 
         if (type == END_BUCKET) {
-            int res = hashmap_get(METRIC_BUCKETS, buf, (void**)&m);
+            int res = hashmap_get(METRICS_BUCKETS, buf, (void**)&bm);
             // Bucket already exists
             if (res == -1) {
                 syslog(LOG_WARNING, "Bucket doesn't exist hence can't flush it: %s", buf);
@@ -470,17 +470,16 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
 
         // XXX:
         //  1. Support Binary Protocol
-        //  2. Handle final flush of buckets
-        //  3. On HUP or USR1 output the number of buckets and their size
-        //      3.1 May be HUP can be used for shedding the buckets off
+        //  2. May be HUP can be used for shedding the buckets off
         // Choose bucket based on flags
         if (type != START_BUCKET && type != END_BUCKET && !buffer_after_terminator(type_str, after_len, '>', &bucket, &bucket_len)) {
-            int res = hashmap_get(METRIC_BUCKETS, bucket, (void**)&m);
+            int res = hashmap_get(METRICS_BUCKETS, bucket, (void**)&bm);
             // Bucket doesn't exist
             if (res == -1) {
                 syslog(LOG_WARNING, "Couldn't find the bucket to update: %s", bucket);
                 goto END_LOOP;
             }
+            m = bm->metrics;
         } else {
             m = GLOBAL_METRICS;
         }
