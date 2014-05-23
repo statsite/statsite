@@ -15,7 +15,9 @@ typedef enum {
     COUNTER,
     TIMER,
     SET,
-    GAUGE_DELTA
+    GAUGE_DELTA,
+    START_BUCKET,
+    END_BUCKET
 } metric_type;
 
 typedef struct key_val {
@@ -48,6 +50,11 @@ typedef struct {
     radix_tree *histograms; // Radix tree with histogram configs
     unsigned char set_precision; // The precision for sets
 } metrics;
+
+typedef struct {
+    time_t *time;
+    metrics *metrics;
+} bucket_metrics;
 
 typedef int(*metric_callback)(void *data, metric_type type, char *name, void *val);
 

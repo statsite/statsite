@@ -325,7 +325,7 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
  */
 static void handle_flush_event(ev_timer *watcher, int revents) {
     // Inform the connection handler of the timeout
-    flush_interval_trigger();
+    flush_interval_trigger(NULL);
 }
 
 

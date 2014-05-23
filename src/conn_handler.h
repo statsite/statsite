@@ -2,6 +2,7 @@
 #define CONN_HANDLER_H
 #include "config.h"
 #include "networking.h"
+#include "hashmap.h"
 
 /**
  * This structure is used to communicate
@@ -12,6 +13,11 @@ typedef struct {
     statsite_config *config;     // Global configuration
     statsite_conn_info *conn;    // Opaque handle into the networking stack
 } statsite_conn_handler;
+
+/** Bucket Support **/
+hashmap *METRIC_BUCKETS;
+hashmap *BUCKET_TIME;
+int bucket_stats_cb(void *data, const char *key, void *value);
 
 /**
  * Invoked to initialize the conn handler layer.
