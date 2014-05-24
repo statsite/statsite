@@ -65,7 +65,13 @@ static statsite_config *GLOBAL_CONFIG;
  */
 int bucket_stats_cb(void *data, const char *key, void *value) {
     metrics_bucket *bm = (metrics_bucket *)value;
-    syslog(LOG_INFO, "Bucket: %s, Timestamp: %lld", key, *(long long *)bm->time);
+    syslog(LOG_INFO, "Bucket: %s, Timestamp: %lld, Creation Time: %lld. With following Clients:", key,
+            *(long long *)bm->time, *(long long *)bm->creation_time);
+    hashmap_iter(bm->clients,bucket_clients_cb, NULL);
+    return 0;
+}
+int bucket_clients_cb(void *data, const char *key, void *value) {
+    syslog(LOG_INFO, ">>> client: %s", key);
     return 0;
 }
 
@@ -229,7 +235,7 @@ static void* flush_thread(void *arg) {
     metrics_bucket *bm = arg;
     struct timeval tv;
 
-    if (bm->time != NULL) {
+    if (!bm->for_global) {
         tv.tv_sec = (time_t)*(bm->time);
     } else {
         // Get the current time
@@ -246,35 +252,22 @@ static void* flush_thread(void *arg) {
     }
 
     // Cleanup
-    if (bm->time != NULL) {
-        free(bm->time);
-    }
-    destroy_metrics(bm->metrics);
-    free(bm->metrics);
-    free(bm);
+    free_metrics_bucket(bm);
 }
 
 /**
  * Invoked to when we've reached the flush interval timeout
  */
-void flush_interval_trigger(char *bucket_name) {
-    metrics_bucket *bm;
-    if (bucket_name != NULL) {
-        int res = hashmap_get(METRICS_BUCKETS, bucket_name, (void**)&bm);
-        hashmap_delete(METRICS_BUCKETS, bucket_name);
-        // It's part of the socket read buf shoudn't be freed individually
-        // free(bucket_name);
-    } else {
-        // Make a new metrics object
-        bm = malloc(sizeof(metrics_bucket));
-        bm->time = NULL;
-        metrics *m_new = malloc(sizeof(metrics));
-        init_metrics(GLOBAL_CONFIG->timer_eps, (double*)&QUANTILES, NUM_QUANTILES,
-                GLOBAL_CONFIG->histograms, GLOBAL_CONFIG->set_precision, m_new);
+void flush_interval_trigger() {
+    // Make metrics_bucket for GLOBAL_METRICS
+    metrics_bucket *bm = create_metrics_bucket(1);
+    // Make a new metrics object
+    metrics *m_new = malloc(sizeof(metrics));
+    init_metrics(GLOBAL_CONFIG->timer_eps, (double*)&QUANTILES, NUM_QUANTILES,
+            GLOBAL_CONFIG->histograms, GLOBAL_CONFIG->set_precision, m_new);
 
-        bm->metrics = GLOBAL_METRICS;
-        GLOBAL_METRICS = m_new;
-    }
+    bm->metrics = GLOBAL_METRICS;
+    GLOBAL_METRICS = m_new;
 
     // Start a flush thread
     pthread_t thread;
@@ -288,10 +281,8 @@ void flush_interval_trigger(char *bucket_name) {
  */
 void final_flush() {
     // Get the last set of metrics
-    // XXX Handle buckets
-    metrics_bucket *bm = malloc(sizeof(metrics_bucket));
+    metrics_bucket *bm = create_metrics_bucket(1);
     bm->metrics = GLOBAL_METRICS;
-    bm->time = NULL;
     GLOBAL_METRICS = NULL;
 
     // Start a flush thread
@@ -300,6 +291,60 @@ void final_flush() {
 
     // Wait for the thread to finish
     pthread_join(thread, NULL);
+    // Flush all the buckets
+    hashmap_iter(METRICS_BUCKETS, flush_bucket_cb, NULL);
+}
+
+/**
+ * Use this to free metrics_bucket
+ */
+void free_metrics_bucket(metrics_bucket *bm) {
+    if (!bm->for_global) {
+        free(bm->time);
+        free(bm->creation_time);
+        hashmap_destroy(bm->clients);
+    }
+    destroy_metrics(bm->metrics);
+    free(bm->metrics);
+    free(bm);
+}
+
+metrics_bucket* create_metrics_bucket(int for_global) {
+    metrics_bucket *bm = malloc(sizeof(metrics_bucket));
+    struct timeval tv;
+    if (for_global) {
+        bm->for_global = 1;
+        return bm;
+    } else {
+        bm->metrics = malloc(sizeof(metrics));
+        hashmap_init(0, &(bm->clients));
+        init_metrics(GLOBAL_CONFIG->timer_eps, (double*)&QUANTILES, NUM_QUANTILES,
+                GLOBAL_CONFIG->histograms, GLOBAL_CONFIG->set_precision, bm->metrics);
+        bm->time = malloc(sizeof(time_t));
+        gettimeofday(&tv, NULL);
+        bm->creation_time = malloc(sizeof(time_t));
+        *(bm->creation_time) = tv.tv_sec;
+        bm->for_global = 0;
+    }
+    return bm;
+}
+
+/** Called by hashmap_iter in final_flush for
+ * flushing all the buckets
+ */
+int flush_bucket_cb(void *data, const char *key, void *value) {
+    metrics_bucket *bm = (metrics_bucket *)value;
+    syslog(LOG_INFO, "Flushing Bucket: %s with Timestamp: %lld Created at: %lld", key,
+            *(long long *)bm->time, *(long long *)bm->creation_time);
+    hashmap_delete(METRICS_BUCKETS, (char *)key);
+
+    // Start a flush thread
+    pthread_t thread;
+    pthread_create(&thread, NULL, flush_thread, bm);
+
+    // Wait for the thread to finish
+    pthread_join(thread, NULL);
+    return 0;
 }
 
 
@@ -359,7 +404,9 @@ static double str2double(const char *s, char **end) {
  */
 static int handle_ascii_client_connect(statsite_conn_handler *handle) {
     // Look for the next command line
-    char *buf, *key, *val_str, *type_str, *sample_str, *endptr, *bucket;
+    void *ignored;
+    char *buf, *key, *val_str, *type_str, *sample_str, *endptr, *bucket, *client_str;
+    char *client_received = NULL;
     metric_type type;
     metrics_bucket *bm;
     metrics *m;
@@ -425,31 +472,43 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
 
         // Handle START_BUCKET & END_BUCKET commands
         if (type == START_BUCKET) {
-            bm = malloc(sizeof(metrics_bucket));
+            if (!buffer_after_terminator(type_str, after_len, '|', &client_str, &after_len)) {
+                client_received = client_str;
+            }
             int res = hashmap_get(METRICS_BUCKETS, buf, (void**)&bm);
             // Bucket already exists
             if (res == 0) {
-                syslog(LOG_WARNING, "Got START_BUCKET for an existing bucket: %s, ignoring...", buf);
-                goto END_LOOP;
+                if (client_received) {
+                    if (!hashmap_get(bm->clients, client_received, (void **)&ignored)) {
+                        syslog(LOG_WARNING, "Got START_BUCKET for an existing bucket: %s, from existing client: %s, ignoring...", buf, client_received);
+                        goto END_LOOP;
+                    } else {
+                        hashmap_put(bm->clients, client_received, NULL);
+                        goto END_LOOP;
+                    }
+                } else {
+                    syslog(LOG_WARNING, "Got START_BUCKET for an existing bucket: %s, ignoring...", buf);
+                    goto END_LOOP;
+                }
             }
-            bm->metrics = malloc(sizeof(metrics));
-            res = init_metrics(GLOBAL_CONFIG->timer_eps, (double*)&QUANTILES, NUM_QUANTILES,
-                    GLOBAL_CONFIG->histograms, GLOBAL_CONFIG->set_precision, bm->metrics);
-            assert(res == 0);
-            bm->time = malloc(sizeof(time_t));
+            bm = create_metrics_bucket(0);
             *(bm->time) = (time_t)val;
             hashmap_put(METRICS_BUCKETS, buf, bm);
+            if (client_received) hashmap_put(bm->clients, client_received, NULL);
             goto END_LOOP;
         }
 
         if (type == END_BUCKET) {
             int res = hashmap_get(METRICS_BUCKETS, buf, (void**)&bm);
-            // Bucket already exists
+            // Bucket doesn't exist
             if (res == -1) {
                 syslog(LOG_WARNING, "Bucket doesn't exist hence can't flush it: %s", buf);
                 goto END_LOOP;
             }
-            flush_interval_trigger(buf);
+            if (!buffer_after_terminator(type_str, after_len, '|', &client_str, &after_len)) {
+                hashmap_delete(bm->clients, client_str);
+            }
+            if (hashmap_size(bm->clients) == 0) flush_bucket_cb(NULL, buf, (void *)bm);
             goto END_LOOP;
         }
 

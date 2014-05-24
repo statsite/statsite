@@ -20,9 +20,20 @@ hashmap *METRICS_BUCKETS;
 typedef struct {
     time_t *time;
     metrics *metrics;
+    time_t *creation_time;
+    hashmap *clients;
+    int for_global;
 } metrics_bucket;
 
+/** Print bucket stats */
 int bucket_stats_cb(void *data, const char *key, void *value);
+
+/** Flush respective bucket */
+int flush_bucket_cb(void *data, const char *key, void *value);
+int bucket_clients_cb(void *data, const char *key, void *value);
+
+void free_metrics_bucket();
+metrics_bucket* create_metrics_bucket(int);
 
 /**
  * Invoked to initialize the conn handler layer.
