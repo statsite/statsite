@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include "radix.h"
 
+
 typedef enum {
     UNKNOWN,
     KEY_VAL,
@@ -12,7 +13,9 @@ typedef enum {
     COUNTER,
     TIMER,
     SET,
-    GAUGE_DELTA
+    GAUGE_DELTA,
+    START_BUCKET,
+    END_BUCKET
 } metric_type;
 
 #define METRIC_TYPES 7

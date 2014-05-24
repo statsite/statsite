@@ -101,6 +101,14 @@ void signal_handler(int signum) {
     syslog(LOG_WARNING, "Received signal [%s]! Exiting...", strsignal(signum));
 }
 
+/**
+ * USR1 signal handler
+ */
+void usr1_signal_handler(int signum) {
+    syslog(LOG_WARNING, "Received [%s]! Here are the buckets that we currently have:", strsignal(signum));
+    hashmap_iter(METRICS_BUCKETS, bucket_stats_cb, NULL);
+}
+
 
 /**
  * Writes the pid to the configured pidfile
@@ -217,6 +225,7 @@ int main(int argc, char **argv) {
     signal(SIGHUP, SIG_IGN);        // Ignore SIG_IGN
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
+    signal(SIGUSR1, usr1_signal_handler);
 
     // Join the networking loop, blocks until exit
     enter_networking_loop(netconf, &SHOULD_RUN);
