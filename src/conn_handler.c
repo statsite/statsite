@@ -483,6 +483,7 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
                         syslog(LOG_WARNING, "Got START_BUCKET for an existing bucket: %s, from existing client: %s, ignoring...", buf, client_received);
                         goto END_LOOP;
                     } else {
+                        syslog(LOG_DEBUG, "Got START_BUCKET for bucket: %s, from new client: %s", buf, client_received);
                         hashmap_put(bm->clients, client_received, NULL);
                         goto END_LOOP;
                     }
@@ -506,6 +507,7 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
                 goto END_LOOP;
             }
             if (!buffer_after_terminator(type_str, after_len, '|', &client_str, &after_len)) {
+                syslog(LOG_DEBUG, "Got END_BUCKET for bucket: %s, from client: %s", buf, client_str);
                 hashmap_delete(bm->clients, client_str);
             }
             if (hashmap_size(bm->clients) == 0) flush_bucket_cb(NULL, buf, (void *)bm);
