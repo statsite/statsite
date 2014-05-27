@@ -29,8 +29,8 @@ mkdir -vp $RPM_BUILD_ROOT/etc/init.d
 mkdir -vp $RPM_BUILD_ROOT/etc/%{name}
 mkdir -vp $RPM_BUILD_ROOT/usr/libexec/%{name}
 install -m 755 statsite $RPM_BUILD_ROOT/usr/sbin
-install -m 755 statsite.initscript $RPM_BUILD_ROOT/etc/init.d/statsite
-install -m 644 statsite.conf.example $RPM_BUILD_ROOT/etc/%{name}/statsite.conf
+install -m 755 rpm/statsite.initscript $RPM_BUILD_ROOT/etc/init.d/statsite
+install -m 644 rpm/statsite.conf.example $RPM_BUILD_ROOT/etc/%{name}/statsite.conf
 cp -a sinks $RPM_BUILD_ROOT/usr/libexec/%{name}
 
 %clean
@@ -54,7 +54,7 @@ exit 0
 %doc LICENSE
 %doc CHANGELOG.md
 %doc README.md
-%doc statsite.conf.example
+%doc rpm/statsite.conf.example
 %config /etc/%{name}/statsite.conf
 %attr(755, root, root) /usr/sbin/statsite
 %attr(755, root, root) /etc/init.d/statsite
