@@ -233,7 +233,7 @@ static int config_callback(void* user, const char* section, const char* name, co
     // Unknown parameter?
     } else {
         // Log it, but ignore
-        syslog(LOG_NOTICE, "Unrecognized config parameter: %s", value);
+        syslog(LOG_NOTICE, "Unrecognized config parameter: %s", name);
     }
 
     // Success

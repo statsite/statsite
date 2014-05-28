@@ -17,7 +17,7 @@ import os
 #
 # Use with the following stream command:
 #
-#  stream_command = python sinks/librato.py librato.ini
+#  stream_cmd = python sinks/librato.py librato.ini
 #
 # The Librato sink takes an INI format configuration file as a single
 # argument. The following is an example configuration:
@@ -233,7 +233,7 @@ class LibratoStore(object):
                 self.logger.warning('Error when sending metrics Librato (%s)' % (error.reason))
             elif hasattr(error, 'code'):
                 self.logger.warning('Error when sending metrics Librato (%s)' % (error.code))
-            else:   
+            else:
                 self.logger.warning('Error when sending metrics Librato and I dunno why')
 
     def flush(self):
