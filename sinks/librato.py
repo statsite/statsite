@@ -162,10 +162,10 @@ class LibratoStore(object):
 
         # Match the source regex
         if self.source_re != None:
-            m = self.source_re.match(name)
+            m = self.source_re.search(name)
             if m != None:
                 source = m.group(1)
-                name = name[0:m.pos] + name[m.pos + len(m.group(0)):]
+                name = name[0:m.start(0)] + name[m.end(0):]
 
         subf = None
         if istimer:
