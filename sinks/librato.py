@@ -69,19 +69,8 @@ class LibratoStore(object):
         # Limit our payload sizes
         self.max_metrics_payload = 500
 
-        self.timer_re = re.compile("^timers\.")
         self.type_re = re.compile("^(kv|timers|counts|gauges|sets)\.(.+)$")
 
-        self.sfx_map = {
-            'sum': 'sum',
-            'sum_sq' : 'sum_squares',
-            'count' : 'count',
-            'stdev' : None,
-            'lower' : 'min',
-            'upper' : 'max',
-            'mean' : None
-            }
-        self.sfx_re = re.compile("(.+)\.(sum|sum_sq|count|stdev|lower|upper|mean)$")
         self.sanitize_re = re.compile("[^-A-Za-z0-9.:_]")
 
     def parse_conf(self, conffile):
@@ -136,17 +125,6 @@ class LibratoStore(object):
         else:
             self.prefix = None
 
-    def split_timer_metric(self, name):
-        m = self.sfx_re.match(name)
-        if m != None:
-            if self.sfx_map[m.group(2)] != None:
-                return m.group(1), self.sfx_map[m.group(2)]
-            else:
-                # These we drop
-                return None, None
-        else:
-            return name, None
-
     def sanitize(self, name):
         return self.sanitize_re.sub("_", name)
 
@@ -157,7 +135,6 @@ class LibratoStore(object):
 
         value = float(value)
         source = self.source
-        istimer = self.timer_re.match(key) != None
         name = self.type_re.match(key).group(2)
 
         # Match the source regex
@@ -166,12 +143,6 @@ class LibratoStore(object):
             if m != None:
                 source = m.group(1)
                 name = name[0:m.start(0)] + name[m.end(0):]
-
-        subf = None
-        if istimer:
-            name, subf = self.split_timer_metric(name)
-        if subf == None:
-            subf = 'value'
 
         # Bail if skipping
         if name == None:
@@ -187,12 +158,11 @@ class LibratoStore(object):
         k = "%s\t%s" % (name, source)
         if k not in self.gauges:
             self.gauges[k] = {
-                'name' : name,
-                'source' : source,
-                'measure_time' : ts,
+                'name': name,
+                'source': source,
+                'measure_time': ts,
+                'value': value,
                 }
-
-        self.gauges[k][subf] = value
 
     def build(self, metrics):
         """
