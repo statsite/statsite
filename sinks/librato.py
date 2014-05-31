@@ -29,6 +29,7 @@ import os
 # email = john@example.com
 # token = 02ac4003c4fcd11bf9cee34e34263155dc7ba1906c322d167db6ab4b2cd2082b
 # source_regex = ^([^-]+)--
+# ignore_metric_regex = ^timers\.(.+)\.(sum_sq|stdev)$
 # floor_time_secs = 60
 #
 # Options:
@@ -115,6 +116,18 @@ class LibratoStore(object):
         else:
             self.source_re = None
 
+        if config.has_option(sect, 'ignore_metric_regex'):
+            reg = config.get(sect, 'ignore_metric_regex')
+
+            # Strip /'s
+            if len(reg) > 2 and reg[0] == '/' and \
+               reg[len(reg) - 1] == "/":
+                reg = reg[1:len(reg)-1]
+
+            self.ignore_metric_re = re.compile(reg)
+        else:
+            self.ignore_metric_re = None
+
         if config.has_option(sect, 'floor_time_secs'):
             self.floor_time_secs = config.getint(sect, 'floor_time_secs')
         else:
@@ -143,6 +156,11 @@ class LibratoStore(object):
             if m != None:
                 source = m.group(1)
                 name = name[0:m.start(0)] + name[m.end(0):]
+
+        if self.ignore_metric_re != None:
+            m = self.ignore_metric_re.search(key)
+            if m != None:
+                name = None
 
         # Bail if skipping
         if name == None:
