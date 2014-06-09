@@ -5,7 +5,6 @@ import sys
 import os
 import sinks.librato
 import json
-import pprint
 import tempfile
 import time
 
@@ -16,9 +15,8 @@ except ImportError:
     sys.exit(1)
 
 
-class TestLibrato(object):
-    def setup_method(self, method):
-        self.sample_output = """\
+def build_librato(options={}):
+    options.setdefault("statsite_output", """\
 counts.active_sessions|1.000000|1401577507
 timers.query.sum|1017.000000|1401577507
 timers.query.sum_sq|1034289.000000|1401577507
@@ -31,20 +29,35 @@ timers.query.median|1017.000000|1401577507
 timers.query.p95|1017.000000|1401577507
 timers.query.p99|1017.000000|1401577507
 timers.query.rate|16.950000|1401577507\
-        """
+    """)
 
-        f = tempfile.NamedTemporaryFile(delete=False)
-        f.write("""\
+    f = tempfile.NamedTemporaryFile(delete=False)
+    f.write(build_librato_config(options))
+    f.close()
+    librato = sinks.librato.LibratoStore(f.name)
+    os.unlink(f.name)
+
+    librato.build(options["statsite_output"].splitlines())
+    return librato
+
+
+def build_librato_config(options):
+    config = """\
 [librato]
 email = john@example.com
 token = 02ac4003c4fcd11bf9cee34e34263155dc7ba1906c322d167db6ab4b2cd2082b
-source = localhost
-        """)
-        f.close()
-        self.librato = sinks.librato.LibratoStore(f.name)
-        os.unlink(f.name)
+source = localhost\
+    """
 
-        self.librato.build(self.sample_output.splitlines())
+    if "source_regex" in options:
+        config += "\nsource_regex = %s" % (options["source_regex"])
+
+    return config
+
+
+class TestLibrato(object):
+    def setup_method(self, method):
+        self.librato = build_librato()
 
     def test_gauge_specific_params_on_timers(self):
         expected_output = {
@@ -67,3 +80,18 @@ source = localhost
             "value":        1.0,
         }
         assert expected_output == self.librato.gauges["active_sessions\tlocalhost"]
+
+    def test_source_regex_can_match_more_than_beginning_of_metric(self):
+        self.librato = build_librato({
+            "statsite_output": "counts.baby-animals.source__puppy-cam-1__.active_sessions|1.000000|1401577507",
+            "source_regex": "\.source__(.*?)__",
+        })
+
+        expected_output = {
+            "name":         "baby-animals.active_sessions",
+            "source":       "puppy-cam-1",
+            "measure_time": 1401577507,
+            "value":        1.0,
+        }
+
+        assert expected_output == self.librato.gauges["baby-animals.active_sessions\tpuppy-cam-1"]
