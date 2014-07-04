@@ -85,7 +85,7 @@ available usually through a system package manager. Steps:
 
     $ git clone https://github.com/armon/statsite.git
     $ cd statsite
-    $ pip install SCons  # Uses the Scons build system, may not be necessary
+    $ pip install --egg SCons  # Uses the Scons build system, may not be necessary
     $ make
     $ ./statsite
 
