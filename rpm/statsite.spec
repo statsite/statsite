@@ -60,6 +60,7 @@ exit 0
 %attr(755, root, root) /etc/init.d/statsite
 %dir /usr/libexec/statsite
 %dir /usr/libexec/statsite/sinks
+%attr(755, root, root) /usr/libexec/statsite/sinks/__init__.py
 %attr(755, root, root) /usr/libexec/statsite/sinks/binary_sink.py
 %attr(755, root, root) /usr/libexec/statsite/sinks/librato.py
 %attr(755, root, root) /usr/libexec/statsite/sinks/statsite_json_sink.rb
@@ -68,6 +69,9 @@ exit 0
 %attr(755, root, root) /usr/libexec/statsite/sinks/graphite.py
 
 %changelog
+* Fri Jul 18 2014 Gary Richardson <gary.richardson@gmail.com>
+- added missing __init__.py to spec file
+- fixed makefile for building RPMS
 * Tue May 20 2014 Marcelo Teixeira Monteiro <marcelotmonteiro@gmail.com>
 - Added initscript and config file
 - small improvements
