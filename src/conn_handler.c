@@ -45,8 +45,8 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle);
 static int buffer_after_terminator(char *buf, int buf_len, char terminator, char **after_term, int *after_len);
 
 /* These are the quantiles we track */
-static const double QUANTILES[] = {0.5, 0.95, 0.99};
-static const int NUM_QUANTILES = 3;
+static const double QUANTILES[] = {0.5, 0.90, 0.95, 0.99};
+static const int NUM_QUANTILES = 4;
 
 // This is the magic byte that indicates we are handling
 // a binary command, instead of an ASCII command. We use
@@ -123,6 +123,7 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
             STREAM("%s%s.count|%lld|%lld\n", prefix, name, timer_count(&t->tm));
             STREAM("%s%s.stdev|%f|%lld\n", prefix, name, timer_stddev(&t->tm));
             STREAM("%s%s.median|%f|%lld\n", prefix, name, timer_query(&t->tm, 0.5));
+            STREAM("%s%s.p90|%f|%lld\n", prefix, name, timer_query(&t->tm, 0.90));
             STREAM("%s%s.p95|%f|%lld\n", prefix, name, timer_query(&t->tm, 0.95));
             STREAM("%s%s.p99|%f|%lld\n", prefix, name, timer_query(&t->tm, 0.99));
             STREAM("%s%s.rate|%f|%lld\n", prefix, name, timer_sum(&t->tm) / GLOBAL_CONFIG->flush_interval);
@@ -203,6 +204,7 @@ static int stream_formatter_bin(FILE *pipe, void *data, metric_type type, char *
             STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MIN, timer_min(&t->tm));
             STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MAX, timer_max(&t->tm));
             STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 50, timer_query(&t->tm, 0.5));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 90, timer_query(&t->tm, 0.90));
             STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 95, timer_query(&t->tm, 0.95));
             STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 99, timer_query(&t->tm, 0.99));
 
