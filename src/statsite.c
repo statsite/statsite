@@ -89,6 +89,7 @@ void setup_syslog() {
     if (isatty(1)) {
         flags |= LOG_PERROR;
     }
+    errno = 0
     openlog("statsite", flags, LOG_LOCAL0);
 }
 
