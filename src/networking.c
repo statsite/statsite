@@ -515,13 +515,14 @@ static void invoke_event_handler(ev_io *watcher, int ready_events) {
     // Read in the data, and close on issues
     conn_info *conn = watcher->data;
     if (read_client_data(conn)) {
-        close_client_connection(conn);
+        if (watcher->fd != STDIN_FILENO)
+            close_client_connection(conn);
         return;
     }
 
     // Invoke the connection handler, and close connection on error
     statsite_conn_handler handle = {data->netconf->config, watcher->data};
-    if (handle_client_connect(&handle))
+    if (handle_client_connect(&handle) && watcher->fd != STDIN_FILENO)
         close_client_connection(conn);
 }
 
