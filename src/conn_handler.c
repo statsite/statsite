@@ -293,13 +293,7 @@ void final_flush() {
     // Get the last set of metrics
     metrics *old = GLOBAL_METRICS;
     GLOBAL_METRICS = NULL;
-
-    // Start a flush thread
-    pthread_t thread;
-    start_thread(&thread, flush_thread, old);
-
-    // Wait for the thread to finish
-    pthread_join(thread, NULL);
+    flush_thread(old);
 }
 
 
