@@ -254,19 +254,6 @@ static void* flush_thread(void *arg) {
 }
 
 /**
- * Start a new thread with all signals blocked.
- */
-static void start_thread(pthread_t *thread, void *(*start)(void *), void *arg) {
-    sigset_t oldset;
-    sigset_t newset;
-    sigfillset(&newset);
-    pthread_sigmask(SIG_BLOCK, &newset, &oldset);
-    // FIXME(bnoordhuis) Handle EAGAIN when hitting RLIMIT_NPROC.
-    pthread_create(thread, NULL, start, arg);
-    pthread_sigmask(SIG_SETMASK, &oldset, NULL);
-}
-
-/**
  * Invoked to when we've reached the flush interval timeout
  */
 void flush_interval_trigger() {
@@ -281,8 +268,22 @@ void flush_interval_trigger() {
 
     // Start a flush thread
     pthread_t thread;
-    start_thread(&thread, flush_thread, old);
-    pthread_detach(thread);
+    sigset_t oldset;
+    sigset_t newset;
+    sigfillset(&newset);
+    pthread_sigmask(SIG_BLOCK, &newset, &oldset);
+    int err = pthread_create(&thread, NULL, flush_thread, old);
+    pthread_sigmask(SIG_SETMASK, &oldset, NULL);
+
+    if (err == 0) {
+        pthread_detach(thread);
+        return;
+    }
+
+    syslog(LOG_WARNING, "Failed to spawn flush thread: %s", strerror(err));
+    GLOBAL_METRICS = old;
+    destroy_metrics(m);
+    free(m);
 }
 
 /**
