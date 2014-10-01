@@ -532,10 +532,10 @@ static void invoke_event_handler(ev_io *watcher, int ready_events) {
  * stack. This method blocks indefinitely until the
  * network stack is shutdown.
  * @arg netconf The configuration for the networking stack.
- * @arg should_run A reference to a variable that is set to 0 when
- * shutdown should be started
+ * @arg signum A reference to a variable that is set when
+ * a signal is caught and shutdown should be started
  */
-void enter_networking_loop(statsite_networking *netconf, volatile int *should_run) {
+void enter_networking_loop(statsite_networking *netconf, volatile int *signum) {
     // Allocate our user data
     worker_ev_userdata data;
     data.netconf = netconf;
@@ -544,7 +544,7 @@ void enter_networking_loop(statsite_networking *netconf, volatile int *should_ru
     ev_set_userdata(&data);
 
     // Run forever until we are told to halt
-    while (likely(*should_run)) {
+    while (likely(*signum == 0)) {
         ev_run(EVRUN_ONCE);
     }
     return;

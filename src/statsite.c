@@ -21,11 +21,10 @@
 #include "networking.h"
 
 /**
- * By default we should run. Our signal
- * handler updates this variable to allow the
- * program to gracefully terminate.
+ * Our signal handler updates this variable to
+ * allow the program to gracefully terminate.
  */
-static volatile int SHOULD_RUN = 1;
+static volatile int SIGNUM;
 
 /**
  * Prints our usage to stderr
@@ -99,12 +98,7 @@ void setup_syslog() {
  * when we get signals such as SIGINT, SIGTERM.
  */
 void signal_handler(int signum) {
-    if (!SHOULD_RUN) {
-        syslog(LOG_WARNING, "Received signal [%s] while exiting! Terminating", strsignal(signum));
-        exit(1);
-    }
-    SHOULD_RUN = 0;  // Stop running now
-    syslog(LOG_WARNING, "Received signal [%s]! Exiting...", strsignal(signum));
+    SIGNUM = signum;
 }
 
 
@@ -225,7 +219,11 @@ int main(int argc, char **argv) {
     signal(SIGTERM, signal_handler);
 
     // Join the networking loop, blocks until exit
-    enter_networking_loop(netconf, &SHOULD_RUN);
+    enter_networking_loop(netconf, &SIGNUM);
+
+    if (SIGNUM != 0) {
+        syslog(LOG_WARNING, "Received signal [%s]! Exiting...", strsignal(SIGNUM));
+    }
 
     // Begin the shutdown/cleanup
     shutdown_networking(netconf);
