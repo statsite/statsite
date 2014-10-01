@@ -21,7 +21,7 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out);
  * @arg should_run A reference to a variable that is set to 0 when
  * shutdown should be started
  */
-void enter_networking_loop(statsite_networking *netconf, int *should_run);
+void enter_networking_loop(statsite_networking *netconf, volatile int *should_run);
 
 /**
  * Shuts down all the connections

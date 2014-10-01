@@ -25,7 +25,7 @@
  * handler updates this variable to allow the
  * program to gracefully terminate.
  */
-static int SHOULD_RUN = 1;
+static volatile int SHOULD_RUN = 1;
 
 /**
  * Prints our usage to stderr
