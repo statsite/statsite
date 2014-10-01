@@ -4,6 +4,7 @@
 #include <regex.h>
 #include <assert.h>
 #include <pthread.h>
+#include <signal.h>
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <math.h>
@@ -253,6 +254,19 @@ static void* flush_thread(void *arg) {
 }
 
 /**
+ * Start a new thread with all signals blocked.
+ */
+static void start_thread(pthread_t *thread, void *(*start)(void *), void *arg) {
+    sigset_t oldset;
+    sigset_t newset;
+    sigfillset(&newset);
+    pthread_sigmask(SIG_BLOCK, &newset, &oldset);
+    // FIXME(bnoordhuis) Handle EAGAIN when hitting RLIMIT_NPROC.
+    pthread_create(thread, NULL, start, arg);
+    pthread_sigmask(SIG_SETMASK, &oldset, NULL);
+}
+
+/**
  * Invoked to when we've reached the flush interval timeout
  */
 void flush_interval_trigger() {
@@ -267,7 +281,7 @@ void flush_interval_trigger() {
 
     // Start a flush thread
     pthread_t thread;
-    pthread_create(&thread, NULL, flush_thread, old);
+    start_thread(&thread, flush_thread, old);
     pthread_detach(thread);
 }
 
@@ -282,7 +296,7 @@ void final_flush() {
 
     // Start a flush thread
     pthread_t thread;
-    pthread_create(&thread, NULL, flush_thread, old);
+    start_thread(&thread, flush_thread, old);
 
     // Wait for the thread to finish
     pthread_join(thread, NULL);
