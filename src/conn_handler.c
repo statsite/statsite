@@ -4,6 +4,7 @@
 #include <regex.h>
 #include <assert.h>
 #include <pthread.h>
+#include <signal.h>
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <math.h>
@@ -267,8 +268,22 @@ void flush_interval_trigger() {
 
     // Start a flush thread
     pthread_t thread;
-    pthread_create(&thread, NULL, flush_thread, old);
-    pthread_detach(thread);
+    sigset_t oldset;
+    sigset_t newset;
+    sigfillset(&newset);
+    pthread_sigmask(SIG_BLOCK, &newset, &oldset);
+    int err = pthread_create(&thread, NULL, flush_thread, old);
+    pthread_sigmask(SIG_SETMASK, &oldset, NULL);
+
+    if (err == 0) {
+        pthread_detach(thread);
+        return;
+    }
+
+    syslog(LOG_WARNING, "Failed to spawn flush thread: %s", strerror(err));
+    GLOBAL_METRICS = old;
+    destroy_metrics(m);
+    free(m);
 }
 
 /**
@@ -279,13 +294,7 @@ void final_flush() {
     // Get the last set of metrics
     metrics *old = GLOBAL_METRICS;
     GLOBAL_METRICS = NULL;
-
-    // Start a flush thread
-    pthread_t thread;
-    pthread_create(&thread, NULL, flush_thread, old);
-
-    // Wait for the thread to finish
-    pthread_join(thread, NULL);
+    flush_thread(old);
 }
 
 
