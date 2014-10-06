@@ -193,7 +193,9 @@ options must exist in the `statsite` section of the INI file:
 
 * extended_counters : If enabled, the counter output is extended to include
   all the computed summary values. Otherwise, the counter is emitted as just
-  the sum value. Defaults to 0.
+  the sum value. Summary values include `mean`, `stdev`, `sum`, `sum_sq`,
+  `lower`, `upper`, and `rate`.
+  Defaults to 0.
 
 In addition to global configurations, statsite supports histograms
 as well. Histograms are configured one per section, and the INI
