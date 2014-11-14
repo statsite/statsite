@@ -123,6 +123,10 @@ static int name_to_facility(const char *val, int *result) {
         log_facility = LOG_LOCAL6;
     } else if (VAL_MATCH("local7")) {
         log_facility = LOG_LOCAL7;
+    } else if (VAL_MATCH("user")) {
+        log_facility = LOG_LOCAL7;
+    } else if (VAL_MATCH("daemon")) {
+        log_facility = LOG_LOCAL7;
     } else {
         log_facility = LOG_LOCAL0;
     }
@@ -269,7 +273,7 @@ static int config_callback(void* user, const char* section, const char* name, co
         config->prefixes[KEY_VAL] = strdup(value);
 
     // Copy the multi-case variables
-    } else if (NAME_MATCH("syslog_log_facility")) {
+    } else if (NAME_MATCH("log_facility")) {
         return name_to_facility(value, &config->syslog_log_facility);
     
     // Unknown parameter?
