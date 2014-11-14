@@ -112,6 +112,7 @@ Here is an example configuration file::
     port = 8125
     udp_port = 8125
     log_level = INFO
+    syslog_log_facility = local0
     flush_interval = 10
     timer_eps = 0.01
     set_eps = 0.02

@@ -82,14 +82,14 @@ int parse_cmd_line_args(int argc, char **argv, char **config_file) {
 /**
  * Initializes the syslog configuration
  */
-void setup_syslog() {
+void setup_syslog(int LOG_FACIL) {
     // If we are on a tty, log the errors out
     int flags = LOG_CONS|LOG_NDELAY|LOG_PID;
     if (isatty(1)) {
         flags |= LOG_PERROR;
     }
     errno = 0;
-    openlog("statsite", flags, LOG_LOCAL0);
+    openlog("statsite", flags, LOG_FACIL);
 }
 
 
@@ -127,8 +127,9 @@ int write_pidfile(char *pid_file, pid_t pid) {
 
 
 int main(int argc, char **argv) {
-    // Initialize syslog
-    setup_syslog();
+
+    // temporarily set the syslog facilty to main and init it
+    setup_syslog(LOG_USER);
 
     // Parse the command line
     char *config_file = NULL;
@@ -149,6 +150,12 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    // close the initial syslog
+    closelog();
+
+    // Initialize syslog with configured facility
+    setup_syslog(config->syslog_log_facility);
+    
     // Set prefixes for each message type
     if (prepare_prefixes(config)) {
         syslog(LOG_ERR, "Failed to get prefixes!");

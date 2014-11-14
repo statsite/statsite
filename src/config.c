@@ -32,6 +32,7 @@ static const statsite_config DEFAULT_CONFIG = {
     false,              // Do not parse stdin by default
     "DEBUG",            // DEBUG level
     LOG_DEBUG,
+    LOG_LOCAL0,         // Syslog logging facility
     0.01,               // Default 1% error
     "cat",              // Pipe to cat
     10,                 // Flush every 10 seconds
@@ -95,6 +96,43 @@ static int value_to_int(const char *val, int *result) {
  */
 static int value_to_double(const char *val, double *result) {
     return sscanf(val, "%lf", result);
+}
+
+/**
+* Attempts to convert a string log facility 
+* to an actual syslog log facility,
+* @arg val The string value
+* @arg result The destination for the result
+* @return 1 on success, 0 on error.
+*/
+static int name_to_facility(const char *val, int *result) {
+    int log_facility = LOG_LOCAL0;
+    if (VAL_MATCH("local0")) {
+        log_facility = LOG_LOCAL0;    
+    } else if (VAL_MATCH("local1")) {
+        log_facility = LOG_LOCAL1;
+    } else if (VAL_MATCH("local2")) {
+        log_facility = LOG_LOCAL2;
+    } else if (VAL_MATCH("local3")) {
+        log_facility = LOG_LOCAL3;
+    } else if (VAL_MATCH("local4")) {
+        log_facility = LOG_LOCAL4;
+    } else if (VAL_MATCH("local5")) {
+        log_facility = LOG_LOCAL5;
+    } else if (VAL_MATCH("local6")) {
+        log_facility = LOG_LOCAL6;
+    } else if (VAL_MATCH("local7")) {
+        log_facility = LOG_LOCAL7;
+    } else {
+        log_facility = LOG_LOCAL0;
+    }
+
+    if (errno == EINVAL) {
+        return 0;
+    }
+
+    *result = log_facility;
+    return 1;
 }
 
 /**
@@ -230,6 +268,10 @@ static int config_callback(void* user, const char* section, const char* name, co
     } else if (NAME_MATCH("kv_prefix")) {
         config->prefixes[KEY_VAL] = strdup(value);
 
+    // Copy the multi-case variables
+    } else if (NAME_MATCH("syslog_log_facility")) {
+        return name_to_facility(value, &config->syslog_log_facility);
+    
     // Unknown parameter?
     } else {
         // Log it, but ignore

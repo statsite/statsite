@@ -39,6 +39,7 @@ typedef struct {
     bool parse_stdin;
     char *log_level;
     int syslog_log_level;
+    int syslog_log_facility;
     double timer_eps;
     char *stream_cmd;
     int flush_interval;
