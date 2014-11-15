@@ -39,6 +39,8 @@ typedef struct {
     bool parse_stdin;
     char *log_level;
     int syslog_log_level;
+    char *log_facility;
+    int syslog_log_facility;
     double timer_eps;
     char *stream_cmd;
     int flush_interval;
@@ -83,6 +85,7 @@ int validate_config(statsite_config *config);
 
 // Configuration validation methods
 int sane_log_level(char *log_level, int *syslog_level);
+int sane_log_facility(char *log_facil, int *syslog_facility);
 int sane_timer_eps(double eps);
 int sane_flush_interval(int intv);
 int sane_histograms(histogram_config *config);

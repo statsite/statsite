@@ -32,6 +32,8 @@ static const statsite_config DEFAULT_CONFIG = {
     false,              // Do not parse stdin by default
     "DEBUG",            // DEBUG level
     LOG_DEBUG,
+    "local0",           // local0 logging facility
+    LOG_LOCAL0,         // Syslog logging facility
     0.01,               // Default 1% error
     "cat",              // Pipe to cat
     10,                 // Flush every 10 seconds
@@ -95,6 +97,47 @@ static int value_to_int(const char *val, int *result) {
  */
 static int value_to_double(const char *val, double *result) {
     return sscanf(val, "%lf", result);
+}
+
+/**
+* Attempts to convert a string log facility 
+* to an actual syslog log facility,
+* @arg val The string value
+* @arg result The destination for the result
+* @return 1 on success, 0 on error.
+*/
+static int name_to_facility(const char *val, int *result) {
+    int log_facility = LOG_LOCAL0;
+    if (VAL_MATCH("local0")) {
+        log_facility = LOG_LOCAL0;    
+    } else if (VAL_MATCH("local1")) {
+        log_facility = LOG_LOCAL1;
+    } else if (VAL_MATCH("local2")) {
+        log_facility = LOG_LOCAL2;
+    } else if (VAL_MATCH("local3")) {
+        log_facility = LOG_LOCAL3;
+    } else if (VAL_MATCH("local4")) {
+        log_facility = LOG_LOCAL4;
+    } else if (VAL_MATCH("local5")) {
+        log_facility = LOG_LOCAL5;
+    } else if (VAL_MATCH("local6")) {
+        log_facility = LOG_LOCAL6;
+    } else if (VAL_MATCH("local7")) {
+        log_facility = LOG_LOCAL7;
+    } else if (VAL_MATCH("user")) {
+        log_facility = LOG_LOCAL7;
+    } else if (VAL_MATCH("daemon")) {
+        log_facility = LOG_LOCAL7;
+    } else {
+        log_facility = LOG_LOCAL0;
+    }
+
+    if (errno == EINVAL) {
+        return 0;
+    }
+
+    *result = log_facility;
+    return 1;
 }
 
 /**
@@ -209,6 +252,8 @@ static int config_callback(void* user, const char* section, const char* name, co
     // Copy the string values
     } else if (NAME_MATCH("log_level")) {
         config->log_level = strdup(value);
+    } else if (NAME_MATCH("log_facility")) {
+        config->log_facility = strdup(value);
     } else if (NAME_MATCH("stream_cmd")) {
         config->stream_cmd = strdup(value);
     } else if (NAME_MATCH("pid_file")) {
@@ -230,6 +275,10 @@ static int config_callback(void* user, const char* section, const char* name, co
     } else if (NAME_MATCH("kv_prefix")) {
         config->prefixes[KEY_VAL] = strdup(value);
 
+    // Copy the multi-case variables
+    } else if (NAME_MATCH("log_facility")) {
+        return name_to_facility(value, &config->syslog_log_facility);
+    
     // Unknown parameter?
     } else {
         // Log it, but ignore
@@ -345,6 +394,39 @@ int sane_log_level(char *log_level, int *syslog_level) {
     return 0;
 }
 
+int sane_log_facility(char *log_facil, int *syslog_facility) {
+    #define FACIL_MATCH(facil) (strcasecmp(facil, log_facil) == 0)
+
+    if (FACIL_MATCH("local0")) {
+        *syslog_facility = LOG_LOCAL0;    
+    } else if (FACIL_MATCH("local0")) {
+        *syslog_facility = LOG_LOCAL0;    
+    } else if (FACIL_MATCH("local1")) {
+        *syslog_facility = LOG_LOCAL1;    
+    } else if (FACIL_MATCH("local2")) {
+        *syslog_facility = LOG_LOCAL2;    
+    } else if (FACIL_MATCH("local3")) {
+        *syslog_facility = LOG_LOCAL3;    
+    } else if (FACIL_MATCH("local4")) {
+        *syslog_facility = LOG_LOCAL4;    
+    } else if (FACIL_MATCH("local5")) {
+        *syslog_facility = LOG_LOCAL5;    
+    } else if (FACIL_MATCH("local6")) {
+        *syslog_facility = LOG_LOCAL6;    
+    } else if (FACIL_MATCH("local7")) {
+        *syslog_facility = LOG_LOCAL7;    
+    } else if (FACIL_MATCH("user")) {
+        *syslog_facility = LOG_USER;    
+    } else if (FACIL_MATCH("daemon")) {
+        *syslog_facility = LOG_DAEMON;    
+    } else {
+        syslog(LOG_ERR, "Invalid log facility!");
+        return 1;
+    }
+
+    return 0;
+}
+
 int sane_timer_eps(double eps) {
     if (eps>= 0.5) {
         syslog(LOG_ERR,
@@ -441,6 +523,7 @@ int validate_config(statsite_config *config) {
     int res = 0;
 
     res |= sane_log_level(config->log_level, &config->syslog_log_level);
+    res |= sane_log_facility(config->log_facility, &config->syslog_log_facility);
     res |= sane_timer_eps(config->timer_eps);
     res |= sane_flush_interval(config->flush_interval);
     res |= sane_histograms(config->hist_configs);

@@ -18,6 +18,7 @@ START_TEST(test_config_get_default)
     fail_unless(config.parse_stdin == false);
     fail_unless(strcmp(config.log_level, "DEBUG") == 0);
     fail_unless(config.syslog_log_level == LOG_DEBUG);
+    fail_unless(config.syslog_log_facility == LOG_LOCAL0);
     fail_unless(config.timer_eps == (double)1e-2);
     fail_unless(strcmp(config.stream_cmd, "cat") == 0);
     fail_unless(config.flush_interval == 10);
@@ -41,6 +42,7 @@ START_TEST(test_config_bad_file)
     fail_unless(config.parse_stdin == false);
     fail_unless(strcmp(config.log_level, "DEBUG") == 0);
     fail_unless(config.syslog_log_level == LOG_DEBUG);
+    fail_unless(config.syslog_log_facility == LOG_LOCAL0);
     fail_unless(config.timer_eps == (double)1e-2);
     fail_unless(strcmp(config.stream_cmd, "cat") == 0);
     fail_unless(config.flush_interval == 10);
@@ -67,6 +69,7 @@ START_TEST(test_config_empty_file)
     fail_unless(config.parse_stdin == false);
     fail_unless(strcmp(config.log_level, "DEBUG") == 0);
     fail_unless(config.syslog_log_level == LOG_DEBUG);
+    fail_unless(config.syslog_log_facility == LOG_LOCAL0);
     fail_unless(config.timer_eps == (double)1e-2);
     fail_unless(strcmp(config.stream_cmd, "cat") == 0);
     fail_unless(config.flush_interval == 10);
@@ -91,6 +94,7 @@ timer_eps = 0.005\n\
 set_eps = 0.03\n\
 stream_cmd = foo\n\
 log_level = INFO\n\
+log_facility = local3\n\
 daemonize = true\n\
 binary_stream = true\n\
 input_counter = foobar\n\
@@ -109,6 +113,7 @@ extended_counters = true\n";
     fail_unless(config.udp_port == 10001);
     fail_unless(config.parse_stdin == true);
     fail_unless(strcmp(config.log_level, "INFO") == 0);
+    fail_unless(strcmp(config.log_facility, "local3") == 0);
     fail_unless(config.timer_eps == (double)0.005);
     fail_unless(config.set_eps == (double)0.03);
     fail_unless(strcmp(config.stream_cmd, "foo") == 0);
@@ -181,6 +186,24 @@ START_TEST(test_sane_log_level)
     fail_unless(sane_log_level("critical", &log_lvl) == 0);
     fail_unless(sane_log_level("foo", &log_lvl) == 1);
     fail_unless(sane_log_level("BAR", &log_lvl) == 1);
+}
+END_TEST
+
+START_TEST(test_sane_log_facility)
+{
+    int log_facil;
+    fail_unless(sane_log_facility("local0", &log_facil) == 0);
+    fail_unless(sane_log_facility("local1", &log_facil) == 0);
+    fail_unless(sane_log_facility("local2", &log_facil) == 0);
+    fail_unless(sane_log_facility("local3", &log_facil) == 0);
+    fail_unless(sane_log_facility("local4", &log_facil) == 0);
+    fail_unless(sane_log_facility("local5", &log_facil) == 0);
+    fail_unless(sane_log_facility("local6", &log_facil) == 0);
+    fail_unless(sane_log_facility("local7", &log_facil) == 0);
+    fail_unless(sane_log_facility("user", &log_facil) == 0);
+    fail_unless(sane_log_facility("daemon", &log_facil) == 0);
+    fail_unless(sane_log_facility("foo", &log_facil) == 1);
+    fail_unless(sane_log_facility("BAR", &log_facil) == 1);
 }
 END_TEST
 
@@ -265,6 +288,7 @@ flush_interval = 120\n\
 timer_eps = 0.005\n\
 stream_cmd = foo\n\
 log_level = INFO\n\
+log_facility = local0\n\
 daemonize = true\n\
 binary_stream = true\n\
 input_counter = foobar\n\
@@ -460,6 +484,7 @@ timer_eps = 0.005\n\
 set_eps = 0.03\n\
 stream_cmd = foo\n\
 log_level = INFO\n\
+log_facility = level0\n\
 daemonize = true\n\
 binary_stream = true\n\
 input_counter = foobar\n\

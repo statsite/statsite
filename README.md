@@ -112,6 +112,7 @@ Here is an example configuration file::
     port = 8125
     udp_port = 8125
     log_level = INFO
+    log_facility = local0
     flush_interval = 10
     timer_eps = 0.01
     set_eps = 0.02
@@ -154,6 +155,10 @@ options must exist in the `statsite` section of the INI file:
 * log\_level : The logging level that statsite should use. One of:
   DEBUG, INFO, WARN, ERROR, or CRITICAL. All logs go to syslog,
   and stderr if that is a TTY. Default is DEBUG.
+
+* log\_facility : The syslog logging facility that statsite should use. 
+  One of: user, daemon, local0, local1, local2, local3, local4, local5, 
+  local6, local7. All logs go to syslog.
 
 * flush\_interval : How often the metrics should be flushed to the
   sink in seconds. Defaults to 10 seconds.
