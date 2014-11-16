@@ -45,7 +45,7 @@ class GraphiteStore(object):
             return
 
         # Construct the output
-        metrics = [m.split("|") for m in metrics if m and m.count("|") == 3]
+        metrics = [m.split("|") for m in metrics if m and m.count("|") == 2]
 
         self.logger.info("Outputting %d metrics" % len(metrics))
         if self.prefix:
