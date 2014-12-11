@@ -50,6 +50,7 @@ static const statsite_config DEFAULT_CONFIG = {
     {"", "kv.", "gauges.", "counts.", "timers.", "sets.", ""},
     {},
     false,              // Extended counts off by default
+    false,              // Do not prefix binary stream by default
 };
 
 /**
@@ -100,7 +101,7 @@ static int value_to_double(const char *val, double *result) {
 }
 
 /**
-* Attempts to convert a string log facility 
+* Attempts to convert a string log facility
 * to an actual syslog log facility,
 * @arg val The string value
 * @arg result The destination for the result
@@ -109,7 +110,7 @@ static int value_to_double(const char *val, double *result) {
 static int name_to_facility(const char *val, int *result) {
     int log_facility = LOG_LOCAL0;
     if (VAL_MATCH("local0")) {
-        log_facility = LOG_LOCAL0;    
+        log_facility = LOG_LOCAL0;
     } else if (VAL_MATCH("local1")) {
         log_facility = LOG_LOCAL1;
     } else if (VAL_MATCH("local2")) {
@@ -242,6 +243,8 @@ static int config_callback(void* user, const char* section, const char* name, co
         return value_to_bool(value, &config->use_type_prefix);
     } else if (NAME_MATCH("extended_counters")) {
         return value_to_bool(value, &config->extended_counters);
+    } else if (NAME_MATCH("prefix_binary_stream")) {
+        return value_to_bool(value, &config->prefix_binary_stream);
 
     // Handle the double cases
     } else if (NAME_MATCH("timer_eps")) {
@@ -278,7 +281,7 @@ static int config_callback(void* user, const char* section, const char* name, co
     // Copy the multi-case variables
     } else if (NAME_MATCH("log_facility")) {
         return name_to_facility(value, &config->syslog_log_facility);
-    
+
     // Unknown parameter?
     } else {
         // Log it, but ignore
@@ -398,27 +401,27 @@ int sane_log_facility(char *log_facil, int *syslog_facility) {
     #define FACIL_MATCH(facil) (strcasecmp(facil, log_facil) == 0)
 
     if (FACIL_MATCH("local0")) {
-        *syslog_facility = LOG_LOCAL0;    
+        *syslog_facility = LOG_LOCAL0;
     } else if (FACIL_MATCH("local0")) {
-        *syslog_facility = LOG_LOCAL0;    
+        *syslog_facility = LOG_LOCAL0;
     } else if (FACIL_MATCH("local1")) {
-        *syslog_facility = LOG_LOCAL1;    
+        *syslog_facility = LOG_LOCAL1;
     } else if (FACIL_MATCH("local2")) {
-        *syslog_facility = LOG_LOCAL2;    
+        *syslog_facility = LOG_LOCAL2;
     } else if (FACIL_MATCH("local3")) {
-        *syslog_facility = LOG_LOCAL3;    
+        *syslog_facility = LOG_LOCAL3;
     } else if (FACIL_MATCH("local4")) {
-        *syslog_facility = LOG_LOCAL4;    
+        *syslog_facility = LOG_LOCAL4;
     } else if (FACIL_MATCH("local5")) {
-        *syslog_facility = LOG_LOCAL5;    
+        *syslog_facility = LOG_LOCAL5;
     } else if (FACIL_MATCH("local6")) {
-        *syslog_facility = LOG_LOCAL6;    
+        *syslog_facility = LOG_LOCAL6;
     } else if (FACIL_MATCH("local7")) {
-        *syslog_facility = LOG_LOCAL7;    
+        *syslog_facility = LOG_LOCAL7;
     } else if (FACIL_MATCH("user")) {
-        *syslog_facility = LOG_USER;    
+        *syslog_facility = LOG_USER;
     } else if (FACIL_MATCH("daemon")) {
-        *syslog_facility = LOG_DAEMON;    
+        *syslog_facility = LOG_DAEMON;
     } else {
         syslog(LOG_ERR, "Invalid log facility!");
         return 1;

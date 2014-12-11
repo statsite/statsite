@@ -57,6 +57,7 @@ typedef struct {
     char* prefixes[METRIC_TYPES];
     char* prefixes_final[METRIC_TYPES];
     bool extended_counters;
+    bool prefix_binary_stream;
 } statsite_config;
 
 /**

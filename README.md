@@ -156,8 +156,8 @@ options must exist in the `statsite` section of the INI file:
   DEBUG, INFO, WARN, ERROR, or CRITICAL. All logs go to syslog,
   and stderr if that is a TTY. Default is DEBUG.
 
-* log\_facility : The syslog logging facility that statsite should use. 
-  One of: user, daemon, local0, local1, local2, local3, local4, local5, 
+* log\_facility : The syslog logging facility that statsite should use.
+  One of: user, daemon, local0, local1, local2, local3, local4, local5,
   local6, local7. All logs go to syslog.
 
 * flush\_interval : How often the metrics should be flushed to the
@@ -196,11 +196,15 @@ options must exist in the `statsite` section of the INI file:
   each message type. Defaults to respectively: "kv.", "gauges.", "counts.",
   "sets.", "timers.". Values will be ignored if use_type_prefix set to 0.
 
-* extended_counters : If enabled, the counter output is extended to include
+* extended\_counters : If enabled, the counter output is extended to include
   all the computed summary values. Otherwise, the counter is emitted as just
   the sum value. Summary values include `mean`, `stdev`, `sum`, `sum_sq`,
   `lower`, `upper`, and `rate`.
-  Defaults to 0.
+  Defaults to false.
+
+* prefix\_binary\_stream : If enabled, the keys streamed to a the stream\_cmd
+  when using binary\_stream mode are also prefixed. By default, this is false,
+  and keys do not get the prefix.
 
 In addition to global configurations, statsite supports histograms
 as well. Histograms are configured one per section, and the INI

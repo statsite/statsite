@@ -27,6 +27,7 @@ START_TEST(test_config_get_default)
     fail_unless(strcmp(config.pid_file, "/var/run/statsite.pid") == 0);
     fail_unless(config.input_counter == NULL);
     fail_unless(config.extended_counters == false);
+    fail_unless(config.prefix_binary_stream == false);
 }
 END_TEST
 
@@ -50,6 +51,9 @@ START_TEST(test_config_bad_file)
     fail_unless(config.binary_stream == false);
     fail_unless(strcmp(config.pid_file, "/var/run/statsite.pid") == 0);
     fail_unless(config.input_counter == NULL);
+    fail_unless(config.extended_counters == false);
+    fail_unless(config.prefix_binary_stream == false);
+
 }
 END_TEST
 
@@ -77,6 +81,8 @@ START_TEST(test_config_empty_file)
     fail_unless(config.binary_stream == false);
     fail_unless(strcmp(config.pid_file, "/var/run/statsite.pid") == 0);
     fail_unless(config.input_counter == NULL);
+    fail_unless(config.extended_counters == false);
+    fail_unless(config.prefix_binary_stream == false);
 
     unlink("/tmp/zero_file");
 }
@@ -99,7 +105,8 @@ daemonize = true\n\
 binary_stream = true\n\
 input_counter = foobar\n\
 pid_file = /tmp/statsite.pid\n\
-extended_counters = true\n";
+extended_counters = true\n\
+prefix_binary_stream = true\n";
     write(fh, buf, strlen(buf));
     fchmod(fh, 777);
     close(fh);
@@ -123,6 +130,7 @@ extended_counters = true\n";
     fail_unless(strcmp(config.pid_file, "/tmp/statsite.pid") == 0);
     fail_unless(strcmp(config.input_counter, "foobar") == 0);
     fail_unless(config.extended_counters == true);
+    fail_unless(config.prefix_binary_stream == true);
 
     unlink("/tmp/basic_config");
 }
