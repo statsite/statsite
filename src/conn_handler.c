@@ -158,10 +158,14 @@ struct binary_out_prefix {
 
 static int stream_bin_writer(FILE *pipe, uint64_t timestamp, unsigned char type,
         unsigned char val_type, double val, char *name) {
-        uint16_t key_len = strlen(name) + 1;
-        struct binary_out_prefix out = {timestamp, type, val_type, key_len, val};
+        char *prefix = GLOBAL_CONFIG->prefixes_final[type];
+        uint16_t pre_len = strlen(prefix);
+        uint16_t key_len = strlen(name);
+        uint16_t tot_len = pre_len + key_len + 1;
+        struct binary_out_prefix out = {timestamp, type, val_type, tot_len, val};
         if (!fwrite(&out, sizeof(struct binary_out_prefix), 1, pipe)) return 1;
-        if (!fwrite(name, key_len, 1, pipe)) return 1;
+        if (!fwrite(prefix, pre_len, 1, pipe)) return 1; 
+        if (!fwrite(name, key_len + 1, 1, pipe)) return 1;
         return 0;
 }
 
