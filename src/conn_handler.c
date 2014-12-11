@@ -40,6 +40,19 @@
 #define likely(x)       __builtin_expect((x),1)
 #define unlikely(x)     __builtin_expect((x),0)
 
+// BIN_TYPE_MAP is used to map the BIN_TYPE_* static
+// definitions into the metric_type value, so that
+// we can lookup the proper prefix.
+int BIN_TYPE_MAP[METRIC_TYPES] = {
+    UNKNOWN,
+    KEY_VAL,
+    COUNTER,
+    TIMER,
+    SET,
+    GAUGE,
+    GAUGE_DELTA,
+    };
+
 /* Static method declarations */
 static int handle_binary_client_connect(statsite_conn_handler *handle);
 static int handle_ascii_client_connect(statsite_conn_handler *handle);
@@ -158,13 +171,19 @@ struct binary_out_prefix {
 
 static int stream_bin_writer(FILE *pipe, uint64_t timestamp, unsigned char type,
         unsigned char val_type, double val, char *name) {
-        char *prefix = GLOBAL_CONFIG->prefixes_final[type];
-        uint16_t pre_len = strlen(prefix);
+        char *prefix = NULL;
+        uint16_t pre_len = 0;
+        if (GLOBAL_CONFIG->prefix_binary_stream) {
+            prefix = GLOBAL_CONFIG->prefixes_final[BIN_TYPE_MAP[type]];
+            pre_len = strlen(prefix);
+        }
         uint16_t key_len = strlen(name);
         uint16_t tot_len = pre_len + key_len + 1;
         struct binary_out_prefix out = {timestamp, type, val_type, tot_len, val};
         if (!fwrite(&out, sizeof(struct binary_out_prefix), 1, pipe)) return 1;
-        if (!fwrite(prefix, pre_len, 1, pipe)) return 1; 
+        if (pre_len > 0) {
+            if (!fwrite(prefix, pre_len, 1, pipe)) return 1;
+        }
         if (!fwrite(name, key_len + 1, 1, pipe)) return 1;
         return 0;
 }
