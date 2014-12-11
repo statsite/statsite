@@ -34,7 +34,7 @@ int stream_to_command(metrics *m, void *data, stream_callback cb, char *cmd) {
     if (res < 0) return res;
 
     // Fork and exec
-    int status;
+    int status = 0;
     pid_t pid = fork();
     if (pid < 0) return res;
 
