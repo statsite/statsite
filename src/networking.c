@@ -146,7 +146,7 @@ static int setup_tcp_listener(statsite_networking *netconf) {
     hints.ai_next = NULL;
 
     snprintf(tcp_port, MAX_PORT_LEN, "%d", netconf->config->tcp_port);
-    
+
     s = getaddrinfo(netconf->config->bind_address, tcp_port, &hints, &result);
     if (s != 0) {
         syslog(LOG_ERR, "getaddrinfo: %s\n", gai_strerror(s));
@@ -1023,7 +1023,7 @@ static int circbuf_write(circular_buffer *buf, char *in, uint64_t bytes) {
             memcpy(buf->buffer+buf->write_cursor, in, end_size);
 
             // Copy the remaining data
-            memcpy(buf->buffer, in, (bytes - end_size));
+            memcpy(buf->buffer, in+end_size, (bytes - end_size));
             buf->write_cursor = (bytes - end_size);
         }
     }
