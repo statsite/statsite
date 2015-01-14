@@ -1,9 +1,9 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <sys/uio.h>
 #include <syslog.h>
 #include <unistd.h>
