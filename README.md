@@ -208,7 +208,7 @@ options must exist in the `statsite` section of the INI file:
 
 In addition to global configurations, statsite supports histograms
 as well. Histograms are configured one per section, and the INI
-section must start with the work `histogram`. These are the recognized
+section must start with the word `histogram`. These are the recognized
 options:
 
 * prefix : This is the key prefix to match on. The longest matching prefix
