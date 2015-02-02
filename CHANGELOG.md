@@ -1,8 +1,16 @@
-# 0.7.0 (Unreleased)
+# 0.7.0
 
 * Support for IPv6. Thanks to @ealekseev [GH-57]
 * Support for `extended_counters` option to expose more
   summary information about counters.
+* Support for Gmetric sink
+* Support for Liberato sink
+* Fixing issue that would cause STDIN to be closed [GH-74]
+* Fixing race condition that would report sink had failed
+* Address several thread safety issues
+* Configurable syslog facilities
+* Support for prefixes on the binary stream
+* Git SHA: b29492b
 
 # 0.6.5
 
