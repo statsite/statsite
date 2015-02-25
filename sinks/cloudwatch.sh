@@ -14,6 +14,9 @@
 # available. The colon is a special character if this sink is used and should 
 # only be used to seperate the fields as described.
 
+command -v aws &> /dev/null
+[[ "$?" != 0 ]] && exit 0
+
 OIFS=$IFS
 while read line
 do
