@@ -58,7 +58,21 @@ typedef struct {
     char* prefixes_final[METRIC_TYPES];
     bool extended_counters;
     bool prefix_binary_stream;
+    int num_quantiles;
+    double* quantiles;
 } statsite_config;
+
+/**
+ * Allocates memory for a new config structure
+ * @return a pointer to a new config structure on success.
+ */
+statsite_config* alloc_config();
+
+/**
+ * Frees memory associated with a previously allocated config structure
+ * @arg config The config object to free.
+ */
+void free_config(statsite_config* config);
 
 /**
  * Initializes the configuration from a filename.
@@ -91,6 +105,7 @@ int sane_timer_eps(double eps);
 int sane_flush_interval(int intv);
 int sane_histograms(histogram_config *config);
 int sane_set_precision(double eps, unsigned char *precision);
+int sane_quantiles(int num_quantiles, double quantiles[]);
 
 /**
  * Joins two strings as part of a path,

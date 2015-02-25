@@ -206,6 +206,9 @@ options must exist in the `statsite` section of the INI file:
   when using binary\_stream mode are also prefixed. By default, this is false,
   and keys do not get the prefix.
 
+* quantiles : A comma-separated list of quantiles to calculate for timers.
+  Defaults to `0.5, 0.95, 0.99`
+
 In addition to global configurations, statsite supports histograms
 as well. Histograms are configured one per section, and the INI
 section must start with the word `histogram`. These are the recognized
