@@ -35,8 +35,8 @@ do
     key=`       echo $origkey | cut -d ':' -f 2`
     dimensions=`echo $origkey | cut -d ':' -f 3-`
 
-    if [[ -z $namespace || -z $key ]]; then
-      echo "key or namespace missing: $line" 1>&2
+    if [[ -z $namespace || -z $key || -z $timestamp ]]; then
+      echo "namespace, key or timestamp missing: $line" 1>&2
       continue
     fi
 
