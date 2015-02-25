@@ -32,7 +32,12 @@
 #ifdef __MACH__
 #define EV_USE_KQUEUE 1
 #endif
+
+#ifdef _DEPS_LIBEV
 #include "ev.c"
+#else
+#include <ev.h>
+#endif
 
 /**
  * Default listen backlog size for
