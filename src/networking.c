@@ -8,6 +8,11 @@
 #include <syslog.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <assert.h>
 
 #include "networking.h"
 #include "conn_handler.h"
