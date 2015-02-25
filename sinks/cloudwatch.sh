@@ -63,9 +63,9 @@ do
       dimensions_json="$dimensions_json{\"Name\": \"$dk\", \"Value\": \"$dv\"}"
     done
 
-    json="$json, \"Dimensions\":[$dimensions_json]"
+    json="[{$json, \"Dimensions\":[$dimensions_json]}]"
 
-    aws cloudwatch put-metric-data --namespace $namespace --metric-data "[{$json}]"
+    aws cloudwatch put-metric-data --namespace $namespace --metric-data "$json"
   fi
 done 
 IFS=$OIFS
