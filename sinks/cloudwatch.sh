@@ -24,49 +24,48 @@ OIFS=$IFS
 while read line
 do
   # line format: key|val|timestamp\n
-  if [[ ! -z $line ]]; then
+  if [[ -z $line ]]; then continue; fi
 
-    # splitting it at |
-    IFS='|'
-    arr=($line); origkey=${arr[0]}; value=${arr[1]}; timestamp=${arr[2]}
+  # splitting it at |
+  IFS='|'
+  arr=($line); origkey=${arr[0]}; value=${arr[1]}; timestamp=${arr[2]}
 
-    # extracting namespace, metricname and dimensions
-    namespace=` echo $origkey | cut -d ':' -f 1`
-    key=`       echo $origkey | cut -d ':' -f 2`
-    dimensions=`echo $origkey | cut -d ':' -f 3-`
+  # extracting namespace, metricname and dimensions
+  namespace=` echo $origkey | cut -d ':' -f 1`
+  key=`       echo $origkey | cut -d ':' -f 2`
+  dimensions=`echo $origkey | cut -d ':' -f 3-`
 
-    if [[ -z $namespace || -z $key || -z $timestamp ]]; then
-      echo "namespace, key or timestamp missing: $line" 1>&2
-      continue
-    fi
-
-    # generate json payload
-    json="\"MetricName\": \"$key\""
-    json="$json, \"Value\": $value"
-    json="$json, \"Timestamp\": $timestamp"
-
-    # add dimensions
-    IFS=':'
-
-    dimensions_json=""
-    # add instance_id to dimensions if available
-    command -v ec2metadata &> /dev/null
-    if [[ "$?" == 0 ]]; then
-      instance_id=`ec2metadata | awk '/instance-id.*/ { print $2 }'`
-      dimensions_json="{\"Name\": \"InstanceId\", \"Value\": \"$instance_id\"}"
-    fi
-
-    for d in $dimensions; do
-      dk=`echo $d | cut -d '=' -f 1`
-      dv=`echo $d | cut -d '=' -f 2`
-      if [[ ! -z "$dimensions_json" ]]; then dimensions_json+=","; fi
-      dimensions_json="$dimensions_json{\"Name\": \"$dk\", \"Value\": \"$dv\"}"
-    done
-
-    json="[{$json, \"Dimensions\":[$dimensions_json]}]"
-
-    aws cloudwatch put-metric-data --namespace $namespace --metric-data "$json"
+  if [[ -z $namespace || -z $key || -z $timestamp ]]; then
+    echo "namespace, key or timestamp missing: $line" 1>&2
+    continue
   fi
+
+  # generate json payload
+  json="\"MetricName\": \"$key\""
+  json="$json, \"Value\": $value"
+  json="$json, \"Timestamp\": $timestamp"
+
+  # add dimensions
+  IFS=':'
+
+  dimensions_json=""
+  # add instance_id to dimensions if available
+  command -v ec2metadata &> /dev/null
+  if [[ "$?" == 0 ]]; then
+    instance_id=`ec2metadata | awk '/instance-id.*/ { print $2 }'`
+    dimensions_json="{\"Name\": \"InstanceId\", \"Value\": \"$instance_id\"}"
+  fi
+
+  for d in $dimensions; do
+    dk=`echo $d | cut -d '=' -f 1`
+    dv=`echo $d | cut -d '=' -f 2`
+    if [[ ! -z "$dimensions_json" ]]; then dimensions_json+=","; fi
+    dimensions_json="$dimensions_json{\"Name\": \"$dk\", \"Value\": \"$dv\"}"
+  done
+
+  json="[{$json, \"Dimensions\":[$dimensions_json]}]"
+
+  aws cloudwatch put-metric-data --namespace $namespace --metric-data "$json"
 done 
 IFS=$OIFS
 
