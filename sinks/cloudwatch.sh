@@ -15,7 +15,10 @@
 # only be used to seperate the fields as described.
 
 command -v aws &> /dev/null
-[[ "$?" != 0 ]] && exit 0
+if [[ "$?" != 0 ]]; then
+  echo "aws cli missing." 1>&2
+  exit 0
+fi
 
 OIFS=$IFS
 while read line
@@ -33,6 +36,7 @@ do
     dimensions=`echo $origkey | cut -d ':' -f 3-`
 
     if [[ -z $namespace || -z $key ]]; then
+      echo "key or namespace missing: $line" 1>&2
       continue
     fi
 
