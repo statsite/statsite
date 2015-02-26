@@ -10,7 +10,7 @@
 # These three things are parsed out of the key like that:
 #  Namespace:Metricname[:DimensionKey=DimensionValue]*
 #
-# The dimension InstanceId is use automatically if the command ec2metadata is 
+# The dimension InstanceId is added automatically if the command ec2metadata is 
 # available. The colon is a special character if this sink is used and should 
 # only be used to seperate the fields as described.
 
