@@ -21,9 +21,7 @@
 #define MAX_PORT_LEN 6
 
 #define EV_STANDALONE 1
-#define EV_API_STATIC 1
 #define EV_COMPAT3 0
-#define EV_MULTIPLICITY 0
 #define EV_USE_MONOTONIC 1
 #ifdef __linux__
 #define EV_USE_CLOCK_SYSCALL 0
@@ -34,8 +32,11 @@
 #endif
 
 #ifdef _DEPS_LIBEV
+#define EV_MULTIPLICITY 0
+#define EV_API_STATIC 1
 #include "ev.c"
 #else
+#define EV_MULTIPLICITY 1
 #include <ev.h>
 #endif
 
@@ -108,10 +109,10 @@ struct statsite_networking {
 
 
 // Static typedefs
-static void handle_flush_event(ev_timer *watcher, int revents);
-static void handle_new_client(ev_io *watcher, int ready_events);
-static void handle_udp_message(ev_io *watch, int ready_events);
-static void invoke_event_handler(ev_io *watch, int ready_events);
+static void handle_flush_event(EV_P_ ev_timer *watcher, int revents);
+static void handle_new_client(EV_P_ ev_io *watcher, int ready_events);
+static void handle_udp_message(EV_P_ ev_io *watch, int ready_events);
+static void invoke_event_handler(EV_P_ ev_io *watch, int ready_events);
 
 // Utility methods
 static int set_client_sockopts(int client_fd);
@@ -192,7 +193,7 @@ static int setup_tcp_listener(statsite_networking *netconf) {
     // Create the libev objects
     ev_io_init(&netconf->tcp_client, handle_new_client,
                 tcp_listener_fd, EV_READ);
-    ev_io_start(&netconf->tcp_client);
+    ev_io_start(EV_DEFAULT_UC_ &netconf->tcp_client);
     return 0;
 }
 
@@ -266,7 +267,7 @@ static int setup_udp_listener(statsite_networking *netconf) {
     // Create the libev objects
     ev_io_init(&netconf->udp_client, handle_udp_message,
                 udp_listener_fd, EV_READ);
-    ev_io_start(&netconf->udp_client);
+    ev_io_start(EV_DEFAULT_UC_ &netconf->udp_client);
     return 0;
 }
 
@@ -290,7 +291,7 @@ static int setup_stdin_listener(statsite_networking *netconf) {
 
     // Initialize the libev stuff
     ev_io_init(&conn->client, invoke_event_handler, STDIN_FILENO, EV_READ);
-    ev_io_start(&conn->client);
+    ev_io_start(EV_DEFAULT_UC_ &conn->client);
     return 0;
 }
 
@@ -339,7 +340,7 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
     res = setup_udp_listener(netconf);
     if (res != 0) {
         if (ev_is_active(&netconf->tcp_client)) {
-            ev_io_stop(&netconf->tcp_client);
+            ev_io_stop(EV_DEFAULT_UC_ &netconf->tcp_client);
             close(netconf->tcp_client.fd);
         }
         free(netconf);
@@ -348,7 +349,7 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
 
     // Setup the timer
     ev_timer_init(&netconf->flush_timer, handle_flush_event, config->flush_interval, config->flush_interval);
-    ev_timer_start(&netconf->flush_timer);
+    ev_timer_start(EV_DEFAULT_UC_ &netconf->flush_timer);
 
     // Prepare the conn handlers
     init_conn_handler(config);
@@ -363,7 +364,7 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
  * Invoked when our flush timer is reached.
  * We need to instruct the connection handler about this.
  */
-static void handle_flush_event(ev_timer *watcher, int revents) {
+static void handle_flush_event(EV_P_ ev_timer *watcher, int revents) {
     // Inform the connection handler of the timeout
     flush_interval_trigger();
 }
@@ -374,7 +375,7 @@ static void handle_flush_event(ev_timer *watcher, int revents) {
  * to accept a new client. Accepts the client, initializes
  * the connection buffers, and stars to listening for data
  */
-static void handle_new_client(ev_io *watcher, int ready_events) {
+static void handle_new_client(EV_P_ ev_io *watcher, int ready_events) {
     // Accept the client connection
     int listen_fd = watcher->fd;
     struct sockaddr_in client_addr;
@@ -403,7 +404,7 @@ static void handle_new_client(ev_io *watcher, int ready_events) {
 
     // Initialize the libev stuff
     ev_io_init(&conn->client, invoke_event_handler, client_fd, EV_READ);
-    ev_io_start(&conn->client);
+    ev_io_start(EV_DEFAULT_UC_ &conn->client);
 }
 
 
@@ -458,7 +459,7 @@ static int read_client_data(conn_info *conn) {
  * invoke the connection handlers who have the business logic
  * of what to do.
  */
-static void handle_udp_message(ev_io *watch, int ready_events) {
+static void handle_udp_message(EV_P_ ev_io *watch, int ready_events) {
     while (1) {
         // Get the associated connection struct
         conn_info *conn = watch->data;
@@ -503,7 +504,7 @@ static void handle_udp_message(ev_io *watch, int ready_events) {
             circbuf_write(&conn->input, "\n", 1);
 
         // Get the user data
-        worker_ev_userdata *data = ev_userdata();
+        worker_ev_userdata *data = ev_userdata(EV_DEFAULT_UC);
 
         // Invoke the connection handler
         statsite_conn_handler handle = {data->netconf->config, watch->data};
@@ -518,9 +519,9 @@ static void handle_udp_message(ev_io *watch, int ready_events) {
  * stack should be handled here, but otherwise we should defer
  * to the connection handlers.
  */
-static void invoke_event_handler(ev_io *watcher, int ready_events) {
+static void invoke_event_handler(EV_P_ ev_io *watcher, int ready_events) {
     // Get the user data
-    worker_ev_userdata *data = ev_userdata();
+    worker_ev_userdata *data = ev_userdata(EV_DEFAULT_UC);
 
     // Read in the data, and close on issues
     conn_info *conn = watcher->data;
@@ -551,11 +552,11 @@ void enter_networking_loop(statsite_networking *netconf, volatile int *signum) {
     data.netconf = netconf;
 
     // Set the user data to be for this thread
-    ev_set_userdata(&data);
+    ev_set_userdata(EV_DEFAULT_UC_ &data);
 
     // Run forever until we are told to halt
     while (likely(*signum == 0)) {
-        ev_run(EVRUN_ONCE);
+        ev_run(EV_DEFAULT_UC_ EVRUN_ONCE);
     }
     return;
 }
@@ -568,11 +569,11 @@ void enter_networking_loop(statsite_networking *netconf, volatile int *signum) {
 int shutdown_networking(statsite_networking *netconf) {
     // Stop listening for new connections
     if (ev_is_active(&netconf->tcp_client)) {
-        ev_io_stop(&netconf->tcp_client);
+        ev_io_stop(EV_DEFAULT_UC_ &netconf->tcp_client);
         close(netconf->tcp_client.fd);
     }
     if (ev_is_active(&netconf->udp_client)) {
-        ev_io_stop(&netconf->udp_client);
+        ev_io_stop(EV_DEFAULT_UC_ &netconf->udp_client);
         close(netconf->udp_client.fd);
     }
     if (netconf->stdin_client != NULL) {
@@ -581,7 +582,7 @@ int shutdown_networking(statsite_networking *netconf) {
     }
 
     // Stop the other timers
-    ev_timer_stop(&netconf->flush_timer);
+    ev_timer_stop(EV_DEFAULT_UC_ &netconf->flush_timer);
 
     // TODO: Close all the client connections
     // ??? For now, we just leak the memory
@@ -610,7 +611,7 @@ int shutdown_networking(statsite_networking *netconf) {
  */
 void close_client_connection(conn_info *conn) {
     // Stop the libev clients
-    ev_io_stop(&conn->client);
+    ev_io_stop(EV_DEFAULT_UC_ &conn->client);
 
     // Clear everything out
     circbuf_free(&conn->input);
