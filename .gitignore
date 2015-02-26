@@ -13,6 +13,7 @@
 
 .lvimrc
 .sconsign.dblite
+config.log
 tests/build/
 test_runner
 statsite
