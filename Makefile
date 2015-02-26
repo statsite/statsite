@@ -4,7 +4,9 @@ build:
 	scons statsite
 
 clean:
-	rm -rfv ./dist ./statsite ./rpm-build
+	scons --clean test_runner
+	scons --clean
+	rm -rfv ./dist ./statsite ./rpm-build ./.sconsign.dblite ./.sconf_temp
 
 test_runner:
 	scons test_runner
