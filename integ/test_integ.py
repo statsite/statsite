@@ -33,6 +33,7 @@ flush_interval = 1
 port = %d
 udp_port = %d
 stream_cmd = %s
+quantiles = 0.5, 0.9, 0.95, 0.99
 
 [histogram1]
 prefix=has_hist
@@ -180,6 +181,7 @@ class TestInteg(object):
         assert "timers.val.count|100" in out
         assert "timers.val.stdev|29.011492" in out
         assert "timers.val.median|49.000000" in out
+        assert "timers.val.p90|90.000000" in out
         assert "timers.val.p95|95.000000" in out
         assert "timers.val.p99|99.000000" in out
         assert "timers.val.rate|4950" in out
@@ -203,6 +205,7 @@ class TestInteg(object):
         assert "timers.noobs.count|100" in out
         assert "timers.noobs.stdev|29.011492" in out
         assert "timers.noobs.median|49.000000" in out
+        assert "timers.noobs.p90|90.000000" in out
         assert "timers.noobs.p95|95.000000" in out
         assert "timers.noobs.p99|99.000000" in out
         assert "timers.noobs.rate|4950" in out
@@ -345,6 +348,7 @@ class TestIntegUDP(object):
         assert "timers.noobs.count|100" in out
         assert "timers.noobs.stdev|29.011492" in out
         assert "timers.noobs.median|49.000000" in out
+        assert "timers.noobs.p90|90.000000" in out
         assert "timers.noobs.p95|95.000000" in out
         assert "timers.noobs.p99|99.000000" in out
         assert "timers.noobs.rate|4950" in out

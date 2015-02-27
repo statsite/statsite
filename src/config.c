@@ -25,6 +25,7 @@ static histogram_config *in_progress;
  * filters that are about 300KB initially, and suited
  * to grow quickly.
  */
+static double default_quantiles[] = {0.5, 0.95, 0.99};
 static const statsite_config DEFAULT_CONFIG = {
     8125,               // TCP defaults to 8125
     8125,               // UDP on 8125
@@ -51,6 +52,9 @@ static const statsite_config DEFAULT_CONFIG = {
     {},
     false,              // Extended counts off by default
     false,              // Do not prefix binary stream by default
+                        // Number of quantiles
+    sizeof(default_quantiles) / sizeof(double),
+    default_quantiles,  // Quantiles
 };
 
 /**
@@ -98,6 +102,34 @@ static int value_to_int(const char *val, int *result) {
  */
 static int value_to_double(const char *val, double *result) {
     return sscanf(val, "%lf", result);
+}
+
+/**
+ * Attempts to convert a string to an array out doubles,
+ * assuming a comma and space separated list.
+ * @arg val The string value
+ * @arg result The destination for the result
+ * @arg count The destination for the count
+ * @return 1 on success, 0 on error.
+ */
+static int value_to_list_of_doubles(const char *val, double **result, int *count) {
+    int scanned;
+    double quantile;
+
+    *count = 0;
+    *result = NULL;
+    while (sscanf(val, "%lf%n", &quantile, &scanned) == 1) {
+        val += scanned;
+        *count += 1;
+        *result = realloc(*result, *count * sizeof(double));
+        (*result)[*count - 1] = quantile;
+        if (sscanf(val, " , %n", &scanned) == 0) {
+            val += scanned;
+        }
+    }
+    sscanf(val, " %n", &scanned);
+
+    return val[scanned] == '\0';
 }
 
 /**
@@ -251,6 +283,10 @@ static int config_callback(void* user, const char* section, const char* name, co
         return value_to_double(value, &config->timer_eps);
     } else if (NAME_MATCH("set_eps")) {
         return value_to_double(value, &config->set_eps);
+
+    // Handle quantiles as a comma-separated list of doubles
+    } else if (NAME_MATCH("quantiles")) {
+        return value_to_list_of_doubles(value, &config->quantiles, &config->num_quantiles);
 
     // Copy the string values
     } else if (NAME_MATCH("log_level")) {
@@ -517,6 +553,36 @@ cause increased memory use.");
     return 0;
 }
 
+int sane_quantiles(int num_quantiles, double quantiles[]) {
+    for (int i=0; i < num_quantiles; i++) {
+        if (quantiles[i] <= 0.0 || quantiles[i] >= 1.0) {
+            syslog(LOG_ERR, "Quantiles must be between 0 and 1");
+            return 1;
+        }
+    }
+    return 0;
+}
+
+/**
+ * Allocates memory for a new config structure
+ * @return a pointer to a new config structure on success.
+ */
+statsite_config* alloc_config() {
+    return calloc(1, sizeof(statsite_config));
+}
+
+/**
+ * Frees memory associated with a previously allocated config structure
+ * @arg config The config object to free.
+ */
+void free_config(statsite_config* config) {
+    if (config->quantiles != default_quantiles) {
+        free (config->quantiles);
+    }
+    free(config);
+}
+
+
 /**
  * Validates the configuration
  * @arg config The config object to validate.
@@ -531,6 +597,7 @@ int validate_config(statsite_config *config) {
     res |= sane_flush_interval(config->flush_interval);
     res |= sane_histograms(config->hist_configs);
     res |= sane_set_precision(config->set_eps, &config->set_precision);
+    res |= sane_quantiles(config->num_quantiles, config->quantiles);
 
     return res;
 }

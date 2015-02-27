@@ -58,10 +58,6 @@ static int handle_binary_client_connect(statsite_conn_handler *handle);
 static int handle_ascii_client_connect(statsite_conn_handler *handle);
 static int buffer_after_terminator(char *buf, int buf_len, char terminator, char **after_term, int *after_len);
 
-/* These are the quantiles we track */
-static const double QUANTILES[] = {0.5, 0.95, 0.99};
-static const int NUM_QUANTILES = 3;
-
 // This is the magic byte that indicates we are handling
 // a binary command, instead of an ASCII command. We use
 // 170 (0xaa) value.
@@ -81,8 +77,8 @@ static statsite_config *GLOBAL_CONFIG;
 void init_conn_handler(statsite_config *config) {
     // Make the initial metrics object
     metrics *m = malloc(sizeof(metrics));
-    int res = init_metrics(config->timer_eps, (double*)&QUANTILES, NUM_QUANTILES,
-            config->histograms, config->set_precision, m);
+    int res = init_metrics(config->timer_eps, config->quantiles,
+            config->num_quantiles, config->histograms, config->set_precision, m);
     assert(res == 0);
     GLOBAL_METRICS = m;
 
@@ -136,9 +132,14 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
             STREAM("%s%s.upper|%f|%lld\n", prefix, name, timer_max(&t->tm));
             STREAM("%s%s.count|%lld|%lld\n", prefix, name, timer_count(&t->tm));
             STREAM("%s%s.stdev|%f|%lld\n", prefix, name, timer_stddev(&t->tm));
-            STREAM("%s%s.median|%f|%lld\n", prefix, name, timer_query(&t->tm, 0.5));
-            STREAM("%s%s.p95|%f|%lld\n", prefix, name, timer_query(&t->tm, 0.95));
-            STREAM("%s%s.p99|%f|%lld\n", prefix, name, timer_query(&t->tm, 0.99));
+            for (i=0; i < GLOBAL_CONFIG->num_quantiles; i++) {
+                if (GLOBAL_CONFIG->quantiles[i] == 0.5) {
+                    STREAM("%s%s.median|%f|%lld\n", prefix, name, timer_query(&t->tm, 0.5));
+                }
+                STREAM("%s%s.p%0.0f|%f|%lld\n", prefix, name,
+                    GLOBAL_CONFIG->quantiles[i] * 100,
+                    timer_query(&t->tm, GLOBAL_CONFIG->quantiles[i]));
+            }
             STREAM("%s%s.rate|%f|%lld\n", prefix, name, timer_sum(&t->tm) / GLOBAL_CONFIG->flush_interval);
             STREAM("%s%s.sample_rate|%f|%lld\n", prefix, name, (double)timer_count(&t->tm) / GLOBAL_CONFIG->flush_interval);
 
@@ -227,9 +228,11 @@ static int stream_formatter_bin(FILE *pipe, void *data, metric_type type, char *
             STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_STDDEV, timer_stddev(&t->tm));
             STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MIN, timer_min(&t->tm));
             STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MAX, timer_max(&t->tm));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 50, timer_query(&t->tm, 0.5));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 95, timer_query(&t->tm, 0.95));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 99, timer_query(&t->tm, 0.99));
+            for (i=0; i < GLOBAL_CONFIG->num_quantiles; i++) {
+                STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT |
+                    (int)(GLOBAL_CONFIG->quantiles[i] * 100),
+                    timer_query(&t->tm, GLOBAL_CONFIG->quantiles[i]));
+            }
 
             // Binary streaming for histograms
             if (t->conf) {
@@ -283,8 +286,9 @@ static void* flush_thread(void *arg) {
 void flush_interval_trigger() {
     // Make a new metrics object
     metrics *m = malloc(sizeof(metrics));
-    init_metrics(GLOBAL_CONFIG->timer_eps, (double*)&QUANTILES, NUM_QUANTILES,
-            GLOBAL_CONFIG->histograms, GLOBAL_CONFIG->set_precision, m);
+    init_metrics(GLOBAL_CONFIG->timer_eps, GLOBAL_CONFIG->quantiles,
+            GLOBAL_CONFIG->num_quantiles, GLOBAL_CONFIG->histograms,
+            GLOBAL_CONFIG->set_precision, m);
 
     // Swap with the new one
     metrics *old = GLOBAL_METRICS;

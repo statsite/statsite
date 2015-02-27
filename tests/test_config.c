@@ -28,6 +28,10 @@ START_TEST(test_config_get_default)
     fail_unless(config.input_counter == NULL);
     fail_unless(config.extended_counters == false);
     fail_unless(config.prefix_binary_stream == false);
+    fail_unless(config.num_quantiles == 3);
+    fail_unless(config.quantiles[0] == 0.5);
+    fail_unless(config.quantiles[1] == 0.95);
+    fail_unless(config.quantiles[2] == 0.99);
 }
 END_TEST
 
@@ -53,6 +57,10 @@ START_TEST(test_config_bad_file)
     fail_unless(config.input_counter == NULL);
     fail_unless(config.extended_counters == false);
     fail_unless(config.prefix_binary_stream == false);
+    fail_unless(config.num_quantiles == 3);
+    fail_unless(config.quantiles[0] == 0.5);
+    fail_unless(config.quantiles[1] == 0.95);
+    fail_unless(config.quantiles[2] == 0.99);
 
 }
 END_TEST
@@ -83,6 +91,10 @@ START_TEST(test_config_empty_file)
     fail_unless(config.input_counter == NULL);
     fail_unless(config.extended_counters == false);
     fail_unless(config.prefix_binary_stream == false);
+    fail_unless(config.num_quantiles == 3);
+    fail_unless(config.quantiles[0] == 0.5);
+    fail_unless(config.quantiles[1] == 0.95);
+    fail_unless(config.quantiles[2] == 0.99);
 
     unlink("/tmp/zero_file");
 }
@@ -106,7 +118,8 @@ binary_stream = true\n\
 input_counter = foobar\n\
 pid_file = /tmp/statsite.pid\n\
 extended_counters = true\n\
-prefix_binary_stream = true\n";
+prefix_binary_stream = true\n\
+quantiles = 0.5, 0.90, 0.95, 0.99\n";
     write(fh, buf, strlen(buf));
     fchmod(fh, 777);
     close(fh);
@@ -131,6 +144,11 @@ prefix_binary_stream = true\n";
     fail_unless(strcmp(config.input_counter, "foobar") == 0);
     fail_unless(config.extended_counters == true);
     fail_unless(config.prefix_binary_stream == true);
+    fail_unless(config.num_quantiles == 4);
+    fail_unless(config.quantiles[0] == 0.5);
+    fail_unless(config.quantiles[1] == 0.90);
+    fail_unless(config.quantiles[2] == 0.95);
+    fail_unless(config.quantiles[3] == 0.99);
 
     unlink("/tmp/basic_config");
 }
@@ -284,6 +302,17 @@ START_TEST(test_sane_set_eps)
 }
 END_TEST
 
+START_TEST(test_sane_quantiles)
+{
+    double good[] = { 0.01, 0.99 };
+    double low[]  = { 0.00, 0.99 };
+    double high[] = { 0.99, 1.00 };
+
+    fail_unless(sane_quantiles(2, good) == 0);
+    fail_unless(sane_quantiles(2, low)  == 1);
+    fail_unless(sane_quantiles(2, high) == 1);
+}
+END_TEST
 
 
 START_TEST(test_config_histograms)
