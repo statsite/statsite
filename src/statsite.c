@@ -82,10 +82,10 @@ int parse_cmd_line_args(int argc, char **argv, char **config_file) {
 /**
  * Initializes the syslog configuration
  */
-void setup_syslog(int LOG_FACIL) {
+void setup_syslog(int LOG_FACIL, char daemonize) {
     // If we are on a tty, log the errors out
     int flags = LOG_CONS|LOG_NDELAY|LOG_PID;
-    if (isatty(1)) {
+    if (!daemonize) {
         flags |= LOG_PERROR;
     }
     errno = 0;
@@ -129,7 +129,7 @@ int write_pidfile(char *pid_file, pid_t pid) {
 int main(int argc, char **argv) {
 
     // temporarily set the syslog facilty to main and init it
-    setup_syslog(LOG_USER);
+    setup_syslog(LOG_USER, 0);
 
     // Parse the command line
     char *config_file = NULL;
@@ -154,7 +154,7 @@ int main(int argc, char **argv) {
     closelog();
 
     // Initialize syslog with configured facility
-    setup_syslog(config->syslog_log_facility);
+    setup_syslog(config->syslog_log_facility, config->daemonize);
     
     // Set prefixes for each message type
     if (prepare_prefixes(config)) {
