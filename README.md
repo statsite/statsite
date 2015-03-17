@@ -154,7 +154,7 @@ options must exist in the `statsite` section of the INI file:
 
 * log\_level : The logging level that statsite should use. One of:
   DEBUG, INFO, WARN, ERROR, or CRITICAL. All logs go to syslog,
-  and stderr if that is a TTY. Default is DEBUG.
+  and also stderr when not daemonizing. Default is DEBUG.
 
 * log\_facility : The syslog logging facility that statsite should use.
   One of: user, daemon, local0, local1, local2, local3, local4, local5,
