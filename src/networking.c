@@ -170,6 +170,7 @@ static int setup_tcp_listener(statsite_networking *netconf) {
         syslog(LOG_ERR, "Failed to bind on any TCP socket!\n");
         return 1;
     }
+    freeaddrinfo(result);
     if (listen(tcp_listener_fd, BACKLOG_SIZE) != 0) {
         syslog(LOG_ERR, "Failed to listen on TCP socket! Err: %s", strerror(errno));
         close(tcp_listener_fd);
@@ -237,7 +238,7 @@ static int setup_udp_listener(statsite_networking *netconf) {
         syslog(LOG_ERR, "Failed to bind on any UDP socket!\n");
         return 1;
     }
-
+    freeaddrinfo(result);
     // Put the socket in non-blocking mode
     int flags = fcntl(udp_listener_fd, F_GETFL, 0);
     fcntl(udp_listener_fd, F_SETFL, flags | O_NONBLOCK);
