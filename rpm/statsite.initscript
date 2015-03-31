@@ -26,6 +26,7 @@ if [ -f /etc/sysconfig/statsite ]; then
 fi
 
 prog=statsite
+user=${STATSITEUSER-root}
 statsite=${STATSITE-/usr/sbin/statsite}
 conffile=${CONFFILE-/etc/statsite/statsite.conf}
 pidfile=${PIDFILE-/var/run/statsite.pid}
@@ -34,7 +35,11 @@ RETVAL=0
 start() {
     echo -n $"Starting $prog: "
 
-    daemon --pidfile=${pidfile} ${statsite} -f ${conffile}
+    # Nuke stale pidfile
+    pkill -9 -U ${user} ${prog}
+    rm -f ${pidfile}
+
+    daemon --user ${user} --pidfile=${pidfile} ${statsite} -f ${conffile}
     RETVAL=$?
     echo
     return $RETVAL

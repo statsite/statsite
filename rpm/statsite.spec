@@ -38,14 +38,25 @@ make clean
 [ "%{buildroot}" != "/" ] && rm -rf %{buildroot}
 
 %post
-/sbin/chkconfig --add %{name}
-/sbin/chkconfig %{name} off
+if [ "$1" = 1 ] ; then
+	/sbin/chkconfig --add %{name}
+	/sbin/chkconfig %{name} off
+fi
+exit 0
+
+%postun
+if [ "$1" = 1 ] ; then
+	/sbin/service %{name} restart
+fi
+exit 0
 
 %preun
 if [ "$1" = 0 ] ; then
-    %{monit_bin} stop %{appname}
-    /sbin/service %{appname} stop > /dev/null 2>&1
-    /sbin/chkconfig --del %{appname}
+	%if %{monit_bin}
+	%{monit_bin} stop %{name}
+	%endif
+	/sbin/service %{name} stop > /dev/null 2>&1
+	/sbin/chkconfig --del %{name}
 fi
 exit 0
 
