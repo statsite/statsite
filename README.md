@@ -355,6 +355,9 @@ Here is an example of sending ("Conns", "c", 200) as hex:
     0xaa 0x02 0x0600 0x0000000000006940 0x436f6e6e7300
 
 
+Note: The binary protocol does not include support for "flags" and resultantly
+cannot be used for transmitting sampled counters.
+
 
 Binary Sink Protocol
 --------------------
