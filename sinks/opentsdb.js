@@ -1,12 +1,12 @@
 var net = require('net');
-
+var util = require('util');
 
 /*
-    Put into your statsite config as:
-    ****
-    stream_cmd = node sinks/opentsdb.js 127.0.0.1 4242 _t_
-    ****
-*/
+ Put into your statsite config as:
+ ****
+ stream_cmd = node sinks/opentsdb.js 127.0.0.1 4242 _t_
+ ****
+ */
 
 
 if (process.argv.length != 5)
@@ -65,18 +65,18 @@ var data = '';
 process.stdin.setEncoding('utf8');
 process.stdin.on('readable', function () {
     var chunk = process.stdin.read();
-    if(chunk !== null ) data += chunk
+    if (chunk !== null) data += chunk
 });
-process.stdin.on('end', function(){
+process.stdin.on('end', function () {
     var suffix = " source=statsd";
     if (data)
     {
         data = data.split('\n');
         var tString = '';
-        for(var i in data)
+        for (var i in data)
         {
             var mParts = data[i].split('|');
-            tString += ('put ' + strip_tags(mParts[0]) + ' ' + mParts[2] + ' ' + mParts[1] + ' ' + parse_tags(mParts[0]).join(' ') + suffix).replace(/\s+/g, ' ')+'\n';
+            tString += ('put ' + strip_tags(mParts[0]) + ' ' + mParts[2] + ' ' + mParts[1] + ' ' + parse_tags(mParts[0]).join(' ') + suffix).replace(/\s+/g, ' ') + '\n';
         }
         try
         {
@@ -89,7 +89,7 @@ process.stdin.on('end', function(){
         }
         catch (e)
         {
-            console.log(e);
+            util.log(e);
             process.exit(1);
         }
     }
