@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -355,6 +356,8 @@ int handle_client_connect(statsite_conn_handler *handle) {
 static double str2double(const char *s, char **end) {
     double val = 0.0;
     char neg = 0;
+    const char *orig_s = s;
+
     if (*s == '-') {
         neg = 1;
         s++;
@@ -372,8 +375,13 @@ static double str2double(const char *s, char **end) {
         }
         val += frac / pow(10.0, digits);
     }
+    if (unlikely(*s == 'E' || *s == 'e')) {
+        errno = 0;
+        return strtod(orig_s, end);
+    }
     if (neg) val *= -1.0;
     if (end) *end = (char*)s;
+    errno = 0;
     return val;
 }
 
@@ -447,7 +455,7 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
 
         // Convert the value to a double
         val = str2double(val_str, &endptr);
-        if (unlikely(endptr == val_str)) {
+        if (unlikely(endptr == val_str || errno == ERANGE)) {
             syslog(LOG_WARNING, "Failed value conversion! Input: %s", val_str);
             goto ERR_RET;
         }
