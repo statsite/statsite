@@ -45,7 +45,7 @@ width=10
     open(config_path, "w").write(conf)
 
     # Start the process
-    proc = subprocess.Popen("./statsite -f %s" % config_path, shell=True)
+    proc = subprocess.Popen(['./statsite', '-f', config_path])
     proc.poll()
     assert proc.returncode is None
 
@@ -382,7 +382,7 @@ class TestIntegBindAddress(object):
         fh.flush()
 
         try:
-            p = subprocess.Popen('./statsite -f %s' % fh.name, shell=True)
+            p = subprocess.Popen(['./statsite', '-f', fh.name])
             time.sleep(0.3)
             yield port
         finally:
@@ -391,8 +391,8 @@ class TestIntegBindAddress(object):
 
     def islistening(self, addr, port, command='statsite'):
         try:
-            cmd = 'lsof -FnPc -nP -i @%s:%s' % (addr, port)
-            out = subprocess.check_output(cmd, shell=True)
+            cmd = ['lsof', '-FnPc', '-nP', '-i', '@%s:%s' % (addr, port)]
+            out = subprocess.check_output(cmd)
         except subprocess.CalledProcessError:
             return False
 

@@ -37,7 +37,7 @@ extended_counters = true
     open(config_path, "w").write(conf)
 
     # Start the process
-    proc = subprocess.Popen("./statsite -f %s" % config_path, shell=True)
+    proc = subprocess.Popen(['./statsite', '-f', config_path])
     proc.poll()
     assert proc.returncode is None
 
