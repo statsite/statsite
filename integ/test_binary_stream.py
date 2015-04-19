@@ -5,6 +5,7 @@ protocol.
 """
 import os
 import os.path
+import shutil
 import socket
 import subprocess
 import sys
@@ -88,7 +89,7 @@ width=10
         try:
             proc.kill()
             proc.wait()
-            #shutil.rmtree(tmpdir)
+            shutil.rmtree(tmpdir)
         except:
             print proc
             pass
@@ -158,7 +159,7 @@ width=10
         try:
             proc.kill()
             proc.wait()
-            #shutil.rmtree(tmpdir)
+            shutil.rmtree(tmpdir)
         except:
             print proc
             pass

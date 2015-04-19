@@ -4,6 +4,7 @@ of the ASCII protocol.
 """
 import os
 import os.path
+import shutil
 import socket
 import subprocess
 import sys
@@ -54,7 +55,7 @@ stream_cmd = %s
         try:
             proc.kill()
             proc.wait()
-            #shutil.rmtree(tmpdir)
+            shutil.rmtree(tmpdir)
         except:
             print proc
             pass

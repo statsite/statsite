@@ -2,6 +2,7 @@ import os
 import os.path
 import socket
 import textwrap
+import shutil
 import subprocess
 import contextlib
 import sys
@@ -53,7 +54,7 @@ width=10
         try:
             proc.kill()
             proc.wait()
-            #shutil.rmtree(tmpdir)
+            shutil.rmtree(tmpdir)
         except:
             print proc
             pass

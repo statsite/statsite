@@ -1,5 +1,6 @@
 import os
 import os.path
+import shutil
 import socket
 import subprocess
 import sys
@@ -46,7 +47,7 @@ extended_counters = true
         try:
             proc.kill()
             proc.wait()
-            #shutil.rmtree(tmpdir)
+            shutil.rmtree(tmpdir)
         except:
             print proc
             pass
