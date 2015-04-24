@@ -347,34 +347,6 @@ int handle_client_connect(statsite_conn_handler *handle) {
 }
 
 /**
- * Simple string to double conversion
- */
-static double str2double(const char *s, char **end) {
-    double val = 0.0;
-    char neg = 0;
-    if (*s == '-') {
-        neg = 1;
-        s++;
-    }
-    for (; *s >= '0' && *s <= '9'; s++) {
-        val = (val * 10.0) + (*s - '0');
-    }
-    if (*s == '.') {
-        s++;
-        double frac = 0.0;
-        int digits = 0;
-        for (; *s >= '0' && *s <= '9'; s++) {
-            frac = (frac * 10.0) + (*s - '0');
-            digits++;
-        }
-        val += frac / pow(10.0, digits);
-    }
-    if (neg) val *= -1.0;
-    if (end) *end = (char*)s;
-    return val;
-}
-
-/**
  * Invoked to handle ASCII commands. This is the default
  * mode for statsite, to be backwards compatible with statsd
  * @arg handle The connection related information
@@ -417,8 +389,6 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
                 // Check if this is a delta update
                 switch (*val_str) {
                     case '+':
-                        // Advance past the + to avoid breaking str2double
-                        val_str++;
                     case '-':
                         type = GAUGE_DELTA;
                 }
@@ -443,7 +413,7 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
         }
 
         // Convert the value to a double
-        val = str2double(val_str, &endptr);
+        val = strtod(val_str, &endptr);
         if (unlikely(endptr == val_str)) {
             syslog(LOG_WARNING, "Failed value conversion! Input: %s", val_str);
             goto ERR_RET;
@@ -451,7 +421,7 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
 
         // Handle counter sampling if applicable
         if (type == COUNTER && !buffer_after_terminator(type_str, after_len, '@', &sample_str, &after_len)) {
-            sample_rate = str2double(sample_str, &endptr);
+            sample_rate = strtod(sample_str, &endptr);
             if (unlikely(endptr == sample_str)) {
                 syslog(LOG_WARNING, "Failed sample rate conversion! Input: %s", sample_str);
                 goto ERR_RET;
