@@ -1,13 +1,33 @@
+from copy import copy
 import platform
 
-envmurmur = Environment(CPATH = ['deps/murmurhash/'], CFLAGS="-std=c99 -O3")
+CFLAGS = ["-Wall",
+          "-Wno-unused-function",
+          "-std=c99",
+          "-fno-omit-frame-pointer", # Allow for perf
+          "-D_GNU_SOURCE",
+          "-g3",
+          "-O3",
+          "-pthread",
+          "-Ideps/inih", "-Ideps/libev", "-Isrc"]
+CFLAGS_ERROR = copy(CFLAGS)
+CFLAGS_ERROR.extend(["-Werror"])
+CFLAGS_LIBEV = copy(CFLAGS)
+CFLAGS_LIBEV.extend(["-Wno-strict-aliasing",
+                     "-Wno-unused-value",
+                     "-Wno-unused-variable",
+                     "-Wno-comment",
+                     "-Wno-parentheses"])
+
+envmurmur = Environment(CPATH = ['deps/murmurhash/'], CFLAGS=" ".join(CFLAGS))
 murmur = envmurmur.Library('murmur', Glob("deps/murmurhash/*.c"))
 
-envinih = Environment(CPATH = ['deps/inih/'], CFLAGS="-O3")
+envinih = Environment(CPATH = ['deps/inih/'], CFLAGS= " ".join(CFLAGS))
 inih = envinih.Library('inih', Glob("deps/inih/*.c"))
 
-env_statsite_with_err = Environment(CCFLAGS = '-g -std=c99 -D_GNU_SOURCE -Wall -Werror -Wstrict-aliasing=0 -O3 -pthread -Ideps/inih/ -Ideps/libev/ -Isrc/')
-env_statsite_without_err = Environment(CCFLAGS = '-g -std=c99 -D_GNU_SOURCE -O3 -pthread -Ideps/inih/ -Ideps/libev/ -Isrc/')
+env_statsite_with_err = Environment(CFLAGS = " ".join(CFLAGS_ERROR))
+env_statsite_without_err = Environment(CFLAGS = " ".join(CFLAGS))
+env_statsite_libev = Environment(CFLAGS = " ".join(CFLAGS_LIBEV))
 
 objs = env_statsite_with_err.Object('src/hashmap', 'src/hashmap.c')           + \
         env_statsite_with_err.Object('src/heap', 'src/heap.c')                + \
@@ -21,8 +41,8 @@ objs = env_statsite_with_err.Object('src/hashmap', 'src/hashmap.c')           + 
         env_statsite_with_err.Object('src/metrics', 'src/metrics.c')          + \
         env_statsite_with_err.Object('src/streaming', 'src/streaming.c')      + \
         env_statsite_with_err.Object('src/config', 'src/config.c')            + \
-        env_statsite_without_err.Object('src/networking', 'src/networking.c') + \
-        env_statsite_without_err.Object('src/conn_handler', 'src/conn_handler.c')
+        env_statsite_libev.Object('src/networking', 'src/networking.c') + \
+        env_statsite_libev.Object('src/conn_handler', 'src/conn_handler.c')
 
 statsite_libs = ["m", "pthread", murmur, inih]
 if platform.system() == 'Linux':
