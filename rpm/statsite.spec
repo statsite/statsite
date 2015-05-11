@@ -1,20 +1,21 @@
 %global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
 
 Name:		statsite
-Version:	0.7.0
+Version:	0.7.0-t1
 Release:	1%{?dist}
 Summary:	A C implementation of statsd.
 Group:		Applications
 License:	See the LICENSE file.
-URL:		https://github.com/armon/statsite
+URL:		https://github.com/twitter-forks/statsite
 Source0:	statsite.tar.gz
+Requires:       %{!?el5:libcurl} %{?el5:curl}
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
-BuildRequires:	scons
+BuildRequires:	scons gcc check-devel %{?el5:curl-devel} %{!?el5:libcurl-devel}
 AutoReqProv:	No
 
 %description
 
-Statsite is a metrics aggregation server. Statsite is based heavily on Etsy's StatsD
+Statsite is a metrics aggregation server. Statsite is based heavily on Etsy\'s StatsD
 https://github.com/etsy/statsd, and is wire compatible.
 
 %prep
