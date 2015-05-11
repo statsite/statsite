@@ -1,8 +1,8 @@
 %global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
 
 Name:		statsite
-Version:	0.7.0-t1
-Release:	1%{?dist}
+Version:	0.7.0.t1
+Release:	2%{?dist}
 Summary:	A C implementation of statsd.
 Group:		Applications
 License:	See the LICENSE file.
@@ -53,9 +53,9 @@ exit 0
 
 %preun
 if [ "$1" = 0 ] ; then
-	%if %{monit_bin}
+%if "%{monit_bin}"
 	%{monit_bin} stop %{name}
-	%endif
+%endif
 	/sbin/service %{name} stop > /dev/null 2>&1
 	/sbin/chkconfig --del %{name}
 fi
@@ -79,8 +79,13 @@ exit 0
 %attr(755, root, root) /usr/libexec/statsite/sinks/gmetric.py
 %attr(755, root, root) /usr/libexec/statsite/sinks/influxdb.py
 %attr(755, root, root) /usr/libexec/statsite/sinks/graphite.py
+%attr(755, root, root) /usr/libexec/statsite/sinks/cloudwatch.sh
+%attr(755, root, root) /usr/libexec/statsite/sinks/opentsdb.js
 
 %changelog
+* Mon May 11 2015 Yann Ramin <yann@twitter.com> - 0.7.0.t1-2
+- Introduce libcurl and cleanup spec file builds for tXX versions
+
 * Fri Jul 18 2014 Gary Richardson <gary.richardson@gmail.com>
 - added missing __init__.py to spec file
 - fixed makefile for building RPMS
