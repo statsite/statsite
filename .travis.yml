@@ -3,7 +3,7 @@ language: c
 compiler:
   - gcc
 
-sudo: false
+sudo: required
 
 addons:
   apt:
@@ -16,7 +16,7 @@ python:
   - "2.7"
 
 before_install:
-  - ls /usr/include | grep check
+  - find / -name "check.h"
   - scons statsite test_runner
 
 install: pip install pytest==2.3.4 --use-mirrors
