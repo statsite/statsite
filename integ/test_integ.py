@@ -245,6 +245,29 @@ class TestInteg(object):
         out = open(output).read()
         assert out in ("sets.zip|3|%d\n" % now, "sets.zip|3|%d\n" % (now - 1))
 
+    def test_double_parsing(self, servers):
+        "Tests string to double parsing"
+        server, _, output = servers
+        server.sendall("int1:1|c\n")
+        server.sendall("decimal1:1.0|c\n")
+        server.sendall("decimal2:2.3456789|c\n")
+        server.sendall("scientific1:1.0e5|c\n")
+        server.sendall("scientific2:2.0e05|c\n")
+        server.sendall("scientific3:3.0E05|c\n")
+        server.sendall("scientific4:4.0e-5|c\n")
+        server.sendall("underflow1:1.964393875E-314|c\n")
+
+        wait_file(output)
+        out = open(output).read()
+        assert "counts.int1|1.000000|" in out
+        assert "counts.decimal1|1.000000|" in out
+        assert "counts.decimal2|2.345679|" in out
+        assert "counts.scientific1|100000.000000|" in out
+        assert "counts.scientific2|200000.000000|" in out
+        assert "counts.scientific3|300000.000000|" in out
+        assert "counts.scientific4|0.000040|" in out
+        assert "counts.underflow1|" not in out
+
 
 class TestIntegUDP(object):
     def test_kv(self, servers):
