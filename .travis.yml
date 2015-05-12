@@ -1,14 +1,28 @@
-language: python
+language: c
+
+compiler:
+  - gcc
+  - clang
+
+sudo: required
+
+addons:
+  apt:
+    packages:
+      - scons
+      - check
+      - python
+
 python:
   - "2.7"
+
 before_install:
-  - sudo apt-get -y install scons
-  - pushd deps/check-0.9.8
-  - ./configure
-  - make
-  - sudo make install
-  - sudo ldconfig
-  - popd
+  - sudo apt-get update -qq
+  - sudo apt-get install -y check scons python-virtualenv
+  - sudo apt-get autoremove
   - scons statsite test_runner
-install: pip install pytest==2.3.4 --use-mirrors
-script: ./test_runner && py.test integ/
+  - virtualenv ve
+
+install: ve/bin/pip install pytest==2.3.4
+
+script: ./test_runner && ve/bin/py.test integ
