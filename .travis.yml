@@ -17,9 +17,10 @@ python:
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -y check scons
+  - sudo apt-get install -y check scons python-virtualenv
   - scons statsite test_runner
+  - virtualenv ve
 
-install: pip install pytest==2.3.4 --use-mirrors
+install: ve/bin/pip install pytest==2.3.4
 
-script: ./test_runner && py.test integ/
+script: ./test_runner && ve/bin/py.test integ
