@@ -8,10 +8,8 @@ clean:
 	scons --clean
 	rm -rfv ./dist ./statsite ./rpm-build ./.sconsign.dblite ./.sconf_temp
 
-test_runner:
+test:
 	scons test_runner
-
-test: test_runner
 	./test_runner
 
 integ: build test
@@ -34,5 +32,5 @@ rpms: sdist build
         --define "_sourcedir  %{_topdir}" \
         -ba $(RPMBUILDROOT)/statsite.spec
 
-.PHONY: build test statsite_test
+.PHONY: build test
 

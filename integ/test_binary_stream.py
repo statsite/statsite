@@ -5,6 +5,7 @@ protocol.
 """
 import os
 import os.path
+import shutil
 import socket
 import subprocess
 import sys
@@ -41,6 +42,7 @@ VAL_TYPE_MAP = {
     "hist_bin": 9,
     "hist_max": 10,
     "rate": 11,
+    "sample_rate": 12,
     "percentile": 128,
 }
 
@@ -78,7 +80,7 @@ width=10
     open(config_path, "w").write(conf)
 
     # Start the process
-    proc = subprocess.Popen("./statsite -f %s" % config_path, shell=True)
+    proc = subprocess.Popen(['./statsite', '-f', config_path])
     proc.poll()
     assert proc.returncode is None
 
@@ -87,7 +89,7 @@ width=10
         try:
             proc.kill()
             proc.wait()
-            #shutil.rmtree(tmpdir)
+            shutil.rmtree(tmpdir)
         except:
             print proc
             pass
@@ -148,7 +150,7 @@ width=10
     open(config_path, "w").write(conf)
 
     # Start the process
-    proc = subprocess.Popen("./statsite -f %s" % config_path, shell=True)
+    proc = subprocess.Popen(['./statsite', '-f', config_path])
     proc.poll()
     assert proc.returncode is None
 
@@ -157,7 +159,7 @@ width=10
         try:
             proc.kill()
             proc.wait()
-            #shutil.rmtree(tmpdir)
+            shutil.rmtree(tmpdir)
         except:
             print proc
             pass
@@ -297,6 +299,8 @@ class TestInteg(object):
         assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["count"], 100) in out
         assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["stddev"], 29.011491975882016) in out
         assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["mean"], 49.5) in out
+        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["rate"], 4950) in out
+        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sample_rate"], 100) in out
         assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P50"], 49) in out
         assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P95"], 95) in out
         assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P99"], 99) in out
@@ -409,6 +413,8 @@ class TestIntegPrefix(object):
         assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["count"], 100) in out
         assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["stddev"], 29.011491975882016) in out
         assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["mean"], 49.5) in out
+        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["rate"], 4950) in out
+        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sample_rate"], 100) in out
         assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P50"], 49) in out
         assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P95"], 95) in out
         assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P99"], 99) in out

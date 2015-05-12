@@ -34,6 +34,7 @@
 #define BIN_OUT_HIST_BIN      0x9
 #define BIN_OUT_HIST_CEIL     0xa
 #define BIN_OUT_RATE     0xb
+#define BIN_OUT_SAMPLE_RATE     0xc
 #define BIN_OUT_PCT     0x80
 
 // Macro to provide branch meta-data
@@ -228,6 +229,8 @@ static int stream_formatter_bin(FILE *pipe, void *data, metric_type type, char *
             STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_STDDEV, timer_stddev(&t->tm));
             STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MIN, timer_min(&t->tm));
             STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MAX, timer_max(&t->tm));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_RATE, timer_sum(&t->tm) / GLOBAL_CONFIG->flush_interval);
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_SAMPLE_RATE, (double)timer_count(&t->tm) / GLOBAL_CONFIG->flush_interval);
             for (i=0; i < GLOBAL_CONFIG->num_quantiles; i++) {
                 STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT |
                     (int)(GLOBAL_CONFIG->quantiles[i] * 100),
