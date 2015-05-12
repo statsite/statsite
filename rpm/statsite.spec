@@ -2,7 +2,7 @@
 
 Name:		statsite
 Version:	0.7.0.t1
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	A C implementation of statsd.
 Group:		Applications
 License:	See the LICENSE file.
@@ -12,6 +12,7 @@ Requires:       %{!?el5:libcurl} %{?el5:curl} jansson
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 BuildRequires:	scons gcc check-devel %{?el5:curl-devel} %{!?el5:libcurl-devel} jansson-devel
 AutoReqProv:	No
+Requires(pre):  /usr/sbin/useradd, /usr/bin/getent
 
 %description
 
@@ -37,6 +38,11 @@ cp -a sinks $RPM_BUILD_ROOT/usr/libexec/%{name}
 %clean
 make clean
 [ "%{buildroot}" != "/" ] && rm -rf %{buildroot}
+
+%pre
+/usr/bin/getent group statsite || /usr/sbin/groupadd -r statsite
+/usr/bin/getent passwd statsite || /usr/sbin/useradd -r -g statsite -d / -s /sbin/nologin statsite
+
 
 %post
 if [ "$1" = 1 ] ; then
@@ -83,6 +89,9 @@ exit 0
 %attr(755, root, root) /usr/libexec/statsite/sinks/opentsdb.js
 
 %changelog
+* Tue May 12 2015 Yann Ramin <yann@twitter.com> - 0.7.0.t1-3
+- Add a statsite user and group
+
 * Mon May 11 2015 Yann Ramin <yann@twitter.com> - 0.7.0.t1-2
 - Introduce libcurl and cleanup spec file builds for tXX versions
 
