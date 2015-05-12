@@ -16,10 +16,7 @@ python:
   - "2.7"
 
 before_install:
-  - pushd deps/check-0.9.8
-  - ./configure
-  - make
-  - popd
+  - ls /usr/include | grep check
   - scons statsite test_runner
 
 install: pip install pytest==2.3.4 --use-mirrors
