@@ -1,3 +1,12 @@
+# 0.7.1
+
+* Support for custom quantiles
+* Included Cloudwatch sink
+* Included OpenTSDB sink
+* Fixing minor memory leak
+* Support for parsing floating point and exponential formats
+* Git SHA: 8c1cfb5
+
 # 0.7.0
 
 * Support for IPv6. Thanks to @ealekseev [GH-57]
