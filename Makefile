@@ -1,4 +1,4 @@
-RPMBUILDROOT=./rpm-build
+RPMBUILDROOT=$(shell pwd)/rpm-build
 
 build:
 	scons statsite

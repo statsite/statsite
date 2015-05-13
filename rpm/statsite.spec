@@ -98,7 +98,6 @@ exit 0
 %endif
 %dir /usr/libexec/statsite
 %dir /usr/libexec/statsite/sinks
-%dir /var/run/statsite
 %attr(755, statsite, statsite) /var/run/statsite
 %attr(755, root, root) /usr/libexec/statsite/sinks/__init__.py
 %attr(755, root, root) /usr/libexec/statsite/sinks/binary_sink.py
@@ -107,6 +106,8 @@ exit 0
 %attr(755, root, root) /usr/libexec/statsite/sinks/gmetric.py
 %attr(755, root, root) /usr/libexec/statsite/sinks/influxdb.py
 %attr(755, root, root) /usr/libexec/statsite/sinks/graphite.py
+%attr(755, root, root) /usr/libexec/statsite/sinks/cloudwatch.sh
+%attr(755, root, root) /usr/libexec/statsite/sinks/opentsdb.js
 
 %changelog
 * Tue May 12 2015 Yann Ramin <yann@twitter.com> - 0.7.1-1
