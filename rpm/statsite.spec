@@ -1,7 +1,7 @@
 %global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
 
 Name:		statsite
-Version:	0.7.0
+Version:	0.7.1
 Release:	1%{?dist}
 Summary:	A C implementation of statsd.
 Group:		Applications
@@ -9,12 +9,12 @@ License:	See the LICENSE file.
 URL:		https://github.com/armon/statsite
 Source0:	statsite.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
-BuildRequires:	scons
+BuildRequires:	scons check-devel %{?el7:systemd} %{?fedora:systemd}
 AutoReqProv:	No
 
 %description
 
-Statsite is a metrics aggregation server. Statsite is based heavily on Etsy's StatsD
+Statsite is a metrics aggregation server. Statsite is based heavily on Etsy\'s StatsD
 https://github.com/etsy/statsd, and is wire compatible.
 
 %prep
@@ -28,8 +28,16 @@ mkdir -vp $RPM_BUILD_ROOT/usr/sbin
 mkdir -vp $RPM_BUILD_ROOT/etc/init.d
 mkdir -vp $RPM_BUILD_ROOT/etc/%{name}
 mkdir -vp $RPM_BUILD_ROOT/usr/libexec/%{name}
-install -m 755 statsite $RPM_BUILD_ROOT/usr/sbin
+mkdir -vp $RPM_BUILD_ROOT/var/run/statsite
+
+%if 0%{?fedora}%{?el7}
+mkdir -vp $RPM_BUILD_ROOT/%{_unitdir}
+install -m 644 rpm/statsite.service $RPM_BUILD_ROOT/%{_unitdir}
+%else
 install -m 755 rpm/statsite.initscript $RPM_BUILD_ROOT/etc/init.d/statsite
+%endif
+
+install -m 755 statsite $RPM_BUILD_ROOT/usr/sbin
 install -m 644 rpm/statsite.conf.example $RPM_BUILD_ROOT/etc/%{name}/statsite.conf
 cp -a sinks $RPM_BUILD_ROOT/usr/libexec/%{name}
 
@@ -39,24 +47,39 @@ make clean
 
 %post
 if [ "$1" = 1 ] ; then
+%if 0%{?fedora}%{?el7}
+	systemctl daemon-reload
+%else
 	/sbin/chkconfig --add %{name}
 	/sbin/chkconfig %{name} off
+%endif
+
 fi
 exit 0
 
 %postun
 if [ "$1" = 1 ] ; then
+%if 0%{?fedora}%{?el7}
+	systemctl restart statsite.service
+%else
 	/sbin/service %{name} restart
+
+%endif
 fi
 exit 0
 
 %preun
 if [ "$1" = 0 ] ; then
-	%if %{monit_bin}
+	%if 0%{?monit_bin}
 	%{monit_bin} stop %{name}
 	%endif
+
+%if 0%{?fedora}%{?el7}
+	systemctl stop statsite.service
+%else
 	/sbin/service %{name} stop > /dev/null 2>&1
 	/sbin/chkconfig --del %{name}
+%endif
 fi
 exit 0
 
@@ -68,9 +91,15 @@ exit 0
 %doc rpm/statsite.conf.example
 %config /etc/%{name}/statsite.conf
 %attr(755, root, root) /usr/sbin/statsite
+%if 0%{?fedora}%{?el7}
+%attr(644, root, root) %{_unitdir}/statsite.service
+%else
 %attr(755, root, root) /etc/init.d/statsite
+%endif
 %dir /usr/libexec/statsite
 %dir /usr/libexec/statsite/sinks
+%dir /var/run/statsite
+%attr(755, statsite, statsite) /var/run/statsite
 %attr(755, root, root) /usr/libexec/statsite/sinks/__init__.py
 %attr(755, root, root) /usr/libexec/statsite/sinks/binary_sink.py
 %attr(755, root, root) /usr/libexec/statsite/sinks/librato.py
@@ -80,6 +109,10 @@ exit 0
 %attr(755, root, root) /usr/libexec/statsite/sinks/graphite.py
 
 %changelog
+* Tue May 12 2015 Yann Ramin <yann@twitter.com> - 0.7.1-1
+- Add a statsite user and group
+- Add systemd support
+
 * Fri Jul 18 2014 Gary Richardson <gary.richardson@gmail.com>
 - added missing __init__.py to spec file
 - fixed makefile for building RPMS
