@@ -266,7 +266,7 @@ class TestInteg(object):
         assert "counts.scientific2|200000.000000|" in out
         assert "counts.scientific3|300000.000000|" in out
         assert "counts.scientific4|0.000040|" in out
-        assert "counts.underflow1|" not in out
+        assert "counts.underflow1|0.000000|" in out
 
 
 class TestIntegUDP(object):
