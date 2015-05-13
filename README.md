@@ -27,6 +27,8 @@ Features
   - InfluxDB
   - Ganglia
   - Librato
+  - CloudWatch
+  - OpenTSDB
 * Binary protocol
 * TCP, UDP, and STDIN
 * Fast
