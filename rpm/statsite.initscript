@@ -29,7 +29,7 @@ prog=statsite
 user=${STATSITEUSER-statsite}
 statsite=${STATSITE-/usr/sbin/statsite}
 conffile=${CONFFILE-/etc/statsite/statsite.conf}
-pidfile=${PIDFILE-/var/run/statsite.pid}
+pidfile=${PIDFILE-/var/run/statsite/statsite.pid}
 RETVAL=0
 
 start() {
