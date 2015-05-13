@@ -36,15 +36,16 @@ install -m 644 rpm/statsite.conf.example $RPM_BUILD_ROOT/etc/%{name}/statsite.co
 cp -a sinks $RPM_BUILD_ROOT/usr/libexec/%{name}
 
 %clean
+
 make clean
 [ "%{buildroot}" != "/" ] && rm -rf %{buildroot}
 
 %pre
-/usr/bin/getent group statsite || /usr/sbin/groupadd -r statsite
-/usr/bin/getent passwd statsite || /usr/sbin/useradd -r -g statsite -d / -s /sbin/nologin statsite
 
+/usr/bin/getent passwd statsite > /dev/null || /usr/sbin/useradd -r -d / -s /sbin/nologin statsite
 
 %post
+
 if [ "$1" = 1 ] ; then
 	/sbin/chkconfig --add %{name}
 	/sbin/chkconfig %{name} off
@@ -52,16 +53,15 @@ fi
 exit 0
 
 %postun
+
 if [ "$1" = 1 ] ; then
 	/sbin/service %{name} restart
 fi
 exit 0
 
 %preun
+
 if [ "$1" = 0 ] ; then
-%if "%{monit_bin}"
-	%{monit_bin} stop %{name}
-%endif
 	/sbin/service %{name} stop > /dev/null 2>&1
 	/sbin/chkconfig --del %{name}
 fi
