@@ -8,9 +8,9 @@ Group:		Applications
 License:	See the LICENSE file.
 URL:		https://github.com/twitter-forks/statsite
 Source0:	statsite.tar.gz
-Requires:       %{!?el5:libcurl} %{?el5:curl}
+Requires:       %{!?el5:libcurl} %{?el5:curl} jansson
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
-BuildRequires:	scons gcc check-devel %{?el5:curl-devel} %{!?el5:libcurl-devel}
+BuildRequires:	scons gcc check-devel %{?el5:curl-devel} %{!?el5:libcurl-devel} jansson-devel
 AutoReqProv:	No
 
 %description
