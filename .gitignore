@@ -21,3 +21,4 @@ statsite
 
 dist/
 rpm-build/
+*.tar.gz
