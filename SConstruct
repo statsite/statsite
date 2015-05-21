@@ -4,6 +4,7 @@ import platform
 CFLAGS = ["-Wall",
           "-Wno-unused-function",
           "-std=c99",
+          "-fno-strict-aliasing",
           "-fno-omit-frame-pointer", # Allow for perf
           "-D_GNU_SOURCE",
           "-g3",
