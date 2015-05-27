@@ -33,8 +33,10 @@ def pytest_funcarg__servers(request):
 flush_interval = 1
 port = %d
 udp_port = %d
-stream_cmd = %s
 quantiles = 0.5, 0.9, 0.95, 0.99
+
+[sink_stream_default]
+command = %s
 
 [histogram1]
 prefix=has_hist

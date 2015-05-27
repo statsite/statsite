@@ -33,7 +33,9 @@ flush_interval = 1
 port = 0
 udp_port = 0
 parse_stdin = yes
-stream_cmd = %s
+
+[sink_stream_default]
+command = %s
 
 [histogram1]
 prefix=has_hist
