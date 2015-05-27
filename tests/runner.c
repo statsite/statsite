@@ -121,6 +121,8 @@ int main(void)
     tcase_add_test(tc8, test_sane_prefixes);
     tcase_add_test(tc8, test_sane_global_prefix);
     tcase_add_test(tc8, test_sane_quantiles);
+    tcase_add_test(tc8, test_basic_sink);
+    tcase_add_test(tc8, test_multi_sink);
     
     // Add the radix tests
     suite_add_tcase(s1, tc9);

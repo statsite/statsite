@@ -9,8 +9,11 @@
 #include <unistd.h>
 #include <netdb.h>
 
+#include "likely.h"
+#include "circqueue.h"
 #include "networking.h"
 #include "conn_handler.h"
+#include "sink.h"
 
 // Length of string to represent maximum port of 65535
 #define MAX_PORT_LEN 6
@@ -36,42 +39,11 @@
 #define BACKLOG_SIZE 64
 
 /**
- * How big should the default connection
- * buffer size be. One page seems reasonable
- * since most requests will not be this large
- */
-#define INIT_CONN_BUF_SIZE 32768
-
-/**
- * This is the scale factor we use when
- * we are growing our connection buffers.
- * We want this to be aggressive enough to reduce
- * the number of resizes, but to also avoid wasted
- * space. With this, we will go from:
- * 32K -> 64K -> 128K
- */
-#define CONN_BUF_MULTIPLIER 2
-
-// Macro to provide branch meta-data
-#define likely(x)       __builtin_expect((x),1)
-#define unlikely(x)     __builtin_expect((x),0)
-
-/**
  * Stores the thread specific user data.
  */
 typedef struct {
     statsite_networking *netconf;
 } worker_ev_userdata;
-
-/**
- * Represents a simple circular buffer
- */
-typedef struct {
-    int write_cursor;
-    int read_cursor;
-    uint32_t buf_size;
-    char *buffer;
-} circular_buffer;
 
 /**
  * Stores the connection specific data.
@@ -94,6 +66,7 @@ struct statsite_networking {
     ev_io udp_client;
     conn_info *stdin_client;
     ev_timer flush_timer;
+    sink* sinks;
 };
 
 
@@ -106,18 +79,6 @@ static void invoke_event_handler(ev_io *watch, int ready_events);
 // Utility methods
 static int set_client_sockopts(int client_fd);
 static conn_info* get_conn();
-
-// Circular buffer method
-static void circbuf_init(circular_buffer *buf);
-static void circbuf_clear(circular_buffer *buf);
-static void circbuf_free(circular_buffer *buf);
-static uint64_t circbuf_avail_buf(circular_buffer *buf);
-static uint64_t circbuf_used_buf(circular_buffer *buf);
-static void circbuf_grow_buf(circular_buffer *buf);
-static void circbuf_setup_readv_iovec(circular_buffer *buf, struct iovec *vectors, int *num_vectors);
-static void circbuf_advance_write(circular_buffer *buf, uint64_t bytes);
-static void circbuf_advance_read(circular_buffer *buf, uint64_t bytes);
-static int circbuf_write(circular_buffer *buf, char *in, uint64_t bytes);
 
 /**
  * Initializes the TCP listener
@@ -337,6 +298,9 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
         return 1;
     }
 
+    // Setup sinks
+    init_sinks(&netconf->sinks, config);
+
     // Setup the timer
     ev_timer_init(&netconf->flush_timer, handle_flush_event, config->flush_interval, config->flush_interval);
     ev_timer_start(&netconf->flush_timer);
@@ -355,8 +319,9 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
  * We need to instruct the connection handler about this.
  */
 static void handle_flush_event(ev_timer *watcher, int revents) {
+    worker_ev_userdata *data = ev_userdata();
     // Inform the connection handler of the timeout
-    flush_interval_trigger();
+    flush_interval_trigger(data->netconf->sinks);
 }
 
 
@@ -369,7 +334,7 @@ static void handle_new_client(ev_io *watcher, int ready_events) {
     // Accept the client connection
     int listen_fd = watcher->fd;
     struct sockaddr_in client_addr;
-    int client_addr_len = sizeof(client_addr);
+    socklen_t client_addr_len = sizeof(client_addr);
     int client_fd = accept(listen_fd,
                         (struct sockaddr*)&client_addr,
                         &client_addr_len);
@@ -877,158 +842,3 @@ static conn_info* get_conn() {
     conn->client.data = conn;
     return conn;
 }
-
-/*
- * Methods for manipulating our circular buffers
- */
-
-// Conditionally allocates if there is no buffer
-static void circbuf_init(circular_buffer *buf) {
-    buf->read_cursor = 0;
-    buf->write_cursor = 0;
-    buf->buf_size = INIT_CONN_BUF_SIZE * sizeof(char);
-    buf->buffer = malloc(buf->buf_size);
-}
-
-// Clears the circular buffer, reseting it.
-static void circbuf_clear(circular_buffer *buf) {
-    buf->read_cursor = 0;
-    buf->write_cursor = 0;
-}
-
-// Frees a buffer
-static void circbuf_free(circular_buffer *buf) {
-    if (buf->buffer) free(buf->buffer);
-    buf->buffer = NULL;
-}
-
-// Calculates the available buffer size
-static uint64_t circbuf_avail_buf(circular_buffer *buf) {
-    uint64_t avail_buf;
-    if (buf->write_cursor < buf->read_cursor) {
-        avail_buf = buf->read_cursor - buf->write_cursor - 1;
-    } else {
-        avail_buf = buf->buf_size - buf->write_cursor + buf->read_cursor - 1;
-    }
-    return avail_buf;
-}
-
-// Calculates the used buffer size
-static uint64_t circbuf_used_buf(circular_buffer *buf) {
-    uint64_t used_buf;
-    if (buf->write_cursor < buf->read_cursor) {
-        used_buf = buf->buf_size - buf->read_cursor + buf->write_cursor;
-    } else {
-        used_buf = buf->write_cursor - buf->read_cursor;
-    }
-    return used_buf;
-}
-
-// Grows the circular buffer to make room for more data
-static void circbuf_grow_buf(circular_buffer *buf) {
-    int new_size = buf->buf_size * CONN_BUF_MULTIPLIER * sizeof(char);
-    char *new_buf = malloc(new_size);
-    int bytes_written = 0;
-
-    // Check if the write has wrapped around
-    if (buf->write_cursor < buf->read_cursor) {
-        // Copy from the read cursor to the end of the buffer
-        bytes_written = buf->buf_size - buf->read_cursor;
-        memcpy(new_buf,
-               buf->buffer+buf->read_cursor,
-               bytes_written);
-
-        // Copy from the start to the write cursor
-        memcpy(new_buf+bytes_written,
-               buf->buffer,
-               buf->write_cursor);
-        bytes_written += buf->write_cursor;
-
-    // We haven't wrapped yet...
-    } else {
-        // Copy from the read cursor up to the write cursor
-        bytes_written = buf->write_cursor - buf->read_cursor;
-        memcpy(new_buf,
-               buf->buffer + buf->read_cursor,
-               bytes_written);
-    }
-
-    // Update the buffer locations and everything
-    free(buf->buffer);
-    buf->buffer = new_buf;
-    buf->buf_size = new_size;
-    buf->read_cursor = 0;
-    buf->write_cursor = bytes_written;
-}
-
-
-// Initializes a pair of iovectors to be used for readv
-static void circbuf_setup_readv_iovec(circular_buffer *buf, struct iovec *vectors, int *num_vectors) {
-    // Check if we've wrapped around
-    *num_vectors = 1;
-    if (buf->write_cursor < buf->read_cursor) {
-        vectors[0].iov_base = buf->buffer + buf->write_cursor;
-        vectors[0].iov_len = buf->read_cursor - buf->write_cursor - 1;
-    } else {
-        vectors[0].iov_base = buf->buffer + buf->write_cursor;
-        vectors[0].iov_len = buf->buf_size - buf->write_cursor - 1;
-        if (buf->read_cursor > 0)  {
-            vectors[0].iov_len += 1;
-            vectors[1].iov_base = buf->buffer;
-            vectors[1].iov_len = buf->read_cursor - 1;
-            *num_vectors = 2;
-        }
-    }
-}
-
-// Advances the cursors
-static void circbuf_advance_write(circular_buffer *buf, uint64_t bytes) {
-    buf->write_cursor = (buf->write_cursor + bytes) % buf->buf_size;
-}
-
-static void circbuf_advance_read(circular_buffer *buf, uint64_t bytes) {
-    buf->read_cursor = (buf->read_cursor + bytes) % buf->buf_size;
-
-    // Optimization, reset the cursors if they catchup with each other
-    if (buf->read_cursor == buf->write_cursor) {
-        buf->read_cursor = 0;
-        buf->write_cursor = 0;
-    }
-}
-
-/**
- * Writes the data from a given input buffer
- * into the circular buffer.
- * @return 0 on success.
- */
-static int circbuf_write(circular_buffer *buf, char *in, uint64_t bytes) {
-    // Check for available space
-    uint64_t avail = circbuf_avail_buf(buf);
-    while (avail < bytes) {
-        circbuf_grow_buf(buf);
-        avail = circbuf_avail_buf(buf);
-    }
-
-    if (buf->write_cursor < buf->read_cursor) {
-        memcpy(buf->buffer+buf->write_cursor, in, bytes);
-        buf->write_cursor += bytes;
-
-    } else {
-        uint64_t end_size = buf->buf_size - buf->write_cursor;
-        if (end_size >= bytes) {
-            memcpy(buf->buffer+buf->write_cursor, in, bytes);
-            buf->write_cursor += bytes;
-
-        } else {
-            // Copy the first end_size bytes
-            memcpy(buf->buffer+buf->write_cursor, in, end_size);
-
-            // Copy the remaining data
-            memcpy(buf->buffer, in+end_size, (bytes - end_size));
-            buf->write_cursor = (bytes - end_size);
-        }
-    }
-
-    return 0;
-}
-
