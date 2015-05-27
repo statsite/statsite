@@ -47,11 +47,9 @@ static const statsite_config DEFAULT_CONFIG = {
     "local0",           // local0 logging facility
     LOG_LOCAL0,         // Syslog logging facility
     0.01,               // Default 1% error
-    "cat",              // Pipe to cat
     10,                 // Flush every 10 seconds
     0,                  // Do not daemonize
     "/var/run/statsite.pid", // Default pidfile path
-    0,                  // Do not use binary output by default
     NULL,               // Do not track number of messages received
     NULL,               // No histograms by default
     NULL,               // No sinks are built
@@ -378,8 +376,6 @@ static int config_callback(void* user, const char* section, const char* name, co
         return value_to_bool(value, &config->parse_stdin);
     } else if (NAME_MATCH("daemonize")) {
         return value_to_bool(value, &config->daemonize);
-    } else if (NAME_MATCH("binary_stream")) {
-        return value_to_bool(value, &config->binary_stream);
     } else if (NAME_MATCH("use_type_prefix")) {
         return value_to_bool(value, &config->use_type_prefix);
     } else if (NAME_MATCH("extended_counters")) {
@@ -402,8 +398,6 @@ static int config_callback(void* user, const char* section, const char* name, co
         config->log_level = strdup(value);
     } else if (NAME_MATCH("log_facility")) {
         config->log_facility = strdup(value);
-    } else if (NAME_MATCH("stream_cmd")) {
-        config->stream_cmd = strdup(value);
     } else if (NAME_MATCH("pid_file")) {
         config->pid_file = strdup(value);
     } else if (NAME_MATCH("input_counter")) {
@@ -470,21 +464,26 @@ int prepare_prefixes(statsite_config *config)
  */
 
 int config_from_filename(char *filename, statsite_config *config) {
+    int ret = 0;
     // Initialize to the default values
     memcpy(config, &DEFAULT_CONFIG, sizeof(statsite_config));
 
     // If there is no filename, return now
-    if (filename == NULL)
-        return 0;
+    if (filename == NULL) {
+        ret = 0;
+        goto exit;
+    }
 
     // Try to open the file
     int res = ini_parse(filename, config_callback, config);
     if (res == -1) {
-        return -ENOENT;
+        ret = -ENOENT;
     } else if (res) {
         syslog(LOG_ERR, "Failed to parse config on line: %d", res);
-        return -res;
+        ret = -res;
     }
+
+exit:
 
     // Check for an unfinished histogram
     if (histogram_in_progress) {
@@ -503,7 +502,7 @@ int config_from_filename(char *filename, statsite_config *config) {
         config->sink_configs = (sink_config*)&DEFAULT_SINK;
     }
 
-    return 0;
+    return ret;
 }
 
 /**

@@ -78,11 +78,9 @@ typedef struct {
     char *log_facility;
     int syslog_log_facility;
     double timer_eps;
-    char *stream_cmd;
     int flush_interval;
     bool daemonize;
     char *pid_file;
-    bool binary_stream;
     char *input_counter;
     histogram_config *hist_configs;
     sink_config *sink_configs;

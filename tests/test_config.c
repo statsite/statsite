@@ -20,10 +20,11 @@ START_TEST(test_config_get_default)
     fail_unless(config.syslog_log_level == LOG_DEBUG);
     fail_unless(config.syslog_log_facility == LOG_LOCAL0);
     fail_unless(config.timer_eps == (double)1e-2);
-    fail_unless(strcmp(config.stream_cmd, "cat") == 0);
+    sink_config_stream* sc = (sink_config_stream*)config.sink_configs;
+    fail_unless(strcmp(sc->stream_cmd, "cat") == 0);
     fail_unless(config.flush_interval == 10);
     fail_unless(config.daemonize == false);
-    fail_unless(config.binary_stream == false);
+    fail_unless(sc->binary_stream == false);
     fail_unless(strcmp(config.pid_file, "/var/run/statsite.pid") == 0);
     fail_unless(config.input_counter == NULL);
     fail_unless(config.extended_counters == false);
@@ -49,10 +50,11 @@ START_TEST(test_config_bad_file)
     fail_unless(config.syslog_log_level == LOG_DEBUG);
     fail_unless(config.syslog_log_facility == LOG_LOCAL0);
     fail_unless(config.timer_eps == (double)1e-2);
-    fail_unless(strcmp(config.stream_cmd, "cat") == 0);
+    sink_config_stream* sc = (sink_config_stream*)config.sink_configs;
+    fail_unless(strcmp(sc->stream_cmd, "cat") == 0);
     fail_unless(config.flush_interval == 10);
     fail_unless(config.daemonize == false);
-    fail_unless(config.binary_stream == false);
+    fail_unless(sc->binary_stream == false);
     fail_unless(strcmp(config.pid_file, "/var/run/statsite.pid") == 0);
     fail_unless(config.input_counter == NULL);
     fail_unless(config.extended_counters == false);
@@ -83,10 +85,11 @@ START_TEST(test_config_empty_file)
     fail_unless(config.syslog_log_level == LOG_DEBUG);
     fail_unless(config.syslog_log_facility == LOG_LOCAL0);
     fail_unless(config.timer_eps == (double)1e-2);
-    fail_unless(strcmp(config.stream_cmd, "cat") == 0);
+    sink_config_stream* sc = (sink_config_stream*)config.sink_configs;
+    fail_unless(strcmp(sc->stream_cmd, "cat") == 0);
     fail_unless(config.flush_interval == 10);
     fail_unless(config.daemonize == false);
-    fail_unless(config.binary_stream == false);
+    fail_unless(sc->binary_stream == false);
     fail_unless(strcmp(config.pid_file, "/var/run/statsite.pid") == 0);
     fail_unless(config.input_counter == NULL);
     fail_unless(config.extended_counters == false);
@@ -110,11 +113,9 @@ parse_stdin = true\n\
 flush_interval = 120\n\
 timer_eps = 0.005\n\
 set_eps = 0.03\n\
-stream_cmd = foo\n\
 log_level = INFO\n\
 log_facility = local3\n\
 daemonize = true\n\
-binary_stream = true\n\
 input_counter = foobar\n\
 pid_file = /tmp/statsite.pid\n\
 extended_counters = true\n\
@@ -136,10 +137,8 @@ quantiles = 0.5, 0.90, 0.95, 0.99\n";
     fail_unless(strcmp(config.log_facility, "local3") == 0);
     fail_unless(config.timer_eps == (double)0.005);
     fail_unless(config.set_eps == (double)0.03);
-    fail_unless(strcmp(config.stream_cmd, "foo") == 0);
     fail_unless(config.flush_interval == 120);
     fail_unless(config.daemonize == true);
-    fail_unless(config.binary_stream == true);
     fail_unless(strcmp(config.pid_file, "/tmp/statsite.pid") == 0);
     fail_unless(strcmp(config.input_counter, "foobar") == 0);
     fail_unless(config.extended_counters == true);
@@ -323,11 +322,9 @@ port = 10000\n\
 udp_port = 10001\n\
 flush_interval = 120\n\
 timer_eps = 0.005\n\
-stream_cmd = foo\n\
 log_level = INFO\n\
 log_facility = local0\n\
 daemonize = true\n\
-binary_stream = true\n\
 input_counter = foobar\n\
 pid_file = /tmp/statsite.pid\n\
 \n\
@@ -363,10 +360,8 @@ width=25\n\
     fail_unless(config.udp_port == 10001);
     fail_unless(strcmp(config.log_level, "INFO") == 0);
     fail_unless(config.timer_eps == (double)0.005);
-    fail_unless(strcmp(config.stream_cmd, "foo") == 0);
     fail_unless(config.flush_interval == 120);
     fail_unless(config.daemonize == true);
-    fail_unless(config.binary_stream == true);
     fail_unless(strcmp(config.pid_file, "/tmp/statsite.pid") == 0);
     fail_unless(strcmp(config.input_counter, "foobar") == 0);
 
@@ -519,11 +514,9 @@ parse_stdin = true\n\
 flush_interval = 120\n\
 timer_eps = 0.005\n\
 set_eps = 0.03\n\
-stream_cmd = foo\n\
 log_level = INFO\n\
 log_facility = level0\n\
 daemonize = true\n\
-binary_stream = true\n\
 input_counter = foobar\n\
 pid_file = /tmp/statsite.pid\n\
 global_prefix = statsd.\n\
@@ -550,10 +543,8 @@ sets_prefix=foo.sets.bar.";
     fail_unless(strcmp(config.log_level, "INFO") == 0);
     fail_unless(config.timer_eps == (double)0.005);
     fail_unless(config.set_eps == (double)0.03);
-    fail_unless(strcmp(config.stream_cmd, "foo") == 0);
     fail_unless(config.flush_interval == 120);
     fail_unless(config.daemonize == true);
-    fail_unless(config.binary_stream == true);
     fail_unless(strcmp(config.pid_file, "/tmp/statsite.pid") == 0);
     fail_unless(strcmp(config.input_counter, "foobar") == 0);
 
@@ -577,11 +568,9 @@ port = 10000\n\
 udp_port = 10001\n\
 flush_interval = 120\n\
 timer_eps = 0.005\n\
-stream_cmd = foo\n\
 log_level = INFO\n\
 log_facility = local0\n\
 daemonize = true\n\
-binary_stream = true\n\
 input_counter = foobar\n\
 pid_file = /tmp/statsite.pid\n\
 \n\
@@ -602,10 +591,8 @@ command=cat\n\
     fail_unless(config.udp_port == 10001);
     fail_unless(strcmp(config.log_level, "INFO") == 0);
     fail_unless(config.timer_eps == (double)0.005);
-    fail_unless(strcmp(config.stream_cmd, "foo") == 0);
     fail_unless(config.flush_interval == 120);
     fail_unless(config.daemonize == true);
-    fail_unless(config.binary_stream == true);
     fail_unless(strcmp(config.pid_file, "/tmp/statsite.pid") == 0);
     fail_unless(strcmp(config.input_counter, "foobar") == 0);
 
@@ -629,17 +616,15 @@ port = 10000\n\
 udp_port = 10001\n\
 flush_interval = 120\n\
 timer_eps = 0.005\n\
-stream_cmd = foo\n\
 log_level = INFO\n\
 log_facility = local0\n\
 daemonize = true\n\
-binary_stream = true\n\
 input_counter = foobar\n\
 pid_file = /tmp/statsite.pid\n\
 \n\
 [sink_stream_main]\n\
 binary=true\n\
-command=cat\n\
+command=foo\n\
 \n\
 [sink_stream_other]\n\
 binary=false\n\
@@ -658,10 +643,8 @@ command=not cat\n\
     fail_unless(config.udp_port == 10001);
     fail_unless(strcmp(config.log_level, "INFO") == 0);
     fail_unless(config.timer_eps == (double)0.005);
-    fail_unless(strcmp(config.stream_cmd, "foo") == 0);
     fail_unless(config.flush_interval == 120);
     fail_unless(config.daemonize == true);
-    fail_unless(config.binary_stream == true);
     fail_unless(strcmp(config.pid_file, "/tmp/statsite.pid") == 0);
     fail_unless(strcmp(config.input_counter, "foobar") == 0);
 
@@ -670,13 +653,13 @@ command=not cat\n\
     fail_unless(c->type == SINK_TYPE_STREAM);
     fail_unless(c->next != NULL);
     sink_config *c2 = c->next;
-    
+
     sink_config_stream *cs = (sink_config_stream*)c;
     sink_config_stream *cs2 = (sink_config_stream*)c2;
     fail_unless(cs->binary_stream == false);
     fail_unless(strcmp(cs->stream_cmd, "not cat") == 0);
     fail_unless(cs2->binary_stream == true);
-    fail_unless(strcmp(cs2->stream_cmd, "cat") == 0);
+    fail_unless(strcmp(cs2->stream_cmd, "foo") == 0);
 
     unlink("/tmp/ss_sink_multi");
 }
