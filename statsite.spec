@@ -99,7 +99,7 @@ exit 0
 %doc CHANGELOG.md
 %doc README.md
 %doc rpm/statsite.conf.example
-%config /etc/%{name}/statsite.conf
+%config(noreplace) /etc/%{name}/statsite.conf
 %attr(755, root, root) /usr/sbin/statsite
 %if 0%{?fedora}%{?el7}
 %attr(644, root, root) %{_unitdir}/statsite.service
