@@ -67,9 +67,11 @@ def pytest_funcarg__servers(request):
 flush_interval = 1
 port = %d
 udp_port = %d
-stream_cmd = %s
-binary_stream = yes
 
+[sink_stream_default]
+command = %s
+binary = yes
+    
 [histogram1]
 prefix=has_hist
 min=10
@@ -136,10 +138,12 @@ def pytest_funcarg__serversPrefix(request):
 flush_interval = 1
 port = %d
 udp_port = %d
-stream_cmd = %s
-binary_stream = yes
 prefix_binary_stream = true
 
+[sink_stream_default]
+command = %s
+binary = yes
+    
 [histogram1]
 prefix=has_hist
 min=10

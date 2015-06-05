@@ -13,12 +13,23 @@
 #include "hll.h"
 
 /**
- * Static pointer used for
- * while we are still parsing the configs
- * for a histogram.
+ * Allow more succint if blocks
+ */
+#define NAME_MATCH(param) (strcasecmp(param, name) == 0)
+
+/**
+ * Static pointer used for while we are still parsing the configs for
+ * a histogram or a sink.
+ *
+ * This is somewhat of a hack but its used only once. The alternative
+ * it to use a pure kv reader into memory and then re-parse the kv
+ * tree, but that was a larger yak-shave.
  */
 static char* histogram_section;
-static histogram_config *in_progress;
+static histogram_config *histogram_in_progress;
+
+static char* sink_section;
+static sink_config *sink_in_progress;
 
 /**
  * Default statsite_config values. Should create
@@ -36,13 +47,12 @@ static const statsite_config DEFAULT_CONFIG = {
     "local0",           // local0 logging facility
     LOG_LOCAL0,         // Syslog logging facility
     0.01,               // Default 1% error
-    "cat",              // Pipe to cat
     10,                 // Flush every 10 seconds
     0,                  // Do not daemonize
     "/var/run/statsite.pid", // Default pidfile path
-    0,                  // Do not use binary output by default
     NULL,               // Do not track number of messages received
     NULL,               // No histograms by default
+    NULL,               // No sinks are built
     NULL,
     0.02,               // 2% goal uses precision 12
     12,                 // Set precision 12, 1.6% variance
@@ -55,6 +65,15 @@ static const statsite_config DEFAULT_CONFIG = {
                         // Number of quantiles
     sizeof(default_quantiles) / sizeof(double),
     default_quantiles,  // Quantiles
+};
+
+static const sink_config_stream DEFAULT_SINK = {
+    .super = { .type = SINK_TYPE_STREAM,
+               .name = "default",
+               .next = NULL
+    },
+    .binary_stream = false,
+    .stream_cmd = "cat"
 };
 
 /**
@@ -174,6 +193,95 @@ static int name_to_facility(const char *val, int *result) {
 }
 
 /**
+ * Commit any in-progress sinks, either when we switched sections
+ * or when the configuration file has ended.
+ */
+static void sink_commit(statsite_config *config) {
+    /* Todo: validate something here */
+
+    if (sink_in_progress) {
+        sink_config* last = config->sink_configs;
+        if (last)
+            sink_in_progress->next = last;
+        config->sink_configs = sink_in_progress;
+    }
+
+    /* Cleanup */
+    sink_in_progress = NULL;
+    if (sink_section) {
+        free(sink_section);
+        sink_section = NULL;
+    }
+    return;
+}
+
+/**
+ * Callback function to use with INIH for parsing sink configurations.
+ * The sink type is currently encoded into the section name to
+ * simplify instantiating the correct configuration type.
+ */
+static int sink_callback(void* user, const char* section, const char* name, const char* value) {
+
+    statsite_config *all_config = (statsite_config*)user;
+
+    /* The sink section does not match - lets commit since we're on to a new one now */
+    if (sink_in_progress && strcasecmp(sink_section, section)) {
+        sink_commit(all_config);
+    }
+
+    /* Nothing in progress? Create it! */
+    if (!sink_in_progress) {
+        if (!sink_section)
+            sink_section = strdup(section);
+
+        char* section_to_tokenize = strdup(section);
+        char* tok = NULL;
+        char* header = strtok_r(section_to_tokenize, "_", &tok);
+        char* type = strtok_r(NULL, "_", &tok);
+        char* name = strtok_r(NULL, "_", &tok);
+
+        if (header == NULL || type == NULL || name == NULL) {
+            free(section_to_tokenize);
+            syslog(LOG_WARNING, "Sink section %s is not of the form \"sink_[type]_[name]\"", section);
+            return 0;
+        }
+        /* Match various sink types to find their type */
+        if (strcasecmp(type, "stream") == 0) {
+            sink_config_stream* config = calloc(1, sizeof(sink_config_stream));
+            sink_in_progress = (sink_config*)config;
+            config->super.type = SINK_TYPE_STREAM;
+            config->super.name = strdup(name);
+            config->stream_cmd = DEFAULT_SINK.stream_cmd;
+        } else {
+            free(section_to_tokenize);
+            /* Unknown sink type - abort! */
+            syslog(LOG_WARNING, "Unknown sink type: %s for sink: %s", type, name);
+            return 0;
+        }
+        free(section_to_tokenize);
+    }
+
+    /* Quickie - we only have one sink type this second so just up-cast it */
+    if (sink_in_progress->type != SINK_TYPE_STREAM) {
+        syslog(LOG_WARNING, "Grevious state problem");
+        return 0;
+    }
+
+    sink_config_stream* config = (sink_config_stream*)sink_in_progress;
+    if (NAME_MATCH("binary")) {
+        return value_to_bool(value, &config->binary_stream);
+    } else if (NAME_MATCH("command")) {
+        config->stream_cmd = strdup(value);
+    } else {
+        syslog(LOG_NOTICE, "Unrecognized stream sink parameter: %s", name);
+        return 0;
+    }
+
+    return 1;
+}
+
+
+/**
  * Callback function to use with INIH for parsing histogram configs
  * @arg user Opaque value. Actually a statsite_config pointer
  * @arg name The config name
@@ -182,49 +290,46 @@ static int name_to_facility(const char *val, int *result) {
  */
 static int histogram_callback(void* user, const char* section, const char* name, const char* value) {
     // Make sure we don't change sections with an unfinished config
-    if (in_progress && strcasecmp(histogram_section, section)) {
+    if (histogram_in_progress && strcasecmp(histogram_section, section)) {
         syslog(LOG_WARNING, "Unfinished configuration for section: %s", histogram_section);
         return 0;
     }
 
     // Ensure we have something in progress
-    if (!in_progress) {
-        in_progress = calloc(1, sizeof(histogram_config));
+    if (!histogram_in_progress) {
+        histogram_in_progress = calloc(1, sizeof(histogram_config));
         histogram_section = strdup(section);
     }
 
     // Cast the user handle
     statsite_config *config = (statsite_config*)user;
 
-    // Switch on the config
-    #define NAME_MATCH(param) (strcasecmp(param, name) == 0)
-
     int res = 1;
     if (NAME_MATCH("prefix")) {
-        in_progress->parts |= 1;
-        in_progress->prefix = strdup(value);
+        histogram_in_progress->parts |= 1;
+        histogram_in_progress->prefix = strdup(value);
 
     } else if (NAME_MATCH("min")) {
-        in_progress->parts |= 1 << 1;
-        res = value_to_double(value, &in_progress->min_val);
+        histogram_in_progress->parts |= 1 << 1;
+        res = value_to_double(value, &histogram_in_progress->min_val);
 
     } else if (NAME_MATCH("max")) {
-        in_progress->parts |= 1 << 2;
-        res = value_to_double(value, &in_progress->max_val);
+        histogram_in_progress->parts |= 1 << 2;
+        res = value_to_double(value, &histogram_in_progress->max_val);
 
     } else if (NAME_MATCH("width")) {
-        in_progress->parts |= 1 << 3;
-        res = value_to_double(value, &in_progress->bin_width);
+        histogram_in_progress->parts |= 1 << 3;
+        res = value_to_double(value, &histogram_in_progress->bin_width);
 
     } else {
         syslog(LOG_NOTICE, "Unrecognized histogram config parameter: %s", value);
     }
 
     // Check if this config is done, and push into the list of configs
-    if (in_progress->parts == 15) {
-        in_progress->next = config->hist_configs;
-        config->hist_configs = in_progress;
-        in_progress = NULL;
+    if (histogram_in_progress->parts == 15) {
+        histogram_in_progress->next = config->hist_configs;
+        config->hist_configs = histogram_in_progress;
+        histogram_in_progress = NULL;
         free(histogram_section);
         histogram_section = NULL;
     }
@@ -245,16 +350,18 @@ static int config_callback(void* user, const char* section, const char* name, co
         return histogram_callback(user, section, name, value);
     }
 
+    if (strncasecmp("sink", section, 4) == 0) {
+        return sink_callback(user, section, name, value);
+    }
+
     // Ignore any non-statsite sections
     if (strcasecmp("statsite", section) != 0) {
+        syslog(LOG_NOTICE, "Unknown values in section ignored: %s", section);
         return 0;
     }
 
     // Cast the user handle
     statsite_config *config = (statsite_config*)user;
-
-    // Switch on the config
-    #define NAME_MATCH(param) (strcasecmp(param, name) == 0)
 
     // Handle the int cases
     if (NAME_MATCH("port")) {
@@ -269,8 +376,6 @@ static int config_callback(void* user, const char* section, const char* name, co
         return value_to_bool(value, &config->parse_stdin);
     } else if (NAME_MATCH("daemonize")) {
         return value_to_bool(value, &config->daemonize);
-    } else if (NAME_MATCH("binary_stream")) {
-        return value_to_bool(value, &config->binary_stream);
     } else if (NAME_MATCH("use_type_prefix")) {
         return value_to_bool(value, &config->use_type_prefix);
     } else if (NAME_MATCH("extended_counters")) {
@@ -293,8 +398,6 @@ static int config_callback(void* user, const char* section, const char* name, co
         config->log_level = strdup(value);
     } else if (NAME_MATCH("log_facility")) {
         config->log_facility = strdup(value);
-    } else if (NAME_MATCH("stream_cmd")) {
-        config->stream_cmd = strdup(value);
     } else if (NAME_MATCH("pid_file")) {
         config->pid_file = strdup(value);
     } else if (NAME_MATCH("input_counter")) {
@@ -361,32 +464,45 @@ int prepare_prefixes(statsite_config *config)
  */
 
 int config_from_filename(char *filename, statsite_config *config) {
+    int ret = 0;
     // Initialize to the default values
     memcpy(config, &DEFAULT_CONFIG, sizeof(statsite_config));
 
     // If there is no filename, return now
-    if (filename == NULL)
-        return 0;
+    if (filename == NULL) {
+        ret = 0;
+        goto exit;
+    }
 
     // Try to open the file
     int res = ini_parse(filename, config_callback, config);
     if (res == -1) {
-        return -ENOENT;
+        ret = -ENOENT;
     } else if (res) {
         syslog(LOG_ERR, "Failed to parse config on line: %d", res);
-        return -res;
+        ret = -res;
     }
 
+exit:
+
     // Check for an unfinished histogram
-    if (in_progress) {
+    if (histogram_in_progress) {
         syslog(LOG_WARNING, "Unfinished configuration for section: %s", histogram_section);
         free(histogram_section);
-        free(in_progress);
-        in_progress = NULL;
+        free(histogram_in_progress);
+        histogram_in_progress = NULL;
         histogram_section = NULL;
     }
 
-    return 0;
+    if (sink_in_progress)
+        sink_commit(config);
+
+    /* Fill in a default sink if there is none specified */
+    if (config->sink_configs == NULL) {
+        config->sink_configs = (sink_config*)&DEFAULT_SINK;
+    }
+
+    return ret;
 }
 
 /**

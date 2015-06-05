@@ -2,6 +2,7 @@
 #define CONN_HANDLER_H
 #include "config.h"
 #include "networking.h"
+#include "sink.h"
 
 /**
  * This structure is used to communicate
@@ -21,7 +22,7 @@ void init_conn_handler(statsite_config *config);
 /**
  * Invoked to when we've reached the flush interval timeout
  */
-void flush_interval_trigger();
+void flush_interval_trigger(sink* sinks);
 
 /**
  * Called when statsite is terminating to flush the

@@ -5,9 +5,11 @@ log_level=INFO
 flush_interval=10
 timer_eps=0.01
 set_eps=0.02
-stream_cmd=python sinks/graphite.py localhost 2003
 daemonize=1
 pid_file=/var/run/statsite/statsite.pid
+
+[sink_stream_default]
+command=cat > /tmp/statsite-latest
 
 [histogram_api]
 prefix=api

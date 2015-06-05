@@ -27,7 +27,7 @@ static int stream_cb(void *data, metric_type type, char *name, void *val) {
  * @arg cmd The command to invoke, invoked with a shell.
  * @return 0 on success, or the value of stream callback.
  */
-int stream_to_command(metrics *m, void *data, stream_callback cb, char *cmd) {
+int stream_to_command(metrics *m, void *data, stream_callback cb, const char *cmd) {
     // Create a pipe to the child
     int filedes[2] = {0, 0};
     int res = pipe(filedes);

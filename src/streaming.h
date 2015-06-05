@@ -18,7 +18,7 @@ typedef int(*stream_callback)(FILE *pipe, void *data, metric_type type, char *na
  * @arg cmd The command to invoke, invoked with a shell.
  * @return 0 on success, or the value of stream callback.
  */
-int stream_to_command(metrics *m, void *data, stream_callback cb, char *cmd);
+int stream_to_command(metrics *m, void *data, stream_callback cb, const char *cmd);
 
 #endif
 

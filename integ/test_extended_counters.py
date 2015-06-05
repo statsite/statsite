@@ -31,9 +31,10 @@ def pytest_funcarg__servers(request):
 flush_interval = 1
 port = %d
 udp_port = %d
-stream_cmd = %s
 extended_counters = true
 
+[sink_stream_default]
+command = %s
 """ % (port, port, cmd)
     open(config_path, "w").write(conf)
 
