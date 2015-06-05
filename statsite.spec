@@ -2,7 +2,7 @@
 
 Name:		statsite
 Version:	0.7.1
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	A C implementation of statsd.
 Group:		Applications
 License:	See the LICENSE file.
@@ -49,8 +49,14 @@ make clean
 [ "%{buildroot}" != "/" ] && rm -rf %{buildroot}
 
 %pre
+/usr/bin/getent group statsite >/dev/null 2>&1 || \
+  /usr/sbin/groupadd -r statsite >/dev/null 2>&1 || :;
+useradd_option=%{?el5:-n}%{!?el5:-N}
 
-/usr/bin/getent passwd statsite > /dev/null || /usr/sbin/useradd -r -d / -s /sbin/nologin statsite
+/usr/bin/getent passwd statsite >/dev/null 2>&1 || \
+    /usr/sbin/useradd  -r "${useradd_option}" -M -g statsite \
+      -c "statsite Service Account" \
+      -s /sbin/nologin statsite >/dev/null 2>&1 || :;
 
 %post
 
@@ -121,6 +127,9 @@ exit 0
 %attr(755, root, root) /usr/libexec/statsite/sinks/opentsdb.js
 
 %changelog
+* Fri Jun 05 2015 Yann Ramin - 0.7.1-2
+- Fix user creation in statsite
+
 * Tue May 12 2015 Yann Ramin <yann@twitter.com> - 0.7.1-1
 - Add a statsite user and group
 - Add systemd support
