@@ -3,7 +3,7 @@ NAME=$(shell rpm -q --qf '%{name}\n' --specfile rpm/*.spec | head -1)
 VERSION=$(shell rpm -q --qf '%{version}\n' --specfile rpm/*.spec | head -1)
 
 build:
-	scons statsite
+	scons -j4 statsite
 
 clean:
 	scons --clean test_runner
@@ -38,4 +38,3 @@ rpms: sdist build
         -ba $(RPMBUILDROOT)/statsite.spec
 
 .PHONY: build test
-

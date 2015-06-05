@@ -161,6 +161,7 @@ static int hashmap_insert_table(hashmap_entry *table, int table_size, char *key,
 
     // Look for an entry
     hashmap_entry *entry = table+index;
+    // last_entry governs if we saw any nodes with keys
     hashmap_entry *last_entry = NULL;
 
     // Scan the keys
@@ -176,19 +177,21 @@ static int hashmap_insert_table(hashmap_entry *table, int table_size, char *key,
         entry = entry->next;
     }
 
-    // If last entry is NULL, we can just
-    // insert directly into the table slot
-    // since it is empty
-    if (last_entry == NULL) {
+    // If last entry is NULL, we can just insert directly into the
+    // table slot since it is empty
+    if (entry && last_entry == NULL) {
         entry->key = (should_dup) ? strdup(key) : key;
         entry->value = value;
 
-    // We have a last value, need to link against it
-    } else {
+    // We have a last value, need to link against it with our new
+    // value.
+    } else if (last_entry) {
         entry = calloc(1, sizeof(hashmap_entry));
         entry->key = (should_dup) ? strdup(key) : key;
         entry->value = value;
         last_entry->next = entry;
+    } else {
+        return -1;
     }
     return 1;
 }
