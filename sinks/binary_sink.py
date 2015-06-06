@@ -21,7 +21,7 @@ TYPE_MAP = {
 VAL_TYPE_MAP = {
     0: "kv",
     1: "sum",
-    2: "sum sq",
+    2: "sum_sq",
     3: "mean",
     4: "count",
     5: "stddev",
@@ -30,6 +30,8 @@ VAL_TYPE_MAP = {
     8: "hist_min",
     9: "hist_bin",
     10: "hist_max",
+    11: "count_rate",
+    12: "sample_rate",
     128: "percentile"
 }
 # Pre-compute all the possible percentiles
