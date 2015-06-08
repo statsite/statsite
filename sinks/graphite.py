@@ -39,7 +39,7 @@ class GraphiteStore(object):
         Flushes the metrics provided to Graphite.
 
        :Parameters:
-        - `metrics` : A list of (key,value,timestamp) tuples.
+        - `metrics` : A list of "key|value|timestamp" strings.
         """
         if not metrics:
             return
