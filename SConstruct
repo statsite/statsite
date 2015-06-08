@@ -1,5 +1,12 @@
+import os
 from copy import copy
 import platform
+
+ENV = Environment()
+ENV["CC"] = os.getenv("CC") or ENV["CC"]
+ENV["CXX"] = os.getenv("CXX") or ENV["CXX"]
+ENV["PATH"] = os.getenv("PATH") or ENV["PATH"]
+ENV["ENV"].update(x for x in os.environ.items() if x[0].startswith("CCC_"))
 
 CFLAGS = ["-Wall",
           "-Wno-unused-function",
@@ -20,15 +27,15 @@ CFLAGS_LIBEV.extend(["-Wno-strict-aliasing",
                      "-Wno-comment",
                      "-Wno-parentheses"])
 
-envmurmur = Environment(CPATH = ['deps/murmurhash/'], CFLAGS=" ".join(CFLAGS))
+envmurmur = ENV.Clone(CPATH = ['deps/murmurhash/'], CFLAGS=" ".join(CFLAGS))
 murmur = envmurmur.Library('murmur', Glob("deps/murmurhash/*.c"))
 
-envinih = Environment(CPATH = ['deps/inih/'], CFLAGS= " ".join(CFLAGS))
+envinih = ENV.Clone(CPATH = ['deps/inih/'], CFLAGS= " ".join(CFLAGS))
 inih = envinih.Library('inih', Glob("deps/inih/*.c"))
 
-env_statsite_with_err = Environment(CFLAGS = " ".join(CFLAGS_ERROR))
-env_statsite_without_err = Environment(CFLAGS = " ".join(CFLAGS))
-env_statsite_libev = Environment(CFLAGS = " ".join(CFLAGS_LIBEV))
+env_statsite_with_err = ENV.Clone(CFLAGS = " ".join(CFLAGS_ERROR))
+env_statsite_without_err = ENV.Clone(CFLAGS = " ".join(CFLAGS))
+env_statsite_libev = ENV.Clone(CFLAGS = " ".join(CFLAGS_LIBEV))
 
 objs = env_statsite_with_err.Object('src/hashmap', 'src/hashmap.c')           + \
         env_statsite_with_err.Object('src/heap', 'src/heap.c')                + \

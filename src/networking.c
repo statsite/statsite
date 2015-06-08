@@ -335,6 +335,8 @@ static void handle_new_client(ev_io *watcher, int ready_events) {
     int listen_fd = watcher->fd;
     struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
+    bzero(&client_addr, sizeof(client_addr));
+
     int client_fd = accept(listen_fd,
                         (struct sockaddr*)&client_addr,
                         &client_addr_len);
@@ -503,16 +505,19 @@ static void invoke_event_handler(ev_io *watcher, int ready_events) {
  */
 void enter_networking_loop(statsite_networking *netconf, volatile int *signum) {
     // Allocate our user data
-    worker_ev_userdata data;
-    data.netconf = netconf;
+    worker_ev_userdata* data = calloc(1, sizeof(worker_ev_userdata));
+    data->netconf = netconf;
 
     // Set the user data to be for this thread
-    ev_set_userdata(&data);
+    ev_set_userdata(data);
 
     // Run forever until we are told to halt
     while (likely(*signum == 0)) {
         ev_run(EVRUN_ONCE);
     }
+
+    // Do not free userdata - this leaks, but is only handled while
+    // running and not in a shutdown state.
     return;
 }
 
