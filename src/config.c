@@ -252,6 +252,11 @@ static int sink_callback(void* user, const char* section, const char* name, cons
             config->super.type = SINK_TYPE_STREAM;
             config->super.name = strdup(name);
             config->stream_cmd = DEFAULT_SINK.stream_cmd;
+        } else if (strcasecmp(type, "http") == 0) {
+            sink_config_http* config = calloc(1, sizeof(sink_config_http));
+            sink_in_progress = (sink_config*)config;
+            config->super.type = SINK_TYPE_HTTP;
+            config->super.name = strdup(name);
         } else {
             free(section_to_tokenize);
             /* Unknown sink type - abort! */
@@ -261,19 +266,42 @@ static int sink_callback(void* user, const char* section, const char* name, cons
         free(section_to_tokenize);
     }
 
-    /* Quickie - we only have one sink type this second so just up-cast it */
-    if (sink_in_progress->type != SINK_TYPE_STREAM) {
-        syslog(LOG_WARNING, "Grevious state problem");
-        return 0;
-    }
 
-    sink_config_stream* config = (sink_config_stream*)sink_in_progress;
-    if (NAME_MATCH("binary")) {
-        return value_to_bool(value, &config->binary_stream);
-    } else if (NAME_MATCH("command")) {
-        config->stream_cmd = strdup(value);
+    if (sink_in_progress->type == SINK_TYPE_STREAM) {
+        sink_config_stream* config = (sink_config_stream*)sink_in_progress;
+        if (NAME_MATCH("binary")) {
+            return value_to_bool(value, &config->binary_stream);
+        } else if (NAME_MATCH("command")) {
+            config->stream_cmd = strdup(value);
+        } else {
+            syslog(LOG_NOTICE, "Unrecognized stream sink parameter: %s", name);
+            return 0;
+        }
+    } else if (sink_in_progress->type == SINK_TYPE_HTTP) {
+        sink_config_http* config = (sink_config_http*)sink_in_progress;
+        if (NAME_MATCH("url")) {
+            config->post_url = strdup(value);
+        } else {
+            /* Attempt to locate keys
+             * of the form param_PNAME */
+            char* param_tok = strdup(name);
+            char* tok = NULL;
+            char* header = strtok_r(param_tok, "_", &tok);
+            char* param = strtok_r(NULL, "_", &tok);
+            if (header == NULL || param == NULL || strcasecmp("param", header) != 0) {
+                syslog(LOG_NOTICE, "Unrecognized http sink parameters: %s: %s", name, header);
+                free(param_tok);
+                return 0;
+            }
+            kv_config* last_kv = config->params;
+            config->params = calloc(1, sizeof(kv_config));
+            config->params->k = strdup(param);
+            config->params->v = strdup(value);
+            config->params->next = last_kv;
+            free(param_tok);
+        }
     } else {
-        syslog(LOG_NOTICE, "Unrecognized stream sink parameter: %s", name);
+        syslog(LOG_WARNING, "Grevious state problem");
         return 0;
     }
 
