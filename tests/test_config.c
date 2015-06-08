@@ -630,7 +630,7 @@ command=foo\n\
 binary=false\n\
 command=not cat\n\
 [sink_http_hi]\n\
-url=https://google.com\n\
+url=https://example.com\n\
 param_bar=barbar\n\
 param_hello=foo\n\
 \n\
@@ -673,7 +673,7 @@ param_hello=foo\n\
     fail_unless(strcmp(cs2->stream_cmd, "foo") == 0);
 
     sink_config_http *ch = (sink_config_http*)c;
-    ck_assert_str_eq(ch->post_url, "https://google.com");
+    ck_assert_str_eq(ch->post_url, "https://example.com");
     fail_unless(ch->params != NULL);
     ck_assert_str_eq(ch->params->k, "hello");
     ck_assert_str_eq(ch->params->v, "foo");

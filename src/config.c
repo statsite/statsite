@@ -266,8 +266,9 @@ static int sink_callback(void* user, const char* section, const char* name, cons
         free(section_to_tokenize);
     }
 
-
-    if (sink_in_progress->type == SINK_TYPE_STREAM) {
+    switch(sink_in_progress->type) {
+    case SINK_TYPE_STREAM:
+    {
         sink_config_stream* config = (sink_config_stream*)sink_in_progress;
         if (NAME_MATCH("binary")) {
             return value_to_bool(value, &config->binary_stream);
@@ -277,7 +278,10 @@ static int sink_callback(void* user, const char* section, const char* name, cons
             syslog(LOG_NOTICE, "Unrecognized stream sink parameter: %s", name);
             return 0;
         }
-    } else if (sink_in_progress->type == SINK_TYPE_HTTP) {
+        break;
+    }
+    case SINK_TYPE_HTTP:
+    {
         sink_config_http* config = (sink_config_http*)sink_in_progress;
         if (NAME_MATCH("url")) {
             config->post_url = strdup(value);
@@ -300,7 +304,9 @@ static int sink_callback(void* user, const char* section, const char* name, cons
             config->params->next = last_kv;
             free(param_tok);
         }
-    } else {
+        break;
+    }
+    default:
         syslog(LOG_WARNING, "Grevious state problem");
         return 0;
     }
