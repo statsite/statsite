@@ -629,6 +629,12 @@ command=foo\n\
 [sink_stream_other]\n\
 binary=false\n\
 command=not cat\n\
+[sink_http_hi]\n\
+url=https://example.com\n\
+param_bar=barbar\n\
+param_hello=foo\n\
+\n\
+\n\
 ";
     write(fh, buf, strlen(buf));
     fchmod(fh, 777);
@@ -650,16 +656,32 @@ command=not cat\n\
 
     sink_config *c = config.sink_configs;
     fail_unless(c != NULL);
-    fail_unless(c->type == SINK_TYPE_STREAM);
+    fail_unless(c->type == SINK_TYPE_HTTP);
     fail_unless(c->next != NULL);
     sink_config *c2 = c->next;
+    fail_unless(c2->type == SINK_TYPE_STREAM);
+    fail_unless(c2->next != NULL);
+    sink_config *c3 = c2->next;
+    fail_unless(c3->type == SINK_TYPE_STREAM);
+    fail_unless(c3->next == NULL);
 
-    sink_config_stream *cs = (sink_config_stream*)c;
-    sink_config_stream *cs2 = (sink_config_stream*)c2;
+    sink_config_stream *cs = (sink_config_stream*)c2;
+    sink_config_stream *cs2 = (sink_config_stream*)c3;
     fail_unless(cs->binary_stream == false);
     fail_unless(strcmp(cs->stream_cmd, "not cat") == 0);
     fail_unless(cs2->binary_stream == true);
     fail_unless(strcmp(cs2->stream_cmd, "foo") == 0);
+
+    sink_config_http *ch = (sink_config_http*)c;
+    ck_assert_str_eq(ch->post_url, "https://example.com");
+    fail_unless(ch->params != NULL);
+    ck_assert_str_eq(ch->params->k, "hello");
+    ck_assert_str_eq(ch->params->v, "foo");
+    fail_unless(ch->params->next != NULL);
+    kv_config* p2 = ch->params->next;
+    ck_assert_str_eq(p2->k, "bar");
+    ck_assert_str_eq(p2->v, "barbar");
+    fail_unless(p2->next == NULL);
 
     unlink("/tmp/ss_sink_multi");
 }

@@ -16,7 +16,8 @@ typedef enum {
 } metric_type;
 
 typedef enum {
-    SINK_TYPE_STREAM
+    SINK_TYPE_STREAM,
+    SINK_TYPE_HTTP
 } sink_type;
 
 #define METRIC_TYPES 7
@@ -52,6 +53,15 @@ typedef struct sink_config_stream {
     bool binary_stream;
     const char* stream_cmd;
 } sink_config_stream;
+
+/**
+ * An HTTP sink config.
+ */
+typedef struct sink_config_http {
+    sink_config super;
+    const char* post_url;
+    kv_config* params;
+} sink_config_http;
 
 // Represents the configuration of a histogram
 typedef struct histogram_config {
