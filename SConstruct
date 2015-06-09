@@ -52,6 +52,7 @@ objs = env_statsite_with_err.Object('src/hashmap', 'src/hashmap.c')           + 
         env_statsite_with_err.Object('src/circqueue', 'src/circqueue.c')      + \
         env_statsite_with_err.Object('src/sink', 'src/sink.c')                + \
         env_statsite_with_err.Object('src/sink_stream', 'src/sink_stream.c')  + \
+        env_statsite_with_err.Object('src/lifoq', 'src/lifoq.c')              + \
         env_statsite_libev.Object('src/networking', 'src/networking.c')       + \
         env_statsite_libev.Object('src/conn_handler', 'src/conn_handler.c')
 
