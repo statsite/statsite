@@ -61,11 +61,8 @@ int strbuf_catsprintf(strbuf* buf, const char* fmt, ...) {
             buf->len += printed;
             return buf->len;
         }
-
         expand(buf, printed + 1);
     }
-
-
     return 0;
 }
 

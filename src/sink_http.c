@@ -2,10 +2,12 @@
 #include <inttypes.h>
 #include <string.h>
 #include <jansson.h>
+#include <curl/curl.h>
 
 #include "metrics.h"
 #include "sink.h"
 #include "strbuf.h"
+
 
 
 typedef struct http_sink {
@@ -129,13 +131,14 @@ static int json_cb(const char* buf, size_t size, void* d) {
 
 static int serialize_metrics(http_sink* sink, metrics* m, void* data) {
     json_t* jobject = json_object();
+    const sink_config_http* httpconfig = (const sink_config_http*)sink->sink.sink_config;
 
     struct cb_info info = {
         .jobject = jobject,
         .config = sink->sink.global_config,
-        .httpconfig = (const sink_config_http*)sink->sink.sink_config
+        .httpconfig = httpconfig
     };
-
+    /* produce a metrics json object */
     metrics_iter(m, &info, add_metrics);
 
     strbuf* json_buf;
@@ -144,14 +147,47 @@ static int serialize_metrics(http_sink* sink, metrics* m, void* data) {
 
     int json_len = 0;
     char* json_data = strbuf_get(json_buf, &json_len);
-    strbuf_free(json_buf, false);
+    json_decref(jobject);
 
-    fprintf(stderr, "%s\n", json_data);
-    fprintf(stderr, "\n");
+    /* Start working on the post buffer contents */
+    strbuf* post_buf;
+    strbuf_new(&post_buf, 128);
+
+    CURL* curl = curl_easy_init();
+
+    /* Encode the json document as a parameter */
+    char *escaped_json_data = curl_easy_escape(curl, json_data, json_len);
+    strbuf_catsprintf(post_buf, "%s=%s", httpconfig->metrics_name, escaped_json_data);
+    strbuf_free(json_buf, true);
+    curl_free(escaped_json_data);
+
+    /* Encode the time stamp */
+    struct timeval* tv = (struct timeval*) data;
+    struct tm tm;
+    gmtime_r(&tv->tv_sec, &tm);
+    char time_buf[200];
+    strftime(time_buf, 200, httpconfig->timestamp_format, &tm);
+    char* encoded_time = curl_easy_escape(curl, time_buf, 0);
+    strbuf_catsprintf(post_buf, "&%s=%s", httpconfig->timestamp_name, encoded_time);
+    curl_free(encoded_time);
+
+    /* Encode all the free-form parameters from configuration */
+    for (kv_config* kv = httpconfig->params; kv != NULL; kv = kv->next) {
+        char* encoded = curl_easy_escape(curl, kv->v, 0);
+        strbuf_catsprintf(post_buf, "&%s=%s", kv->k, encoded);
+        curl_free(encoded);
+    }
+
+    curl_easy_cleanup(curl);
+
+    int post_len = 0;
+    char* post_data = strbuf_get(post_buf, &post_len);
+    strbuf_free(post_buf, false);
+
+    /* TODO: Leave debugging in place for now */
+    fprintf(stderr, "%s\n", post_data);
     fflush(stderr);
 
-    free(json_data);
-    json_decref(jobject);
     return 0;
 }
 

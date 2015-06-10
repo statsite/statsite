@@ -58,7 +58,7 @@ objs = env_statsite_with_err.Object('src/hashmap', 'src/hashmap.c')           + 
         env_statsite_libev.Object('src/networking', 'src/networking.c')       + \
         env_statsite_libev.Object('src/conn_handler', 'src/conn_handler.c')
 
-statsite_libs = ["m", "pthread", murmur, inih, "jansson"]
+statsite_libs = ["m", "pthread", murmur, inih, "jansson", "curl"]
 if platform.system() == 'Linux':
    statsite_libs.append("rt")
 
