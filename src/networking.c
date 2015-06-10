@@ -251,8 +251,9 @@ static int setup_stdin_listener(statsite_networking *netconf) {
  * @arg config Takes the bloom server configuration
  * @arg mgr The filter manager to pass up to the connection handlers
  * @arg netconf Output. The configuration for the networking stack.
+ * @arg sinks The sinks to use for this network loop
  */
-int init_networking(statsite_config *config, statsite_networking **netconf_out) {
+int init_networking(statsite_config *config, statsite_networking **netconf_out, sink* sinks) {
     // Initialize the netconf structure
     statsite_networking *netconf = calloc(1, sizeof(struct statsite_networking));
     netconf->config = config;
@@ -299,7 +300,7 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
     }
 
     // Setup sinks
-    init_sinks(&netconf->sinks, config);
+    netconf->sinks = sinks;
 
     // Setup the timer
     ev_timer_init(&netconf->flush_timer, handle_flush_event, config->flush_interval, config->flush_interval);

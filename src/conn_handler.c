@@ -78,7 +78,7 @@ static void* flush_thread(void *arg) {
             syslog(LOG_WARNING, "Streaming command %s exited with status %d", s->sink_config->name, res);
         }
     }
-    
+
     // Cleanup
     destroy_metrics(m);
     free(m);
@@ -127,11 +127,17 @@ void flush_interval_trigger(sink* sinks) {
  * Called when statsite is terminating to flush the
  * final set of metrics
  */
-void final_flush() {
+void final_flush(sink* sinks) {
     // Get the last set of metrics
     metrics *old = GLOBAL_METRICS;
     GLOBAL_METRICS = NULL;
-    flush_thread(old);
+
+    /* We heap allocate this in order to allow it to be freed by the function */
+    struct flush_op* ops = calloc(1, sizeof(struct flush_op));
+    ops->m = old;
+    ops->sinks = sinks;
+
+    flush_thread(ops);
 }
 
 

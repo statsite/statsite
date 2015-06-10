@@ -1,5 +1,6 @@
 #ifndef NETWORKING_H
 #define NETWORKING_H
+#include "sink.h"
 #include "config.h"
 
 // Network configuration struct
@@ -11,7 +12,7 @@ typedef struct conn_info statsite_conn_info;
  * @arg config Takes the statsite server configuration
  * @arg netconf Output. The configuration for the networking stack.
  */
-int init_networking(statsite_config *config, statsite_networking **netconf_out);
+int init_networking(statsite_config *config, statsite_networking **netconf_out, sink* sinks);
 
 /**
  * Entry point for main thread to enter the networking
