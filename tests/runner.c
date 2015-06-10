@@ -13,6 +13,7 @@
 #include "test_hll.c"
 #include "test_set.c"
 #include "test_lifoq.c"
+#include "test_strbuf.c"
 
 int main(void)
 {
@@ -31,6 +32,7 @@ int main(void)
     TCase *tc10 = tcase_create("hyperloglog");
     TCase *tc11 = tcase_create("set");
     TCase *tc12 = tcase_create("lifoq");
+    TCase *tc13 = tcase_create("strbuf");
     SRunner *sr = srunner_create(s1);
     int nf;
 
@@ -125,7 +127,7 @@ int main(void)
     tcase_add_test(tc8, test_sane_quantiles);
     tcase_add_test(tc8, test_basic_sink);
     tcase_add_test(tc8, test_multi_sink);
-    
+
     // Add the radix tests
     suite_add_tcase(s1, tc9);
     tcase_add_test(tc9, test_radix_init_and_destroy);
@@ -159,10 +161,16 @@ int main(void)
     tcase_add_test(tc12, test_lifoq_overflow);
     tcase_add_test(tc12, test_lifoq_close);
 
+    // Add the strbuf tests
+    suite_add_tcase(s1, tc13);
+    tcase_add_test(tc13, test_strbuf_new);
+    tcase_add_test(tc13, test_strbuf_printf);
+    tcase_add_test(tc13, test_strbuf_big);
+
+
     srunner_run_all(sr, CK_ENV);
     nf = srunner_ntests_failed(sr);
     srunner_free(sr);
 
     return nf == 0 ? 0 : 1;
 }
-

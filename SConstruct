@@ -39,6 +39,7 @@ env_statsite_libev = ENV.Clone(CFLAGS = " ".join(CFLAGS_LIBEV))
 
 objs = env_statsite_with_err.Object('src/hashmap', 'src/hashmap.c')           + \
         env_statsite_with_err.Object('src/heap', 'src/heap.c')                + \
+        env_statsite_with_err.Object('src/strbuf', 'src/strbuf.c')            + \
         env_statsite_with_err.Object('src/radix', 'src/radix.c')              + \
         env_statsite_with_err.Object('src/hll_constants', 'src/hll_constants.c') + \
         env_statsite_with_err.Object('src/hll', 'src/hll.c')                  + \

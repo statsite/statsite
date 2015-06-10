@@ -76,6 +76,18 @@ static const sink_config_stream DEFAULT_SINK = {
     .stream_cmd = "cat"
 };
 
+static const sink_config_http DEFAULT_HTTP_SINK = {
+    .super = { .type = SINK_TYPE_HTTP,
+               .name = "default",
+               .next = NULL
+    },
+    .post_url = NULL,
+    .params = NULL,
+    .metrics_name = "metrics",
+    .timestamp_name = "timestamp",
+    .timestamp_format = "%s" /* Seconds since epoch */
+};
+
 /**
  * Attempts to convert a string to a boolean,
  * and write the value out.
@@ -253,9 +265,10 @@ static int sink_callback(void* user, const char* section, const char* name, cons
             config->super.name = strdup(name);
             config->stream_cmd = DEFAULT_SINK.stream_cmd;
         } else if (strcasecmp(type, "http") == 0) {
-            sink_config_http* config = calloc(1, sizeof(sink_config_http));
+            sink_config_http* config = malloc(sizeof(sink_config_http));
+
+            memcpy(config, &DEFAULT_HTTP_SINK, sizeof(sink_config_http));
             sink_in_progress = (sink_config*)config;
-            config->super.type = SINK_TYPE_HTTP;
             config->super.name = strdup(name);
         } else {
             free(section_to_tokenize);
@@ -285,6 +298,12 @@ static int sink_callback(void* user, const char* section, const char* name, cons
         sink_config_http* config = (sink_config_http*)sink_in_progress;
         if (NAME_MATCH("url")) {
             config->post_url = strdup(value);
+        } else if (NAME_MATCH("metrics_name")) {
+            config->metrics_name = strdup(value);
+        } else if (NAME_MATCH("timestamp_name")) {
+            config->timestamp_name = strdup(value);
+        } else if (NAME_MATCH("timestamp_format")) {
+            config->timestamp_format = strdup(value);
         } else {
             /* Attempt to locate keys
              * of the form param_PNAME */
@@ -782,4 +801,3 @@ ERR:
     free(t);
     return 1;
 }
-

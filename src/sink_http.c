@@ -5,6 +5,7 @@
 
 #include "metrics.h"
 #include "sink.h"
+#include "strbuf.h"
 
 
 typedef struct http_sink {
@@ -120,6 +121,12 @@ static int add_metrics(void* data,
     return 0;
 }
 
+static int json_cb(const char* buf, size_t size, void* d) {
+    strbuf* sbuf = (strbuf*)d;
+    strbuf_cat(sbuf, buf, size);
+    return 0;
+}
+
 static int serialize_metrics(http_sink* sink, metrics* m, void* data) {
     json_t* jobject = json_object();
 
@@ -128,12 +135,22 @@ static int serialize_metrics(http_sink* sink, metrics* m, void* data) {
         .config = sink->sink.global_config,
         .httpconfig = (const sink_config_http*)sink->sink.sink_config
     };
+
     metrics_iter(m, &info, add_metrics);
 
-    /* TODO: Totally temporary */
-    json_dumpf(jobject, stdout, 0);
-    printf("\n");
-    fflush(stdout);
+    strbuf* json_buf;
+    strbuf_new(&json_buf, 0);
+    json_dump_callback(jobject, json_cb, (void*)json_buf, 0);
+
+    int json_len = 0;
+    char* json_data = strbuf_get(json_buf, &json_len);
+    strbuf_free(json_buf, false);
+
+    fprintf(stderr, "%s\n", json_data);
+    fprintf(stderr, "\n");
+    fflush(stderr);
+
+    free(json_data);
     json_decref(jobject);
     return 0;
 }
