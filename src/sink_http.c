@@ -10,9 +10,9 @@
 
 
 
-typedef struct http_sink {
+struct http_sink {
     sink sink;
-} http_sink;
+};
 
 /*
  * Data from the metrics_iter callback */
@@ -45,7 +45,7 @@ static int add_metrics(void* data,
         suffixed[base_len - 1] = '\0';                                  \
         strcat(suffixed, suf);                                          \
         json_object_set_new(obj, suffixed, val);                        \
-    } while(0);
+    } while(0)
 
     char* prefix = config->prefixes_final[type];
     /* Using C99 stack allocation, don't panic */
@@ -63,7 +63,9 @@ static int add_metrics(void* data,
     case COUNTER:
     {
         if (config->extended_counters) {
-            char suffixed[base_len + 8];
+            /* We allow up to 8 characters for a suffix, based on the static strings below */
+            const int suffix_space = 8;
+            char suffixed[base_len + suffix_space];
             strcpy(suffixed, full_name);
             SUFFIX_ADD(".count", json_integer(counter_count(value)));
             SUFFIX_ADD(".mean", json_real(counter_mean(value)));
@@ -84,7 +86,9 @@ static int add_metrics(void* data,
     case TIMER:
     {
         timer_hist *t = (timer_hist*)value;
-        char suffixed[base_len + 20];
+        /* We allow up to 40 characters for the metric name suffix. */
+        const int suffix_space = 40;
+        char suffixed[base_len + suffix_space];
         strcpy(suffixed, full_name);
         SUFFIX_ADD(".sum", json_real(timer_sum(&t->tm)));
         SUFFIX_ADD(".sum_sq", json_real(timer_squared_sum(&t->tm)));
@@ -94,8 +98,9 @@ static int add_metrics(void* data,
         SUFFIX_ADD(".count", json_integer(timer_count(&t->tm)));
         SUFFIX_ADD(".stdev", json_real(timer_stddev(&t->tm))); /* stdev matches other output */
         for (int i = 0; i < config->num_quantiles; i++) {
-            char ptile[20];
-            sprintf(ptile, ".p%0.0f", config->quantiles[i] * 100);
+            char ptile[suffix_space];
+            snprintf(ptile, suffix_space, ".p%0.0f", config->quantiles[i] * 100);
+            ptile[suffix_space-1] = '\0';
             SUFFIX_ADD(ptile, json_real(timer_query(&t->tm, config->quantiles[i])));
         }
         SUFFIX_ADD(".rate", json_real(timer_sum(&t->tm) / config->flush_interval));
@@ -103,8 +108,9 @@ static int add_metrics(void* data,
 
         /* Manual histogram bins */
         if (t->conf) {
-            char ptile[20];
-            sprintf(ptile, ".bin_<%0.2f", t->conf->min_val);
+            char ptile[suffix_space];
+            snprintf(ptile, suffix_space, ".bin_<%0.2f", t->conf->min_val);
+            ptile[suffix_space-1] = '\0';
             SUFFIX_ADD(ptile, json_integer(t->counts[0]));
             for (int i = 0; i < t->conf->num_bins - 2; i++) {
                 sprintf(ptile, ".bin_%0.2f", t->conf->min_val+(t->conf->bin_width*i));
@@ -129,7 +135,7 @@ static int json_cb(const char* buf, size_t size, void* d) {
     return 0;
 }
 
-static int serialize_metrics(http_sink* sink, metrics* m, void* data) {
+static int serialize_metrics(struct http_sink* sink, metrics* m, void* data) {
     json_t* jobject = json_object();
     const sink_config_http* httpconfig = (const sink_config_http*)sink->sink.sink_config;
 
@@ -192,7 +198,7 @@ static int serialize_metrics(http_sink* sink, metrics* m, void* data) {
 }
 
 sink* init_http_sink(const sink_config_http* sc, const statsite_config* config) {
-    http_sink* s = calloc(1, sizeof(http_sink));
+    struct http_sink* s = calloc(1, sizeof(struct http_sink));
     s->sink.sink_config = (const sink_config*)sc;
     s->sink.global_config = config;
     s->sink.command = (int (*)(sink*, metrics*, void*))serialize_metrics;
