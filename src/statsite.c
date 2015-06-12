@@ -16,6 +16,7 @@
 #include <syslog.h>
 #include <unistd.h>
 #include <signal.h>
+#include <curl/curl.h>
 #include "config.h"
 #include "conn_handler.h"
 #include "networking.h"
@@ -172,6 +173,9 @@ int main(int argc, char **argv) {
     // Set the syslog mask
     setlogmask(config->syslog_log_level);
 
+    // Initialize libcurl
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+
     // Daemonize
     if (config->daemonize) {
         pid_t pid, sid;
@@ -250,6 +254,9 @@ int main(int argc, char **argv) {
 
     // Free our memory
     free_config(config);
+
+    // Tear down libcurl
+    curl_global_cleanup();
 
     // Done
     return 0;

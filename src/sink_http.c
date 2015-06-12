@@ -305,7 +305,7 @@ static void* http_worker(void* arg) {
     }
 exit:
     free(error_buffer);
-
+    strbuf_free(recv_buf, true);
     return NULL;
 }
 
