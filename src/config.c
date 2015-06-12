@@ -85,7 +85,8 @@ static const sink_config_http DEFAULT_HTTP_SINK = {
     .params = NULL,
     .metrics_name = "metrics",
     .timestamp_name = "timestamp",
-    .timestamp_format = "%s" /* Seconds since epoch */
+    .timestamp_format = "%s", /* Seconds since epoch */
+    .ciphers = NULL
 };
 
 /**
@@ -304,6 +305,8 @@ static int sink_callback(void* user, const char* section, const char* name, cons
             config->timestamp_name = strdup(value);
         } else if (NAME_MATCH("timestamp_format")) {
             config->timestamp_format = strdup(value);
+        } else if (NAME_MATCH("ciphers")) {
+            config->ciphers = strdup(value);
         } else {
             /* Attempt to locate keys
              * of the form param_PNAME */

@@ -249,7 +249,11 @@ static void* http_worker(void* arg) {
     char* error_buffer = malloc(CURL_ERROR_SIZE + 1);
     strbuf *recv_buf;
     strbuf_new(&recv_buf, 16384);
-    const char* ssl_ciphers = curl_which_ssl();
+    const char* ssl_ciphers;
+    if (httpconfig->ciphers)
+        ssl_ciphers = httpconfig->ciphers;
+    else
+        ssl_ciphers = curl_which_ssl();
 
     syslog(LOG_NOTICE, "Starting HTTP worker");
 
