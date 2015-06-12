@@ -18,6 +18,8 @@ const useconds_t FAILURE_WAIT = 5000000; /* 5 seconds */
 const char* DEFAULT_CIPHERS_NSS = "ecdhe_ecdsa_aes_128_gcm_sha_256,ecdhe_rsa_aes_256_sha,rsa_aes_128_gcm_sha_256,rsa_aes_256_sha,rsa_aes_128_sha";
 const char* DEFAULT_CIPHERS_OPENSSL = "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA";
 
+const char* USERAGENT = "statsite-http/0";
+
 struct http_sink {
     sink sink;
     lifoq* queue;
@@ -255,6 +257,9 @@ static void* http_worker(void* arg) {
     else
         ssl_ciphers = curl_which_ssl();
 
+    struct curl_slist* headers = NULL;
+    headers = curl_slist_append(headers, "Connection: close");
+
     syslog(LOG_NOTICE, "Starting HTTP worker");
 
     while(true) {
@@ -265,18 +270,21 @@ static void* http_worker(void* arg) {
         if (ret == LIFOQ_CLOSED)
             goto exit;
 
-        CURL* curl = curl_easy_init();
         memset(error_buffer, 0, CURL_ERROR_SIZE+1);
 
         /* Setup HTTP parameters */
+        CURL* curl = curl_easy_init();
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, DEFAULT_TIMEOUT_SECONDS);
         curl_easy_setopt(curl, CURLOPT_URL, httpconfig->post_url);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, data_size);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
         curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error_buffer);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, recv_buf);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, recv_cb);
         curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST, ssl_ciphers);
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, USERAGENT);
+
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, data_size);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
         syslog(LOG_NOTICE, "HTTP: Sending %zd bytes to %s", data_size, httpconfig->post_url);
         /* Do it! */
@@ -304,6 +312,7 @@ static void* http_worker(void* arg) {
         strbuf_truncate(recv_buf);
     }
 exit:
+    curl_slist_free_all(headers);
     free(error_buffer);
     strbuf_free(recv_buf, true);
     return NULL;

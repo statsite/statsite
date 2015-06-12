@@ -2,7 +2,7 @@
 
 Name:		statsite
 Version:	0.7.2
-Release:	3%{?dist}
+Release:	4%{?dist}
 Summary:	A C implementation of statsd.
 Group:		Applications
 License:	See the LICENSE file.
