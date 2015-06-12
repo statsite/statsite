@@ -17,7 +17,7 @@ START_TEST(test_lifoq_basic)
     *data = 12;
 
     lifoq_new(&q, 10);
-    int ret = lifoq_push(q, data, 1, true);
+    int ret = lifoq_push(q, data, 1, true, false);
     fail_unless(ret == 0);
 
     int* fdata = NULL;
@@ -39,12 +39,12 @@ START_TEST(test_lifoq_overflow)
     *data = 12;
 
     lifoq_new(&q, 10);
-    int ret = lifoq_push(q, data, 10, true);
+    int ret = lifoq_push(q, data, 10, true, false);
     fail_unless(ret == 0);
 
     int* data2 = malloc(sizeof(int));
     *data2 = 13;
-    ret = lifoq_push(q, data2, 9, true);
+    ret = lifoq_push(q, data2, 9, true, false);
     fail_unless(ret == 0);
     /*
      * At this point, data should have been removed from the queue and the
@@ -60,7 +60,7 @@ START_TEST(test_lifoq_overflow)
     /* Queue should be empty at this state */
     /* Insert a "new" element to confirm it is */
     *data2 = 14;
-    ret = lifoq_push(q, data2, 8, true);
+    ret = lifoq_push(q, data2, 8, true, false);
     fail_unless(ret == 0);
     /* Check that this new element is added */
     ret = lifoq_get(q, (void**)&fdata, &s);
@@ -68,6 +68,11 @@ START_TEST(test_lifoq_overflow)
     fail_unless(*fdata == 14);
     fail_unless(s == 8);
 
+    /* Do a push with failure */
+    ret = lifoq_push(q, data2, 8, true, true);
+    fail_unless(ret == 0);
+    ret = lifoq_push(q, data2, 8, true, true);
+    fail_unless(ret == LIFOQ_FULL);
 
     free(data2);
     free(q);
@@ -81,7 +86,7 @@ START_TEST(test_lifoq_close)
     *data = 12;
 
     lifoq_new(&q, 10);
-    int ret = lifoq_push(q, data, 10, true);
+    int ret = lifoq_push(q, data, 10, true, false);
     fail_unless(ret == 0);
 
     ret = lifoq_close(q);
@@ -89,7 +94,7 @@ START_TEST(test_lifoq_close)
 
     int* data2 = malloc(sizeof(int));
     *data2 = 13;
-    ret = lifoq_push(q, data2, 9, true);
+    ret = lifoq_push(q, data2, 9, true, false);
     fail_unless(ret == LIFOQ_CLOSED);
 
     int* fdata = NULL;

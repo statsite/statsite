@@ -20,6 +20,11 @@ extern int strbuf_new(strbuf** buf, size_t initial_size);
 extern void strbuf_free(strbuf* buf, bool data_too);
 
 /**
+ * Truncate a buffer by setting its recorded data length to 0
+ */
+extern void strbuf_truncate(strbuf* buf);
+
+/**
  * Returns the underlying character buffer and the current strlen() value
  * of the buffer.
  */

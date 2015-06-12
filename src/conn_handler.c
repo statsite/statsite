@@ -138,6 +138,11 @@ void final_flush(sink* sinks) {
     ops->sinks = sinks;
 
     flush_thread(ops);
+
+    for (sink* sink = sinks; sink != NULL; sink = sink->next) {
+        if (sink->close)
+            sink->close(sink);
+    }
 }
 
 

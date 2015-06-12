@@ -43,6 +43,10 @@ void strbuf_free(strbuf* buf, bool data_too) {
     free(buf);
 }
 
+void strbuf_truncate(strbuf* buf) {
+    buf->len = 0;
+}
+
 char* strbuf_get(strbuf* buf, int* len) {
     *len = buf->len;
     return buf->d;

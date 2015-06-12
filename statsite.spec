@@ -1,8 +1,8 @@
 %global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
 
 Name:		statsite
-Version:	0.7.1
-Release:	2%{?dist}
+Version:	0.7.2
+Release:	1%{?dist}
 Summary:	A C implementation of statsd.
 Group:		Applications
 License:	See the LICENSE file.

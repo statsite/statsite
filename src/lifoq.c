@@ -68,14 +68,15 @@ int lifoq_close(struct lifoq* q) {
         ret = LIFOQ_ALREADY_CLOSED;
     q->closed = true;
 
+    pthread_cond_broadcast(&q->cond);
     if (pthread_mutex_unlock(&q->mutex))
         ret = LIFOQ_INTERNAL_ERROR;
     return ret;
 }
 
 int lifoq_get(struct lifoq* q, void** data, size_t* size) {
+    pthread_mutex_lock(&q->mutex);
     for(;;) {
-        pthread_mutex_lock(&q->mutex);
         if (q->head) {
             struct lq_entry* qe = q->head;
             q->head = qe->next;
@@ -95,7 +96,7 @@ int lifoq_get(struct lifoq* q, void** data, size_t* size) {
     }
 }
 
-int lifoq_push(struct lifoq* q, void* data, size_t size, bool should_free) {
+int lifoq_push(struct lifoq* q, void* data, size_t size, bool should_free, bool fail_full) {
     int ret = 0;
 
     if (size > q->max_size)
@@ -106,6 +107,11 @@ int lifoq_push(struct lifoq* q, void* data, size_t size, bool should_free) {
 
     if (q->closed) { /* If the queue is closed no more pushes are possible */
         ret = LIFOQ_CLOSED;
+        goto exit;
+    }
+
+    if (fail_full && size + q->cur_size > q->max_size ) {
+        ret = LIFOQ_FULL;
         goto exit;
     }
 

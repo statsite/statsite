@@ -11,7 +11,8 @@ enum {
     LIFOQ_INTERNAL_ERROR = -1,
     LIFOQ_INVALID_ENTRY = -2,
     LIFOQ_CLOSED = -3,
-    LIFOQ_ALREADY_CLOSED = -4
+    LIFOQ_ALREADY_CLOSED = -4,
+    LIFOQ_FULL = -5
 };
 
 /**
@@ -28,7 +29,7 @@ extern int lifoq_new(lifoq** q, size_t max_size);
  * If this function returns a non-zero error state, data will not be
  * free()ed.
  */
-extern int lifoq_push(lifoq* q, void* data, size_t size, bool should_free);
+extern int lifoq_push(lifoq* q, void* data, size_t size, bool should_free, bool fail_full);
 
 /**
  * Get an entry from the queue. Place the result in data, and return the

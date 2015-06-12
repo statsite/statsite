@@ -3,15 +3,25 @@
 #include <string.h>
 #include <jansson.h>
 #include <curl/curl.h>
+#include <pthread.h>
+#include <unistd.h>
 
+#include "lifoq.h"
 #include "metrics.h"
 #include "sink.h"
 #include "strbuf.h"
 
+const int QUEUE_MAX_SIZE = 10 * 1024 * 1024; /* 10 MB of data */
+const int DEFAULT_TIMEOUT_SECONDS = 30;
+const useconds_t FAILURE_WAIT = 5000000; /* 5 seconds */
 
+const char* DEFAULT_CIPHERS_NSS = "ecdhe_ecdsa_aes_128_gcm_sha_256,ecdhe_rsa_aes_256_sha,rsa_aes_128_gcm_sha_256,rsa_aes_256_sha,rsa_aes_128_sha";
+const char* DEFAULT_CIPHERS_OPENSSL = "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA";
 
 struct http_sink {
     sink sink;
+    lifoq* queue;
+    pthread_t worker;
 };
 
 /*
@@ -155,6 +165,12 @@ static int serialize_metrics(struct http_sink* sink, metrics* m, void* data) {
     char* json_data = strbuf_get(json_buf, &json_len);
     json_decref(jobject);
 
+    /* Many APIs reject empty metrics lists - in this case, we simply early abort */
+    if (json_len == 2) {
+        strbuf_free(json_buf, true);
+        return 0;
+    }
+
     /* Start working on the post buffer contents */
     strbuf* post_buf;
     strbuf_new(&post_buf, 128);
@@ -170,7 +186,7 @@ static int serialize_metrics(struct http_sink* sink, metrics* m, void* data) {
     /* Encode the time stamp */
     struct timeval* tv = (struct timeval*) data;
     struct tm tm;
-    gmtime_r(&tv->tv_sec, &tm);
+    localtime_r(&tv->tv_sec, &tm);
     char time_buf[200];
     strftime(time_buf, 200, httpconfig->timestamp_format, &tm);
     char* encoded_time = curl_easy_escape(curl, time_buf, 0);
@@ -190,11 +206,111 @@ static int serialize_metrics(struct http_sink* sink, metrics* m, void* data) {
     char* post_data = strbuf_get(post_buf, &post_len);
     strbuf_free(post_buf, false);
 
-    /* TODO: Leave debugging in place for now */
-    fprintf(stderr, "%s\n", post_data);
-    fflush(stderr);
+    int push_ret = lifoq_push(sink->queue, post_data, post_len, true, false);
+    if (push_ret) {
+        syslog(LOG_ERR, "HTTP Sink couldn't enqueue a %d size buffer - rejected code %d",
+               post_len, push_ret);
+    }
 
     return 0;
+}
+
+/*
+ * libcurl data writeback handler - buffers into a growable buffer
+ */
+size_t recv_cb(char *ptr, size_t size, size_t nmemb, void *userdata) {
+    strbuf* buf = (strbuf*)userdata;
+    /* Note: ptr is not NULL terminated, but strbuf_cat enforces a NULL */
+    strbuf_cat(buf, ptr, size * nmemb);
+
+    return size * nmemb;
+}
+
+/*
+ * Attempt to check if this libcurl is using OpenSSL or NSS, which
+ * differ in how ciphers are listed.
+ */
+static const char* curl_which_ssl(void) {
+    curl_version_info_data* v = curl_version_info(CURLVERSION_NOW);
+    if (v->ssl_version && strncmp(v->ssl_version, "NSS", 3) == 0)
+        return DEFAULT_CIPHERS_NSS;
+    else
+        return DEFAULT_CIPHERS_OPENSSL;
+}
+
+/*
+ * A simple background worker thread which pops from the queue and tries
+ * to post. If the queue is marked closed, this thread exits
+ */
+static void* http_worker(void* arg) {
+    struct http_sink* s = (struct http_sink*)arg;
+    const sink_config_http* httpconfig = (sink_config_http*)s->sink.sink_config;
+
+    char* error_buffer = malloc(CURL_ERROR_SIZE + 1);
+    strbuf *recv_buf;
+    strbuf_new(&recv_buf, 16384);
+    const char* ssl_ciphers = curl_which_ssl();
+
+    syslog(LOG_NOTICE, "Starting HTTP worker");
+
+    while(true) {
+
+        void *data = NULL;
+        size_t data_size = 0;
+        int ret = lifoq_get(s->queue, &data, &data_size);
+        if (ret == LIFOQ_CLOSED)
+            goto exit;
+
+        CURL* curl = curl_easy_init();
+        memset(error_buffer, 0, CURL_ERROR_SIZE+1);
+
+        /* Setup HTTP parameters */
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, DEFAULT_TIMEOUT_SECONDS);
+        curl_easy_setopt(curl, CURLOPT_URL, httpconfig->post_url);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, data_size);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error_buffer);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, recv_buf);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, recv_cb);
+        curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST, ssl_ciphers);
+
+        syslog(LOG_NOTICE, "HTTP: Sending %zd bytes to %s", data_size, httpconfig->post_url);
+        /* Do it! */
+        CURLcode rcurl = curl_easy_perform(curl);
+        long http_code = 0;
+
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+        if (http_code != 200 || rcurl != CURLE_OK) {
+
+            int recv_len;
+            char* recv_data = strbuf_get(recv_buf, &recv_len);
+
+            syslog(LOG_ERR, "HTTP: error %d: %s %s", rcurl, error_buffer, recv_data);
+            /* Re-enqueue data */
+            if (lifoq_push(s->queue, data, data_size, true, true))
+                syslog(LOG_ERR, "HTTP: dropped data due to queue full of closed");
+
+            usleep(FAILURE_WAIT);
+        } else {
+            syslog(LOG_NOTICE, "HTTP: success");
+            free(data);
+        }
+
+        curl_easy_cleanup(curl);
+        strbuf_truncate(recv_buf);
+    }
+exit:
+    free(error_buffer);
+
+    return NULL;
+}
+
+static void close_sink(struct http_sink* s) {
+    lifoq_close(s->queue);
+    void* retval;
+    pthread_join(s->worker, &retval);
+    syslog(LOG_NOTICE, "HTTP: sink closed down with status %ld", (intptr_t)retval);
+    return;
 }
 
 sink* init_http_sink(const sink_config_http* sc, const statsite_config* config) {
@@ -202,5 +318,10 @@ sink* init_http_sink(const sink_config_http* sc, const statsite_config* config) 
     s->sink.sink_config = (const sink_config*)sc;
     s->sink.global_config = config;
     s->sink.command = (int (*)(sink*, metrics*, void*))serialize_metrics;
+    s->sink.close = (void (*)(sink*))close_sink;
+
+    lifoq_new(&s->queue, QUEUE_MAX_SIZE);
+    pthread_create(&s->worker, NULL, http_worker, (void*)s);
+
     return (sink*)s;
 }
