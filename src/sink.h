@@ -28,6 +28,12 @@ typedef struct sink {
      * Always pass this instance of sink to this function.
      */
     int (*command)(struct sink*, metrics* m, void* data);
+
+    /**
+     * A command to close this sink, allowing any flushing or cleanup
+     * actions appropiate for the sink.
+     */
+    void (*close)(struct sink*);
 } sink;
 
 /**

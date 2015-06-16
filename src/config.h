@@ -61,6 +61,10 @@ typedef struct sink_config_http {
     sink_config super;
     const char* post_url;
     kv_config* params;
+    const char* metrics_name; /* The name of the metric parameter */
+    const char* timestamp_name; /* The name of the timestamp */
+    const char* timestamp_format; /* The format specifier, strftime format */
+    const char* ciphers; /* A platform dependent list of ciphers */
 } sink_config_http;
 
 // Represents the configuration of a histogram

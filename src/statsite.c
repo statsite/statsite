@@ -16,9 +16,11 @@
 #include <syslog.h>
 #include <unistd.h>
 #include <signal.h>
+#include <curl/curl.h>
 #include "config.h"
 #include "conn_handler.h"
 #include "networking.h"
+#include "sink.h"
 
 /**
  * Our signal handler updates this variable to
@@ -155,7 +157,7 @@ int main(int argc, char **argv) {
 
     // Initialize syslog with configured facility
     setup_syslog(config->syslog_log_facility, config->daemonize);
-    
+
     // Set prefixes for each message type
     if (prepare_prefixes(config)) {
         syslog(LOG_ERR, "Failed to get prefixes!");
@@ -170,6 +172,9 @@ int main(int argc, char **argv) {
 
     // Set the syslog mask
     setlogmask(config->syslog_log_level);
+
+    // Initialize libcurl
+    curl_global_init(CURL_GLOBAL_DEFAULT);
 
     // Daemonize
     if (config->daemonize) {
@@ -211,9 +216,13 @@ int main(int argc, char **argv) {
     // Log that we are starting up
     syslog(LOG_INFO, "Starting statsite.");
 
+    // Build the sinks
+    sink* sinks = NULL;
+    init_sinks(&sinks, config);
+
     // Initialize the networking
     statsite_networking *netconf = NULL;
-    int net_res = init_networking(config, &netconf);
+    int net_res = init_networking(config, &netconf, sinks);
     if (net_res != 0) {
         syslog(LOG_ERR, "Failed to initialize networking!");
         return 1;
@@ -236,7 +245,7 @@ int main(int argc, char **argv) {
     shutdown_networking(netconf);
 
     // Do the final flush
-    final_flush();
+    final_flush(sinks);
 
     // If daemonized, remove the pid file
     if (config->daemonize && unlink(config->pid_file)) {
@@ -245,6 +254,9 @@ int main(int argc, char **argv) {
 
     // Free our memory
     free_config(config);
+
+    // Tear down libcurl
+    curl_global_cleanup();
 
     // Done
     return 0;
