@@ -2,15 +2,15 @@
 
 Name:		statsite
 Version:	0.7.2
-Release:	4%{?dist}
+Release:	6%{?dist}
 Summary:	A C implementation of statsd.
 Group:		Applications
 License:	See the LICENSE file.
 URL:		https://github.com/twitter-forks/statsite
 Source0:	statsite.tar.gz
-Requires:       %{!?el5:libcurl} %{?el5:curl} jansson
+Requires:       %{!?el5:libcurl-openssl} %{?el5:curl} jansson
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
-BuildRequires:	scons check-devel %{?el7:systemd} %{?fedora:systemd} %{?el5:curl-devel} %{!?el5:libcurl-devel} jansson-devel
+BuildRequires:	scons check-devel %{?el7:systemd} %{?fedora:systemd} %{?el5:curl-devel} %{!?el5:libcurl-openssl-devel} %{!?el5:libcurl-devel}  jansson-devel
 AutoReqProv:	No
 Requires(pre):  /usr/sbin/useradd, /usr/bin/getent
 
@@ -23,7 +23,7 @@ https://github.com/etsy/statsd, and is wire compatible.
 %setup -c %{name}-%{version}
 
 %build
-make %{?_smp_mflags}
+CURL_LIB=curl-openssl scons %{?_smp_mflags}
 
 %install
 mkdir -vp $RPM_BUILD_ROOT/usr/sbin
@@ -127,6 +127,9 @@ exit 0
 %attr(755, root, root) /usr/libexec/statsite/sinks/opentsdb.js
 
 %changelog
+* Tue Jun 16 2015 Yann Ramin - 0.7.2-6
+- Allow builds using alternate libcurl
+
 * Fri Jun 05 2015 Yann Ramin - 0.7.1-2
 - Fix user creation in statsite
 

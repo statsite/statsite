@@ -8,6 +8,11 @@ ENV["CXX"] = os.getenv("CXX") or ENV["CXX"]
 ENV["PATH"] = os.getenv("PATH") or ENV["PATH"]
 ENV["ENV"].update(x for x in os.environ.items() if x[0].startswith("CCC_"))
 
+if "CURL_LIB" in os.environ:
+  curl_lib = os.environ["CURL_LIB"]
+else:
+  curl_lib = "curl"
+
 CFLAGS = ["-Wall",
           "-Wno-unused-function",
           "-std=c99",
@@ -58,7 +63,7 @@ objs = env_statsite_with_err.Object('src/hashmap', 'src/hashmap.c')           + 
         env_statsite_libev.Object('src/networking', 'src/networking.c')       + \
         env_statsite_libev.Object('src/conn_handler', 'src/conn_handler.c')
 
-statsite_libs = ["m", "pthread", murmur, inih, "jansson", "curl"]
+statsite_libs = ["m", "pthread", murmur, inih, "jansson", curl_lib]
 if platform.system() == 'Linux':
    statsite_libs.append("rt")
 
