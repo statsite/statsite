@@ -234,6 +234,7 @@ size_t recv_cb(char *ptr, size_t size, size_t nmemb, void *userdata) {
  */
 static const char* curl_which_ssl(void) {
     curl_version_info_data* v = curl_version_info(CURLVERSION_NOW);
+    syslog(LOG_NOTICE, "HTTP: libcurl is built with %s %s", v->version, v->ssl_version);
     if (v->ssl_version && strncmp(v->ssl_version, "NSS", 3) == 0)
         return DEFAULT_CIPHERS_NSS;
     else
@@ -250,20 +251,22 @@ static void* http_worker(void* arg) {
 
     char* error_buffer = malloc(CURL_ERROR_SIZE + 1);
     strbuf *recv_buf;
-    strbuf_new(&recv_buf, 16384);
+
     const char* ssl_ciphers;
     if (httpconfig->ciphers)
         ssl_ciphers = httpconfig->ciphers;
     else
         ssl_ciphers = curl_which_ssl();
 
+    syslog(LOG_NOTICE, "HTTP: Using cipher suite %s", ssl_ciphers);
+
     struct curl_slist* headers = NULL;
     headers = curl_slist_append(headers, "Connection: close");
 
     syslog(LOG_NOTICE, "Starting HTTP worker");
+    strbuf_new(&recv_buf, 16384);
 
     while(true) {
-
         void *data = NULL;
         size_t data_size = 0;
         int ret = lifoq_get(s->queue, &data, &data_size);
@@ -271,9 +274,9 @@ static void* http_worker(void* arg) {
             goto exit;
 
         memset(error_buffer, 0, CURL_ERROR_SIZE+1);
+        CURL* curl = curl_easy_init();
 
         /* Setup HTTP parameters */
-        CURL* curl = curl_easy_init();
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, DEFAULT_TIMEOUT_SECONDS);
         curl_easy_setopt(curl, CURLOPT_URL, httpconfig->post_url);
         curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error_buffer);
@@ -312,6 +315,7 @@ static void* http_worker(void* arg) {
         strbuf_truncate(recv_buf);
     }
 exit:
+
     curl_slist_free_all(headers);
     free(error_buffer);
     strbuf_free(recv_buf, true);
