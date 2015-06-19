@@ -204,6 +204,9 @@ options must exist in the `statsite` section of the INI file:
   `lower`, `upper`, and `rate`.
   Defaults to false.
 
+* extended\_counters\_include : Allows you to configure which extended counters to include 
+  through a comma separated list of values, extended\_counters must be set to true.
+
 * prefix\_binary\_stream : If enabled, the keys streamed to a the stream\_cmd
   when using binary\_stream mode are also prefixed. By default, this is false,
   and keys do not get the prefix.
