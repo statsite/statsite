@@ -2,7 +2,7 @@
 
 Name:		statsite
 Version:	0.7.2
-Release:	6%{?dist}
+Release:	7%{?dist}
 Summary:	A C implementation of statsd.
 Group:		Applications
 License:	See the LICENSE file.
@@ -23,7 +23,7 @@ https://github.com/etsy/statsd, and is wire compatible.
 %setup -c %{name}-%{version}
 
 %build
-CURL_LIB=curl-openssl scons %{?_smp_mflags}
+%{!?el5:CURL_LIB=curl-openssl} scons %{?_smp_mflags}
 
 %install
 mkdir -vp $RPM_BUILD_ROOT/usr/sbin
@@ -127,6 +127,9 @@ exit 0
 %attr(755, root, root) /usr/libexec/statsite/sinks/opentsdb.js
 
 %changelog
+* Tue Jun 23 2015 Yann Ramin - 0.7.2-7
+- Build correctly on EL5 with default libcurl
+
 * Tue Jun 16 2015 Yann Ramin - 0.7.2-6
 - Allow builds using alternate libcurl
 
