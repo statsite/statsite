@@ -2,6 +2,7 @@ import os
 import os.path
 import socket
 import textwrap
+import shutil
 import subprocess
 import contextlib
 import sys
@@ -44,7 +45,7 @@ width=10
     open(config_path, "w").write(conf)
 
     # Start the process
-    proc = subprocess.Popen("./statsite -f %s" % config_path, shell=True, stdin=subprocess.PIPE)
+    proc = subprocess.Popen(['./statsite', '-f', config_path], stdin=subprocess.PIPE)
     proc.poll()
     assert proc.returncode is None
 
@@ -53,7 +54,7 @@ width=10
         try:
             proc.kill()
             proc.wait()
-            #shutil.rmtree(tmpdir)
+            shutil.rmtree(tmpdir)
         except:
             print proc
             pass
@@ -125,7 +126,8 @@ class TestInteg(object):
         wait_file(output)
         now = time.time()
         out = open(output).read()
-        assert out in ("counts.foobar|600.000000|%d\n" % now, "counts.foobar|600.000000|%d\n" % (now - 1))
+        assert out in ("counts.foobar|600.000000|%d\n" % (now),
+                       "counts.foobar|600.000000|%d\n" % (now - 1))
 
     def test_counters_sample(self, servers):
         "Tests adding kv pairs"
@@ -137,7 +139,8 @@ class TestInteg(object):
         wait_file(output)
         now = time.time()
         out = open(output).read()
-        assert out in ("counts.foobar|6000.000000|%d\n" % now, "counts.foobar|6000.000000|%d\n" % (now - 1))
+        assert out in ("counts.foobar|6000.000000|%d\n" % (now),
+                       "counts.foobar|6000.000000|%d\n" % (now - 1))
 
     def test_meters(self, servers):
         "Tests adding kv pairs"

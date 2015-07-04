@@ -111,6 +111,7 @@ int main(void)
     tcase_add_test(tc8, test_join_path_no_slash);
     tcase_add_test(tc8, test_join_path_with_slash);
     tcase_add_test(tc8, test_sane_log_level);
+    tcase_add_test(tc8, test_sane_log_facility);
     tcase_add_test(tc8, test_sane_timer_eps);
     tcase_add_test(tc8, test_sane_flush_interval);
     tcase_add_test(tc8, test_sane_histograms);
@@ -119,7 +120,8 @@ int main(void)
     tcase_add_test(tc8, test_build_radix);
     tcase_add_test(tc8, test_sane_prefixes);
     tcase_add_test(tc8, test_sane_global_prefix);
-
+    tcase_add_test(tc8, test_sane_quantiles);
+    
     // Add the radix tests
     suite_add_tcase(s1, tc9);
     tcase_add_test(tc9, test_radix_init_and_destroy);

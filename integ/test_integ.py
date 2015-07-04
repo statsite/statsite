@@ -2,6 +2,7 @@ import os
 import os.path
 import socket
 import textwrap
+import shutil
 import subprocess
 import contextlib
 import sys
@@ -33,6 +34,7 @@ flush_interval = 1
 port = %d
 udp_port = %d
 stream_cmd = %s
+quantiles = 0.5, 0.9, 0.95, 0.99
 
 [histogram1]
 prefix=has_hist
@@ -44,7 +46,7 @@ width=10
     open(config_path, "w").write(conf)
 
     # Start the process
-    proc = subprocess.Popen("./statsite -f %s" % config_path, shell=True)
+    proc = subprocess.Popen(['./statsite', '-f', config_path])
     proc.poll()
     assert proc.returncode is None
 
@@ -53,7 +55,7 @@ width=10
         try:
             proc.kill()
             proc.wait()
-            #shutil.rmtree(tmpdir)
+            shutil.rmtree(tmpdir)
         except:
             print proc
             pass
@@ -146,7 +148,8 @@ class TestInteg(object):
         wait_file(output)
         now = time.time()
         out = open(output).read()
-        assert out in ("counts.foobar|600.000000|%d\n" % now, "counts.foobar|600.000000|%d\n" % (now - 1))
+        assert out in ("counts.foobar|600.000000|%d\n" % (now),
+                       "counts.foobar|600.000000|%d\n" % (now - 1))
 
     def test_counters_sample(self, servers):
         "Tests adding kv pairs"
@@ -158,7 +161,8 @@ class TestInteg(object):
         wait_file(output)
         now = time.time()
         out = open(output).read()
-        assert out in ("counts.foobar|6000.000000|%d\n" % now, "counts.foobar|6000.000000|%d\n" % (now - 1))
+        assert out in ("counts.foobar|6000.000000|%d\n" % (now),
+                       "counts.foobar|6000.000000|%d\n" % (now - 1))
 
     def test_meters_alias(self, servers):
         "Tests adding timing data with the 'h' alias"
@@ -178,8 +182,11 @@ class TestInteg(object):
         assert "timers.val.count|100" in out
         assert "timers.val.stdev|29.011492" in out
         assert "timers.val.median|49.000000" in out
+        assert "timers.val.p90|90.000000" in out
         assert "timers.val.p95|95.000000" in out
         assert "timers.val.p99|99.000000" in out
+        assert "timers.val.rate|4950" in out
+        assert "timers.val.sample_rate|100" in out
 
     def test_meters(self, servers):
         "Tests adding kv pairs"
@@ -199,8 +206,11 @@ class TestInteg(object):
         assert "timers.noobs.count|100" in out
         assert "timers.noobs.stdev|29.011492" in out
         assert "timers.noobs.median|49.000000" in out
+        assert "timers.noobs.p90|90.000000" in out
         assert "timers.noobs.p95|95.000000" in out
         assert "timers.noobs.p99|99.000000" in out
+        assert "timers.noobs.rate|4950" in out
+        assert "timers.noobs.sample_rate|100" in out
 
     def test_histogram(self, servers):
         "Tests adding keys with histograms"
@@ -234,6 +244,29 @@ class TestInteg(object):
         now = time.time()
         out = open(output).read()
         assert out in ("sets.zip|3|%d\n" % now, "sets.zip|3|%d\n" % (now - 1))
+
+    def test_double_parsing(self, servers):
+        "Tests string to double parsing"
+        server, _, output = servers
+        server.sendall("int1:1|c\n")
+        server.sendall("decimal1:1.0|c\n")
+        server.sendall("decimal2:2.3456789|c\n")
+        server.sendall("scientific1:1.0e5|c\n")
+        server.sendall("scientific2:2.0e05|c\n")
+        server.sendall("scientific3:3.0E05|c\n")
+        server.sendall("scientific4:4.0e-5|c\n")
+        server.sendall("underflow1:1.964393875E-314|c\n")
+
+        wait_file(output)
+        out = open(output).read()
+        assert "counts.int1|1.000000|" in out
+        assert "counts.decimal1|1.000000|" in out
+        assert "counts.decimal2|2.345679|" in out
+        assert "counts.scientific1|100000.000000|" in out
+        assert "counts.scientific2|200000.000000|" in out
+        assert "counts.scientific3|300000.000000|" in out
+        assert "counts.scientific4|0.000040|" in out
+        assert "counts.underflow1|" not in out
 
 
 class TestIntegUDP(object):
@@ -295,7 +328,8 @@ class TestIntegUDP(object):
         wait_file(output)
         now = time.time()
         out = open(output).read()
-        assert out in ("counts.foobar|600.000000|%d\n" % now, "counts.foobar|600.000000|%d\n" % (now - 1))
+        assert out in ("counts.foobar|600.000000|%d\n" % (now),
+                       "counts.foobar|600.000000|%d\n" % (now - 1))
 
     def test_counters_sample(self, servers):
         "Tests adding kv pairs"
@@ -306,7 +340,8 @@ class TestIntegUDP(object):
         wait_file(output)
         now = time.time()
         out = open(output).read()
-        assert out in ("counts.foobar|6000.000000|%d\n" % now, "counts.foobar|6000.000000|%d\n" % (now - 1))
+        assert out in ("counts.foobar|6000.000000|%d\n" % (now),
+                       "counts.foobar|6000.000000|%d\n" % (now - 1))
 
     def test_counters_no_newlines(self, servers):
         "Tests adding counters without a trailing new line"
@@ -317,7 +352,8 @@ class TestIntegUDP(object):
         wait_file(output)
         now = time.time()
         out = open(output).read()
-        assert out in ("counts.zip|600.000000|%d\n" % now, "counts.zip|600.000000|%d\n" % (now - 1))
+        assert out in ("counts.zip|600.000000|%d\n" % (now),
+                       "counts.zip|600.000000|%d\n" % (now - 1))
 
     def test_meters(self, servers):
         "Tests adding kv pairs"
@@ -336,8 +372,11 @@ class TestIntegUDP(object):
         assert "timers.noobs.count|100" in out
         assert "timers.noobs.stdev|29.011492" in out
         assert "timers.noobs.median|49.000000" in out
+        assert "timers.noobs.p90|90.000000" in out
         assert "timers.noobs.p95|95.000000" in out
         assert "timers.noobs.p99|99.000000" in out
+        assert "timers.noobs.rate|4950" in out
+        assert "timers.noobs.sample_rate|100" in out
 
     def test_sets(self, servers):
         "Tests adding kv pairs"
@@ -367,7 +406,7 @@ class TestIntegBindAddress(object):
         fh.flush()
 
         try:
-            p = subprocess.Popen('./statsite -f %s' % fh.name, shell=True)
+            p = subprocess.Popen(['./statsite', '-f', fh.name])
             time.sleep(0.3)
             yield port
         finally:
@@ -376,8 +415,8 @@ class TestIntegBindAddress(object):
 
     def islistening(self, addr, port, command='statsite'):
         try:
-            cmd = 'lsof -FnPc -nP -i @%s:%s' % (addr, port)
-            out = subprocess.check_output(cmd, shell=True)
+            cmd = ['lsof', '-FnPc', '-nP', '-i', '@%s:%s' % (addr, port)]
+            out = subprocess.check_output(cmd)
         except subprocess.CalledProcessError:
             return False
 

@@ -1,9 +1,11 @@
+#include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <regex.h>
 #include <assert.h>
 #include <pthread.h>
+#include <signal.h>
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <math.h>
@@ -32,20 +34,31 @@
 #define BIN_OUT_HIST_FLOOR    0x8
 #define BIN_OUT_HIST_BIN      0x9
 #define BIN_OUT_HIST_CEIL     0xa
+#define BIN_OUT_RATE     0xb
+#define BIN_OUT_SAMPLE_RATE     0xc
 #define BIN_OUT_PCT     0x80
 
 // Macro to provide branch meta-data
 #define likely(x)       __builtin_expect((x),1)
 #define unlikely(x)     __builtin_expect((x),0)
 
+// BIN_TYPE_MAP is used to map the BIN_TYPE_* static
+// definitions into the metric_type value, so that
+// we can lookup the proper prefix.
+int BIN_TYPE_MAP[METRIC_TYPES] = {
+    UNKNOWN,
+    KEY_VAL,
+    COUNTER,
+    TIMER,
+    SET,
+    GAUGE,
+    GAUGE_DELTA,
+    };
+
 /* Static method declarations */
 static int handle_binary_client_connect(statsite_conn_handler *handle);
 static int handle_ascii_client_connect(statsite_conn_handler *handle);
 static int buffer_after_terminator(char *buf, int buf_len, char terminator, char **after_term, int *after_len);
-
-/* These are the quantiles we track */
-static const double QUANTILES[] = {0.5, 0.95, 0.99};
-static const int NUM_QUANTILES = 3;
 
 // This is the magic byte that indicates we are handling
 // a binary command, instead of an ASCII command. We use
@@ -66,8 +79,8 @@ static statsite_config *GLOBAL_CONFIG;
 void init_conn_handler(statsite_config *config) {
     // Make the initial metrics object
     metrics *m = malloc(sizeof(metrics));
-    int res = init_metrics(config->timer_eps, (double*)&QUANTILES, NUM_QUANTILES,
-            config->histograms, config->set_precision, m);
+    int res = init_metrics(config->timer_eps, config->quantiles,
+            config->num_quantiles, config->histograms, config->set_precision, m);
     assert(res == 0);
     GLOBAL_METRICS = m;
 
@@ -94,7 +107,18 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
             break;
 
         case COUNTER:
-            STREAM("%s%s|%f|%lld\n", prefix, name, counter_sum(value));
+            if (GLOBAL_CONFIG->extended_counters) {
+                STREAM("%s%s.count|%lld|%lld\n", prefix, name, counter_count(value));
+                STREAM("%s%s.mean|%f|%lld\n", prefix, name, counter_mean(value));
+                STREAM("%s%s.stdev|%f|%lld\n", prefix, name, counter_stddev(value));
+                STREAM("%s%s.sum|%f|%lld\n", prefix, name, counter_sum(value));
+                STREAM("%s%s.sum_sq|%f|%lld\n", prefix, name, counter_squared_sum(value));
+                STREAM("%s%s.lower|%f|%lld\n", prefix, name, counter_min(value));
+                STREAM("%s%s.upper|%f|%lld\n", prefix, name, counter_max(value));
+                STREAM("%s%s.rate|%f|%lld\n", prefix, name, counter_sum(value) / GLOBAL_CONFIG->flush_interval);
+            } else {
+                STREAM("%s%s|%f|%lld\n", prefix, name, counter_sum(value));
+            }
             break;
 
         case SET:
@@ -110,9 +134,16 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
             STREAM("%s%s.upper|%f|%lld\n", prefix, name, timer_max(&t->tm));
             STREAM("%s%s.count|%lld|%lld\n", prefix, name, timer_count(&t->tm));
             STREAM("%s%s.stdev|%f|%lld\n", prefix, name, timer_stddev(&t->tm));
-            STREAM("%s%s.median|%f|%lld\n", prefix, name, timer_query(&t->tm, 0.5));
-            STREAM("%s%s.p95|%f|%lld\n", prefix, name, timer_query(&t->tm, 0.95));
-            STREAM("%s%s.p99|%f|%lld\n", prefix, name, timer_query(&t->tm, 0.99));
+            for (i=0; i < GLOBAL_CONFIG->num_quantiles; i++) {
+                if (GLOBAL_CONFIG->quantiles[i] == 0.5) {
+                    STREAM("%s%s.median|%f|%lld\n", prefix, name, timer_query(&t->tm, 0.5));
+                }
+                STREAM("%s%s.p%0.0f|%f|%lld\n", prefix, name,
+                    GLOBAL_CONFIG->quantiles[i] * 100,
+                    timer_query(&t->tm, GLOBAL_CONFIG->quantiles[i]));
+            }
+            STREAM("%s%s.rate|%f|%lld\n", prefix, name, timer_sum(&t->tm) / GLOBAL_CONFIG->flush_interval);
+            STREAM("%s%s.sample_rate|%f|%lld\n", prefix, name, (double)timer_count(&t->tm) / GLOBAL_CONFIG->flush_interval);
 
             // Stream the histogram values
             if (t->conf) {
@@ -144,10 +175,20 @@ struct binary_out_prefix {
 
 static int stream_bin_writer(FILE *pipe, uint64_t timestamp, unsigned char type,
         unsigned char val_type, double val, char *name) {
-        uint16_t key_len = strlen(name) + 1;
-        struct binary_out_prefix out = {timestamp, type, val_type, key_len, val};
+        char *prefix = NULL;
+        uint16_t pre_len = 0;
+        if (GLOBAL_CONFIG->prefix_binary_stream) {
+            prefix = GLOBAL_CONFIG->prefixes_final[BIN_TYPE_MAP[type]];
+            pre_len = strlen(prefix);
+        }
+        uint16_t key_len = strlen(name);
+        uint16_t tot_len = pre_len + key_len + 1;
+        struct binary_out_prefix out = {timestamp, type, val_type, tot_len, val};
         if (!fwrite(&out, sizeof(struct binary_out_prefix), 1, pipe)) return 1;
-        if (!fwrite(name, key_len, 1, pipe)) return 1;
+        if (pre_len > 0) {
+            if (!fwrite(prefix, pre_len, 1, pipe)) return 1;
+        }
+        if (!fwrite(name, key_len + 1, 1, pipe)) return 1;
         return 0;
 }
 
@@ -173,6 +214,7 @@ static int stream_formatter_bin(FILE *pipe, void *data, metric_type type, char *
             STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_STDDEV, counter_stddev(value));
             STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_MIN, counter_min(value));
             STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_MAX, counter_max(value));
+            STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_RATE, counter_sum(value) / GLOBAL_CONFIG->flush_interval);
             break;
 
         case SET:
@@ -188,9 +230,13 @@ static int stream_formatter_bin(FILE *pipe, void *data, metric_type type, char *
             STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_STDDEV, timer_stddev(&t->tm));
             STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MIN, timer_min(&t->tm));
             STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_MAX, timer_max(&t->tm));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 50, timer_query(&t->tm, 0.5));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 95, timer_query(&t->tm, 0.95));
-            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT | 99, timer_query(&t->tm, 0.99));
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_RATE, timer_sum(&t->tm) / GLOBAL_CONFIG->flush_interval);
+            STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_SAMPLE_RATE, (double)timer_count(&t->tm) / GLOBAL_CONFIG->flush_interval);
+            for (i=0; i < GLOBAL_CONFIG->num_quantiles; i++) {
+                STREAM_BIN(BIN_TYPE_TIMER, BIN_OUT_PCT |
+                    (int)(GLOBAL_CONFIG->quantiles[i] * 100),
+                    timer_query(&t->tm, GLOBAL_CONFIG->quantiles[i]));
+            }
 
             // Binary streaming for histograms
             if (t->conf) {
@@ -244,8 +290,9 @@ static void* flush_thread(void *arg) {
 void flush_interval_trigger() {
     // Make a new metrics object
     metrics *m = malloc(sizeof(metrics));
-    init_metrics(GLOBAL_CONFIG->timer_eps, (double*)&QUANTILES, NUM_QUANTILES,
-            GLOBAL_CONFIG->histograms, GLOBAL_CONFIG->set_precision, m);
+    init_metrics(GLOBAL_CONFIG->timer_eps, GLOBAL_CONFIG->quantiles,
+            GLOBAL_CONFIG->num_quantiles, GLOBAL_CONFIG->histograms,
+            GLOBAL_CONFIG->set_precision, m);
 
     // Swap with the new one
     metrics *old = GLOBAL_METRICS;
@@ -253,8 +300,22 @@ void flush_interval_trigger() {
 
     // Start a flush thread
     pthread_t thread;
-    pthread_create(&thread, NULL, flush_thread, old);
-    pthread_detach(thread);
+    sigset_t oldset;
+    sigset_t newset;
+    sigfillset(&newset);
+    pthread_sigmask(SIG_BLOCK, &newset, &oldset);
+    int err = pthread_create(&thread, NULL, flush_thread, old);
+    pthread_sigmask(SIG_SETMASK, &oldset, NULL);
+
+    if (err == 0) {
+        pthread_detach(thread);
+        return;
+    }
+
+    syslog(LOG_WARNING, "Failed to spawn flush thread: %s", strerror(err));
+    GLOBAL_METRICS = old;
+    destroy_metrics(m);
+    free(m);
 }
 
 /**
@@ -265,13 +326,7 @@ void final_flush() {
     // Get the last set of metrics
     metrics *old = GLOBAL_METRICS;
     GLOBAL_METRICS = NULL;
-
-    // Start a flush thread
-    pthread_t thread;
-    pthread_create(&thread, NULL, flush_thread, old);
-
-    // Wait for the thread to finish
-    pthread_join(thread, NULL);
+    flush_thread(old);
 }
 
 
@@ -301,6 +356,8 @@ int handle_client_connect(statsite_conn_handler *handle) {
 static double str2double(const char *s, char **end) {
     double val = 0.0;
     char neg = 0;
+    const char *orig_s = s;
+
     if (*s == '-') {
         neg = 1;
         s++;
@@ -318,8 +375,13 @@ static double str2double(const char *s, char **end) {
         }
         val += frac / pow(10.0, digits);
     }
+    if (unlikely(*s == 'E' || *s == 'e')) {
+        errno = 0;
+        return strtod(orig_s, end);
+    }
     if (neg) val *= -1.0;
     if (end) *end = (char*)s;
+    errno = 0;
     return val;
 }
 
@@ -393,7 +455,7 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
 
         // Convert the value to a double
         val = str2double(val_str, &endptr);
-        if (unlikely(endptr == val_str)) {
+        if (unlikely(endptr == val_str || errno == ERANGE)) {
             syslog(LOG_WARNING, "Failed value conversion! Input: %s", val_str);
             goto ERR_RET;
         }

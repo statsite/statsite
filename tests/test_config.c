@@ -18,6 +18,7 @@ START_TEST(test_config_get_default)
     fail_unless(config.parse_stdin == false);
     fail_unless(strcmp(config.log_level, "DEBUG") == 0);
     fail_unless(config.syslog_log_level == LOG_DEBUG);
+    fail_unless(config.syslog_log_facility == LOG_LOCAL0);
     fail_unless(config.timer_eps == (double)1e-2);
     fail_unless(strcmp(config.stream_cmd, "cat") == 0);
     fail_unless(config.flush_interval == 10);
@@ -25,7 +26,12 @@ START_TEST(test_config_get_default)
     fail_unless(config.binary_stream == false);
     fail_unless(strcmp(config.pid_file, "/var/run/statsite.pid") == 0);
     fail_unless(config.input_counter == NULL);
-
+    fail_unless(config.extended_counters == false);
+    fail_unless(config.prefix_binary_stream == false);
+    fail_unless(config.num_quantiles == 3);
+    fail_unless(config.quantiles[0] == 0.5);
+    fail_unless(config.quantiles[1] == 0.95);
+    fail_unless(config.quantiles[2] == 0.99);
 }
 END_TEST
 
@@ -41,6 +47,7 @@ START_TEST(test_config_bad_file)
     fail_unless(config.parse_stdin == false);
     fail_unless(strcmp(config.log_level, "DEBUG") == 0);
     fail_unless(config.syslog_log_level == LOG_DEBUG);
+    fail_unless(config.syslog_log_facility == LOG_LOCAL0);
     fail_unless(config.timer_eps == (double)1e-2);
     fail_unless(strcmp(config.stream_cmd, "cat") == 0);
     fail_unless(config.flush_interval == 10);
@@ -48,6 +55,13 @@ START_TEST(test_config_bad_file)
     fail_unless(config.binary_stream == false);
     fail_unless(strcmp(config.pid_file, "/var/run/statsite.pid") == 0);
     fail_unless(config.input_counter == NULL);
+    fail_unless(config.extended_counters == false);
+    fail_unless(config.prefix_binary_stream == false);
+    fail_unless(config.num_quantiles == 3);
+    fail_unless(config.quantiles[0] == 0.5);
+    fail_unless(config.quantiles[1] == 0.95);
+    fail_unless(config.quantiles[2] == 0.99);
+
 }
 END_TEST
 
@@ -67,6 +81,7 @@ START_TEST(test_config_empty_file)
     fail_unless(config.parse_stdin == false);
     fail_unless(strcmp(config.log_level, "DEBUG") == 0);
     fail_unless(config.syslog_log_level == LOG_DEBUG);
+    fail_unless(config.syslog_log_facility == LOG_LOCAL0);
     fail_unless(config.timer_eps == (double)1e-2);
     fail_unless(strcmp(config.stream_cmd, "cat") == 0);
     fail_unless(config.flush_interval == 10);
@@ -74,6 +89,12 @@ START_TEST(test_config_empty_file)
     fail_unless(config.binary_stream == false);
     fail_unless(strcmp(config.pid_file, "/var/run/statsite.pid") == 0);
     fail_unless(config.input_counter == NULL);
+    fail_unless(config.extended_counters == false);
+    fail_unless(config.prefix_binary_stream == false);
+    fail_unless(config.num_quantiles == 3);
+    fail_unless(config.quantiles[0] == 0.5);
+    fail_unless(config.quantiles[1] == 0.95);
+    fail_unless(config.quantiles[2] == 0.99);
 
     unlink("/tmp/zero_file");
 }
@@ -91,10 +112,14 @@ timer_eps = 0.005\n\
 set_eps = 0.03\n\
 stream_cmd = foo\n\
 log_level = INFO\n\
+log_facility = local3\n\
 daemonize = true\n\
 binary_stream = true\n\
 input_counter = foobar\n\
-pid_file = /tmp/statsite.pid\n";
+pid_file = /tmp/statsite.pid\n\
+extended_counters = true\n\
+prefix_binary_stream = true\n\
+quantiles = 0.5, 0.90, 0.95, 0.99\n";
     write(fh, buf, strlen(buf));
     fchmod(fh, 777);
     close(fh);
@@ -108,6 +133,7 @@ pid_file = /tmp/statsite.pid\n";
     fail_unless(config.udp_port == 10001);
     fail_unless(config.parse_stdin == true);
     fail_unless(strcmp(config.log_level, "INFO") == 0);
+    fail_unless(strcmp(config.log_facility, "local3") == 0);
     fail_unless(config.timer_eps == (double)0.005);
     fail_unless(config.set_eps == (double)0.03);
     fail_unless(strcmp(config.stream_cmd, "foo") == 0);
@@ -116,6 +142,13 @@ pid_file = /tmp/statsite.pid\n";
     fail_unless(config.binary_stream == true);
     fail_unless(strcmp(config.pid_file, "/tmp/statsite.pid") == 0);
     fail_unless(strcmp(config.input_counter, "foobar") == 0);
+    fail_unless(config.extended_counters == true);
+    fail_unless(config.prefix_binary_stream == true);
+    fail_unless(config.num_quantiles == 4);
+    fail_unless(config.quantiles[0] == 0.5);
+    fail_unless(config.quantiles[1] == 0.90);
+    fail_unless(config.quantiles[2] == 0.95);
+    fail_unless(config.quantiles[3] == 0.99);
 
     unlink("/tmp/basic_config");
 }
@@ -179,6 +212,24 @@ START_TEST(test_sane_log_level)
     fail_unless(sane_log_level("critical", &log_lvl) == 0);
     fail_unless(sane_log_level("foo", &log_lvl) == 1);
     fail_unless(sane_log_level("BAR", &log_lvl) == 1);
+}
+END_TEST
+
+START_TEST(test_sane_log_facility)
+{
+    int log_facil;
+    fail_unless(sane_log_facility("local0", &log_facil) == 0);
+    fail_unless(sane_log_facility("local1", &log_facil) == 0);
+    fail_unless(sane_log_facility("local2", &log_facil) == 0);
+    fail_unless(sane_log_facility("local3", &log_facil) == 0);
+    fail_unless(sane_log_facility("local4", &log_facil) == 0);
+    fail_unless(sane_log_facility("local5", &log_facil) == 0);
+    fail_unless(sane_log_facility("local6", &log_facil) == 0);
+    fail_unless(sane_log_facility("local7", &log_facil) == 0);
+    fail_unless(sane_log_facility("user", &log_facil) == 0);
+    fail_unless(sane_log_facility("daemon", &log_facil) == 0);
+    fail_unless(sane_log_facility("foo", &log_facil) == 1);
+    fail_unless(sane_log_facility("BAR", &log_facil) == 1);
 }
 END_TEST
 
@@ -251,6 +302,17 @@ START_TEST(test_sane_set_eps)
 }
 END_TEST
 
+START_TEST(test_sane_quantiles)
+{
+    double good[] = { 0.01, 0.99 };
+    double low[]  = { 0.00, 0.99 };
+    double high[] = { 0.99, 1.00 };
+
+    fail_unless(sane_quantiles(2, good) == 0);
+    fail_unless(sane_quantiles(2, low)  == 1);
+    fail_unless(sane_quantiles(2, high) == 1);
+}
+END_TEST
 
 
 START_TEST(test_config_histograms)
@@ -263,6 +325,7 @@ flush_interval = 120\n\
 timer_eps = 0.005\n\
 stream_cmd = foo\n\
 log_level = INFO\n\
+log_facility = local0\n\
 daemonize = true\n\
 binary_stream = true\n\
 input_counter = foobar\n\
@@ -458,6 +521,7 @@ timer_eps = 0.005\n\
 set_eps = 0.03\n\
 stream_cmd = foo\n\
 log_level = INFO\n\
+log_facility = level0\n\
 daemonize = true\n\
 binary_stream = true\n\
 input_counter = foobar\n\

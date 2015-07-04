@@ -5,6 +5,7 @@ protocol.
 """
 import os
 import os.path
+import shutil
 import socket
 import subprocess
 import sys
@@ -40,6 +41,8 @@ VAL_TYPE_MAP = {
     "hist_min": 8,
     "hist_bin": 9,
     "hist_max": 10,
+    "rate": 11,
+    "sample_rate": 12,
     "percentile": 128,
 }
 
@@ -77,7 +80,7 @@ width=10
     open(config_path, "w").write(conf)
 
     # Start the process
-    proc = subprocess.Popen("./statsite -f %s" % config_path, shell=True)
+    proc = subprocess.Popen(['./statsite', '-f', config_path])
     proc.poll()
     assert proc.returncode is None
 
@@ -86,7 +89,77 @@ width=10
         try:
             proc.kill()
             proc.wait()
-            #shutil.rmtree(tmpdir)
+            shutil.rmtree(tmpdir)
+        except:
+            print proc
+            pass
+    request.addfinalizer(cleanup)
+
+    # Make a connection to the server
+    connected = False
+    for x in xrange(3):
+        try:
+            conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            conn.settimeout(1)
+            conn.connect(("localhost", port))
+            connected = True
+            break
+        except Exception, e:
+            print e
+            time.sleep(0.5)
+
+    # Die now
+    if not connected:
+        raise EnvironmentError("Failed to connect!")
+
+    # Make a second connection
+    conn2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    conn2.connect(("localhost", port))
+
+    # Return the connection
+    return conn, conn2, output
+
+
+def pytest_funcarg__serversPrefix(request):
+    "Returns a new APIHandler with a filter manager"
+    # Create tmpdir and delete after
+    tmpdir = tempfile.mkdtemp()
+
+    # Make the command
+    output = "%s/output" % tmpdir
+    cmd = "cat >> %s" % output
+
+    # Write the configuration
+    port = random.randrange(10000, 65000)
+    config_path = os.path.join(tmpdir, "config.cfg")
+    conf = """[statsite]
+flush_interval = 1
+port = %d
+udp_port = %d
+stream_cmd = %s
+binary_stream = yes
+prefix_binary_stream = true
+
+[histogram1]
+prefix=has_hist
+min=10
+max=90
+width=10
+
+""" % (port, port, cmd)
+    open(config_path, "w").write(conf)
+
+    # Start the process
+    proc = subprocess.Popen(['./statsite', '-f', config_path])
+    proc.poll()
+    assert proc.returncode is None
+
+    # Define a cleanup handler
+    def cleanup():
+        try:
+            proc.kill()
+            proc.wait()
+            shutil.rmtree(tmpdir)
         except:
             print proc
             pass
@@ -202,6 +275,7 @@ class TestInteg(object):
         assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["stddev"], 100) in out
         assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["min"], 100) in out
         assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["max"], 300) in out
+        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["rate"], 600) in out
 
     def test_meters(self, servers):
         "Tests adding kv pairs"
@@ -225,6 +299,8 @@ class TestInteg(object):
         assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["count"], 100) in out
         assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["stddev"], 29.011491975882016) in out
         assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["mean"], 49.5) in out
+        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["rate"], 4950) in out
+        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sample_rate"], 100) in out
         assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P50"], 49) in out
         assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P95"], 95) in out
         assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P99"], 99) in out
@@ -241,7 +317,7 @@ class TestInteg(object):
         out = open(output).read()
 
         # Adjust for time drift
-        if format_output(now - 1, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum"], 4950) in out:
+        if format_output_count(now - 1, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_min"], 10, 10) in out:
             now = now - 1
 
         assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_min"], 10, 10) in out
@@ -269,6 +345,120 @@ class TestInteg(object):
         if format_output(now - 1, "zip", BIN_TYPES["set"], VAL_TYPE_MAP["sum"], 3) in out:
             now = now - 1
         assert format_output(now, "zip", BIN_TYPES["set"], VAL_TYPE_MAP["sum"], 3) in out
+
+
+class TestIntegPrefix(object):
+    def test_kv(self, serversPrefix):
+        "Tests adding kv pairs"
+        server, _, output = serversPrefix
+        server.sendall(format("tubez", "kv", 100))
+        wait_file(output)
+        now = time.time()
+        out = open(output).read()
+        assert out in (format_output(now, "kv.tubez", BIN_TYPES["kv"], VAL_TYPE_MAP["kv"], 100),
+                       format_output(now - 1, "kv.tubez", BIN_TYPES["kv"], VAL_TYPE_MAP["kv"], 100))
+
+    def test_gauges(self, serversPrefix):
+        "Tests streaming gauges"
+        server, _, output = serversPrefix
+        server.sendall(format("g1", "g", 500))
+        wait_file(output)
+        now = time.time()
+        out = open(output).read()
+        assert out in (format_output(now, "gauges.g1", BIN_TYPES["g"], VAL_TYPE_MAP["kv"], 500),
+                       format_output(now - 1, "gauges.g1", BIN_TYPES["g"], VAL_TYPE_MAP["kv"], 500))
+
+    def test_counters(self, serversPrefix):
+        "Tests adding kv pairs"
+        server, _, output = serversPrefix
+        server.sendall(format("foobar", "c", 100))
+        server.sendall(format("foobar", "c", 200))
+        server.sendall(format("foobar", "c", 300))
+        wait_file(output)
+        now = time.time()
+        out = open(output).read()
+
+        # Adjust for time drift
+        if format_output(now - 1, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum"], 600) in out:
+            now = now - 1
+
+        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum"], 600) in out
+        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum sq"], 140000) in out
+        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["mean"], 200) in out
+        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["count"], 3) in out
+        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["stddev"], 100) in out
+        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["min"], 100) in out
+        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["max"], 300) in out
+        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["rate"], 600) in out
+
+    def test_meters(self, serversPrefix):
+        "Tests adding kv pairs"
+        server, _, output = serversPrefix
+        msg = ""
+        for x in xrange(100):
+            msg += format("noobs", "ms", x)
+        server.sendall(msg)
+        wait_file(output)
+        now = time.time()
+        out = open(output).read()
+
+        # Adjust for time drift
+        if format_output(now - 1, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum"], 4950) in out:
+            now = now - 1
+
+        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum"], 4950) in out
+        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum sq"], 328350) in out
+        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["min"], 0) in out
+        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["max"], 99) in out
+        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["count"], 100) in out
+        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["stddev"], 29.011491975882016) in out
+        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["mean"], 49.5) in out
+        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["rate"], 4950) in out
+        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sample_rate"], 100) in out
+        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P50"], 49) in out
+        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P95"], 95) in out
+        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P99"], 99) in out
+
+    def test_histogram(self, serversPrefix):
+        "Tests streaming of histogram values"
+        server, _, output = serversPrefix
+        msg = ""
+        for x in xrange(100):
+            msg += format("has_hist.test", "ms", x)
+        server.sendall(msg)
+        wait_file(output)
+        now = time.time()
+        out = open(output).read()
+
+        # Adjust for time drift
+        if format_output(now - 1, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum"], 4950) in out:
+            now = now - 1
+
+        assert format_output_count(now, "timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_min"], 10, 10) in out
+        assert format_output_count(now, "timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 10, 10) in out
+        assert format_output_count(now, "timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 20, 10) in out
+        assert format_output_count(now, "timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 30, 10) in out
+        assert format_output_count(now, "timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 40, 10) in out
+        assert format_output_count(now, "timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 50, 10) in out
+        assert format_output_count(now, "timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 60, 10) in out
+        assert format_output_count(now, "timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 70, 10) in out
+        assert format_output_count(now, "timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 80, 10) in out
+        assert format_output_count(now, "timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_max"], 90, 10) in out
+
+    def test_sets(self, serversPrefix):
+        "Tests adding sets"
+        server, _, output = serversPrefix
+        server.sendall(format_set("zip", "foo"))
+        server.sendall(format_set("zip", "bar"))
+        server.sendall(format_set("zip", "baz"))
+        wait_file(output)
+        now = time.time()
+        out = open(output).read()
+
+        # Adjust for time drift
+        if format_output(now - 1, "sets.zip", BIN_TYPES["set"], VAL_TYPE_MAP["sum"], 3) in out:
+            now = now - 1
+        assert format_output(now, "sets.zip", BIN_TYPES["set"], VAL_TYPE_MAP["sum"], 3) in out
 
 
 if __name__ == "__main__":

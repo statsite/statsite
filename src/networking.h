@@ -18,10 +18,10 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out);
  * stack. This method blocks indefinitely until the
  * network stack is shutdown.
  * @arg netconf The configuration for the networking stack.
- * @arg should_run A reference to a variable that is set to 0 when
- * shutdown should be started
+ * @arg signum A reference to a variable that is set when
+ * a signal is caught and shutdown should be started
  */
-void enter_networking_loop(statsite_networking *netconf, int *should_run);
+void enter_networking_loop(statsite_networking *netconf, volatile int *signum);
 
 /**
  * Shuts down all the connections

@@ -31,6 +31,8 @@ START_TEST(test_stream_empty)
 
     res = destroy_metrics(&m);
     fail_unless(res == 0);
+
+    fail_unless(unlink("/tmp/stream_empty") == 0);
 }
 END_TEST
 
@@ -97,6 +99,8 @@ timers.baz.11.000000\n";
 
     res = destroy_metrics(&m);
     fail_unless(res == 0);
+
+    fail_unless(unlink("/tmp/stream_some") == 0);
 }
 END_TEST
 

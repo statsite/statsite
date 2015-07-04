@@ -25,13 +25,16 @@ static histogram_config *in_progress;
  * filters that are about 300KB initially, and suited
  * to grow quickly.
  */
+static double default_quantiles[] = {0.5, 0.95, 0.99};
 static const statsite_config DEFAULT_CONFIG = {
     8125,               // TCP defaults to 8125
     8125,               // UDP on 8125
-    "0.0.0.0",          // Listen on all IPv4 addresses
+    "::",               // Listen on all addresses
     false,              // Do not parse stdin by default
     "DEBUG",            // DEBUG level
     LOG_DEBUG,
+    "local0",           // local0 logging facility
+    LOG_LOCAL0,         // Syslog logging facility
     0.01,               // Default 1% error
     "cat",              // Pipe to cat
     10,                 // Flush every 10 seconds
@@ -46,7 +49,12 @@ static const statsite_config DEFAULT_CONFIG = {
     true,               // Use type prefixes by default
     "",                 // Global prefix
     {"", "kv.", "gauges.", "counts.", "timers.", "sets.", ""},
-    {}
+    {},
+    false,              // Extended counts off by default
+    false,              // Do not prefix binary stream by default
+                        // Number of quantiles
+    sizeof(default_quantiles) / sizeof(double),
+    default_quantiles,  // Quantiles
 };
 
 /**
@@ -94,6 +102,75 @@ static int value_to_int(const char *val, int *result) {
  */
 static int value_to_double(const char *val, double *result) {
     return sscanf(val, "%lf", result);
+}
+
+/**
+ * Attempts to convert a string to an array out doubles,
+ * assuming a comma and space separated list.
+ * @arg val The string value
+ * @arg result The destination for the result
+ * @arg count The destination for the count
+ * @return 1 on success, 0 on error.
+ */
+static int value_to_list_of_doubles(const char *val, double **result, int *count) {
+    int scanned;
+    double quantile;
+
+    *count = 0;
+    *result = NULL;
+    while (sscanf(val, "%lf%n", &quantile, &scanned) == 1) {
+        val += scanned;
+        *count += 1;
+        *result = realloc(*result, *count * sizeof(double));
+        (*result)[*count - 1] = quantile;
+        if (sscanf(val, " , %n", &scanned) == 0) {
+            val += scanned;
+        }
+    }
+    sscanf(val, " %n", &scanned);
+
+    return val[scanned] == '\0';
+}
+
+/**
+* Attempts to convert a string log facility
+* to an actual syslog log facility,
+* @arg val The string value
+* @arg result The destination for the result
+* @return 1 on success, 0 on error.
+*/
+static int name_to_facility(const char *val, int *result) {
+    int log_facility = LOG_LOCAL0;
+    if (VAL_MATCH("local0")) {
+        log_facility = LOG_LOCAL0;
+    } else if (VAL_MATCH("local1")) {
+        log_facility = LOG_LOCAL1;
+    } else if (VAL_MATCH("local2")) {
+        log_facility = LOG_LOCAL2;
+    } else if (VAL_MATCH("local3")) {
+        log_facility = LOG_LOCAL3;
+    } else if (VAL_MATCH("local4")) {
+        log_facility = LOG_LOCAL4;
+    } else if (VAL_MATCH("local5")) {
+        log_facility = LOG_LOCAL5;
+    } else if (VAL_MATCH("local6")) {
+        log_facility = LOG_LOCAL6;
+    } else if (VAL_MATCH("local7")) {
+        log_facility = LOG_LOCAL7;
+    } else if (VAL_MATCH("user")) {
+        log_facility = LOG_LOCAL7;
+    } else if (VAL_MATCH("daemon")) {
+        log_facility = LOG_LOCAL7;
+    } else {
+        log_facility = LOG_LOCAL0;
+    }
+
+    if (errno == EINVAL) {
+        return 0;
+    }
+
+    *result = log_facility;
+    return 1;
 }
 
 /**
@@ -196,6 +273,10 @@ static int config_callback(void* user, const char* section, const char* name, co
         return value_to_bool(value, &config->binary_stream);
     } else if (NAME_MATCH("use_type_prefix")) {
         return value_to_bool(value, &config->use_type_prefix);
+    } else if (NAME_MATCH("extended_counters")) {
+        return value_to_bool(value, &config->extended_counters);
+    } else if (NAME_MATCH("prefix_binary_stream")) {
+        return value_to_bool(value, &config->prefix_binary_stream);
 
     // Handle the double cases
     } else if (NAME_MATCH("timer_eps")) {
@@ -203,9 +284,15 @@ static int config_callback(void* user, const char* section, const char* name, co
     } else if (NAME_MATCH("set_eps")) {
         return value_to_double(value, &config->set_eps);
 
+    // Handle quantiles as a comma-separated list of doubles
+    } else if (NAME_MATCH("quantiles")) {
+        return value_to_list_of_doubles(value, &config->quantiles, &config->num_quantiles);
+
     // Copy the string values
     } else if (NAME_MATCH("log_level")) {
         config->log_level = strdup(value);
+    } else if (NAME_MATCH("log_facility")) {
+        config->log_facility = strdup(value);
     } else if (NAME_MATCH("stream_cmd")) {
         config->stream_cmd = strdup(value);
     } else if (NAME_MATCH("pid_file")) {
@@ -227,10 +314,14 @@ static int config_callback(void* user, const char* section, const char* name, co
     } else if (NAME_MATCH("kv_prefix")) {
         config->prefixes[KEY_VAL] = strdup(value);
 
+    // Copy the multi-case variables
+    } else if (NAME_MATCH("log_facility")) {
+        return name_to_facility(value, &config->syslog_log_facility);
+
     // Unknown parameter?
     } else {
         // Log it, but ignore
-        syslog(LOG_NOTICE, "Unrecognized config parameter: %s", value);
+        syslog(LOG_NOTICE, "Unrecognized config parameter: %s", name);
     }
 
     // Success
@@ -342,6 +433,39 @@ int sane_log_level(char *log_level, int *syslog_level) {
     return 0;
 }
 
+int sane_log_facility(char *log_facil, int *syslog_facility) {
+    #define FACIL_MATCH(facil) (strcasecmp(facil, log_facil) == 0)
+
+    if (FACIL_MATCH("local0")) {
+        *syslog_facility = LOG_LOCAL0;
+    } else if (FACIL_MATCH("local0")) {
+        *syslog_facility = LOG_LOCAL0;
+    } else if (FACIL_MATCH("local1")) {
+        *syslog_facility = LOG_LOCAL1;
+    } else if (FACIL_MATCH("local2")) {
+        *syslog_facility = LOG_LOCAL2;
+    } else if (FACIL_MATCH("local3")) {
+        *syslog_facility = LOG_LOCAL3;
+    } else if (FACIL_MATCH("local4")) {
+        *syslog_facility = LOG_LOCAL4;
+    } else if (FACIL_MATCH("local5")) {
+        *syslog_facility = LOG_LOCAL5;
+    } else if (FACIL_MATCH("local6")) {
+        *syslog_facility = LOG_LOCAL6;
+    } else if (FACIL_MATCH("local7")) {
+        *syslog_facility = LOG_LOCAL7;
+    } else if (FACIL_MATCH("user")) {
+        *syslog_facility = LOG_USER;
+    } else if (FACIL_MATCH("daemon")) {
+        *syslog_facility = LOG_DAEMON;
+    } else {
+        syslog(LOG_ERR, "Invalid log facility!");
+        return 1;
+    }
+
+    return 0;
+}
+
 int sane_timer_eps(double eps) {
     if (eps>= 0.5) {
         syslog(LOG_ERR,
@@ -429,6 +553,36 @@ cause increased memory use.");
     return 0;
 }
 
+int sane_quantiles(int num_quantiles, double quantiles[]) {
+    for (int i=0; i < num_quantiles; i++) {
+        if (quantiles[i] <= 0.0 || quantiles[i] >= 1.0) {
+            syslog(LOG_ERR, "Quantiles must be between 0 and 1");
+            return 1;
+        }
+    }
+    return 0;
+}
+
+/**
+ * Allocates memory for a new config structure
+ * @return a pointer to a new config structure on success.
+ */
+statsite_config* alloc_config() {
+    return calloc(1, sizeof(statsite_config));
+}
+
+/**
+ * Frees memory associated with a previously allocated config structure
+ * @arg config The config object to free.
+ */
+void free_config(statsite_config* config) {
+    if (config->quantiles != default_quantiles) {
+        free (config->quantiles);
+    }
+    free(config);
+}
+
+
 /**
  * Validates the configuration
  * @arg config The config object to validate.
@@ -438,10 +592,12 @@ int validate_config(statsite_config *config) {
     int res = 0;
 
     res |= sane_log_level(config->log_level, &config->syslog_log_level);
+    res |= sane_log_facility(config->log_facility, &config->syslog_log_facility);
     res |= sane_timer_eps(config->timer_eps);
     res |= sane_flush_interval(config->flush_interval);
     res |= sane_histograms(config->hist_configs);
     res |= sane_set_precision(config->set_eps, &config->set_precision);
+    res |= sane_quantiles(config->num_quantiles, config->quantiles);
 
     return res;
 }

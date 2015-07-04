@@ -21,11 +21,10 @@
 #include "networking.h"
 
 /**
- * By default we should run. Our signal
- * handler updates this variable to allow the
- * program to gracefully terminate.
+ * Our signal handler updates this variable to
+ * allow the program to gracefully terminate.
  */
-static int SHOULD_RUN = 1;
+static volatile int SIGNUM;
 
 /**
  * Prints our usage to stderr
@@ -64,6 +63,11 @@ int parse_cmd_line_args(int argc, char **argv, char **config_file) {
                 return 1;
         }
     }
+    if ( optind < argc )
+    {
+        fprintf(stderr, "Unknown option `%s`.\n", argv[optind]);
+        return 1;
+    }
 
     // Check if we need to show usage
     if (enable_help) {
@@ -78,13 +82,14 @@ int parse_cmd_line_args(int argc, char **argv, char **config_file) {
 /**
  * Initializes the syslog configuration
  */
-void setup_syslog() {
+void setup_syslog(int LOG_FACIL, char daemonize) {
     // If we are on a tty, log the errors out
     int flags = LOG_CONS|LOG_NDELAY|LOG_PID;
-    if (isatty(1)) {
+    if (!daemonize) {
         flags |= LOG_PERROR;
     }
-    openlog("statsite", flags, LOG_LOCAL0);
+    errno = 0;
+    openlog("statsite", flags, LOG_FACIL);
 }
 
 
@@ -93,12 +98,7 @@ void setup_syslog() {
  * when we get signals such as SIGINT, SIGTERM.
  */
 void signal_handler(int signum) {
-    if (!SHOULD_RUN) {
-        syslog(LOG_WARNING, "Received signal [%s] while exiting! Terminating", strsignal(signum));
-        exit(1);
-    }
-    SHOULD_RUN = 0;  // Stop running now
-    syslog(LOG_WARNING, "Received signal [%s]! Exiting...", strsignal(signum));
+    SIGNUM = signum;
 }
 
 
@@ -127,8 +127,9 @@ int write_pidfile(char *pid_file, pid_t pid) {
 
 
 int main(int argc, char **argv) {
-    // Initialize syslog
-    setup_syslog();
+
+    // temporarily set the syslog facilty to main and init it
+    setup_syslog(LOG_USER, 0);
 
     // Parse the command line
     char *config_file = NULL;
@@ -136,7 +137,7 @@ int main(int argc, char **argv) {
     if (parse_res) return 1;
 
     // Parse the config file
-    statsite_config *config = calloc(1, sizeof(statsite_config));
+    statsite_config *config = alloc_config();
     int config_res = config_from_filename(config_file, config);
     if (config_res != 0) {
         syslog(LOG_ERR, "Failed to read the configuration file!");
@@ -149,6 +150,12 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    // close the initial syslog
+    closelog();
+
+    // Initialize syslog with configured facility
+    setup_syslog(config->syslog_log_facility, config->daemonize);
+    
     // Set prefixes for each message type
     if (prepare_prefixes(config)) {
         syslog(LOG_ERR, "Failed to get prefixes!");
@@ -219,7 +226,11 @@ int main(int argc, char **argv) {
     signal(SIGTERM, signal_handler);
 
     // Join the networking loop, blocks until exit
-    enter_networking_loop(netconf, &SHOULD_RUN);
+    enter_networking_loop(netconf, &SIGNUM);
+
+    if (SIGNUM != 0) {
+        syslog(LOG_WARNING, "Received signal [%s]! Exiting...", strsignal(SIGNUM));
+    }
 
     // Begin the shutdown/cleanup
     shutdown_networking(netconf);
@@ -233,7 +244,7 @@ int main(int argc, char **argv) {
     }
 
     // Free our memory
-    free(config);
+    free_config(config);
 
     // Done
     return 0;

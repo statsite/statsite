@@ -4,6 +4,7 @@ of the ASCII protocol.
 """
 import os
 import os.path
+import shutil
 import socket
 import subprocess
 import sys
@@ -45,7 +46,7 @@ stream_cmd = %s
     open(config_path, "w").write(conf)
 
     # Start the process
-    proc = subprocess.Popen("./statsite -f %s" % config_path, shell=True)
+    proc = subprocess.Popen(['./statsite', '-f', config_path])
     proc.poll()
     assert proc.returncode is None
 
@@ -54,7 +55,7 @@ stream_cmd = %s
         try:
             proc.kill()
             proc.wait()
-            #shutil.rmtree(tmpdir)
+            shutil.rmtree(tmpdir)
         except:
             print proc
             pass
@@ -166,7 +167,8 @@ class TestInteg(object):
         wait_file(output)
         now = time.time()
         out = open(output).read()
-        assert out in ("counts.foobar|600.000000|%d\n" % now, "counts.foobar|600.000000|%d\n" % (now - 1))
+        assert out in ("counts.foobar|600.000000|%d\n" % (now),
+                       "counts.foobar|600.000000|%d\n" % (now - 1))
 
     def test_meters(self, servers):
         "Tests adding kv pairs"
@@ -249,7 +251,8 @@ class TestIntegUDP(object):
         wait_file(output)
         now = time.time()
         out = open(output).read()
-        assert out in ("counts.foobar|600.000000|%d\n" % now, "counts.foobar|600.000000|%d\n" % (now - 1))
+        assert out in ("counts.foobar|600.000000|%d\n" % (now),
+                       "counts.foobar|600.000000|%d\n" % (now - 1))
 
     def test_meters(self, servers):
         "Tests adding kv pairs"

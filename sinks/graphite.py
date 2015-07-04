@@ -7,7 +7,7 @@ import logging
 
 
 class GraphiteStore(object):
-    def __init__(self, host="localhost", port=2003, prefix="statsite", attempts=3):
+    def __init__(self, host="localhost", port=2003, prefix="statsite.", attempts=3):
         """
         Implements an interface that allows metrics to be persisted to Graphite.
         Raises a :class:`ValueError` on bad arguments.
@@ -15,7 +15,7 @@ class GraphiteStore(object):
         :Parameters:
             - `host` : The hostname of the graphite server.
             - `port` : The port of the graphite server
-            - `prefix` (optional) : A prefix to add to the keys. Defaults to 'statsite'
+            - `prefix` (optional) : A prefix to add to the keys. Defaults to 'statsite.'
             - `attempts` (optional) : The number of re-connect retries before failing.
         """
         # Convert the port to an int since its coming from a configuration file
@@ -39,16 +39,17 @@ class GraphiteStore(object):
         Flushes the metrics provided to Graphite.
 
        :Parameters:
-        - `metrics` : A list of (key,value,timestamp) tuples.
+        - `metrics` : A list of "key|value|timestamp" strings.
         """
         if not metrics:
             return
 
         # Construct the output
-        metrics = [m.split("|") for m in metrics if m]
+        metrics = [m.split("|") for m in metrics if m and m.count("|") == 2]
+
         self.logger.info("Outputting %d metrics" % len(metrics))
         if self.prefix:
-            lines = ["%s.%s %s %s" % (self.prefix, k, v, ts) for k, v, ts in metrics]
+            lines = ["%s%s %s %s" % (self.prefix, k, v, ts) for k, v, ts in metrics]
         else:
             lines = ["%s %s %s" % (k, v, ts) for k, v, ts in metrics]
         data = "\n".join(lines) + "\n"
