@@ -86,22 +86,16 @@ class GraphiteStore(object):
         self.logger.critical("Failed to flush to Graphite! Gave up after %d attempts." % self.attempts)
 
 
-
-def main(metrics, *argv):
-
+if __name__ == "__main__":
     # Initialize the logger
     logging.basicConfig()
 
     # Intialize from our arguments
-    graphite = GraphiteStore(*argv[0:])
+    graphite = GraphiteStore(*sys.argv[1:])
+
+    # Get all the inputs
+    metrics = sys.stdin.read()
 
     # Flush
     graphite.flush(metrics.splitlines())
     graphite.close()
-
-
-
-if __name__ == "__main__":
-    # Get all the inputs
-    metrics = sys.stdin.read()
-    main(metrics, *sys.argv[1:])
