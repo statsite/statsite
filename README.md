@@ -1,4 +1,4 @@
-Statsite [![Build Status](https://travis-ci.org/armon/statsite.png)](https://travis-ci.org/armon/statsite)
+Statsite (Twitter-Forks) [![Build Status](https://travis-ci.org/twitter-forks/statsite.png)](https://travis-ci.org/twitter-forks/statsite)
 ========
 
 Statsite is a metrics aggregation server. Statsite is based heavily
@@ -22,6 +22,9 @@ Features
 * Dynamic set implementation:
   - Exactly counts for small sets
   - HyperLogLog for large sets
+* _New_ Support for multiple sinks (with the same flush period)
+* _New_ Integrated, finite queue, HTTP POST sink
+* _New_ Docker support
 * Included sinks:
   - Graphite
   - InfluxDB
@@ -46,6 +49,12 @@ statsite performs a fork/exec to start a new stream handler
 invoking a specified application. Statsite then streams the
 aggregated metrics over stdin to the application, which is
 free to handle the metrics as it sees fit.
+
+_New_ Statsite (Twitter-Forks) supports multiple sinks, of different
+types, as long as they all honor the same flush period. A built-in
+HTTP sink has also been provided, which provides LIFO space-limited
+queueing semantics which significantly improve backlogs during TSDB
+failures or network partitions. 
 
 This allows statsite to aggregate metrics and then ship metrics
 to any number of sinks (Graphite, SQL databases, etc). There
@@ -118,7 +127,9 @@ Here is an example configuration file::
     flush_interval = 10
     timer_eps = 0.01
     set_eps = 0.02
-    stream_cmd = python sinks/graphite.py localhost 2003
+
+    [sink_steam_graphite]
+    command = python sinks/graphite.py localhost 2003
 
     [histogram_api]
     prefix=api
@@ -171,10 +182,6 @@ options must exist in the `statsite` section of the INI file:
 * set\_eps : The upper bound on error for unique set estimates. Defaults
   to 2%. Decreasing this value causes more memory utilization per set.
 
-* stream\_cmd : This is the command that statsite invokes every
-  `flush_interval` seconds to handle the metrics. It can be any executable.
-  It should read inputs over stdin and exit with status code 0 on success.
-
 * input\_counter : If set, statsite will count how many commands it received
   in the flush interval, and the count will be emitted under this name. For
   example if set to "numStats", then statsite will emit "counter.numStats" with
@@ -184,9 +191,6 @@ options must exist in the `statsite` section of the INI file:
 
 * pid\_file : When daemonizing, where to put the pid file. Defaults
   to /var/run/statsite.pid
-
-* binary\_stream : Should data be streamed to the stream\_cmd in
-  binary form instead of ASCII form. Defaults to 0.
 
 * use\_type\_prefix : Should prefixes with message type be added to the messages.
   Does not affect global\_prefix. Defaults to 1.
@@ -210,6 +214,26 @@ options must exist in the `statsite` section of the INI file:
 
 * quantiles : A comma-separated list of quantiles to calculate for timers.
   Defaults to `0.5, 0.95, 0.99`
+
+### Sinks
+
+Sinks are configured using a section named [sink\_TYPE\_NAME]. The two
+valid sink types are currently:
+
+* stream
+* http
+
+Stream sinks take the following options:
+
+* command : This is the command that statsite invokes every
+  `flush_interval` seconds to handle the metrics. It can be any executable.
+  It should read inputs over stdin and exit with status code 0 on
+  success.
+* binary : Should data be streamed to the stream\_cmd in
+  binary form instead of ASCII form. Defaults to 0.
+
+
+### Histograms
 
 In addition to global configurations, statsite supports histograms
 as well. Histograms are configured one per section, and the INI
