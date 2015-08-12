@@ -125,6 +125,7 @@ static int metrics_increment_counter(metrics *m, char *name, double val) {
  * given name.
  * @arg name The name of the timer
  * @arg val The sample to add
+ * @arg sample_rate The sample rate of val
  * @return 0 on success.
  */
 static int metrics_add_timer_sample(metrics *m, char *name, double val, double sample_rate) {
