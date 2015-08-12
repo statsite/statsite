@@ -127,7 +127,7 @@ static int metrics_increment_counter(metrics *m, char *name, double val) {
  * @arg val The sample to add
  * @return 0 on success.
  */
-static int metrics_add_timer_sample(metrics *m, char *name, double val) {
+static int metrics_add_timer_sample(metrics *m, char *name, double val, double sample_rate) {
     timer_hist *t;
     histogram_config *conf;
     int res = hashmap_get(m->timers, name, (void**)&t);
@@ -162,7 +162,7 @@ static int metrics_add_timer_sample(metrics *m, char *name, double val) {
     }
 
     // Add the sample value
-    return timer_add_sample(&t->tm, val);
+    return timer_add_sample(&t->tm, val, sample_rate);
 }
 
 /**
@@ -213,7 +213,7 @@ static int metrics_set_gauge(metrics *m, char *name, double val, bool delta) {
  * @arg val The sample to add
  * @return 0 on success.
  */
-int metrics_add_sample(metrics *m, metric_type type, char *name, double val) {
+int metrics_add_sample(metrics *m, metric_type type, char *name, double val, double sample_rate) {
     switch (type) {
         case KEY_VAL:
             return metrics_add_kv(m, name, val);
@@ -228,7 +228,7 @@ int metrics_add_sample(metrics *m, metric_type type, char *name, double val) {
             return metrics_increment_counter(m, name, val);
 
         case TIMER:
-            return metrics_add_timer_sample(m, name, val);
+            return metrics_add_timer_sample(m, name, val, sample_rate);
 
         default:
             return -1;
@@ -336,4 +336,3 @@ static int iter_cb(void *data, const char *key, void *value) {
     struct cb_info *info = data;
     return info->cb(info->data, info->type, (char*)key, value);
 }
-

@@ -71,14 +71,14 @@ START_TEST(test_stream_some)
     fail_unless(res == 0);
 
     // Add some metrics
-    fail_unless(metrics_add_sample(&m, KEY_VAL, "test", 100) == 0);
-    fail_unless(metrics_add_sample(&m, KEY_VAL, "test2", 42) == 0);
-    fail_unless(metrics_add_sample(&m, COUNTER, "foo", 4) == 0);
-    fail_unless(metrics_add_sample(&m, COUNTER, "foo", 6) == 0);
-    fail_unless(metrics_add_sample(&m, COUNTER, "bar", 10) == 0);
-    fail_unless(metrics_add_sample(&m, COUNTER, "bar", 20) == 0);
-    fail_unless(metrics_add_sample(&m, TIMER, "baz", 1) == 0);
-    fail_unless(metrics_add_sample(&m, TIMER, "baz", 10) == 0);
+    fail_unless(metrics_add_sample(&m, KEY_VAL, "test", 100, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, KEY_VAL, "test2", 42, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, COUNTER, "foo", 4, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, COUNTER, "foo", 6, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, COUNTER, "bar", 10, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, COUNTER, "bar", 20, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "baz", 1, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "baz", 10, 1.0) == 0);
 
     int called = 0;
     res = stream_to_command(&m, &called, some_cb, "cat > /tmp/stream_some");
@@ -111,14 +111,14 @@ START_TEST(test_stream_bad_cmd)
     fail_unless(res == 0);
 
     // Add some metrics
-    fail_unless(metrics_add_sample(&m, KEY_VAL, "test", 100) == 0);
-    fail_unless(metrics_add_sample(&m, KEY_VAL, "test2", 42) == 0);
-    fail_unless(metrics_add_sample(&m, COUNTER, "foo", 4) == 0);
-    fail_unless(metrics_add_sample(&m, COUNTER, "foo", 6) == 0);
-    fail_unless(metrics_add_sample(&m, COUNTER, "bar", 10) == 0);
-    fail_unless(metrics_add_sample(&m, COUNTER, "bar", 20) == 0);
-    fail_unless(metrics_add_sample(&m, TIMER, "baz", 1) == 0);
-    fail_unless(metrics_add_sample(&m, TIMER, "baz", 10) == 0);
+    fail_unless(metrics_add_sample(&m, KEY_VAL, "test", 100, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, KEY_VAL, "test2", 42, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, COUNTER, "foo", 4, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, COUNTER, "foo", 6, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, COUNTER, "bar", 10, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, COUNTER, "bar", 20, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "baz", 1, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "baz", 10, 1.0) == 0);
 
     int called = 0;
     res = stream_to_command(&m, &called, some_cb, "abcd 2>/dev/null");
@@ -136,14 +136,14 @@ START_TEST(test_stream_sigpipe)
     fail_unless(res == 0);
 
     // Add some metrics
-    fail_unless(metrics_add_sample(&m, KEY_VAL, "test", 100) == 0);
-    fail_unless(metrics_add_sample(&m, KEY_VAL, "test2", 42) == 0);
-    fail_unless(metrics_add_sample(&m, COUNTER, "foo", 4) == 0);
-    fail_unless(metrics_add_sample(&m, COUNTER, "foo", 6) == 0);
-    fail_unless(metrics_add_sample(&m, COUNTER, "bar", 10) == 0);
-    fail_unless(metrics_add_sample(&m, COUNTER, "bar", 20) == 0);
-    fail_unless(metrics_add_sample(&m, TIMER, "baz", 1) == 0);
-    fail_unless(metrics_add_sample(&m, TIMER, "baz", 10) == 0);
+    fail_unless(metrics_add_sample(&m, KEY_VAL, "test", 100, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, KEY_VAL, "test2", 42, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, COUNTER, "foo", 4, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, COUNTER, "foo", 6, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, COUNTER, "bar", 10, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, COUNTER, "bar", 20, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "baz", 1, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "baz", 10, 1.0) == 0);
 
     int called = 0;
     res = stream_to_command(&m, &called, some_cb, "head -n1 >/dev/null");
@@ -153,4 +153,3 @@ START_TEST(test_stream_sigpipe)
     fail_unless(res == 0);
 }
 END_TEST
-
