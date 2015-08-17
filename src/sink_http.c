@@ -19,6 +19,7 @@ const char* DEFAULT_CIPHERS_NSS = "ecdhe_ecdsa_aes_128_gcm_sha_256,ecdhe_rsa_aes
 const char* DEFAULT_CIPHERS_OPENSSL = "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA";
 
 const char* USERAGENT = "statsite-http/0";
+const char* OAUTH2_GRANT = "grant_type=client_credentials";
 
 struct http_sink {
     sink sink;
@@ -242,6 +243,83 @@ static const char* curl_which_ssl(void) {
         return DEFAULT_CIPHERS_OPENSSL;
 }
 
+static void http_curl_basic_setup(CURL* curl,
+                                  const sink_config_http* httpconfig, struct curl_slist* headers,
+                                  char* error_buffer,
+                                  strbuf* recv_buf,
+                                  const char* ssl_ciphers) {
+    /* Setup HTTP parameters */
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, DEFAULT_TIMEOUT_SECONDS);
+    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error_buffer);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, recv_buf);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, recv_cb);
+    curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST, ssl_ciphers);
+    if (headers)
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, USERAGENT);
+}
+
+/*
+ * A helper to try to authenticate to an OAuth2 token endpoint
+ */
+static int oauth2_get_token(const sink_config_http* httpconfig, struct http_sink* sink) {
+    char* error_buffer = malloc(CURL_ERROR_SIZE + 1);
+    strbuf *recv_buf;
+    strbuf_new(&recv_buf, 16384);
+
+    const char* ssl_ciphers;
+    if (httpconfig->ciphers)
+        ssl_ciphers = httpconfig->ciphers;
+    else
+        ssl_ciphers = curl_which_ssl();
+
+
+    CURL* curl = curl_easy_init();
+    curl_easy_setopt(curl, CURLOPT_URL, httpconfig->oauth_token_url);
+    http_curl_basic_setup(curl, httpconfig, NULL, error_buffer, recv_buf, ssl_ciphers);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(OAUTH2_GRANT));
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, OAUTH2_GRANT);
+    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+    curl_easy_setopt(curl, CURLOPT_USERNAME, httpconfig->oauth_key);
+    curl_easy_setopt(curl, CURLOPT_PASSWORD, httpconfig->oauth_secret);
+
+    CURLcode rcurl = curl_easy_perform(curl);
+    long http_code = 0;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+
+    int recv_len;
+    char* recv_data = strbuf_get(recv_buf, &recv_len);
+    printf("DATA: %s\n", recv_data);
+    if (http_code != 200 || rcurl != CURLE_OK) {
+        syslog(LOG_ERR, "HTTP auth: error %d: %s %s", rcurl, error_buffer, recv_data);
+        usleep(FAILURE_WAIT);
+        goto exit;
+    } else {
+        json_error_t error;
+        json_t* root = json_loadb(recv_data, recv_len, JSON_DECODE_ANY, &error);
+        if (!root) {
+            syslog(LOG_ERR, "HTTP auth: JSON load error: %s", error.text);
+            goto exit;
+        }
+        char* token = NULL;
+        if (json_unpack_ex(root, &error, 0, "{s:s}", "access_token", &token) != 0) {
+            syslog(LOG_ERR, "HTTP auth: JSON unpack error: %s", error.text);
+            json_decref(root);
+            goto exit;
+        }
+        sink->oauth_bearer = strdup(token);
+        json_decref(root);
+        syslog(LOG_NOTICE, "HTTP auth: Got valid OAuth2 token");
+    }
+
+exit:
+
+    curl_easy_cleanup(curl);
+    free(error_buffer);
+    strbuf_free(recv_buf, true);
+    return 0;
+}
+
 /*
  * A simple background worker thread which pops from the queue and tries
  * to post. If the queue is marked closed, this thread exits
@@ -261,8 +339,7 @@ static void* http_worker(void* arg) {
 
     syslog(LOG_NOTICE, "HTTP: Using cipher suite %s", ssl_ciphers);
 
-    struct curl_slist* headers = NULL;
-    headers = curl_slist_append(headers, "Connection: close");
+    bool should_authenticate = httpconfig->oauth_key != NULL;
 
     syslog(LOG_NOTICE, "Starting HTTP worker");
     strbuf_new(&recv_buf, 16384);
@@ -274,18 +351,31 @@ static void* http_worker(void* arg) {
         if (ret == LIFOQ_CLOSED)
             goto exit;
 
+        if (should_authenticate && s->oauth_bearer == NULL) {
+            if (!oauth2_get_token(httpconfig, s)) {
+                if (lifoq_push(s->queue, data, data_size, true, true))
+                    syslog(LOG_ERR, "HTTP: dropped data due to queue full of closed");
+                continue;
+            }
+        }
+
         memset(error_buffer, 0, CURL_ERROR_SIZE+1);
         CURL* curl = curl_easy_init();
-
-        /* Setup HTTP parameters */
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, DEFAULT_TIMEOUT_SECONDS);
         curl_easy_setopt(curl, CURLOPT_URL, httpconfig->post_url);
-        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error_buffer);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, recv_buf);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, recv_cb);
-        curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST, ssl_ciphers);
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, USERAGENT);
+
+        /* Build headers */
+        struct curl_slist* headers = NULL;
+        headers = curl_slist_append(headers, "Connection: close");
+
+        /* Add a bearer header if needed */
+        if (should_authenticate) {
+            /* 30 is header preamble + fluff */
+            char bearer_header[30 + strlen(s->oauth_bearer)];
+            sprintf(bearer_header, "Authorization: Bearer %s", s->oauth_bearer);
+            headers = curl_slist_append(headers, bearer_header);
+        }
+
+        http_curl_basic_setup(curl, httpconfig, headers, error_buffer, recv_buf, ssl_ciphers);
 
         curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, data_size);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
@@ -306,6 +396,12 @@ static void* http_worker(void* arg) {
             if (lifoq_push(s->queue, data, data_size, true, true))
                 syslog(LOG_ERR, "HTTP: dropped data due to queue full of closed");
 
+            /* Remove any authentication token - this will cause us to get a new one */
+            if (s->oauth_bearer) {
+                free(s->oauth_bearer);
+                s->oauth_bearer = NULL;
+            }
+
             usleep(FAILURE_WAIT);
         } else {
             syslog(LOG_NOTICE, "HTTP: success");
@@ -313,11 +409,11 @@ static void* http_worker(void* arg) {
         }
 
         curl_easy_cleanup(curl);
+        curl_slist_free_all(headers);
         strbuf_truncate(recv_buf);
     }
 exit:
 
-    curl_slist_free_all(headers);
     free(error_buffer);
     strbuf_free(recv_buf, true);
     return NULL;
