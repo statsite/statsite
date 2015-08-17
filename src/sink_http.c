@@ -296,7 +296,7 @@ static int oauth2_get_token(const sink_config_http* httpconfig, struct http_sink
         goto exit;
     } else {
         json_error_t error;
-        json_t* root = json_loadb(recv_data, recv_len, JSON_DECODE_ANY, &error);
+        json_t* root = json_loadb(recv_data, recv_len, 0, &error);
         if (!root) {
             syslog(LOG_ERR, "HTTP auth: JSON load error: %s", error.text);
             goto exit;
