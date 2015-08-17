@@ -65,6 +65,9 @@ typedef struct sink_config_http {
     const char* timestamp_name; /* The name of the timestamp */
     const char* timestamp_format; /* The format specifier, strftime format */
     const char* ciphers; /* A platform dependent list of ciphers */
+    const char* oauth_key; /* OAuth2 Consumer Key */
+    const char* oauth_secret; /* OAuth2 Secret */
+    const char* oauth_token_url; /* URL to get a new token from */
 } sink_config_http;
 
 // Represents the configuration of a histogram

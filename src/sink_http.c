@@ -24,6 +24,7 @@ struct http_sink {
     sink sink;
     lifoq* queue;
     pthread_t worker;
+    char* oauth_bearer;
 };
 
 /*

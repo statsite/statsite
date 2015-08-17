@@ -633,6 +633,9 @@ command=not cat\n\
 url=https://example.com\n\
 param_bar=barbar\n\
 param_hello=foo\n\
+oauth_key=hi\n\
+oauth_secret=boo\n\
+oauth_token_url=https://example.com/token\n\
 \n\
 \n\
 ";
@@ -682,6 +685,9 @@ param_hello=foo\n\
     ck_assert_str_eq(p2->k, "bar");
     ck_assert_str_eq(p2->v, "barbar");
     fail_unless(p2->next == NULL);
+    fail_unless(strcmp("hi", ch->oauth_key) == 0);
+    fail_unless(strcmp("boo", ch->oauth_secret) == 0);
+    fail_unless(strcmp("https://example.com/token", ch->oauth_token_url) == 0);
 
     unlink("/tmp/ss_sink_multi");
 }

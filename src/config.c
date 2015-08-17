@@ -86,7 +86,10 @@ static const sink_config_http DEFAULT_HTTP_SINK = {
     .metrics_name = "metrics",
     .timestamp_name = "timestamp",
     .timestamp_format = "%s", /* Seconds since epoch */
-    .ciphers = NULL
+    .ciphers = NULL,
+    .oauth_key = NULL,
+    .oauth_secret = NULL,
+    .oauth_token_url = NULL
 };
 
 /**
@@ -307,6 +310,12 @@ static int sink_callback(void* user, const char* section, const char* name, cons
             config->timestamp_format = strdup(value);
         } else if (NAME_MATCH("ciphers")) {
             config->ciphers = strdup(value);
+        } else if (NAME_MATCH("oauth_key")) {
+            config->oauth_key = strdup(value);
+        } else if (NAME_MATCH("oauth_secret")) {
+            config->oauth_secret = strdup(value);
+        } else if (NAME_MATCH("oauth_token_url")) {
+            config->oauth_token_url = strdup(value);
         } else {
             /* Attempt to locate keys
              * of the form param_PNAME */
