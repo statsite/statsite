@@ -8,5 +8,7 @@ RUN mkdir -p /statsite && mkdir -p /var/run/statsite && \
     (cd statsite && make) && \
     apt-get purge -y build-essential check scons libcurl4-openssl-dev libjansson-dev && \
     apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
-CMD ["/statsite/statsite", "-f", "/statsite/container/statsite.conf"]
+
+VOLUME ["/etc/statsite"]
+CMD ["/statsite/statsite", "-f", "/etc/statsite/statsite.conf"]
 
