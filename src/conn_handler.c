@@ -464,17 +464,19 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
 
         // Handle counter/timer sampling if applicable
         if ((type == COUNTER || type == TIMER) && !buffer_after_terminator(type_str, after_len, '@', &sample_str, &after_len)) {
-            sample_rate = str2double(sample_str, &endptr);
-            if (type == COUNTER) {
-                if (unlikely(endptr == sample_str)) {
-                    syslog(LOG_WARNING, "Failed sample rate conversion! Input: %s", sample_str);
-                    goto ERR_RET;
-                }
-                if (sample_rate > 0 && sample_rate <= 1) {
-                // Magnify the value
-                val = val * (1.0 / sample_rate);
+            double unchecked_rate = str2double(sample_str, &endptr);
+            if (unlikely(endptr == sample_str)) {
+                syslog(LOG_WARNING, "Failed sample rate conversion! Input: %s", sample_str);
+                goto ERR_RET;
             }
-          }
+            if (unchecked_rate > 0 && unchecked_rate <= 1) {
+                // boundaries checked, so ok to update sample_rate
+                sample_rate = unchecked_rate;
+              if (type == COUNTER) {
+                  // Magnify the value
+                  val = val * (1.0 / sample_rate);
+              }
+            }
         }
 
         // Store the sample
