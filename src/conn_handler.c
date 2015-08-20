@@ -469,13 +469,11 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
                 syslog(LOG_WARNING, "Failed sample rate conversion! Input: %s", sample_str);
                 goto ERR_RET;
             }
-            if (unchecked_rate > 0 && unchecked_rate <= 1) {
-                // boundaries checked, so ok to update sample_rate
+            if (likely(unchecked_rate > 0 && unchecked_rate <= 1)) {
                 sample_rate = unchecked_rate;
-              if (type == COUNTER) {
-                  // Magnify the value
-                  val = val * (1.0 / sample_rate);
-              }
+                if (type == COUNTER) {
+                    val = val * (1.0 / sample_rate);
+                }
             }
         }
 

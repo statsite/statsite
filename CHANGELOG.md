@@ -1,3 +1,7 @@
+# 0.7.2 (Unreleased)
+
+* Timer sampling properly handles counts thanks to @nspragg
+
 # 0.7.1
 
 * Support for custom quantiles
