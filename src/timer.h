@@ -4,7 +4,7 @@
 #include "cm_quantile.h"
 
 typedef struct {
-    uint16_t actual_count; // Actual items recieved
+    uint64_t actual_count; // Actual items recieved
     uint64_t count;     // Count of items (1 / sample rate)
     double sum;         // Sum of the values
     double squared_sum; // Sum of the squared values
