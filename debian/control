@@ -1,0 +1,14 @@
+Source: statsite
+Section: admin
+Priority: optional
+Maintainer: Yann Ramin <yramin@twitter.com>
+Uploaders: Ramin Khatibi <rkhatibi@twitter.com>
+Build-Depends-Indep: pip | libjansson-dev | check
+Build-Depends: debhelper (>= 7.0.0), openssl
+Standards-Version: 3.9.1
+Vcs-Browser: https://github.com/twitter-forks/statsite.git
+
+Package: statsite
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: C implementation of statd

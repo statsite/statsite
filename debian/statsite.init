@@ -1,0 +1,97 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:             statsite
+# Required-Start:       $syslog $remote_fs
+# Required-Stop:        $syslog $remote_fs
+# Should-Start:         $local_fs
+# Should-Stop:          $local_fs
+# Default-Start:        2 3 4 5
+# Default-Stop:         0 1 6
+# Short-Description:    statsite - C implementation of statsite
+# Description:          statsite - C implementation of statsite
+### END INIT INFO
+
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/bin/statsite
+CONFIG=/etc/statsite/statsite.conf
+NAME=statsite
+DESC=statsite
+
+RUNDIR=/var/run/statsite
+PIDFILE=$RUNDIR/statsite.pid
+
+test -x $DAEMON || exit 0
+
+[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+. /lib/lsb/init-functions
+
+is_true() {
+    if [ "x$1" = "xtrue" -o "x$1" = "xyes" -o "x$1" = "x0" ] ; then
+       return 0
+    else
+        return 1
+    fi
+}
+
+case "$1" in
+  start)
+    test -f "$CONFIG" || echo "$CONFIG is missing, exiting." || exit 0
+
+    echo -n "Starting $DESC: "
+    mkdir -p $RUNDIR
+    touch $PIDFILE
+    chown statsite:statsite $RUNDIR $PIDFILE
+    chmod 755 $RUNDIR
+
+    if [ -n "$ULIMIT" ]
+    then
+      ulimit -n $ULIMIT
+    fi
+
+    if is_true "$START" ; then
+      start-stop-daemon --start --make-pidfile --background  --pidfile $PIDFILE --chuid statsite:statsite --exec $DAEMON -- -f $CONFIG
+    else
+      echo ""
+      echo "$NAME not configured to start, please edit /etc/default/$NAME to enable"
+    fi
+    ;;
+
+  stop)
+        echo -n "Stopping $DESC: "
+        if start-stop-daemon --stop --retry forever/TERM/1 --quiet --oknodo --pidfile $PIDFILE --exec $DAEMON
+        then
+                echo "$NAME."
+        else
+                echo "failed"
+        fi
+        rm -f $PIDFILE
+        sleep 1
+        ;;
+
+  restart|force-reload)
+        ${0} stop
+        ${0} start
+        ;;
+
+  status)
+        echo -n "$DESC is "
+  #if start-stop-daemon --stop --quiet --signal 0 --name ${NAME} --pidfile ${PIDFILE}
+  # this is needed to support long daemon names -rdk Nov 2013
+  if start-stop-daemon --stop --quiet --signal 0 --pidfile ${PIDFILE} --exec $DAEMON
+        then
+                echo "running"
+        else
+                echo "not running"
+                exit 1
+        fi
+        ;;
+
+  *)
+        echo "Usage: /etc/init.d/$NAME {start|stop|restart|force-reload|status}" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

@@ -1,0 +1,17 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+MAKEARGS=DESTDIR=debian/statsite \
+	PREFIX=/usr
+
+%:
+	dh $@ 
+
+override_dh_auto_install:
+	make $(MAKEARGS) install
+	dh_installinit -pstatsite
+	install -m 0644 -D debian/rsyslog.conf debian/statsite/etc/rsyslog.d/49-statsite.conf
+	install -m 0644 -D debian/logrotate.conf debian/statsite/etc/logrotate.d/statsite
+
+override_dh_installinit:
+	dh_installinit --no-restart-on-upgrade

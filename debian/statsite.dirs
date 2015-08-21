@@ -1,0 +1,4 @@
+etc/statsite
+var/lib/statsite
+var/log/statsite
+var/run/statsite
