@@ -2,6 +2,12 @@ RPMBUILDROOT=$(shell pwd)/rpm-build
 NAME=$(shell rpm -q --qf '%{name}\n' --specfile rpm/*.spec | head -1)
 VERSION=$(shell rpm -q --qf '%{version}\n' --specfile rpm/*.spec | head -1)
 
+
+#### Installation options.
+DESTDIR =
+PREFIX = /usr/local
+BINDIR = $(PREFIX)/bin
+
 build:
 	scons -j4 statsite
 
@@ -13,6 +19,12 @@ clean:
 test:
 	scons test_runner
 	./test_runner
+
+install-bin: statsite
+	install -d "$(DESTDIR)$(BINDIR)"
+	install statsite "$(DESTDIR)$(BINDIR)"
+
+install: install-bin
 
 integ: build test
 	py.test integ/
