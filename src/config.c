@@ -21,12 +21,6 @@ static char* histogram_section;
 static histogram_config *in_progress;
 
 /**
- * Pointer used for parsing extended config includes option
- *
- */ 
-static extended_counters_config *extended_counters_cfg;
-
-/**
  * Default statsite_config values. Should create
  * filters that are about 300KB initially, and suited
  * to grow quickly.
@@ -57,7 +51,7 @@ static const statsite_config DEFAULT_CONFIG = {
     {"", "kv.", "gauges.", "counts.", "timers.", "sets.", ""},
     {},
     false,              // Extended counters off by default
-    NULL,               // Specify which extended counters to use.
+    {true, true, true, true, true, true, true, true},   // All extended counters on by default.
     false,              // Do not prefix binary stream by default
                         // Number of quantiles
     sizeof(default_quantiles) / sizeof(double),
@@ -149,7 +143,7 @@ static int value_to_list_of_doubles(const char *val, double **result, int *count
 void csv_to_extended_counters_config(statsite_config *config, const char *value)
 {
 
-    *extended_counters_cfg = (extended_counters_config){false, false, false, false, false, false, false, false};
+    extended_counters_config extended_counters_cfg = (extended_counters_config){false, false, false, false, false, false, false, false};
 
     char* token;
 
@@ -159,21 +153,21 @@ void csv_to_extended_counters_config(statsite_config *config, const char *value)
     while( token != NULL )
     {
         if (strcasecmp(token, "COUNT") == 0){
-            extended_counters_cfg->count = true;
+            extended_counters_cfg.count = true;
         } else if(strcasecmp(token, "MEAN") == 0){
-            extended_counters_cfg->mean = true;
+            extended_counters_cfg.mean = true;
         } else if (strcasecmp(token, "STDEV") == 0){
-            extended_counters_cfg->stdev = true;
+            extended_counters_cfg.stdev = true;
         } else if (strcasecmp(token, "SUM") == 0){
-            extended_counters_cfg->sum = true;
+            extended_counters_cfg.sum = true;
         } else if (strcasecmp(token, "SUM_SQ") == 0){
-            extended_counters_cfg->sum_sq = true;
+            extended_counters_cfg.sum_sq = true;
         } else if (strcasecmp(token, "LOWER") == 0){
-            extended_counters_cfg->lower = true;
+            extended_counters_cfg.lower = true;
         } else if (strcasecmp(token, "UPPER") == 0){
-            extended_counters_cfg->upper = true;
+            extended_counters_cfg.upper = true;
         } else if (strcasecmp(token, "RATE") == 0){
-            extended_counters_cfg->rate = true;
+            extended_counters_cfg.rate = true;
 
         }
         token = strtok(NULL, ",");
@@ -418,11 +412,6 @@ int config_from_filename(char *filename, statsite_config *config) {
     if (filename == NULL)
         return 0;
 
-
-    // Initialize extended counters config
-    *extended_counters_cfg = (extended_counters_config){true, true, true, true, true, true, true, true};
-    config->ext_counters_config = extended_counters_cfg;
-
     // Try to open the file
     int res = ini_parse(filename, config_callback, config);
     if (res == -1) {
@@ -623,17 +612,7 @@ int sane_quantiles(int num_quantiles, double quantiles[]) {
  * @return a pointer to a new config structure on success.
  */
 statsite_config* alloc_config() {
-
-    statsite_config* config = calloc(1, sizeof(statsite_config));
-
-    /**
-     * Also need to allocated memory for the extended counters config structure
-     */    
-    extended_counters_cfg = calloc(1, sizeof(extended_counters_config));
-    *extended_counters_cfg = (extended_counters_config){true, true, true, true, true, true, true, true};
-    config->ext_counters_config = extended_counters_cfg;
-    
-    return config;
+    return calloc(1, sizeof(statsite_config));
 }
 
 /**
@@ -644,7 +623,6 @@ void free_config(statsite_config* config) {
     if (config->quantiles != default_quantiles) {
         free (config->quantiles);
     }
-    free(config->ext_counters_config);
     free(config);
 }
 

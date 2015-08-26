@@ -97,7 +97,7 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
     timer_hist *t;
     int i;
     char *prefix = GLOBAL_CONFIG->prefixes_final[type];
-    extended_counters_config* counters_config = GLOBAL_CONFIG->ext_counters_config;
+    extended_counters_config* counters_config = &(GLOBAL_CONFIG->ext_counters_config);
 
     switch (type) {
         case KEY_VAL:
@@ -216,7 +216,7 @@ static int stream_formatter_bin(FILE *pipe, void *data, metric_type type, char *
     timer_hist *t;
     int i;
 
-    extended_counters_config* counters_config = GLOBAL_CONFIG->ext_counters_config;
+    extended_counters_config* counters_config = &(GLOBAL_CONFIG->ext_counters_config);
 
     switch (type) {
         case KEY_VAL:
