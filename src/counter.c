@@ -1,6 +1,5 @@
 #include <math.h>
 #include "counter.h"
-#include <stdio.h>
 
 /**
  * Initializes the counter struct
