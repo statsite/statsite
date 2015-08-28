@@ -121,7 +121,11 @@ int main(void)
     tcase_add_test(tc8, test_sane_prefixes);
     tcase_add_test(tc8, test_sane_global_prefix);
     tcase_add_test(tc8, test_sane_quantiles);
-    
+    tcase_add_test(tc8, test_extended_counters_include_count_only);
+    tcase_add_test(tc8, test_extended_counters_include_count_rate);
+    tcase_add_test(tc8, test_extended_counters_include_all_selected);
+    tcase_add_test(tc8, test_extended_counters_include_all_by_default);
+
     // Add the radix tests
     suite_add_tcase(s1, tc9);
     tcase_add_test(tc9, test_radix_init_and_destroy);
