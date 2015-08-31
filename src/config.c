@@ -50,7 +50,8 @@ static const statsite_config DEFAULT_CONFIG = {
     "",                 // Global prefix
     {"", "kv.", "gauges.", "counts.", "timers.", "sets.", ""},
     {},
-    false,              // Extended counts off by default
+    false,              // Extended counters off by default
+    {true, true, true, true, true, true, true, true},   // All extended counters on by default.
     false,              // Do not prefix binary stream by default
                         // Number of quantiles
     sizeof(default_quantiles) / sizeof(double),
@@ -130,6 +131,49 @@ static int value_to_list_of_doubles(const char *val, double **result, int *count
     sscanf(val, " %n", &scanned);
 
     return val[scanned] == '\0';
+}
+
+
+/**
+* Parsing the extended counters config
+* @arg config The global config
+* @arg value the extended counters to be used
+* 
+*/
+void csv_to_extended_counters_config(statsite_config *config, const char *value)
+{
+
+    extended_counters_config extended_counters_cfg = (extended_counters_config){false, false, false, false, false, false, false, false};
+
+    char* token;
+
+    char s[256];
+    strcpy(s, value);
+    token = strtok(s,",");
+    while( token != NULL )
+    {
+        if (strcasecmp(token, "COUNT") == 0){
+            extended_counters_cfg.count = true;
+        } else if(strcasecmp(token, "MEAN") == 0){
+            extended_counters_cfg.mean = true;
+        } else if (strcasecmp(token, "STDEV") == 0){
+            extended_counters_cfg.stdev = true;
+        } else if (strcasecmp(token, "SUM") == 0){
+            extended_counters_cfg.sum = true;
+        } else if (strcasecmp(token, "SUM_SQ") == 0){
+            extended_counters_cfg.sum_sq = true;
+        } else if (strcasecmp(token, "LOWER") == 0){
+            extended_counters_cfg.lower = true;
+        } else if (strcasecmp(token, "UPPER") == 0){
+            extended_counters_cfg.upper = true;
+        } else if (strcasecmp(token, "RATE") == 0){
+            extended_counters_cfg.rate = true;
+
+        }
+        token = strtok(NULL, ",");
+    }
+
+    config->ext_counters_config = extended_counters_cfg;
 }
 
 /**
@@ -311,13 +355,13 @@ static int config_callback(void* user, const char* section, const char* name, co
         config->prefixes[TIMER] = strdup(value);
     } else if (NAME_MATCH("sets_prefix")) {
         config->prefixes[SET] = strdup(value);
+    } else if (NAME_MATCH("extended_counters_include")) {
+        csv_to_extended_counters_config(config, value);
     } else if (NAME_MATCH("kv_prefix")) {
         config->prefixes[KEY_VAL] = strdup(value);
-
     // Copy the multi-case variables
     } else if (NAME_MATCH("log_facility")) {
         return name_to_facility(value, &config->syslog_log_facility);
-
     // Unknown parameter?
     } else {
         // Log it, but ignore
