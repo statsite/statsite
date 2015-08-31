@@ -200,9 +200,13 @@ options must exist in the `statsite` section of the INI file:
 
 * extended\_counters : If enabled, the counter output is extended to include
   all the computed summary values. Otherwise, the counter is emitted as just
-  the sum value. Summary values include `mean`, `stdev`, `sum`, `sum_sq`,
+  the sum value. Summary values include `count`, `mean`, `stdev`, `sum`, `sum_sq`,
   `lower`, `upper`, and `rate`.
   Defaults to false.
+
+* extended\_counters\_include : Allows you to configure which extended counters to include 
+  through a comma separated list of values, extended\_counters must be set to true. Supported values include `count`, `mean`, `stdev`, `sum`, `sum_sq`,
+  `lower`, `upper`, and `rate`. If this option is not specified but extended_counters is set to true, then all values will be included by default.
 
 * prefix\_binary\_stream : If enabled, the keys streamed to a the stream\_cmd
   when using binary\_stream mode are also prefixed. By default, this is false,

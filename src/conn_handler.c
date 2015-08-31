@@ -97,6 +97,8 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
     timer_hist *t;
     int i;
     char *prefix = GLOBAL_CONFIG->prefixes_final[type];
+    extended_counters_config* counters_config = &(GLOBAL_CONFIG->ext_counters_config);
+
     switch (type) {
         case KEY_VAL:
             STREAM("%s%s|%f|%lld\n", prefix, name, *(double*)value);
@@ -108,14 +110,30 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
 
         case COUNTER:
             if (GLOBAL_CONFIG->extended_counters) {
-                STREAM("%s%s.count|%lld|%lld\n", prefix, name, counter_count(value));
-                STREAM("%s%s.mean|%f|%lld\n", prefix, name, counter_mean(value));
-                STREAM("%s%s.stdev|%f|%lld\n", prefix, name, counter_stddev(value));
-                STREAM("%s%s.sum|%f|%lld\n", prefix, name, counter_sum(value));
-                STREAM("%s%s.sum_sq|%f|%lld\n", prefix, name, counter_squared_sum(value));
-                STREAM("%s%s.lower|%f|%lld\n", prefix, name, counter_min(value));
-                STREAM("%s%s.upper|%f|%lld\n", prefix, name, counter_max(value));
-                STREAM("%s%s.rate|%f|%lld\n", prefix, name, counter_sum(value) / GLOBAL_CONFIG->flush_interval);
+                if (counters_config->count) {
+                    STREAM("%s%s.count|%lld|%lld\n", prefix, name, counter_count(value));
+                }
+                if (counters_config->mean) {
+                    STREAM("%s%s.mean|%f|%lld\n", prefix, name, counter_mean(value));    
+                }
+                if (counters_config->stdev) {
+                    STREAM("%s%s.stdev|%f|%lld\n", prefix, name, counter_stddev(value));
+                }
+                if (counters_config->sum) {
+                    STREAM("%s%s.sum|%f|%lld\n", prefix, name, counter_sum(value));
+                }
+                if (counters_config->sum_sq) {
+                    STREAM("%s%s.sum_sq|%f|%lld\n", prefix, name, counter_squared_sum(value));
+                }
+                if (counters_config->lower) {
+                    STREAM("%s%s.lower|%f|%lld\n", prefix, name, counter_min(value));
+                }
+                if (counters_config->upper) {
+                    STREAM("%s%s.upper|%f|%lld\n", prefix, name, counter_max(value));
+                }
+                if (counters_config->rate) {
+                    STREAM("%s%s.rate|%f|%lld\n", prefix, name, counter_sum(value) / GLOBAL_CONFIG->flush_interval);
+                }
             } else {
                 STREAM("%s%s|%f|%lld\n", prefix, name, counter_sum(value));
             }
@@ -197,6 +215,9 @@ static int stream_formatter_bin(FILE *pipe, void *data, metric_type type, char *
     #define STREAM_UINT(val) if (!fwrite(&val, sizeof(unsigned int), 1, pipe)) return 1;
     timer_hist *t;
     int i;
+
+    extended_counters_config* counters_config = &(GLOBAL_CONFIG->ext_counters_config);
+
     switch (type) {
         case KEY_VAL:
             STREAM_BIN(BIN_TYPE_KV, BIN_OUT_NO_TYPE, *(double*)value);
@@ -207,14 +228,30 @@ static int stream_formatter_bin(FILE *pipe, void *data, metric_type type, char *
             break;
 
         case COUNTER:
-            STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_SUM, counter_sum(value));
-            STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_SUM_SQ, counter_squared_sum(value));
-            STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_MEAN, counter_mean(value));
-            STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_COUNT, counter_count(value));
-            STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_STDDEV, counter_stddev(value));
-            STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_MIN, counter_min(value));
-            STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_MAX, counter_max(value));
-            STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_RATE, counter_sum(value) / GLOBAL_CONFIG->flush_interval);
+            if (counters_config->sum) {
+                STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_SUM, counter_sum(value));
+            }
+            if (counters_config->sum_sq) {
+                STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_SUM_SQ, counter_squared_sum(value));
+            }
+            if (counters_config->mean) {
+                STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_MEAN, counter_mean(value));
+            }
+            if (counters_config->count) {
+                STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_COUNT, counter_count(value));
+            }
+            if (counters_config->stdev) {
+                STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_STDDEV, counter_stddev(value));
+            }
+            if (counters_config->lower) {
+                STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_MIN, counter_min(value));
+            }
+            if (counters_config->upper) {    
+                STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_MAX, counter_max(value));
+            }
+            if (counters_config->rate) {    
+                STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_RATE, counter_sum(value) / GLOBAL_CONFIG->flush_interval);
+            }
             break;
 
         case SET:
