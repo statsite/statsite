@@ -51,6 +51,147 @@ for x in xrange(1, 100):
     VAL_TYPE_MAP["P%02d" % x] = 128 | x
 
 
+def pytest_funcarg__serversPrefixExtended(request):
+    "Returns a new APIHandler with a filter manager"
+    # Create tmpdir and delete after
+    tmpdir = tempfile.mkdtemp()
+
+    # Make the command
+    output = "%s/output" % tmpdir
+    cmd = "cat >> %s" % output
+
+    # Write the configuration
+    port = random.randrange(10000, 65000)
+    config_path = os.path.join(tmpdir, "config.cfg")
+    conf = """[statsite]
+flush_interval = 1
+port = %d
+udp_port = %d
+stream_cmd = %s
+binary_stream = yes
+extended_counters = true
+prefix_binary_stream = true
+
+[histogram1]
+prefix=has_hist
+min=10
+max=90
+width=10
+
+""" % (port, port, cmd)
+    open(config_path, "w").write(conf)
+
+    # Start the process
+    proc = subprocess.Popen(['./statsite', '-f', config_path])
+    proc.poll()
+    assert proc.returncode is None
+
+    # Define a cleanup handler
+    def cleanup():
+        try:
+            proc.kill()
+            proc.wait()
+            shutil.rmtree(tmpdir)
+        except:
+            print proc
+            pass
+    request.addfinalizer(cleanup)
+
+    # Make a connection to the server
+    connected = False
+    for x in xrange(3):
+        try:
+            conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            conn.settimeout(1)
+            conn.connect(("localhost", port))
+            connected = True
+            break
+        except Exception, e:
+            print e
+            time.sleep(0.5)
+
+    # Die now
+    if not connected:
+        raise EnvironmentError("Failed to connect!")
+
+    # Make a second connection
+    conn2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    conn2.connect(("localhost", port))
+
+    # Return the connection
+    return conn, conn2, output
+
+
+def pytest_funcarg__serversExtended(request):
+    "Returns a new APIHandler with a filter manager"
+    # Create tmpdir and delete after
+    tmpdir = tempfile.mkdtemp()
+
+    # Make the command
+    output = "%s/output" % tmpdir
+    cmd = "cat >> %s" % output
+
+    # Write the configuration
+    port = random.randrange(10000, 65000)
+    config_path = os.path.join(tmpdir, "config.cfg")
+    conf = """[statsite]
+flush_interval = 1
+port = %d
+udp_port = %d
+stream_cmd = %s
+binary_stream = yes
+extended_counters = true
+
+[histogram1]
+prefix=has_hist
+min=10
+max=90
+width=10
+
+""" % (port, port, cmd)
+    open(config_path, "w").write(conf)
+
+    # Start the process
+    proc = subprocess.Popen(['./statsite', '-f', config_path])
+    proc.poll()
+    assert proc.returncode is None
+
+    # Define a cleanup handler
+    def cleanup():
+        try:
+            proc.kill()
+            proc.wait()
+            shutil.rmtree(tmpdir)
+        except:
+            print proc
+            pass
+    request.addfinalizer(cleanup)
+
+    # Make a connection to the server
+    connected = False
+    for x in xrange(3):
+        try:
+            conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            conn.settimeout(1)
+            conn.connect(("localhost", port))
+            connected = True
+            break
+        except Exception, e:
+            print e
+            time.sleep(0.5)
+
+    # Die now
+    if not connected:
+        raise EnvironmentError("Failed to connect!")
+
+    # Make a second connection
+    conn2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    conn2.connect(("localhost", port))
+
+    # Return the connection
+    return conn, conn2, output
+
+
 def pytest_funcarg__servers(request):
     "Returns a new APIHandler with a filter manager"
     # Create tmpdir and delete after
@@ -269,13 +410,6 @@ class TestInteg(object):
             now = now - 1
 
         assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum"], 600) in out
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum sq"], 140000) in out
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["mean"], 200) in out
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["count"], 3) in out
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["stddev"], 100) in out
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["min"], 100) in out
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["max"], 300) in out
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["rate"], 600) in out
 
     def test_meters(self, servers):
         "Tests adding kv pairs"
@@ -383,13 +517,6 @@ class TestIntegPrefix(object):
             now = now - 1
 
         assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum"], 600) in out
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum sq"], 140000) in out
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["mean"], 200) in out
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["count"], 3) in out
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["stddev"], 100) in out
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["min"], 100) in out
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["max"], 300) in out
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["rate"], 600) in out
 
     def test_meters(self, serversPrefix):
         "Tests adding kv pairs"
@@ -459,6 +586,56 @@ class TestIntegPrefix(object):
         if format_output(now - 1, "sets.zip", BIN_TYPES["set"], VAL_TYPE_MAP["sum"], 3) in out:
             now = now - 1
         assert format_output(now, "sets.zip", BIN_TYPES["set"], VAL_TYPE_MAP["sum"], 3) in out
+
+
+class TestIntegBinaryExtendedCounters(object):
+    def test_counters_with_extended_counters(self, serversExtended):
+        "Tests adding kv pairs"
+        server, _, output = serversExtended
+        server.sendall(format("foobar", "c", 100))
+        server.sendall(format("foobar", "c", 200))
+        server.sendall(format("foobar", "c", 300))
+        wait_file(output)
+        now = time.time()
+        out = open(output).read()
+
+        # Adjust for time drift
+        if format_output(now - 1, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum"], 600) in out:
+            now = now - 1
+
+        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum"], 600) in out
+        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum sq"], 140000) in out
+        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["mean"], 200) in out
+        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["count"], 3) in out
+        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["stddev"], 100) in out
+        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["min"], 100) in out
+        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["max"], 300) in out
+        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["rate"], 600) in out
+
+
+class TestIntegBinaryExtendedCountersWithPrefix(object):
+    def test_counters(self, serversPrefixExtended):
+        "Tests adding kv pairs"
+        server, _, output = serversPrefixExtended
+        server.sendall(format("foobar", "c", 100))
+        server.sendall(format("foobar", "c", 200))
+        server.sendall(format("foobar", "c", 300))
+        wait_file(output)
+        now = time.time()
+        out = open(output).read()
+
+        # Adjust for time drift
+        if format_output(now - 1, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum"], 600) in out:
+            now = now - 1
+
+        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum"], 600) in out
+        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum sq"], 140000) in out
+        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["mean"], 200) in out
+        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["count"], 3) in out
+        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["stddev"], 100) in out
+        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["min"], 100) in out
+        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["max"], 300) in out
+        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["rate"], 600) in out
 
 
 if __name__ == "__main__":
