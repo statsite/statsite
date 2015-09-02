@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -e
+
+if [ "$1" = "configure" ]; then
+
+  # Create the "statsite" user
+  if ! getent passwd statsite > /dev/null; then
+    useradd --system --user-group --home-dir /var/lib/statsite \
+      --no-create-home --shell /bin/false \
+      --comment "Statsite daemon" \
+      statsite
+  fi
+
+  # Set correct permissions and ownership for statsite directories
+  for dir in /var/{run,lib,log}/statsite ; do
+    if ! dpkg-statoverride --list "$dir" >/dev/null 2>&1; then
+      dpkg-statoverride --update --add statsite statsite 0750 "$dir"
+    fi
+  done
+fi

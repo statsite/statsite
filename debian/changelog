@@ -1,0 +1,11 @@
+statsite (0.7.2-71twt1~trusty) trusty; urgency=medium
+
+  * Rebuild for 14.04.
+
+ -- Ramin Khatibi <rkhatibi@rwitter.com>  Sat, 04 Jul 2015 07:45:08 +0200
+
+statsite (0.7.2-71twt1~precise) precise; urgency=medium
+
+  * Rebuild for 12.04.
+
+ -- Ramin Khatibi <rkhatibi@rwitter.com>  Sat, 04 Jul 2015 07:45:08 +0200
