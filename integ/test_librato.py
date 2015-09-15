@@ -102,7 +102,7 @@ class TestLibrato(object):
         self.librato = build_librato({
             "statsite_output": "counts.baby-animals.source__puppy-cam-1__.active_sessions|1.000000|1401577507",
             "source_regex": "\.source__(.*?)__",
-            "source_prefix": "production.",
+            "source_prefix": "production",
         })
 
         expected_output = {

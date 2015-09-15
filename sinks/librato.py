@@ -188,7 +188,7 @@ class LibratoStore(object):
 
         # Add a source prefix
         if self.source_prefix:
-            source = "%s%s" % (self.source_prefix, source)
+            source = "%s.%s" % (self.source_prefix, source)
 
         name = self.sanitize(name)
         source = self.sanitize(source)
