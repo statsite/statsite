@@ -142,9 +142,9 @@ class InfluxDBStore(object):
         body = ''
         for k, v, ts in metrics:
             if self.prefix:
-                body += "%s" % re.sub(r'[^a-zA-Z0-9._-]+','.', "%s.%s" % (self.prefix, k))
+                body += "%s" % re.sub(r'[^a-zA-Z0-9.,=_-]+','.', "%s.%s" % (self.prefix, k))
             else:
-                body += "%s" % re.sub(r'[^a-zA-Z0-9._-]+','.', k)
+                body += "%s" % re.sub(r'[^a-zA-Z0-9.,=_-]+','.', k)
 
             body += " value=" + v + " " + ts + "\n"
 
