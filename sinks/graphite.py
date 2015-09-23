@@ -24,7 +24,7 @@ class GraphiteStore(object):
 
         if port <= 0:
             raise ValueError("Port must be positive!")
-        if attempts <= 1:
+        if attempts < 1:
             raise ValueError("Must have at least 1 attempt!")
 
         self.host = host
