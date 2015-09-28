@@ -152,7 +152,18 @@ class InfluxDBStore(object):
         conn.request("POST", "/write?%s" % params, body, headers)
         try:
             res = conn.getresponse()
-            self.logger.info("%s, %s" %(res.status, res.reason))
+            info = "%s, %s" % (res.status, res.reason)
+            if (200 == res.status):
+                self.logger.warning("%s: InfluxDB understood the request but could not complete it: %s" % (info, res.read()))
+            elif (204 == res.status):
+                self.logger.info("%s: Success!" % info)
+            elif (res.status >= 400 and res.status < 500):
+                self.logger.error("%s: InfluxDB could not understand the request: %s" % (info, res.read()))
+            elif (res.status >= 500 and res.status < 600):
+                self.logger.error("%s: The system is overloaded or significantly impaired: %s" % (info, res.read()))
+            else:
+                self.logger.info(info)
+
         except:
             self.logger.exception('Failed to send metrics to InfluxDB:', res.status, res.reason)
 
