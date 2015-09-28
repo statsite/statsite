@@ -76,12 +76,14 @@ int main(void)
     tcase_add_test(tc4, test_timer_init_and_destroy);
     tcase_add_test(tc4, test_timer_init_add_destroy);
     tcase_add_test(tc4, test_timer_add_loop);
+    tcase_add_test(tc4, test_timer_sample_rate);
 
     // Add the counter tests
     suite_add_tcase(s1, tc5);
     tcase_add_test(tc5, test_counter_init);
     tcase_add_test(tc5, test_counter_init_add);
     tcase_add_test(tc5, test_counter_add_loop);
+    tcase_add_test(tc5, test_counter_sample_rate);
 
     // Add the counter tests
     suite_add_tcase(s1, tc6);
@@ -121,7 +123,11 @@ int main(void)
     tcase_add_test(tc8, test_sane_prefixes);
     tcase_add_test(tc8, test_sane_global_prefix);
     tcase_add_test(tc8, test_sane_quantiles);
-    
+    tcase_add_test(tc8, test_extended_counters_include_count_only);
+    tcase_add_test(tc8, test_extended_counters_include_count_rate);
+    tcase_add_test(tc8, test_extended_counters_include_all_selected);
+    tcase_add_test(tc8, test_extended_counters_include_all_by_default);
+
     // Add the radix tests
     suite_add_tcase(s1, tc9);
     tcase_add_test(tc9, test_radix_init_and_destroy);
@@ -155,4 +161,3 @@ int main(void)
 
     return nf == 0 ? 0 : 1;
 }
-

@@ -67,7 +67,7 @@ START_TEST(test_metrics_add_iter)
     fail_unless(res == 0);
 
     int okay = 0;
-    fail_unless(metrics_add_sample(&m, KEY_VAL, "test", 100) == 0);
+    fail_unless(metrics_add_sample(&m, KEY_VAL, "test", 100, 1.0) == 0);
     fail_unless(metrics_iter(&m, (void*)&okay, iter_test_cb) == 0);
     fail_unless(okay == 1);
 
@@ -117,20 +117,20 @@ START_TEST(test_metrics_add_all_iter)
     int res = init_metrics_defaults(&m);
     fail_unless(res == 0);
 
-    fail_unless(metrics_add_sample(&m, KEY_VAL, "test", 100) == 0);
-    fail_unless(metrics_add_sample(&m, KEY_VAL, "test2", 42) == 0);
+    fail_unless(metrics_add_sample(&m, KEY_VAL, "test", 100, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, KEY_VAL, "test2", 42, 1.0) == 0);
 
-    fail_unless(metrics_add_sample(&m, GAUGE, "g1", 1) == 0);
-    fail_unless(metrics_add_sample(&m, GAUGE, "g1", 200) == 0);
-    fail_unless(metrics_add_sample(&m, GAUGE, "g2", 42) == 0);
+    fail_unless(metrics_add_sample(&m, GAUGE, "g1", 1, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, GAUGE, "g1", 200, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, GAUGE, "g2", 42, 1.0) == 0);
 
-    fail_unless(metrics_add_sample(&m, COUNTER, "foo", 4) == 0);
-    fail_unless(metrics_add_sample(&m, COUNTER, "foo", 6) == 0);
-    fail_unless(metrics_add_sample(&m, COUNTER, "bar", 10) == 0);
-    fail_unless(metrics_add_sample(&m, COUNTER, "bar", 20) == 0);
+    fail_unless(metrics_add_sample(&m, COUNTER, "foo", 4, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, COUNTER, "foo", 6, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, COUNTER, "bar", 10, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, COUNTER, "bar", 20, 1.0) == 0);
 
-    fail_unless(metrics_add_sample(&m, TIMER, "baz", 1) == 0);
-    fail_unless(metrics_add_sample(&m, TIMER, "baz", 10) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "baz", 1, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "baz", 10, 1.0) == 0);
 
     fail_unless(metrics_set_update(&m, "zip", "foo") == 0);
     fail_unless(metrics_set_update(&m, "zip", "wow") == 0);
@@ -176,15 +176,15 @@ START_TEST(test_metrics_histogram)
     res = init_metrics(0.01, (double*)&quants, 3, config.histograms, 12, &m);
     fail_unless(res == 0);
 
-    fail_unless(metrics_add_sample(&m, TIMER, "baz", 1) == 0);
-    fail_unless(metrics_add_sample(&m, TIMER, "baz", 10) == 0);
-    fail_unless(metrics_add_sample(&m, TIMER, "baz", -1) == 0);
-    fail_unless(metrics_add_sample(&m, TIMER, "baz", 50) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "baz", 1, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "baz", 10, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "baz", -1, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "baz", 50, 1.0) == 0);
 
-    fail_unless(metrics_add_sample(&m, TIMER, "zip", 1) == 0);
-    fail_unless(metrics_add_sample(&m, TIMER, "zip", 10) == 0);
-    fail_unless(metrics_add_sample(&m, TIMER, "zip", -1) == 0);
-    fail_unless(metrics_add_sample(&m, TIMER, "zip", 50) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "zip", 1, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "zip", 10, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "zip", -1, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, TIMER, "zip", 50, 1.0) == 0);
 
     int okay = 0;
     fail_unless(metrics_iter(&m, (void*)&okay, iter_test_histogram) == 0);
@@ -214,11 +214,11 @@ START_TEST(test_metrics_gauges)
     int res = init_metrics_defaults(&m);
     fail_unless(res == 0);
 
-    fail_unless(metrics_add_sample(&m, GAUGE, "g1", 1) == 0);
-    fail_unless(metrics_add_sample(&m, GAUGE_DELTA, "g1", 41) == 0);
+    fail_unless(metrics_add_sample(&m, GAUGE, "g1", 1, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, GAUGE_DELTA, "g1", 41, 1.0) == 0);
 
-    fail_unless(metrics_add_sample(&m, GAUGE_DELTA, "g2", 100) == 0);
-    fail_unless(metrics_add_sample(&m, GAUGE_DELTA, "g3", -100) == 0);
+    fail_unless(metrics_add_sample(&m, GAUGE_DELTA, "g2", 100, 1.0) == 0);
+    fail_unless(metrics_add_sample(&m, GAUGE_DELTA, "g3", -100, 1.0) == 0);
 
     int okay = 0;
     fail_unless(metrics_iter(&m, (void*)&okay, iter_test_gauge) == 0);
@@ -228,4 +228,3 @@ START_TEST(test_metrics_gauges)
     fail_unless(res == 0);
 }
 END_TEST
-

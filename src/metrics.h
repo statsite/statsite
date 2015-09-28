@@ -72,9 +72,10 @@ int destroy_metrics(metrics *m);
  * arg type The type of the metrics
  * @arg name The name of the metric
  * @arg val The sample to add
+ * @arg sample_rate The sample rate of val
  * @return 0 on success.
  */
-int metrics_add_sample(metrics *m, metric_type type, char *name, double val);
+int metrics_add_sample(metrics *m, metric_type type, char *name, double val, double sample_rate);
 
 /**
  * Adds a value to a named set.
