@@ -71,7 +71,6 @@ case "$1" in
         RETVAL=$?
         ;;
     restart)
-        configtest -q || exit $RETVAL
         stop
         start
         ;;
