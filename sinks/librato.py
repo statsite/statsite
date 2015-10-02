@@ -91,7 +91,7 @@ class LibratoStore(object):
 
         sect = "librato"
 
-        config = ConfigParser.RawConfigParser()
+        config = ConfigParser.SafeConfigParser(os.environ)
         config.read(conffile)
 
         if not config.has_section(sect):

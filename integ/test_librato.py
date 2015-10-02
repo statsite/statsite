@@ -95,3 +95,19 @@ class TestLibrato(object):
         }
 
         assert expected_output == self.librato.gauges["baby-animals.active_sessions\tpuppy-cam-1"]
+
+    def test_config_can_parse_environment_variables(self):
+        os.environ["LIBRATO_SOURCE_REGEX"] = "\.source__(puppy-cam-\d+)__"
+        self.librato = build_librato({
+            "statsite_output": "counts.baby-animals.source__puppy-cam-2__.active_sessions|1.000000|1401577507",
+            "source_regex": "%(LIBRATO_SOURCE_REGEX)s",
+        })
+
+        expected_output = {
+            "name":         "baby-animals.active_sessions",
+            "source":       "puppy-cam-2",
+            "measure_time": 1401577507,
+            "value":        1.0,
+        }
+
+        assert expected_output == self.librato.gauges["baby-animals.active_sessions\tpuppy-cam-2"]
