@@ -51,6 +51,8 @@ source = localhost\
 
     if "source_regex" in options:
         config += "\nsource_regex = %s" % (options["source_regex"])
+    if "source_prefix" in options:
+        config += "\nsource_prefix = %s" % (options["source_prefix"])
 
     return config
 
@@ -95,3 +97,19 @@ class TestLibrato(object):
         }
 
         assert expected_output == self.librato.gauges["baby-animals.active_sessions\tpuppy-cam-1"]
+
+    def test_source_prefix(self):
+        self.librato = build_librato({
+            "statsite_output": "counts.baby-animals.source__puppy-cam-1__.active_sessions|1.000000|1401577507",
+            "source_regex": "\.source__(.*?)__",
+            "source_prefix": "production",
+        })
+
+        expected_output = {
+            "name":         "baby-animals.active_sessions",
+            "source":       "production.puppy-cam-1",
+            "measure_time": 1401577507,
+            "value":        1.0,
+        }
+
+        assert expected_output == self.librato.gauges["baby-animals.active_sessions\tproduction.puppy-cam-1"]

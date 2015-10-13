@@ -136,6 +136,11 @@ class LibratoStore(object):
         else:
             self.prefix = None
 
+        if config.has_option(sect, "source_prefix"):
+            self.source_prefix = config.get(sect, "source_prefix")
+        else:
+            self.source_prefix = None
+
     def split_timer_metric(self, name):
         m = self.sfx_re.match(name)
         if m != None:
@@ -180,6 +185,10 @@ class LibratoStore(object):
         # Add a metric prefix
         if self.prefix:
             name = "%s.%s" % (self.prefix, name)
+
+        # Add a source prefix
+        if self.source_prefix:
+            source = "%s.%s" % (self.source_prefix, source)
 
         name = self.sanitize(name)
         source = self.sanitize(source)
