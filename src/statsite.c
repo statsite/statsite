@@ -20,6 +20,11 @@
 #include "conn_handler.h"
 #include "networking.h"
 
+/* LOG_PERROR is not defined in SunOS derivatives */
+#ifndef LOG_PERROR
+  #define LOG_PERROR 0
+#endif
+
 /**
  * Our signal handler updates this variable to
  * allow the program to gracefully terminate.
@@ -155,7 +160,7 @@ int main(int argc, char **argv) {
 
     // Initialize syslog with configured facility
     setup_syslog(config->syslog_log_facility, config->daemonize);
-    
+
     // Set prefixes for each message type
     if (prepare_prefixes(config)) {
         syslog(LOG_ERR, "Failed to get prefixes!");
