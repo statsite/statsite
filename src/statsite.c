@@ -155,7 +155,7 @@ int main(int argc, char **argv) {
 
     // Initialize syslog with configured facility
     setup_syslog(config->syslog_log_facility, config->daemonize);
-
+    
     // Set prefixes for each message type
     if (prepare_prefixes(config)) {
         syslog(LOG_ERR, "Failed to get prefixes!");
