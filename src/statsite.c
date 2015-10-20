@@ -20,11 +20,6 @@
 #include "conn_handler.h"
 #include "networking.h"
 
-/* LOG_PERROR is not defined in SunOS derivatives */
-#ifndef LOG_PERROR
-  #define LOG_PERROR 0
-#endif
-
 /**
  * Our signal handler updates this variable to
  * allow the program to gracefully terminate.

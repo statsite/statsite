@@ -1,8 +1,8 @@
 import platform
 
 if platform.system() == 'SunOS':
-   statsite_with_err_cc_flags = '-g -std=gnu99 -D_GNU_SOURCE -Wall -Wstrict-aliasing=0 -Wformat=0 -O3 -pthread -Ideps/inih/ -Ideps/libev/ -Isrc/'
-   statsite_without_err_cc_flags = '-g -std=gnu99 -D_GNU_SOURCE -O3 -pthread -Ideps/inih/ -Ideps/libev/ -Isrc/'
+   statsite_with_err_cc_flags = '-g -std=gnu99 -D_GNU_SOURCE -DLOG_PERROR=0 -Wall -Wstrict-aliasing=0 -Wformat=0 -O3 -pthread -Ideps/inih/ -Ideps/libev/ -Isrc/'
+   statsite_without_err_cc_flags = '-g -std=gnu99 -D_GNU_SOURCE -DLOG_PERROR=0 -O3 -pthread -Ideps/inih/ -Ideps/libev/ -Isrc/'
 else:
    statsite_with_err_cc_flags = '-g -std=c99 -D_GNU_SOURCE -Wall -Werror -Wstrict-aliasing=0 -O3 -pthread -Ideps/inih/ -Ideps/libev/ -Isrc/'
    statsite_without_err_cc_flags = '-g -std=c99 -D_GNU_SOURCE -O3 -pthread -Ideps/inih/ -Ideps/libev/ -Isrc/'
