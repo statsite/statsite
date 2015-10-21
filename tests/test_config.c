@@ -894,7 +894,7 @@ END_TEST
 
 START_TEST(test_timers_include_count_only)
 {
-    int fh = open("/tmp/extended_counters_include_count_config", O_CREAT|O_RDWR, 0777);
+    int fh = open("/tmp/timers_include_count_config", O_CREAT|O_RDWR, 0777);
     char *buf = "[statsite]\n\
 timers_include = COUNT\n";
     write(fh, buf, strlen(buf));
@@ -902,7 +902,7 @@ timers_include = COUNT\n";
     close(fh);
 
     statsite_config config;
-    int res = config_from_filename("/tmp/extended_counters_include_count_config", &config);
+    int res = config_from_filename("/tmp/timers_include_count_config", &config);
     fail_unless(res == 0);
 
     // Should get the config
@@ -917,13 +917,13 @@ timers_include = COUNT\n";
     fail_unless(config.timers_config.median == false);
     fail_unless(config.timers_config.sample_rate == false);
 
-    unlink("/tmp/extended_counters_include_count_config");
+    unlink("/tmp/timers_include_count_config");
 }
 END_TEST
 
 START_TEST(test_timers_include_count_rate)
 {
-    int fh = open("/tmp/extended_counters_include_count_config", O_CREAT|O_RDWR, 0777);
+    int fh = open("/tmp/timers_include_count_rate_config", O_CREAT|O_RDWR, 0777);
     char *buf = "[statsite]\n\
 timers_include = COUNT,RATE\n";
     write(fh, buf, strlen(buf));
@@ -931,7 +931,7 @@ timers_include = COUNT,RATE\n";
     close(fh);
 
     statsite_config config;
-    int res = config_from_filename("/tmp/extended_counters_include_count_config", &config);
+    int res = config_from_filename("/tmp/timers_include_count_rate_config", &config);
     fail_unless(res == 0);
 
     // Should get the config
@@ -946,13 +946,13 @@ timers_include = COUNT,RATE\n";
     fail_unless(config.timers_config.median == false);
     fail_unless(config.timers_config.sample_rate == false);
 
-    unlink("/tmp/extended_counters_include_count_config");
+    unlink("/tmp/timers_include_count_rate_config");
 }
 END_TEST
 
 START_TEST(test_timers_include_all_selected)
 {
-    int fh = open("/tmp/extended_counters_include_count_config", O_CREAT|O_RDWR, 0777);
+    int fh = open("/tmp/timers_include_all_selected_config", O_CREAT|O_RDWR, 0777);
     char *buf = "[statsite]\n\
 timers_include = COUNT,MEAN,STDEV,SUM,SUM_SQ,LOWER,UPPER,RATE,MEDIAN,SAMPLE_RATE\n";
     write(fh, buf, strlen(buf));
@@ -960,7 +960,7 @@ timers_include = COUNT,MEAN,STDEV,SUM,SUM_SQ,LOWER,UPPER,RATE,MEDIAN,SAMPLE_RATE
     close(fh);
 
     statsite_config config;
-    int res = config_from_filename("/tmp/extended_counters_include_count_config", &config);
+    int res = config_from_filename("/tmp/timers_include_all_selected_config", &config);
     fail_unless(res == 0);
 
     // Should get the config
@@ -975,6 +975,6 @@ timers_include = COUNT,MEAN,STDEV,SUM,SUM_SQ,LOWER,UPPER,RATE,MEDIAN,SAMPLE_RATE
     fail_unless(config.timers_config.median == true);
     fail_unless(config.timers_config.sample_rate == true);
 
-    unlink("/tmp/extended_counters_include_count_config");
+    unlink("/tmp/timers_include_all_selected_config");
 }
 END_TEST
