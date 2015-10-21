@@ -35,6 +35,18 @@ START_TEST(test_config_get_default)
     fail_unless(config.ext_counters_config.lower == true);
     fail_unless(config.ext_counters_config.upper == true);
     fail_unless(config.ext_counters_config.rate == true);
+    fail_unless(config.ext_counters_config.median == false);
+    fail_unless(config.ext_counters_config.sample_rate == false);
+    fail_unless(config.timers_config.count == true);
+    fail_unless(config.timers_config.mean == true);
+    fail_unless(config.timers_config.stdev == true);
+    fail_unless(config.timers_config.sum == true);
+    fail_unless(config.timers_config.sum_sq == true);
+    fail_unless(config.timers_config.lower == true);
+    fail_unless(config.timers_config.upper == true);
+    fail_unless(config.timers_config.rate == true);
+    fail_unless(config.timers_config.median == true);
+    fail_unless(config.timers_config.sample_rate == true);
     fail_unless(config.prefix_binary_stream == false);
     fail_unless(config.num_quantiles == 3);
     fail_unless(config.quantiles[0] == 0.5);
@@ -72,6 +84,18 @@ START_TEST(test_config_bad_file)
     fail_unless(config.ext_counters_config.lower == true);
     fail_unless(config.ext_counters_config.upper == true);
     fail_unless(config.ext_counters_config.rate == true);
+    fail_unless(config.ext_counters_config.median == false);
+    fail_unless(config.ext_counters_config.sample_rate == false);
+    fail_unless(config.timers_config.count == true);
+    fail_unless(config.timers_config.mean == true);
+    fail_unless(config.timers_config.stdev == true);
+    fail_unless(config.timers_config.sum == true);
+    fail_unless(config.timers_config.sum_sq == true);
+    fail_unless(config.timers_config.lower == true);
+    fail_unless(config.timers_config.upper == true);
+    fail_unless(config.timers_config.rate == true);
+    fail_unless(config.timers_config.median == true);
+    fail_unless(config.timers_config.sample_rate == true);
     fail_unless(config.prefix_binary_stream == false);
     fail_unless(config.num_quantiles == 3);
     fail_unless(config.quantiles[0] == 0.5);
@@ -114,6 +138,18 @@ START_TEST(test_config_empty_file)
     fail_unless(config.ext_counters_config.lower == true);
     fail_unless(config.ext_counters_config.upper == true);
     fail_unless(config.ext_counters_config.rate == true);
+    fail_unless(config.ext_counters_config.median == false);
+    fail_unless(config.ext_counters_config.sample_rate == false);
+    fail_unless(config.timers_config.count == true);
+    fail_unless(config.timers_config.mean == true);
+    fail_unless(config.timers_config.stdev == true);
+    fail_unless(config.timers_config.sum == true);
+    fail_unless(config.timers_config.sum_sq == true);
+    fail_unless(config.timers_config.lower == true);
+    fail_unless(config.timers_config.upper == true);
+    fail_unless(config.timers_config.rate == true);
+    fail_unless(config.timers_config.median == true);
+    fail_unless(config.timers_config.sample_rate == true);
     fail_unless(config.prefix_binary_stream == false);
     fail_unless(config.num_quantiles == 3);
     fail_unless(config.quantiles[0] == 0.5);
@@ -646,6 +682,8 @@ quantiles = 0.5, 0.90, 0.95, 0.99\n";
     fail_unless(config.ext_counters_config.lower == false);
     fail_unless(config.ext_counters_config.upper == false);
     fail_unless(config.ext_counters_config.rate == false);
+    fail_unless(config.ext_counters_config.median == false);
+    fail_unless(config.ext_counters_config.sample_rate == false);
     fail_unless(config.prefix_binary_stream == true);
     fail_unless(config.num_quantiles == 4);
     fail_unless(config.quantiles[0] == 0.5);
@@ -710,6 +748,8 @@ quantiles = 0.5, 0.90, 0.95, 0.99\n";
     fail_unless(config.ext_counters_config.lower == false);
     fail_unless(config.ext_counters_config.upper == false);
     fail_unless(config.ext_counters_config.rate == true);
+    fail_unless(config.ext_counters_config.median == false);
+    fail_unless(config.ext_counters_config.sample_rate == false);
     fail_unless(config.prefix_binary_stream == true);
     fail_unless(config.num_quantiles == 4);
     fail_unless(config.quantiles[0] == 0.5);
@@ -774,6 +814,8 @@ quantiles = 0.5, 0.90, 0.95, 0.99\n";
     fail_unless(config.ext_counters_config.lower == true);
     fail_unless(config.ext_counters_config.upper == true);
     fail_unless(config.ext_counters_config.rate == true);
+    fail_unless(config.ext_counters_config.median == false);
+    fail_unless(config.ext_counters_config.sample_rate == false);
     fail_unless(config.prefix_binary_stream == true);
     fail_unless(config.num_quantiles == 4);
     fail_unless(config.quantiles[0] == 0.5);
@@ -837,6 +879,8 @@ quantiles = 0.5, 0.90, 0.95, 0.99\n";
     fail_unless(config.ext_counters_config.lower == true);
     fail_unless(config.ext_counters_config.upper == true);
     fail_unless(config.ext_counters_config.rate == true);
+    fail_unless(config.ext_counters_config.median == false);
+    fail_unless(config.ext_counters_config.sample_rate == false);
     fail_unless(config.prefix_binary_stream == true);
     fail_unless(config.num_quantiles == 4);
     fail_unless(config.quantiles[0] == 0.5);
@@ -845,5 +889,92 @@ quantiles = 0.5, 0.90, 0.95, 0.99\n";
     fail_unless(config.quantiles[3] == 0.99);
 
     unlink("/tmp/extended_counters_include_all_by_default_config");
+}
+END_TEST
+
+START_TEST(test_timers_include_count_only)
+{
+    int fh = open("/tmp/extended_counters_include_count_config", O_CREAT|O_RDWR, 0777);
+    char *buf = "[statsite]\n\
+timers_include = COUNT\n";
+    write(fh, buf, strlen(buf));
+    fchmod(fh, 777);
+    close(fh);
+
+    statsite_config config;
+    int res = config_from_filename("/tmp/extended_counters_include_count_config", &config);
+    fail_unless(res == 0);
+
+    // Should get the config
+    fail_unless(config.timers_config.count == true);
+    fail_unless(config.timers_config.mean == false);
+    fail_unless(config.timers_config.stdev == false);
+    fail_unless(config.timers_config.sum == false);
+    fail_unless(config.timers_config.sum_sq == false);
+    fail_unless(config.timers_config.lower == false);
+    fail_unless(config.timers_config.upper == false);
+    fail_unless(config.timers_config.rate == false);
+    fail_unless(config.timers_config.median == false);
+    fail_unless(config.timers_config.sample_rate == false);
+
+    unlink("/tmp/extended_counters_include_count_config");
+}
+END_TEST
+
+START_TEST(test_timers_include_count_rate)
+{
+    int fh = open("/tmp/extended_counters_include_count_config", O_CREAT|O_RDWR, 0777);
+    char *buf = "[statsite]\n\
+timers_include = COUNT,RATE\n";
+    write(fh, buf, strlen(buf));
+    fchmod(fh, 777);
+    close(fh);
+
+    statsite_config config;
+    int res = config_from_filename("/tmp/extended_counters_include_count_config", &config);
+    fail_unless(res == 0);
+
+    // Should get the config
+    fail_unless(config.timers_config.count == true);
+    fail_unless(config.timers_config.mean == false);
+    fail_unless(config.timers_config.stdev == false);
+    fail_unless(config.timers_config.sum == false);
+    fail_unless(config.timers_config.sum_sq == false);
+    fail_unless(config.timers_config.lower == false);
+    fail_unless(config.timers_config.upper == false);
+    fail_unless(config.timers_config.rate == true);
+    fail_unless(config.timers_config.median == false);
+    fail_unless(config.timers_config.sample_rate == false);
+
+    unlink("/tmp/extended_counters_include_count_config");
+}
+END_TEST
+
+START_TEST(test_timers_include_all_selected)
+{
+    int fh = open("/tmp/extended_counters_include_count_config", O_CREAT|O_RDWR, 0777);
+    char *buf = "[statsite]\n\
+timers_include = COUNT,MEAN,STDEV,SUM,SUM_SQ,LOWER,UPPER,RATE,MEDIAN,SAMPLE_RATE\n";
+    write(fh, buf, strlen(buf));
+    fchmod(fh, 777);
+    close(fh);
+
+    statsite_config config;
+    int res = config_from_filename("/tmp/extended_counters_include_count_config", &config);
+    fail_unless(res == 0);
+
+    // Should get the config
+    fail_unless(config.timers_config.count == true);
+    fail_unless(config.timers_config.mean == true);
+    fail_unless(config.timers_config.stdev == true);
+    fail_unless(config.timers_config.sum == true);
+    fail_unless(config.timers_config.sum_sq == true);
+    fail_unless(config.timers_config.lower == true);
+    fail_unless(config.timers_config.upper == true);
+    fail_unless(config.timers_config.rate == true);
+    fail_unless(config.timers_config.median == true);
+    fail_unless(config.timers_config.sample_rate == true);
+
+    unlink("/tmp/extended_counters_include_count_config");
 }
 END_TEST

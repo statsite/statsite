@@ -97,7 +97,8 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
     timer_hist *t;
     int i;
     char *prefix = GLOBAL_CONFIG->prefixes_final[type];
-    extended_counters_config* counters_config = &(GLOBAL_CONFIG->ext_counters_config);
+    included_metrics_config* counters_config = &(GLOBAL_CONFIG->ext_counters_config);
+    included_metrics_config* timers_config = &(GLOBAL_CONFIG->timers_config);
 
     switch (type) {
         case KEY_VAL:
@@ -114,7 +115,7 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
                     STREAM("%s%s.count|%lld|%lld\n", prefix, name, counter_count(value));
                 }
                 if (counters_config->mean) {
-                    STREAM("%s%s.mean|%f|%lld\n", prefix, name, counter_mean(value));    
+                    STREAM("%s%s.mean|%f|%lld\n", prefix, name, counter_mean(value));
                 }
                 if (counters_config->stdev) {
                     STREAM("%s%s.stdev|%f|%lld\n", prefix, name, counter_stddev(value));
@@ -145,23 +146,41 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
 
         case TIMER:
             t = (timer_hist*)value;
-            STREAM("%s%s.sum|%f|%lld\n", prefix, name, timer_sum(&t->tm));
-            STREAM("%s%s.sum_sq|%f|%lld\n", prefix, name, timer_squared_sum(&t->tm));
-            STREAM("%s%s.mean|%f|%lld\n", prefix, name, timer_mean(&t->tm));
-            STREAM("%s%s.lower|%f|%lld\n", prefix, name, timer_min(&t->tm));
-            STREAM("%s%s.upper|%f|%lld\n", prefix, name, timer_max(&t->tm));
-            STREAM("%s%s.count|%lld|%lld\n", prefix, name, timer_count(&t->tm));
-            STREAM("%s%s.stdev|%f|%lld\n", prefix, name, timer_stddev(&t->tm));
+            if (timers_config->sum) {
+                STREAM("%s%s.sum|%f|%lld\n", prefix, name, timer_sum(&t->tm));
+            }
+            if (timers_config->sum_sq) {
+                STREAM("%s%s.sum_sq|%f|%lld\n", prefix, name, timer_squared_sum(&t->tm));
+            }
+            if (timers_config->mean) {
+                STREAM("%s%s.mean|%f|%lld\n", prefix, name, timer_mean(&t->tm));
+            }
+            if (timers_config->lower) {
+                STREAM("%s%s.lower|%f|%lld\n", prefix, name, timer_min(&t->tm));
+            }
+            if (timers_config->upper) {
+                STREAM("%s%s.upper|%f|%lld\n", prefix, name, timer_max(&t->tm));
+            }
+            if (timers_config->count) {
+                STREAM("%s%s.count|%lld|%lld\n", prefix, name, timer_count(&t->tm));
+            }
+            if (timers_config->stdev) {
+                STREAM("%s%s.stdev|%f|%lld\n", prefix, name, timer_stddev(&t->tm));
+            }
             for (i=0; i < GLOBAL_CONFIG->num_quantiles; i++) {
-                if (GLOBAL_CONFIG->quantiles[i] == 0.5) {
+                if (timers_config->median && GLOBAL_CONFIG->quantiles[i] == 0.5) {
                     STREAM("%s%s.median|%f|%lld\n", prefix, name, timer_query(&t->tm, 0.5));
                 }
                 STREAM("%s%s.p%0.0f|%f|%lld\n", prefix, name,
                     GLOBAL_CONFIG->quantiles[i] * 100,
                     timer_query(&t->tm, GLOBAL_CONFIG->quantiles[i]));
             }
-            STREAM("%s%s.rate|%f|%lld\n", prefix, name, timer_sum(&t->tm) / GLOBAL_CONFIG->flush_interval);
-            STREAM("%s%s.sample_rate|%f|%lld\n", prefix, name, (double)timer_count(&t->tm) / GLOBAL_CONFIG->flush_interval);
+            if (timers_config->rate) {
+                STREAM("%s%s.rate|%f|%lld\n", prefix, name, timer_sum(&t->tm) / GLOBAL_CONFIG->flush_interval);
+            }
+            if (timers_config->sample_rate) {
+                STREAM("%s%s.sample_rate|%f|%lld\n", prefix, name, (double)timer_count(&t->tm) / GLOBAL_CONFIG->flush_interval);
+            }
 
             // Stream the histogram values
             if (t->conf) {
@@ -216,7 +235,7 @@ static int stream_formatter_bin(FILE *pipe, void *data, metric_type type, char *
     timer_hist *t;
     int i;
 
-    extended_counters_config* counters_config = &(GLOBAL_CONFIG->ext_counters_config);
+    included_metrics_config* counters_config = &(GLOBAL_CONFIG->ext_counters_config);
 
     switch (type) {
         case KEY_VAL:
@@ -246,10 +265,10 @@ static int stream_formatter_bin(FILE *pipe, void *data, metric_type type, char *
             if (counters_config->lower) {
                 STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_MIN, counter_min(value));
             }
-            if (counters_config->upper) {    
+            if (counters_config->upper) {
                 STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_MAX, counter_max(value));
             }
-            if (counters_config->rate) {    
+            if (counters_config->rate) {
                 STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_RATE, counter_sum(value) / GLOBAL_CONFIG->flush_interval);
             }
             break;
