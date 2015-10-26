@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # This is the MIT License
 # http://www.opensource.org/licenses/mit-license.php
 #
@@ -211,7 +209,7 @@ if __name__ == '__main__':
     parser.add_argument('--group', metavar='group', nargs='?', default='', help="Group metric belongs to. If not specified Ganglia will show it as no_group.")
     parser.add_argument('--spoof', metavar='spoof', nargs='?', default='', help="The address to spoof (ip:host). If not specified the metric will not be spoofed.")
     parser.add_argument('--stdin', action='store_true', help="Read metrics from stdin. in 'key|value|timestamp' format.")
-    
+
     p = parser.parse_args()
 
     if p.stdin:
