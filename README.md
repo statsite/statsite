@@ -275,7 +275,7 @@ The following is a timer, timing the response speed of an API call::
 
     api.session_created:114|ms
 
-The next example is increments the "rewards" counter by 1::
+The next example increments the "rewards" counter by 1::
 
     rewards:1|c
 
