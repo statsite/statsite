@@ -10,6 +10,7 @@
 #include "metrics.h"
 #include "sink.h"
 #include "strbuf.h"
+#include "utils.h"
 
 const int QUEUE_MAX_SIZE = 10 * 1024 * 1024; /* 10 MB of data */
 const int DEFAULT_TIMEOUT_SECONDS = 30;
@@ -113,9 +114,15 @@ static int add_metrics(void* data,
         SUFFIX_ADD(".stdev", json_real(timer_stddev(&t->tm))); /* stdev matches other output */
         for (int i = 0; i < config->num_quantiles; i++) {
             char ptile[suffix_space];
-            snprintf(ptile, suffix_space, ".p%0.0f", config->quantiles[i] * 100);
+            int percentile;
+            double quantile = config->quantiles[i];
+            if (to_percentile(quantile, &percentile)) {
+                syslog(LOG_ERR, "Invalid quantile: %lf", quantile);
+                break;
+            }
+            snprintf(ptile, suffix_space, ".p%d", percentile);
             ptile[suffix_space-1] = '\0';
-            SUFFIX_ADD(ptile, json_real(timer_query(&t->tm, config->quantiles[i])));
+            SUFFIX_ADD(ptile, json_real(timer_query(&t->tm, quantile)));
         }
         SUFFIX_ADD(".rate", json_real(timer_sum(&t->tm) / config->flush_interval));
         SUFFIX_ADD(".sample_rate", json_real((double)timer_count(&t->tm) / config->flush_interval));
