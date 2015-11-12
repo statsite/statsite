@@ -26,9 +26,6 @@ BINARY_SET_HEADER = struct.Struct("<BBHH")
 COUNT_VAL = struct.Struct("<I")
 BIN_TYPES = {"kv": 1, "c": 2, "ms": 3, "set": 4, "g": 5}
 
-BINARY_OUT_HEADER = struct.Struct("<QBBHd")
-BINARY_OUT_LEN = 20
-
 VAL_TYPE_MAP = {
     "kv": 0,
     "sum": 1,
@@ -216,14 +213,14 @@ def format_set(key, val):
     return mesg
 
 
-def format_output(time, key, type, val_type, val):
+def format_output(key, type, val_type, val):
     "Formats an response line. This is to check that we meet spec"
-    prefix = BINARY_OUT_HEADER.pack(int(time), type, val_type, len(key) + 1, val)
+    prefix = BINARY_HEADER.pack(type, val_type, len(key) + 1, val)
     return prefix + key + "\0"
 
-def format_output_count(time, key, type, val_type, val, count):
+def format_output_count(key, type, val_type, val, count):
     "Formats a response line that includes a count, for histograms"
-    prefix = format_output(time, key, type, val_type, val)
+    prefix = format_output(key, type, val_type, val)
     return prefix + COUNT_VAL.pack(count)
 
 def wait_file(path, timeout=5):
@@ -243,20 +240,16 @@ class TestInteg(object):
         server, _, output = servers
         server.sendall(format("tubez", "kv", 100))
         wait_file(output)
-        now = time.time()
         out = open(output).read()
-        assert out in (format_output(now, "tubez", BIN_TYPES["kv"], VAL_TYPE_MAP["kv"], 100),
-                       format_output(now - 1, "tubez", BIN_TYPES["kv"], VAL_TYPE_MAP["kv"], 100))
+        assert format_output("tubez", BIN_TYPES["kv"], VAL_TYPE_MAP["kv"], 100) in out
 
     def test_gauges(self, servers):
         "Tests streaming gauges"
         server, _, output = servers
         server.sendall(format("g1", "g", 500))
         wait_file(output)
-        now = time.time()
         out = open(output).read()
-        assert out in (format_output(now, "g1", BIN_TYPES["g"], VAL_TYPE_MAP["kv"], 500),
-                       format_output(now - 1, "g1", BIN_TYPES["g"], VAL_TYPE_MAP["kv"], 500))
+        assert format_output("g1", BIN_TYPES["g"], VAL_TYPE_MAP["kv"], 500) in out
 
     def test_counters(self, servers):
         "Tests adding kv pairs"
@@ -265,21 +258,16 @@ class TestInteg(object):
         server.sendall(format("foobar", "c", 200))
         server.sendall(format("foobar", "c", 300))
         wait_file(output)
-        now = time.time()
         out = open(output).read()
 
-        # Adjust for time drift
-        if format_output(now - 1, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum"], 600) in out:
-            now = now - 1
-
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum"], 600) in out
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum sq"], 140000) in out
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["mean"], 200) in out
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["count"], 3) in out
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["stddev"], 100) in out
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["min"], 100) in out
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["max"], 300) in out
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["rate"], 600) in out
+        assert format_output("foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum"], 600) in out
+        assert format_output("foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum sq"], 140000) in out
+        assert format_output("foobar", BIN_TYPES["c"], VAL_TYPE_MAP["mean"], 200) in out
+        assert format_output("foobar", BIN_TYPES["c"], VAL_TYPE_MAP["count"], 3) in out
+        assert format_output("foobar", BIN_TYPES["c"], VAL_TYPE_MAP["stddev"], 100) in out
+        assert format_output("foobar", BIN_TYPES["c"], VAL_TYPE_MAP["min"], 100) in out
+        assert format_output("foobar", BIN_TYPES["c"], VAL_TYPE_MAP["max"], 300) in out
+        assert format_output("foobar", BIN_TYPES["c"], VAL_TYPE_MAP["rate"], 600) in out
 
     def test_meters(self, servers):
         "Tests adding kv pairs"
@@ -289,25 +277,20 @@ class TestInteg(object):
             msg += format("noobs", "ms", x)
         server.sendall(msg)
         wait_file(output)
-        now = time.time()
         out = open(output).read()
 
-        # Adjust for time drift
-        if format_output(now - 1, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum"], 4950) in out:
-            now = now - 1
-
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum"], 4950) in out
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum sq"], 328350) in out
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["min"], 0) in out
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["max"], 99) in out
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["count"], 100) in out
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["stddev"], 29.011491975882016) in out
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["mean"], 49.5) in out
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["rate"], 4950) in out
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sample_rate"], 100) in out
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P50"], 49) in out
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P95"], 95) in out
-        assert format_output(now, "noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P99"], 99) in out
+        assert format_output("noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum"], 4950) in out
+        assert format_output("noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum sq"], 328350) in out
+        assert format_output("noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["min"], 0) in out
+        assert format_output("noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["max"], 99) in out
+        assert format_output("noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["count"], 100) in out
+        assert format_output("noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["stddev"], 29.011491975882016) in out
+        assert format_output("noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["mean"], 49.5) in out
+        assert format_output("noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["rate"], 4950) in out
+        assert format_output("noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sample_rate"], 100) in out
+        assert format_output("noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P50"], 49) in out
+        assert format_output("noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P95"], 95) in out
+        assert format_output("noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P99"], 99) in out
 
     def test_histogram(self, servers):
         "Tests streaming of histogram values"
@@ -317,23 +300,18 @@ class TestInteg(object):
             msg += format("has_hist.test", "ms", x)
         server.sendall(msg)
         wait_file(output)
-        now = time.time()
         out = open(output).read()
 
-        # Adjust for time drift
-        if format_output_count(now - 1, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_min"], 10, 10) in out:
-            now = now - 1
-
-        assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_min"], 10, 10) in out
-        assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 10, 10) in out
-        assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 20, 10) in out
-        assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 30, 10) in out
-        assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 40, 10) in out
-        assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 50, 10) in out
-        assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 60, 10) in out
-        assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 70, 10) in out
-        assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 80, 10) in out
-        assert format_output_count(now, "has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_max"], 90, 10) in out
+        assert format_output_count("has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_min"], 10, 10) in out
+        assert format_output_count("has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 10, 10) in out
+        assert format_output_count("has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 20, 10) in out
+        assert format_output_count("has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 30, 10) in out
+        assert format_output_count("has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 40, 10) in out
+        assert format_output_count("has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 50, 10) in out
+        assert format_output_count("has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 60, 10) in out
+        assert format_output_count("has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 70, 10) in out
+        assert format_output_count("has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 80, 10) in out
+        assert format_output_count("has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_max"], 90, 10) in out
 
     def test_sets(self, servers):
         "Tests adding sets"
@@ -342,13 +320,9 @@ class TestInteg(object):
         server.sendall(format_set("zip", "bar"))
         server.sendall(format_set("zip", "baz"))
         wait_file(output)
-        now = time.time()
         out = open(output).read()
 
-        # Adjust for time drift
-        if format_output(now - 1, "zip", BIN_TYPES["set"], VAL_TYPE_MAP["sum"], 3) in out:
-            now = now - 1
-        assert format_output(now, "zip", BIN_TYPES["set"], VAL_TYPE_MAP["sum"], 3) in out
+        assert format_output("zip", BIN_TYPES["set"], VAL_TYPE_MAP["sum"], 3) in out
 
 
 class TestIntegPrefix(object):
@@ -357,20 +331,16 @@ class TestIntegPrefix(object):
         server, _, output = serversPrefix
         server.sendall(format("tubez", "kv", 100))
         wait_file(output)
-        now = time.time()
         out = open(output).read()
-        assert out in (format_output(now, "kv.tubez", BIN_TYPES["kv"], VAL_TYPE_MAP["kv"], 100),
-                       format_output(now - 1, "kv.tubez", BIN_TYPES["kv"], VAL_TYPE_MAP["kv"], 100))
+        assert format_output("kv.tubez", BIN_TYPES["kv"], VAL_TYPE_MAP["kv"], 100) in out
 
     def test_gauges(self, serversPrefix):
         "Tests streaming gauges"
         server, _, output = serversPrefix
         server.sendall(format("g1", "g", 500))
         wait_file(output)
-        now = time.time()
         out = open(output).read()
-        assert out in (format_output(now, "gauges.g1", BIN_TYPES["g"], VAL_TYPE_MAP["kv"], 500),
-                       format_output(now - 1, "gauges.g1", BIN_TYPES["g"], VAL_TYPE_MAP["kv"], 500))
+        assert format_output("gauges.g1", BIN_TYPES["g"], VAL_TYPE_MAP["kv"], 500) in out
 
     def test_counters(self, serversPrefix):
         "Tests adding kv pairs"
@@ -379,21 +349,16 @@ class TestIntegPrefix(object):
         server.sendall(format("foobar", "c", 200))
         server.sendall(format("foobar", "c", 300))
         wait_file(output)
-        now = time.time()
         out = open(output).read()
 
-        # Adjust for time drift
-        if format_output(now - 1, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum"], 600) in out:
-            now = now - 1
-
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum"], 600) in out
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum sq"], 140000) in out
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["mean"], 200) in out
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["count"], 3) in out
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["stddev"], 100) in out
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["min"], 100) in out
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["max"], 300) in out
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["rate"], 600) in out
+        assert format_output("counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum"], 600) in out
+        assert format_output("counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum sq"], 140000) in out
+        assert format_output("counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["mean"], 200) in out
+        assert format_output("counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["count"], 3) in out
+        assert format_output("counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["stddev"], 100) in out
+        assert format_output("counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["min"], 100) in out
+        assert format_output("counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["max"], 300) in out
+        assert format_output("counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["rate"], 600) in out
 
     def test_meters(self, serversPrefix):
         "Tests adding kv pairs"
@@ -403,25 +368,20 @@ class TestIntegPrefix(object):
             msg += format("noobs", "ms", x)
         server.sendall(msg)
         wait_file(output)
-        now = time.time()
         out = open(output).read()
 
-        # Adjust for time drift
-        if format_output(now - 1, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum"], 4950) in out:
-            now = now - 1
-
-        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum"], 4950) in out
-        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum sq"], 328350) in out
-        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["min"], 0) in out
-        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["max"], 99) in out
-        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["count"], 100) in out
-        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["stddev"], 29.011491975882016) in out
-        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["mean"], 49.5) in out
-        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["rate"], 4950) in out
-        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sample_rate"], 100) in out
-        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P50"], 49) in out
-        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P95"], 95) in out
-        assert format_output(now, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P99"], 99) in out
+        assert format_output("timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum"], 4950) in out
+        assert format_output("timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum sq"], 328350) in out
+        assert format_output("timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["min"], 0) in out
+        assert format_output("timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["max"], 99) in out
+        assert format_output("timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["count"], 100) in out
+        assert format_output("timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["stddev"], 29.011491975882016) in out
+        assert format_output("timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["mean"], 49.5) in out
+        assert format_output("timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["rate"], 4950) in out
+        assert format_output("timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sample_rate"], 100) in out
+        assert format_output("timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P50"], 49) in out
+        assert format_output("timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P95"], 95) in out
+        assert format_output("timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["P99"], 99) in out
 
     def test_histogram(self, serversPrefix):
         "Tests streaming of histogram values"
@@ -431,23 +391,18 @@ class TestIntegPrefix(object):
             msg += format("has_hist.test", "ms", x)
         server.sendall(msg)
         wait_file(output)
-        now = time.time()
         out = open(output).read()
 
-        # Adjust for time drift
-        if format_output(now - 1, "timers.noobs", BIN_TYPES["ms"], VAL_TYPE_MAP["sum"], 4950) in out:
-            now = now - 1
-
-        assert format_output_count(now, "timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_min"], 10, 10) in out
-        assert format_output_count(now, "timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 10, 10) in out
-        assert format_output_count(now, "timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 20, 10) in out
-        assert format_output_count(now, "timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 30, 10) in out
-        assert format_output_count(now, "timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 40, 10) in out
-        assert format_output_count(now, "timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 50, 10) in out
-        assert format_output_count(now, "timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 60, 10) in out
-        assert format_output_count(now, "timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 70, 10) in out
-        assert format_output_count(now, "timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 80, 10) in out
-        assert format_output_count(now, "timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_max"], 90, 10) in out
+        assert format_output_count("timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_min"], 10, 10) in out
+        assert format_output_count("timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 10, 10) in out
+        assert format_output_count("timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 20, 10) in out
+        assert format_output_count("timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 30, 10) in out
+        assert format_output_count("timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 40, 10) in out
+        assert format_output_count("timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 50, 10) in out
+        assert format_output_count("timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 60, 10) in out
+        assert format_output_count("timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 70, 10) in out
+        assert format_output_count("timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_bin"], 80, 10) in out
+        assert format_output_count("timers.has_hist.test", BIN_TYPES["ms"], VAL_TYPE_MAP["hist_max"], 90, 10) in out
 
     def test_sets(self, serversPrefix):
         "Tests adding sets"
@@ -456,13 +411,9 @@ class TestIntegPrefix(object):
         server.sendall(format_set("zip", "bar"))
         server.sendall(format_set("zip", "baz"))
         wait_file(output)
-        now = time.time()
         out = open(output).read()
 
-        # Adjust for time drift
-        if format_output(now - 1, "sets.zip", BIN_TYPES["set"], VAL_TYPE_MAP["sum"], 3) in out:
-            now = now - 1
-        assert format_output(now, "sets.zip", BIN_TYPES["set"], VAL_TYPE_MAP["sum"], 3) in out
+        assert format_output("sets.zip", BIN_TYPES["set"], VAL_TYPE_MAP["sum"], 3) in out
 
 
 if __name__ == "__main__":
