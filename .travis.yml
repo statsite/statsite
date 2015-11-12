@@ -4,26 +4,23 @@ compiler:
   - gcc
   - clang
 
-sudo: required
+sudo: false
 
 addons:
   apt:
     packages:
-      - scons
       - check
-      - python
+      - clang
       - libjansson-dev
-      - libcurl3-openssl-dev
+      - libcurl4-openssl-dev
+      - python
+      - python-virtualenv
+      - scons
 
 python:
   - "2.7"
 
 before_install:
-  - whereis clang
-  - sudo apt-get update -qq
-  - sudo apt-get install -y check scons python-virtualenv libjansson-dev libcurl4-openssl-dev clang
-  - sudo apt-get autoremove
-  - whereis clang
   - scons statsite test_runner
   - virtualenv ve
 
