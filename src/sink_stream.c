@@ -5,6 +5,7 @@
 #include "metrics.h"
 #include "sink.h"
 #include "streaming.h"
+#include "utils.h"
 
 // BIN_TYPE_MAP is used to map the BIN_TYPE_* static
 // definitions into the metric_type value, so that
@@ -171,12 +172,17 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
             STREAM("%s%s.count|%" PRIu64 "|%lld\n", prefix, name, timer_count(&t->tm));
             STREAM("%s%s.stdev|%f|%lld\n", prefix, name, timer_stddev(&t->tm));
             for (i=0; i < ct->global_config->num_quantiles; i++) {
-                if (ct->global_config->quantiles[i] == 0.5) {
+                int percentile;
+                double quantile = ct->global_config->quantiles[i];
+                if (quantile == 0.5) {
                     STREAM("%s%s.median|%f|%lld\n", prefix, name, timer_query(&t->tm, 0.5));
                 }
-                STREAM("%s%s.p%0.0f|%f|%lld\n", prefix, name,
-                    ct->global_config->quantiles[i] * 100,
-                    timer_query(&t->tm, ct->global_config->quantiles[i]));
+                if (to_percentile(quantile, &percentile)) {
+                    syslog(LOG_ERR, "Invalid quantile: %lf", quantile);
+                    break;
+                }
+                STREAM("%s%s.p%d|%f|%lld\n", prefix, name, percentile,
+                    timer_query(&t->tm, quantile));
             }
             STREAM("%s%s.rate|%f|%lld\n", prefix, name, timer_sum(&t->tm) / ct->global_config->flush_interval);
             STREAM("%s%s.sample_rate|%f|%lld\n", prefix, name, (double)timer_count(&t->tm) / ct->global_config->flush_interval);
