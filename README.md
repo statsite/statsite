@@ -100,25 +100,24 @@ available usually through a system package manager. Steps:
     $ make
     $ ./statsite
 
-Dependencies:
+Explicit list of Dependencies (all must be installed):
 
 jansson - If you don't have Jansson installed - TODO(aasta/hhuang): install instructions for jansson
 
+inih -
+
 libev -
 
-murmurhash - 
+murmurhash -
 
+libcurl -
+
+libcheck - (Needed to build / run unit tests)
 
 
 Building the test code may generate errors if libcheck is not available.
 To build the test code successfully, do the following::
 
-    $ cd deps/check-0.9.8/
-    $ ./configure
-    $ make
-    # make install
-    # ldconfig (necessary on some Linux distros)
-    $ cd ../../
     $ make test
 
 At this point, the test code should build successfully.
