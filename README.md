@@ -128,9 +128,15 @@ Here is an example configuration file::
     timer_eps = 0.01
     set_eps = 0.02
 
-    [sink_steam_graphite]
+    [sink_stream_graphite]
     command = python sinks/graphite.py localhost 2003
 
+    [sink_http_appName]
+    url = https://www.example.com/endpoint
+    oauth_key = test_key
+    oauth_secret = test_secret
+    oauth_token_url = https://api.example.com/oauth2/token
+    
     [histogram_api]
     prefix=api
     min=0
@@ -232,6 +238,10 @@ Stream sinks take the following options:
 * binary : Should data be streamed to the stream\_cmd in
   binary form instead of ASCII form. Defaults to 0.
 
+HTTP sinks take the following options:
+* url : The URL of posting the metrics
+* oauth_key & oauth_secret : The OAuth identity and credential information 
+* oauth_token_url : The URL of authenticating the application of exchange the OAuth credentials for a bearer token
 
 ### Histograms
 
