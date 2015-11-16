@@ -94,7 +94,7 @@ Install [BROKEN/INCOMPLETE]
 Download and build from source. This requires `scons` to be available,
 available usually through a system package manager. Steps:
 
-    $ git clone https://github.com/armon/statsite.git
+    $ git clone https://github.com/twitter-forks/statsite.git
     $ cd statsite
     $ pip install --egg SCons  # Uses the Scons build system, may not be necessary
     $ make
