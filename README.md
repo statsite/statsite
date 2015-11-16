@@ -100,6 +100,16 @@ available usually through a system package manager. Steps:
     $ make
     $ ./statsite
 
+Dependencies:
+
+jansson - If you don't have Jansson installed - TODO(aasta/hhuang): install instructions for jansson
+
+libev -
+
+murmurhash - 
+
+
+
 Building the test code may generate errors if libcheck is not available.
 To build the test code successfully, do the following::
 
