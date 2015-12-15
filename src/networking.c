@@ -13,6 +13,8 @@
 #include <errno.h>
 #include <stdio.h>
 #include <assert.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 
 #include "networking.h"
 #include "conn_handler.h"
@@ -280,7 +282,10 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
     statsite_networking *netconf = calloc(1, sizeof(struct statsite_networking));
     netconf->config = config;
 
-    netconf->loop = aeCreateEventLoop(100); //FIXME
+    struct rlimit limit;
+    int maxclients = (getrlimit(RLIMIT_NOFILE,&limit) == -1) ? 1024 : limit.rlim_cur;
+    netconf->loop = aeCreateEventLoop(maxclients);
+
     if (!netconf->loop) {
         syslog(LOG_CRIT, "Failed to initialize event loop!");
         free(netconf);
