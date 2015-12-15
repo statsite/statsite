@@ -1,17 +1,20 @@
 import platform
 
 if platform.system() == 'SunOS':
-   statsite_with_err_cc_flags = '-g -std=gnu99 -D_GNU_SOURCE -DLOG_PERROR=0 -Wall -Wstrict-aliasing=0 -Wformat=0 -O3 -pthread -Ideps/inih/ -Ideps/libev/ -Isrc/'
-   statsite_without_err_cc_flags = '-g -std=gnu99 -D_GNU_SOURCE -DLOG_PERROR=0 -O3 -pthread -Ideps/inih/ -Ideps/libev/ -Isrc/'
+   statsite_with_err_cc_flags = '-g -std=gnu99 -D_GNU_SOURCE -DLOG_PERROR=0 -Wall -Wstrict-aliasing=0 -Wformat=0 -O3 -pthread -Ideps/inih/ -Ideps/ae/ -Isrc/'
+   statsite_without_err_cc_flags = '-g -std=gnu99 -D_GNU_SOURCE -DLOG_PERROR=0 -O3 -pthread -Ideps/inih/ -Ideps/ae/ -Isrc/'
 else:
-   statsite_with_err_cc_flags = '-g -std=c99 -D_GNU_SOURCE -Wall -Werror -Wstrict-aliasing=0 -O3 -pthread -Ideps/inih/ -Ideps/libev/ -Isrc/'
-   statsite_without_err_cc_flags = '-g -std=c99 -D_GNU_SOURCE -O3 -pthread -Ideps/inih/ -Ideps/libev/ -Isrc/'
+   statsite_with_err_cc_flags = '-g -std=c99 -D_GNU_SOURCE -Wall -Werror -Wstrict-aliasing=0 -O3 -pthread -Ideps/inih/ -Ideps/ae/ -Isrc/'
+   statsite_without_err_cc_flags = '-g -std=c99 -D_GNU_SOURCE -O3 -pthread -Ideps/inih/ -Ideps/ae/ -Isrc/'
 
 envmurmur = Environment(CPATH = ['deps/murmurhash/'], CFLAGS="-std=c99 -O3")
 murmur = envmurmur.Library('murmur', Glob("deps/murmurhash/*.c"))
 
 envinih = Environment(CPATH = ['deps/inih/'], CFLAGS="-O3")
 inih = envinih.Library('inih', Glob("deps/inih/*.c"))
+
+envae = Environment(CPATH = ['deps/ae/'], CFLAGS="-O3")
+ae = envae.Library('ae', Glob("deps/ae/ae.c"))
 
 env_statsite_with_err = Environment(CCFLAGS = statsite_with_err_cc_flags)
 env_statsite_without_err = Environment(CCFLAGS = statsite_without_err_cc_flags)
@@ -35,7 +38,7 @@ objs = env_statsite_with_err.Object('src/hashmap', 'src/hashmap.c')           + 
         env_statsite_without_err.Object('src/networking', 'src/networking.c') + \
         env_statsite_without_err.Object('src/conn_handler', 'src/conn_handler.c')
 
-statsite_libs = ["m", "pthread", murmur, inih]
+statsite_libs = ["m", "pthread", murmur, inih, ae]
 if platform.system() == 'Linux':
    statsite_libs.append("rt")
 elif platform.system() == 'SunOS':
