@@ -20,7 +20,7 @@
 // Length of string to represent maximum port of 65535
 #define MAX_PORT_LEN 6
 
-#include "ae/ae.h"
+#include "ae.h"
 
 /**
  * Default listen backlog size for
@@ -526,10 +526,10 @@ int shutdown_networking(statsite_networking *netconf) {
     aeDeleteFileEvent(netconf->loop, netconf->tcp_listener_fd, AE_READABLE);
     close(netconf->tcp_listener_fd);
 
-		if (netconf->udp_client != NULL) {
-			close_client_connection(netconf->udp_client);
-			netconf->udp_client = NULL;
-		}
+    if (netconf->udp_client != NULL) {
+        close_client_connection(netconf->udp_client);
+        netconf->udp_client = NULL;
+    }
 
     if (netconf->stdin_client != NULL) {
         close_client_connection(netconf->stdin_client);
@@ -838,9 +838,9 @@ static conn_info* get_conn(statsite_networking *nc, int fd) {
     // Prepare the buffers
     circbuf_init(&conn->input);
 
-    // Store a reference back to netconf
+    // Store fd and a reference back to netconf
     conn->nc = nc;
-		conn->client_fd = fd;
+    conn->client_fd = fd;
 
     return conn;
 }
