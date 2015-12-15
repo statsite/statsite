@@ -8,6 +8,11 @@
 #include <syslog.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <stdio.h>
+#include <assert.h>
 
 #include "networking.h"
 #include "conn_handler.h"
@@ -15,19 +20,7 @@
 // Length of string to represent maximum port of 65535
 #define MAX_PORT_LEN 6
 
-#define EV_STANDALONE 1
-#define EV_API_STATIC 1
-#define EV_COMPAT3 0
-#define EV_MULTIPLICITY 0
-#define EV_USE_MONOTONIC 1
-#ifdef __linux__
-#define EV_USE_CLOCK_SYSCALL 0
-#define EV_USE_EPOLL 1
-#endif
-#ifdef __MACH__
-#define EV_USE_KQUEUE 1
-#endif
-#include "ev.c"
+#include "ae/ae.h"
 
 /**
  * Default listen backlog size for
@@ -57,13 +50,6 @@
 #define unlikely(x)     __builtin_expect((x),0)
 
 /**
- * Stores the thread specific user data.
- */
-typedef struct {
-    statsite_networking *netconf;
-} worker_ev_userdata;
-
-/**
  * Represents a simple circular buffer
  */
 typedef struct {
@@ -78,8 +64,9 @@ typedef struct {
  * We initialize one of these per connection
  */
 struct conn_info {
-    ev_io client;
+    int client_fd;
     circular_buffer input;
+    statsite_networking *nc;
 };
 typedef struct conn_info conn_info;
 
@@ -90,22 +77,23 @@ typedef struct conn_info conn_info;
  */
 struct statsite_networking {
     statsite_config *config;
-    ev_io tcp_client;
-    ev_io udp_client;
+    aeEventLoop *loop;
+    int tcp_listener_fd;
+    long long flush_timer;
     conn_info *stdin_client;
-    ev_timer flush_timer;
+    conn_info *udp_client;
 };
 
 
 // Static typedefs
-static void handle_flush_event(ev_timer *watcher, int revents);
-static void handle_new_client(ev_io *watcher, int ready_events);
-static void handle_udp_message(ev_io *watch, int ready_events);
-static void invoke_event_handler(ev_io *watch, int ready_events);
+static int handle_flush_event(aeEventLoop *loop, long long id, void *edata);
+static void handle_new_client(aeEventLoop *loop, int fd, void *edata, int mask);
+static void handle_udp_message(aeEventLoop *loop, int fd, void *edata, int mask);
+static void invoke_event_handler(aeEventLoop *loop, int fd, void *edata, int mask);
 
 // Utility methods
 static int set_client_sockopts(int client_fd);
-static conn_info* get_conn();
+static conn_info* get_conn(statsite_networking *nc, int fd);
 
 // Circular buffer method
 static void circbuf_init(circular_buffer *buf);
@@ -180,10 +168,9 @@ static int setup_tcp_listener(statsite_networking *netconf) {
     syslog(LOG_INFO, "Listening on tcp '%s:%d'",
            netconf->config->bind_address, netconf->config->tcp_port);
 
-    // Create the libev objects
-    ev_io_init(&netconf->tcp_client, handle_new_client,
-                tcp_listener_fd, EV_READ);
-    ev_io_start(&netconf->tcp_client);
+    // Create the tcp event handler
+    aeCreateFileEvent(netconf->loop, tcp_listener_fd, AE_READABLE, handle_new_client, netconf);
+    netconf->tcp_listener_fd = tcp_listener_fd;
     return 0;
 }
 
@@ -245,19 +232,17 @@ static int setup_udp_listener(statsite_networking *netconf) {
 
     // Allocate a connection object for the UDP socket,
     // ensure a min-buffer size of 64K
-    conn_info *conn = get_conn();
+    conn_info *conn = get_conn(netconf, udp_listener_fd);
     while (circbuf_avail_buf(&conn->input) < 65536) {
         circbuf_grow_buf(&conn->input);
     }
-    netconf->udp_client.data = conn;
+    netconf->udp_client = conn;
 
     syslog(LOG_INFO, "Listening on udp '%s:%d'.",
            netconf->config->bind_address, netconf->config->udp_port);
 
-    // Create the libev objects
-    ev_io_init(&netconf->udp_client, handle_udp_message,
-                udp_listener_fd, EV_READ);
-    ev_io_start(&netconf->udp_client);
+    // Create the udp event handler
+    aeCreateFileEvent(netconf->loop, udp_listener_fd, AE_READABLE, handle_udp_message, netconf);
     return 0;
 }
 
@@ -276,12 +261,11 @@ static int setup_stdin_listener(statsite_networking *netconf) {
     syslog(LOG_INFO, "Listening on stdin.");
 
     // Create an associated conn object
-    conn_info *conn = get_conn();
+    conn_info *conn = get_conn(netconf, STDIN_FILENO);
     netconf->stdin_client = conn;
 
-    // Initialize the libev stuff
-    ev_io_init(&conn->client, invoke_event_handler, STDIN_FILENO, EV_READ);
-    ev_io_start(&conn->client);
+    // Initialize the stdin event 
+    aeCreateFileEvent(netconf->loop, STDIN_FILENO, AE_READABLE, invoke_event_handler, conn);
     return 0;
 }
 
@@ -296,18 +280,9 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
     statsite_networking *netconf = calloc(1, sizeof(struct statsite_networking));
     netconf->config = config;
 
-    /**
-     * Check if we can use kqueue instead of select.
-     * By default, libev will not use kqueue since it only
-     * works for sockets, which is all we need.
-     */
-    int ev_mode = EVFLAG_AUTO;
-    if (ev_supported_backends () & ~ev_recommended_backends () & EVBACKEND_KQUEUE) {
-        ev_mode = EVBACKEND_KQUEUE;
-    }
-
-    if (!ev_default_loop (ev_mode)) {
-        syslog(LOG_CRIT, "Failed to initialize libev!");
+    netconf->loop = aeCreateEventLoop(100); //FIXME
+    if (!netconf->loop) {
+        syslog(LOG_CRIT, "Failed to initialize event loop!");
         free(netconf);
         return 1;
     }
@@ -329,17 +304,13 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
     // Setup the UDP listener
     res = setup_udp_listener(netconf);
     if (res != 0) {
-        if (ev_is_active(&netconf->tcp_client)) {
-            ev_io_stop(&netconf->tcp_client);
-            close(netconf->tcp_client.fd);
-        }
+        close(netconf->tcp_listener_fd);
         free(netconf);
         return 1;
     }
 
     // Setup the timer
-    ev_timer_init(&netconf->flush_timer, handle_flush_event, config->flush_interval, config->flush_interval);
-    ev_timer_start(&netconf->flush_timer);
+    netconf->flush_timer = aeCreateTimeEvent(netconf->loop, config->flush_interval * 1000, handle_flush_event, netconf, NULL);
 
     // Prepare the conn handlers
     init_conn_handler(config);
@@ -354,9 +325,11 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
  * Invoked when our flush timer is reached.
  * We need to instruct the connection handler about this.
  */
-static void handle_flush_event(ev_timer *watcher, int revents) {
+static int handle_flush_event(aeEventLoop *loop, long long id, void *edata) {
+    statsite_networking *netconf = (statsite_networking *) edata;
     // Inform the connection handler of the timeout
     flush_interval_trigger();
+    return netconf->config->flush_interval * 1000;
 }
 
 
@@ -365,9 +338,11 @@ static void handle_flush_event(ev_timer *watcher, int revents) {
  * to accept a new client. Accepts the client, initializes
  * the connection buffers, and stars to listening for data
  */
-static void handle_new_client(ev_io *watcher, int ready_events) {
+static void handle_new_client(aeEventLoop *loop, int fd, void *edata, int mask) {
+		statsite_networking *netconf = (statsite_networking *) edata;
+
     // Accept the client connection
-    int listen_fd = watcher->fd;
+    int listen_fd = fd;
     struct sockaddr_in client_addr;
     int client_addr_len = sizeof(client_addr);
     int client_fd = accept(listen_fd,
@@ -390,11 +365,10 @@ static void handle_new_client(ev_io *watcher, int ready_events) {
             inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port), client_fd);
 
     // Get the associated conn object
-    conn_info *conn = get_conn();
+    conn_info *conn = get_conn(netconf, client_fd);
 
     // Initialize the libev stuff
-    ev_io_init(&conn->client, invoke_event_handler, client_fd, EV_READ);
-    ev_io_start(&conn->client);
+    aeCreateFileEvent(netconf->loop, client_fd, AE_READABLE, invoke_event_handler, conn);
 }
 
 
@@ -421,11 +395,11 @@ static int read_client_data(conn_info *conn) {
     circbuf_setup_readv_iovec(&conn->input, (struct iovec*)&vectors, &num_vectors);
 
     // Issue the read
-    ssize_t read_bytes = readv(conn->client.fd, (struct iovec*)&vectors, num_vectors);
+    ssize_t read_bytes = readv(conn->client_fd, (struct iovec*)&vectors, num_vectors);
 
     // Make sure we actually read something
     if (read_bytes == 0) {
-        syslog(LOG_DEBUG, "Closed client connection. [%d]\n", conn->client.fd);
+        syslog(LOG_DEBUG, "Closed client connection. [%d]\n", conn->client_fd);
         return 1;
     } else if (read_bytes == -1) {
         // Ignore the error, read again later
@@ -433,7 +407,7 @@ static int read_client_data(conn_info *conn) {
             return 0;
 
         syslog(LOG_ERR, "Failed to read() from connection [%d]! %s.",
-                conn->client.fd, strerror(errno));
+                conn->client_fd, strerror(errno));
         return 1;
     }
 
@@ -449,10 +423,12 @@ static int read_client_data(conn_info *conn) {
  * invoke the connection handlers who have the business logic
  * of what to do.
  */
-static void handle_udp_message(ev_io *watch, int ready_events) {
+static void handle_udp_message(aeEventLoop *loop, int fd, void *edata, int mask) {
+		statsite_networking *netconf = (statsite_networking *) edata;
+
     while (1) {
         // Get the associated connection struct
-        conn_info *conn = watch->data;
+        conn_info *conn = netconf->udp_client;
 
         // Clear the input buffer
         circbuf_clear(&conn->input);
@@ -468,18 +444,18 @@ static void handle_udp_message(ev_io *watch, int ready_events) {
          * be a contiguous buffer.
          */
         assert(num_vectors == 1);
-        ssize_t read_bytes = recv(watch->fd, vectors[0].iov_base,
+        ssize_t read_bytes = recv(fd, vectors[0].iov_base,
                                     vectors[0].iov_len, 0);
 
         // Make sure we actually read something
         if (read_bytes == 0) {
-            syslog(LOG_DEBUG, "Got empty UDP packet. [%d]\n", watch->fd);
+            syslog(LOG_DEBUG, "Got empty UDP packet. [%d]\n", fd);
             return;
 
         } else if (read_bytes == -1) {
             if (errno != EAGAIN && errno != EINTR) {
                 syslog(LOG_ERR, "Failed to recv() from connection [%d]! %s.",
-                        watch->fd, strerror(errno));
+                        fd, strerror(errno));
             }
             return;
         }
@@ -493,11 +469,8 @@ static void handle_udp_message(ev_io *watch, int ready_events) {
         if (conn->input.buffer[conn->input.write_cursor - 1] != '\n')
             circbuf_write(&conn->input, "\n", 1);
 
-        // Get the user data
-        worker_ev_userdata *data = ev_userdata();
-
         // Invoke the connection handler
-        statsite_conn_handler handle = {data->netconf->config, watch->data};
+        statsite_conn_handler handle = {netconf->config, netconf->udp_client};
         handle_client_connect(&handle);
     }
 }
@@ -509,21 +482,20 @@ static void handle_udp_message(ev_io *watch, int ready_events) {
  * stack should be handled here, but otherwise we should defer
  * to the connection handlers.
  */
-static void invoke_event_handler(ev_io *watcher, int ready_events) {
-    // Get the user data
-    worker_ev_userdata *data = ev_userdata();
+static void invoke_event_handler(aeEventLoop *loop, int fd, void *edata, int mask) {
+    conn_info *conn = (conn_info *) edata;
+    statsite_networking *netconf = conn->nc;
 
     // Read in the data, and close on issues
-    conn_info *conn = watcher->data;
     if (read_client_data(conn)) {
-        if (watcher->fd != STDIN_FILENO)
+        if (fd != STDIN_FILENO)
             close_client_connection(conn);
         return;
     }
 
     // Invoke the connection handler, and close connection on error
-    statsite_conn_handler handle = {data->netconf->config, watcher->data};
-    if (handle_client_connect(&handle) && watcher->fd != STDIN_FILENO)
+    statsite_conn_handler handle = {netconf->config, conn};
+    if (handle_client_connect(&handle) && fd != STDIN_FILENO)
         close_client_connection(conn);
 }
 
@@ -537,16 +509,9 @@ static void invoke_event_handler(ev_io *watcher, int ready_events) {
  * a signal is caught and shutdown should be started
  */
 void enter_networking_loop(statsite_networking *netconf, volatile int *signum) {
-    // Allocate our user data
-    worker_ev_userdata data;
-    data.netconf = netconf;
-
-    // Set the user data to be for this thread
-    ev_set_userdata(&data);
-
     // Run forever until we are told to halt
     while (likely(*signum == 0)) {
-        ev_run(EVRUN_ONCE);
+        aeProcessEvents(netconf->loop, AE_ALL_EVENTS);
     }
     return;
 }
@@ -558,28 +523,28 @@ void enter_networking_loop(statsite_networking *netconf, volatile int *signum) {
  */
 int shutdown_networking(statsite_networking *netconf) {
     // Stop listening for new connections
-    if (ev_is_active(&netconf->tcp_client)) {
-        ev_io_stop(&netconf->tcp_client);
-        close(netconf->tcp_client.fd);
-    }
-    if (ev_is_active(&netconf->udp_client)) {
-        ev_io_stop(&netconf->udp_client);
-        close(netconf->udp_client.fd);
-    }
+    aeDeleteFileEvent(netconf->loop, netconf->tcp_listener_fd, AE_READABLE);
+    close(netconf->tcp_listener_fd);
+
+		if (netconf->udp_client != NULL) {
+			close_client_connection(netconf->udp_client);
+			netconf->udp_client = NULL;
+		}
+
     if (netconf->stdin_client != NULL) {
         close_client_connection(netconf->stdin_client);
         netconf->stdin_client = NULL;
     }
 
     // Stop the other timers
-    ev_timer_stop(&netconf->flush_timer);
+    aeDeleteTimeEvent(netconf->loop, netconf->flush_timer);
 
     // TODO: Close all the client connections
     // ??? For now, we just leak the memory
     // since we are shutdown down anyways...
 
     // Free the event loop
-    ev_loop_destroy(EV_DEFAULT);
+    aeDeleteEventLoop(netconf->loop);
 
     // Free the netconf
     free(netconf);
@@ -594,21 +559,21 @@ int shutdown_networking(statsite_networking *netconf) {
 /**
  * Called to close and cleanup a client connection.
  * Must be called when the connection is not already
- * scheduled. e.g. After ev_io_stop() has been called.
+ * scheduled. e.g. After event has been canceled.
  * Leaves the connection in the conns list so that it
  * can be re-used.
  * @arg conn The connection to close
  */
 void close_client_connection(conn_info *conn) {
-    // Stop the libev clients
-    ev_io_stop(&conn->client);
+    // Stop the events
+    aeDeleteFileEvent(conn->nc->loop, conn->client_fd, AE_READABLE);
 
     // Clear everything out
     circbuf_free(&conn->input);
 
     // Close the fd
-    syslog(LOG_DEBUG, "Closed connection. [%d]", conn->client.fd);
-    close(conn->client.fd);
+    syslog(LOG_DEBUG, "Closed connection. [%d]", conn->client_fd);
+    close(conn->client_fd);
     free(conn);
 }
 
@@ -866,15 +831,17 @@ static int set_client_sockopts(int client_fd) {
  * Returns the conn_info* object associated with the FD
  * or allocates a new one as necessary.
  */
-static conn_info* get_conn() {
+static conn_info* get_conn(statsite_networking *nc, int fd) {
     // Allocate space
     conn_info *conn = malloc(sizeof(conn_info));
 
     // Prepare the buffers
     circbuf_init(&conn->input);
 
-    // Store a reference to the conn object
-    conn->client.data = conn;
+    // Store a reference back to netconf
+    conn->nc = nc;
+		conn->client_fd = fd;
+
     return conn;
 }
 
