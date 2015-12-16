@@ -309,6 +309,7 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
     // Setup the UDP listener
     res = setup_udp_listener(netconf);
     if (res != 0) {
+        aeDeleteFileEvent(netconf->loop, netconf->tcp_listener_fd, AE_READABLE);
         close(netconf->tcp_listener_fd);
         free(netconf);
         return 1;
