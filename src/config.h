@@ -17,7 +17,7 @@ typedef enum {
 
 #define METRIC_TYPES 7
 
-typedef struct extended_counters_config {
+typedef struct included_metrics_config {
     bool count;
     bool mean;
     bool stdev;
@@ -26,7 +26,9 @@ typedef struct extended_counters_config {
     bool lower;
     bool upper;
     bool rate;
-} extended_counters_config;
+    bool median;
+    bool sample_rate;
+} included_metrics_config;
 
 // Represents the configuration of a histogram
 typedef struct histogram_config {
@@ -68,7 +70,8 @@ typedef struct {
     char* prefixes[METRIC_TYPES];
     char* prefixes_final[METRIC_TYPES];
     bool extended_counters;
-    extended_counters_config ext_counters_config;
+    included_metrics_config ext_counters_config;
+    included_metrics_config timers_config;
     bool prefix_binary_stream;
     int num_quantiles;
     double* quantiles;

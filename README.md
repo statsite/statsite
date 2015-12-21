@@ -204,9 +204,14 @@ options must exist in the `statsite` section of the INI file:
   `lower`, `upper`, and `rate`.
   Defaults to false.
 
-* extended\_counters\_include : Allows you to configure which extended counters to include 
+* extended\_counters\_include : Allows you to configure which extended counters to include
   through a comma separated list of values, extended\_counters must be set to true. Supported values include `count`, `mean`, `stdev`, `sum`, `sum_sq`,
   `lower`, `upper`, and `rate`. If this option is not specified but extended_counters is set to true, then all values will be included by default.
+
+* timers\_include : Allows you to configure which timer metrics to include
+  through a comma separated list of values. Supported values include `count`, `mean`, `stdev`, `sum`, `sum_sq`,
+  `lower`, `upper`, `rate`, `median` and `sample_rate`. If this option is not specified then all values except `median` will be included by default.
+  `median` will be included if `quantiles` include 0.5
 
 * prefix\_binary\_stream : If enabled, the keys streamed to a the stream\_cmd
   when using binary\_stream mode are also prefixed. By default, this is false,
@@ -270,7 +275,7 @@ The following is a timer, timing the response speed of an API call::
 
     api.session_created:114|ms
 
-The next example is increments the "rewards" counter by 1::
+The next example increments the "rewards" counter by 1::
 
     rewards:1|c
 
