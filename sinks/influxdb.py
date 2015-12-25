@@ -236,7 +236,7 @@ def main(metrics, *argv):
     influxdb = InfluxDBStore(*argv[0:])
 
     # Flush format depends on InfluxDB version
-    if cmp(version('0.9'), version(influxdb.version)) < 0:
+    if cmp(version(influxdb.version), version('0.9')) < 0:
         influxdb.flush(metrics.splitlines())
     else:
         influxdb.flush09(metrics.splitlines())
