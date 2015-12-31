@@ -54,7 +54,7 @@ is an included Python script that ships metrics to graphite.
 Statsite tries to minimize memory usage by not
 storing all the metrics that are received. Counter values are
 aggregated as they are received, and timer values are stored
-and aggregated using the Cormode-Muthurkrishnan algorithm from
+and aggregated using the Cormode-Muthukrishnan algorithm from
 "Effective Computation of Biased Quantiles over Data Streams".
 This means that the percentile values are not perfectly accurate,
 and are subject to a specifiable error epsilon. This allows us to
