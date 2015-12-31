@@ -266,7 +266,7 @@ static int setup_stdin_listener(statsite_networking *netconf) {
     conn_info *conn = get_conn(netconf, STDIN_FILENO);
     netconf->stdin_client = conn;
 
-    // Initialize the stdin event 
+    // Initialize the stdin event
     aeCreateFileEvent(netconf->loop, STDIN_FILENO, AE_READABLE, invoke_event_handler, conn);
     return 0;
 }
@@ -350,7 +350,7 @@ static void handle_new_client(aeEventLoop *loop, int fd, void *edata, int mask) 
     // Accept the client connection
     int listen_fd = fd;
     struct sockaddr_in client_addr;
-    int client_addr_len = sizeof(client_addr);
+    unsigned int client_addr_len = sizeof(client_addr);
     int client_fd = accept(listen_fd,
                         (struct sockaddr*)&client_addr,
                         &client_addr_len);
