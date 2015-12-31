@@ -1,6 +1,7 @@
-# 0.7.2 (Unreleased)
+# 0.8.0 (Unreleased)
 
 * Timer sampling properly handles counts thanks to @nspragg
+* Replace libev with the Redis (AE) event loop thanks to @sleepybishop
 
 # 0.7.1
 

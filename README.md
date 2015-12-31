@@ -39,7 +39,7 @@ Architecture
 
 Statsite is designed to be both highly performant,
 and very flexible. To achieve this, it implements the stats
-collection and aggregation in pure C, using libev to be
+collection and aggregation in pure C, using an event loop to be
 extremely fast. This allows it to handle hundreds of connections,
 and millions of metrics. After each flush interval expires,
 statsite performs a fork/exec to start a new stream handler
