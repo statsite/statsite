@@ -27,12 +27,12 @@ class GraphiteStore(object):
         if attempts < 1:
             raise ValueError("Must have at least 1 attempt!")
 
+        self.logger = logging.getLogger("statsite.graphitestore")
         self.host = host
         self.port = port
         self.prefix = prefix
         self.attempts = attempts
         self.sock = self._create_socket()
-        self.logger = logging.getLogger("statsite.graphitestore")
 
     def flush(self, metrics):
         """
