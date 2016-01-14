@@ -12,10 +12,16 @@ BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 BuildRequires:	scons check-devel %{?el7:systemd} %{?fedora:systemd}
 AutoReqProv:	No
 
+Requires(pre): /usr/sbin/useradd, /usr/sbin/groupadd
+
 %description
 
 Statsite is a metrics aggregation server. Statsite is based heavily on Etsy\'s StatsD
 https://github.com/etsy/statsd, and is wire compatible.
+
+%pre
+/usr/sbin/groupadd -r statsite 2>/dev/null || :
+/usr/sbin/useradd -r -d /var/lib/statsite -s /sbin/nologin statsite -g statsite -c "Statsite user" 2>/dev/null || : 
 
 %prep
 %setup -c %{name}-%{version}
@@ -28,7 +34,8 @@ mkdir -vp $RPM_BUILD_ROOT/usr/sbin
 mkdir -vp $RPM_BUILD_ROOT/etc/init.d
 mkdir -vp $RPM_BUILD_ROOT/etc/%{name}
 mkdir -vp $RPM_BUILD_ROOT/usr/libexec/%{name}
-mkdir -vp $RPM_BUILD_ROOT/var/run/statsite
+mkdir -vp $RPM_BUILD_ROOT/var/run/%{name}
+mkdir -vp $RPM_BUILD_ROOT/var/lib/%{name}
 
 %if 0%{?fedora}%{?el7}
 mkdir -vp $RPM_BUILD_ROOT/%{_unitdir}
@@ -99,6 +106,7 @@ exit 0
 %dir /usr/libexec/statsite
 %dir /usr/libexec/statsite/sinks
 %attr(755, statsite, statsite) /var/run/statsite
+%attr(755, statsite, statsite) /var/lib/statsite
 %attr(755, root, root) /usr/libexec/statsite/sinks/__init__.py
 %attr(755, root, root) /usr/libexec/statsite/sinks/binary_sink.py
 %attr(755, root, root) /usr/libexec/statsite/sinks/librato.py
