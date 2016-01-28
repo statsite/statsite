@@ -11,8 +11,7 @@ Source0:	statsite.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 BuildRequires:	scons check-devel %{?el7:systemd} %{?fedora:systemd}
 AutoReqProv:	No
-
-Requires(pre): /usr/sbin/useradd, /usr/sbin/groupadd
+Requires(pre):  /usr/sbin/useradd, /usr/sbin/groupadd
 
 %description
 
@@ -33,6 +32,7 @@ make %{?_smp_mflags}
 mkdir -vp $RPM_BUILD_ROOT/usr/sbin
 mkdir -vp $RPM_BUILD_ROOT/etc/init.d
 mkdir -vp $RPM_BUILD_ROOT/etc/%{name}
+mkdir -vp $RPM_BUILD_ROOT/etc/tmpfiles.d
 mkdir -vp $RPM_BUILD_ROOT/usr/libexec/%{name}
 mkdir -vp $RPM_BUILD_ROOT/var/run/%{name}
 mkdir -vp $RPM_BUILD_ROOT/var/lib/%{name}
@@ -40,6 +40,7 @@ mkdir -vp $RPM_BUILD_ROOT/var/lib/%{name}
 %if 0%{?fedora}%{?el7}
 mkdir -vp $RPM_BUILD_ROOT/%{_unitdir}
 install -m 644 rpm/statsite.service $RPM_BUILD_ROOT/%{_unitdir}
+install -m 644 rpm/statsite.tmpfiles.conf $RPM_BUILD_ROOT/etc/tmpfiles.d/statsite.conf
 %else
 install -m 755 rpm/statsite.initscript $RPM_BUILD_ROOT/etc/init.d/statsite
 %endif
@@ -100,6 +101,8 @@ exit 0
 %attr(755, root, root) /usr/sbin/statsite
 %if 0%{?fedora}%{?el7}
 %attr(644, root, root) %{_unitdir}/statsite.service
+%dir /etc/tmpfiles.d
+%attr(755, root, root) /etc/tmpfiles.d/statsite.conf
 %else
 %attr(755, root, root) /etc/init.d/statsite
 %endif
