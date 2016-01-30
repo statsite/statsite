@@ -117,6 +117,7 @@ exit 0
 * Fri Jul 18 2014 Gary Richardson <gary.richardson@gmail.com>
 - added missing __init__.py to spec file
 - fixed makefile for building RPMS
+
 * Tue May 20 2014 Marcelo Teixeira Monteiro <marcelotmonteiro@gmail.com>
 - Added initscript and config file
 - small improvements
