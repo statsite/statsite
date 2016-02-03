@@ -9,8 +9,6 @@ RuntimeDirectory=/var/run/statsite
 PIDFile=/var/run/statsite/statsite.pid
 ExecStart=/usr/sbin/statsite -f /etc/statsite/statsite.conf
 Restart=on-failure
-StandardOutput=syslog
-StandardError=syslog
 
 [Install]
 WantedBy=multi-user.target
