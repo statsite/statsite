@@ -11,7 +11,7 @@ Source0:	statsite.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 BuildRequires:	scons check-devel %{?el7:systemd} %{?fedora:systemd}
 AutoReqProv:	No
-Requires(pre):  /usr/sbin/useradd, /usr/sbin/groupadd
+Requires(pre):  shadow-utils
 
 %description
 
@@ -19,8 +19,11 @@ Statsite is a metrics aggregation server. Statsite is based heavily on Etsy\'s S
 https://github.com/etsy/statsd, and is wire compatible.
 
 %pre
-/usr/sbin/groupadd -r statsite 2>/dev/null || :
-/usr/sbin/useradd -r -d /var/lib/statsite -s /sbin/nologin statsite -g statsite -c "Statsite user" 2>/dev/null || : 
+getent group %{name} >/dev/null || groupadd -r %{name}
+getent passwd  %{name}  >/dev/null || \
+    useradd -r -g  %{name} -d /var/lib/%{name} -s /sbin/nologin \
+    -c "Statsite user" %{name} 
+exit 0
 
 %prep
 %setup -c %{name}-%{version}
@@ -102,7 +105,7 @@ exit 0
 %if 0%{?fedora}%{?el7}
 %attr(644, root, root) %{_unitdir}/statsite.service
 %dir /etc/tmpfiles.d
-%attr(755, root, root) /etc/tmpfiles.d/statsite.conf
+%attr(644, root, root) /etc/tmpfiles.d/statsite.conf
 %else
 %attr(755, root, root) /etc/init.d/statsite
 %endif
