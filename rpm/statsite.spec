@@ -11,11 +11,19 @@ Source0:	statsite.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 BuildRequires:	scons check-devel %{?el7:systemd} %{?fedora:systemd}
 AutoReqProv:	No
+Requires(pre):  shadow-utils
 
 %description
 
 Statsite is a metrics aggregation server. Statsite is based heavily on Etsy\'s StatsD
 https://github.com/etsy/statsd, and is wire compatible.
+
+%pre
+getent group %{name} >/dev/null || groupadd -r %{name}
+getent passwd  %{name}  >/dev/null || \
+    useradd -r -g  %{name} -d /var/lib/%{name} -s /sbin/nologin \
+    -c "Statsite user" %{name} 
+exit 0
 
 %prep
 %setup -c %{name}-%{version}
@@ -27,12 +35,15 @@ make %{?_smp_mflags}
 mkdir -vp $RPM_BUILD_ROOT/usr/sbin
 mkdir -vp $RPM_BUILD_ROOT/etc/init.d
 mkdir -vp $RPM_BUILD_ROOT/etc/%{name}
+mkdir -vp $RPM_BUILD_ROOT/etc/tmpfiles.d
 mkdir -vp $RPM_BUILD_ROOT/usr/libexec/%{name}
-mkdir -vp $RPM_BUILD_ROOT/var/run/statsite
+mkdir -vp $RPM_BUILD_ROOT/var/run/%{name}
+mkdir -vp $RPM_BUILD_ROOT/var/lib/%{name}
 
 %if 0%{?fedora}%{?el7}
 mkdir -vp $RPM_BUILD_ROOT/%{_unitdir}
 install -m 644 rpm/statsite.service $RPM_BUILD_ROOT/%{_unitdir}
+install -m 644 rpm/statsite.tmpfiles.conf $RPM_BUILD_ROOT/etc/tmpfiles.d/statsite.conf
 %else
 install -m 755 rpm/statsite.initscript $RPM_BUILD_ROOT/etc/init.d/statsite
 %endif
@@ -93,12 +104,15 @@ exit 0
 %attr(755, root, root) /usr/sbin/statsite
 %if 0%{?fedora}%{?el7}
 %attr(644, root, root) %{_unitdir}/statsite.service
+%dir /etc/tmpfiles.d
+%attr(644, root, root) /etc/tmpfiles.d/statsite.conf
 %else
 %attr(755, root, root) /etc/init.d/statsite
 %endif
 %dir /usr/libexec/statsite
 %dir /usr/libexec/statsite/sinks
 %attr(755, statsite, statsite) /var/run/statsite
+%attr(755, statsite, statsite) /var/lib/statsite
 %attr(755, root, root) /usr/libexec/statsite/sinks/__init__.py
 %attr(755, root, root) /usr/libexec/statsite/sinks/binary_sink.py
 %attr(755, root, root) /usr/libexec/statsite/sinks/librato.py
