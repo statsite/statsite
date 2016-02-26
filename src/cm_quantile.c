@@ -163,10 +163,10 @@ int cm_flush(cm_quantile *cm) {
  * @return The value on success or 0.
  */
 double cm_query(cm_quantile *cm, double quantile) {
-    uint64_t rank = ceil(quantile * cm->num_values);
+    uint64_t rank = floor(quantile * cm->num_values);
 	uint64_t min_rank=0;
     uint64_t max_rank;
-	uint64_t threshold = ceil(cm_threshold(cm, rank) / 2.);
+	uint64_t threshold = floor(cm_threshold(cm, rank) / 2.);
 
     cm_sample *prev = cm->samples;
     cm_sample *current = cm->samples;
