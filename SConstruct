@@ -23,6 +23,11 @@ if platform.system() == 'SunOS':
   for env in [envmurmur, envinih, env_statsite_with_err, env_statsite_without_err]:
     env.AppendENVPath('PATH', '/opt/local/bin')
 
+if platform.system() == "Darwin":
+  for env in [envmurmur, envinih, env_statsite_with_err, env_statsite_without_err]:
+    env.Append(CCFLAGS= ' -I/usr/local/include/')
+    env.Append(LINKFLAGS= ' -L/usr/local/lib/')
+
 objs = env_statsite_with_err.Object('src/hashmap', 'src/hashmap.c')           + \
         env_statsite_with_err.Object('src/heap', 'src/heap.c')                + \
         env_statsite_with_err.Object('src/radix', 'src/radix.c')              + \
