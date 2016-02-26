@@ -2,6 +2,7 @@
 
 * Timer sampling properly handles counts thanks to @nspragg
 * Replace libev with the Redis (AE) event loop thanks to @sleepybishop
+* Fixed percentile on small data sets picking the upper bound value
 
 # 0.7.1
 
