@@ -57,6 +57,7 @@ int main(void)
     tcase_add_test(tc2, test_cm_init_add_loop_destroy);
     tcase_add_test(tc2, test_cm_init_query_destroy);
     tcase_add_test(tc2, test_cm_init_add_query_destroy);
+    tcase_add_test(tc2, test_cm_init_add3_query_destroy);
     tcase_add_test(tc2, test_cm_init_add_negative_query_destroy);
     tcase_add_test(tc2, test_cm_init_add_loop_query_destroy);
     tcase_add_test(tc2, test_cm_init_add_loop_tail_query_destroy);
