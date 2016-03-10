@@ -16,5 +16,7 @@
 tests/build/
 test_runner
 statsite
+deb/statsite
+*.deb
 .vagrant
 *.pyc

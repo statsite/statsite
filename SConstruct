@@ -54,3 +54,9 @@ statsite_test = env_statsite_without_err.Program('test_runner', objs + Glob("tes
 
 # By default, only compile statsite
 Default(statsite)
+
+Export("env_statsite_with_err")
+
+if 'debian' in COMMAND_LINE_TARGETS:
+    print "Debian, I choose you!"
+    SConscript("deb/SConscript")
