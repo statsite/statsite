@@ -76,8 +76,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-build_triplet = x86_64-apple-darwin15.3.0
-host_triplet = x86_64-apple-darwin15.3.0
+build_triplet = x86_64-unknown-linux-gnu
+host_triplet = x86_64-unknown-linux-gnu
 bin_PROGRAMS = src/statsite$(EXEEXT)
 subdir = .
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
@@ -241,14 +241,14 @@ distuninstallcheck_listfiles = find . -type f -print
 am__distuninstallcheck_listfiles = $(distuninstallcheck_listfiles) \
   | sed 's|^\./|$(prefix)/|' | grep -v '$(infodir)/dir$$'
 distcleancheck_listfiles = find . -type f -print
-ACLOCAL = ${SHELL} /Users/john/Desktop/statsite/ac_config/missing aclocal-1.14
+ACLOCAL = ${SHELL} /vagrant/ac_config/missing aclocal-1.14
 AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 1
 AR = ar
-AUTOCONF = ${SHELL} /Users/john/Desktop/statsite/ac_config/missing autoconf
-AUTOHEADER = ${SHELL} /Users/john/Desktop/statsite/ac_config/missing autoheader
-AUTOMAKE = ${SHELL} /Users/john/Desktop/statsite/ac_config/missing automake-1.14
-AWK = gawk
+AUTOCONF = ${SHELL} /vagrant/ac_config/missing autoconf
+AUTOHEADER = ${SHELL} /vagrant/ac_config/missing autoheader
+AUTOMAKE = ${SHELL} /vagrant/ac_config/missing automake-1.14
+AWK = mawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
 CFLAGS = -g -O2
@@ -258,37 +258,37 @@ CYGPATH_W = echo
 DEFS = -DPACKAGE_NAME=\"statsite\" -DPACKAGE_TARNAME=\"statsite\" -DPACKAGE_VERSION=\"0.0.1\" -DPACKAGE_STRING=\"statsite\ 0.0.1\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DPACKAGE=\"statsite\" -DVERSION=\"0.0.1\" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_DLFCN_H=1 -DLT_OBJDIR=\".libs/\"
 DEPDIR = .deps
 DLLTOOL = false
-DSYMUTIL = dsymutil
+DSYMUTIL = 
 DUMPBIN = 
-ECHO_C = \c
-ECHO_N = 
+ECHO_C = 
+ECHO_N = -n
 ECHO_T = 
-EGREP = /opt/local/bin/grep -E
+EGREP = /bin/grep -E
 EXEEXT = 
-FGREP = /opt/local/bin/grep -F
-GREP = /opt/local/bin/grep
-INSTALL = /opt/local/bin/ginstall -c
+FGREP = /bin/grep -F
+GREP = /bin/grep
+INSTALL = ac_config/install-sh -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-LD = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld
+LD = /usr/bin/ld -m elf_x86_64
 LDFLAGS = 
 LIBOBJS = 
 LIBS = 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
-LIPO = lipo
+LIPO = 
 LN_S = ln -s
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /Users/john/Desktop/statsite/ac_config/missing makeinfo
+MAKEINFO = ${SHELL} /vagrant/ac_config/missing makeinfo
 MANIFEST_TOOL = :
-MKDIR_P = /opt/local/bin/gmkdir -p
-NM = /opt/local/bin/nm
-NMEDIT = nmedit
-OBJDUMP = false
+MKDIR_P = /bin/mkdir -p
+NM = /usr/bin/nm -B
+NMEDIT = 
+OBJDUMP = objdump
 OBJEXT = o
-OTOOL = otool
-OTOOL64 = :
+OTOOL = 
+OTOOL64 = 
 PACKAGE = statsite
 PACKAGE_BUGREPORT = 
 PACKAGE_NAME = statsite
@@ -298,15 +298,15 @@ PACKAGE_URL =
 PACKAGE_VERSION = 0.0.1
 PATH_SEPARATOR = :
 RANLIB = ranlib
-SED = /opt/local/bin/gsed
+SED = /bin/sed
 SET_MAKE = 
-SHELL = /bin/sh
+SHELL = /bin/bash
 STRIP = strip
 VERSION = 0.0.1
-abs_builddir = /Users/john/Desktop/statsite
-abs_srcdir = /Users/john/Desktop/statsite
-abs_top_builddir = /Users/john/Desktop/statsite
-abs_top_srcdir = /Users/john/Desktop/statsite
+abs_builddir = /vagrant
+abs_srcdir = /vagrant
+abs_top_builddir = /vagrant
+abs_top_srcdir = /vagrant
 ac_ct_AR = ar
 ac_ct_CC = gcc
 ac_ct_DUMPBIN = 
@@ -316,26 +316,26 @@ am__quote =
 am__tar = $${TAR-tar} chof - "$$tardir"
 am__untar = $${TAR-tar} xf -
 bindir = ${exec_prefix}/bin
-build = x86_64-apple-darwin15.3.0
+build = x86_64-unknown-linux-gnu
 build_alias = 
 build_cpu = x86_64
-build_os = darwin15.3.0
-build_vendor = apple
+build_os = linux-gnu
+build_vendor = unknown
 builddir = .
 datadir = ${datarootdir}
 datarootdir = ${prefix}/share
 docdir = ${datarootdir}/doc/${PACKAGE_TARNAME}
 dvidir = ${docdir}
 exec_prefix = ${prefix}
-host = x86_64-apple-darwin15.3.0
+host = x86_64-unknown-linux-gnu
 host_alias = 
 host_cpu = x86_64
-host_os = darwin15.3.0
-host_vendor = apple
+host_os = linux-gnu
+host_vendor = unknown
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /Users/john/Desktop/statsite/ac_config/install-sh
+install_sh = ${SHELL} /vagrant/ac_config/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -994,6 +994,32 @@ uninstall-am: uninstall-binPROGRAMS
 #CFLAGS_WITHOUT_ERR = '-g -std=c99 -D_GNU_SOURCE -O3 -pthread -Ideps/inih/ -Ideps/ae/ -Isrc/'
 
 # Compiler options for SunOS from the scons file
+
+test:
+	scons test_runner
+	./test_runner
+
+integ: build test
+	py.test integ/
+
+sdist: clean
+	mkdir -vp ./dist
+	tar --exclude statsite.tar.gz -czvf ./dist/statsite.tar.gz .
+
+rpms: sdist build
+	mkdir -vp $(RPMBUILDROOT)
+	cp -v dist/*.tar.gz $(RPMBUILDROOT)
+	cp -v rpm/statsite.spec $(RPMBUILDROOT)
+	rpmbuild --define "_topdir $(RPMBUILDROOT)" \
+        --define "_builddir %{_topdir}" \
+        --define "_rpmdir %{_topdir}" \
+        --define "_srcrpmdir %{_topdir}" \
+        --define "_specdir %{_topdir}" \
+        --define '_rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm' \
+        --define "_sourcedir  %{_topdir}" \
+        -ba $(RPMBUILDROOT)/statsite.spec
+
+.PHONY: build test
 
 .PHONY: all test clean sdist
 

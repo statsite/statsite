@@ -41,4 +41,31 @@ src_statsite_LDADD = deps/ae/libae.a deps/inih/libinih.a deps/murmurhash/libmurm
 ##    statsite_with_err_cc_flags = '-g -std=gnu99 -D_GNU_SOURCE -DLOG_PERROR=0 -Wall -Wstrict-aliasing=0 -Wformat=0 -O3 -pthread -Ideps/inih/ -Ideps/ae/ -Isrc/'
 ##    statsite_without_err_cc_flags = '-g -std=gnu99 -D_GNU_SOURCE -DLOG_PERROR=0 -O3 -pthread -Ideps/inih/ -Ideps/ae/ -Isrc/'
 
+test:
+	scons test_runner
+	./test_runner
+
+integ: build test
+	py.test integ/
+
+sdist: clean
+	mkdir -vp ./dist
+	tar --exclude statsite.tar.gz -czvf ./dist/statsite.tar.gz .
+
+rpms: sdist build
+	mkdir -vp $(RPMBUILDROOT)
+	cp -v dist/*.tar.gz $(RPMBUILDROOT)
+	cp -v rpm/statsite.spec $(RPMBUILDROOT)
+	rpmbuild --define "_topdir $(RPMBUILDROOT)" \
+        --define "_builddir %{_topdir}" \
+        --define "_rpmdir %{_topdir}" \
+        --define "_srcrpmdir %{_topdir}" \
+        --define "_specdir %{_topdir}" \
+        --define '_rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm' \
+        --define "_sourcedir  %{_topdir}" \
+        -ba $(RPMBUILDROOT)/statsite.spec
+
+.PHONY: build test
+
+
 .PHONY: all test clean sdist
