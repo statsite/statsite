@@ -1,165 +1,224 @@
-src/conn_handler.o: src/conn_handler.c /usr/include/stdc-predef.h \
- /usr/include/errno.h /usr/include/features.h \
- /usr/include/x86_64-linux-gnu/sys/cdefs.h \
- /usr/include/x86_64-linux-gnu/bits/wordsize.h \
- /usr/include/x86_64-linux-gnu/gnu/stubs.h \
- /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
- /usr/include/x86_64-linux-gnu/bits/errno.h /usr/include/linux/errno.h \
- /usr/include/x86_64-linux-gnu/asm/errno.h \
- /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
- /usr/include/stdlib.h /usr/lib/gcc/x86_64-linux-gnu/4.9/include/stddef.h \
- /usr/include/x86_64-linux-gnu/bits/waitflags.h \
- /usr/include/x86_64-linux-gnu/bits/waitstatus.h /usr/include/endian.h \
- /usr/include/x86_64-linux-gnu/bits/endian.h \
- /usr/include/x86_64-linux-gnu/bits/byteswap.h \
- /usr/include/x86_64-linux-gnu/bits/types.h \
- /usr/include/x86_64-linux-gnu/bits/typesizes.h \
- /usr/include/x86_64-linux-gnu/bits/byteswap-16.h /usr/include/xlocale.h \
- /usr/include/x86_64-linux-gnu/sys/types.h /usr/include/time.h \
- /usr/include/x86_64-linux-gnu/sys/select.h \
- /usr/include/x86_64-linux-gnu/bits/select.h \
- /usr/include/x86_64-linux-gnu/bits/sigset.h \
- /usr/include/x86_64-linux-gnu/bits/time.h \
- /usr/include/x86_64-linux-gnu/sys/sysmacros.h \
- /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h /usr/include/alloca.h \
- /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
- /usr/include/x86_64-linux-gnu/bits/stdlib-float.h /usr/include/stdio.h \
- /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
- /usr/lib/gcc/x86_64-linux-gnu/4.9/include/stdarg.h \
- /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
- /usr/include/x86_64-linux-gnu/bits/sys_errlist.h \
- /usr/include/x86_64-linux-gnu/bits/stdio.h /usr/include/string.h \
- /usr/include/x86_64-linux-gnu/bits/string.h \
- /usr/include/x86_64-linux-gnu/bits/string2.h /usr/include/regex.h \
- /usr/include/assert.h /usr/include/pthread.h /usr/include/sched.h \
- /usr/include/x86_64-linux-gnu/bits/sched.h \
- /usr/include/x86_64-linux-gnu/bits/timex.h \
- /usr/include/x86_64-linux-gnu/bits/setjmp.h /usr/include/signal.h \
- /usr/include/x86_64-linux-gnu/bits/signum.h \
- /usr/include/x86_64-linux-gnu/bits/siginfo.h \
- /usr/include/x86_64-linux-gnu/bits/sigaction.h \
- /usr/include/x86_64-linux-gnu/bits/sigcontext.h \
- /usr/include/x86_64-linux-gnu/bits/sigstack.h \
- /usr/include/x86_64-linux-gnu/sys/ucontext.h \
- /usr/include/x86_64-linux-gnu/bits/sigthread.h \
- /usr/include/x86_64-linux-gnu/sys/time.h /usr/include/netinet/in.h \
- /usr/lib/gcc/x86_64-linux-gnu/4.9/include/stdint.h /usr/include/stdint.h \
- /usr/include/x86_64-linux-gnu/bits/wchar.h \
- /usr/include/x86_64-linux-gnu/sys/socket.h \
- /usr/include/x86_64-linux-gnu/sys/uio.h \
- /usr/include/x86_64-linux-gnu/bits/uio.h \
- /usr/include/x86_64-linux-gnu/bits/socket.h \
- /usr/include/x86_64-linux-gnu/bits/socket_type.h \
- /usr/include/x86_64-linux-gnu/bits/sockaddr.h \
- /usr/include/x86_64-linux-gnu/asm/socket.h \
- /usr/include/asm-generic/socket.h \
- /usr/include/x86_64-linux-gnu/asm/sockios.h \
- /usr/include/asm-generic/sockios.h \
- /usr/include/x86_64-linux-gnu/bits/in.h /usr/include/math.h \
- /usr/include/x86_64-linux-gnu/bits/huge_val.h \
- /usr/include/x86_64-linux-gnu/bits/huge_valf.h \
- /usr/include/x86_64-linux-gnu/bits/huge_vall.h \
- /usr/include/x86_64-linux-gnu/bits/inf.h \
- /usr/include/x86_64-linux-gnu/bits/nan.h \
- /usr/include/x86_64-linux-gnu/bits/mathdef.h \
- /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
- /usr/include/x86_64-linux-gnu/bits/mathinline.h src/metrics.h \
- src/config.h /usr/include/syslog.h \
- /usr/include/x86_64-linux-gnu/sys/syslog.h \
- /usr/include/x86_64-linux-gnu/bits/syslog-path.h \
- /usr/lib/gcc/x86_64-linux-gnu/4.9/include/stdbool.h src/radix.h \
- src/counter.h src/timer.h src/cm_quantile.h src/heap.h src/hashmap.h \
- src/set.h src/hll.h src/streaming.h src/conn_handler.h src/networking.h
-
-/usr/include/stdc-predef.h:
+src/conn_handler.o: src/conn_handler.c /usr/include/errno.h \
+  /usr/include/sys/errno.h /usr/include/sys/cdefs.h \
+  /usr/include/sys/_symbol_aliasing.h \
+  /usr/include/sys/_posix_availability.h \
+  /usr/include/sys/_types/_errno_t.h /usr/include/stdlib.h \
+  /usr/include/Availability.h /usr/include/AvailabilityInternal.h \
+  /usr/include/_types.h /usr/include/sys/_types.h \
+  /usr/include/machine/_types.h /usr/include/i386/_types.h \
+  /usr/include/sys/_pthread/_pthread_types.h /usr/include/sys/wait.h \
+  /usr/include/sys/_types/_pid_t.h /usr/include/sys/_types/_id_t.h \
+  /usr/include/sys/signal.h /usr/include/sys/appleapiopts.h \
+  /usr/include/machine/signal.h /usr/include/i386/signal.h \
+  /usr/include/machine/_mcontext.h /usr/include/i386/_mcontext.h \
+  /usr/include/mach/i386/_structs.h \
+  /usr/include/sys/_pthread/_pthread_attr_t.h \
+  /usr/include/sys/_types/_sigaltstack.h \
+  /usr/include/sys/_types/_ucontext.h \
+  /usr/include/sys/_types/_sigset_t.h /usr/include/sys/_types/_size_t.h \
+  /usr/include/sys/_types/_uid_t.h /usr/include/sys/resource.h \
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/7.0.2/include/stdint.h \
+  /usr/include/stdint.h /usr/include/sys/_types/_int8_t.h \
+  /usr/include/sys/_types/_int16_t.h /usr/include/sys/_types/_int32_t.h \
+  /usr/include/sys/_types/_int64_t.h /usr/include/_types/_uint8_t.h \
+  /usr/include/_types/_uint16_t.h /usr/include/_types/_uint32_t.h \
+  /usr/include/_types/_uint64_t.h /usr/include/sys/_types/_intptr_t.h \
+  /usr/include/sys/_types/_uintptr_t.h /usr/include/_types/_intmax_t.h \
+  /usr/include/_types/_uintmax_t.h /usr/include/sys/_types/_timeval.h \
+  /usr/include/machine/endian.h /usr/include/i386/endian.h \
+  /usr/include/sys/_endian.h /usr/include/libkern/_OSByteOrder.h \
+  /usr/include/libkern/i386/_OSByteOrder.h /usr/include/alloca.h \
+  /usr/include/sys/_types/_ct_rune_t.h /usr/include/sys/_types/_rune_t.h \
+  /usr/include/sys/_types/_wchar_t.h /usr/include/sys/_types/_null.h \
+  /usr/include/machine/types.h /usr/include/i386/types.h \
+  /usr/include/sys/_types/_dev_t.h /usr/include/sys/_types/_mode_t.h \
+  /usr/include/stdio.h /usr/include/sys/_types/_va_list.h \
+  /usr/include/sys/stdio.h /usr/include/sys/_types/_off_t.h \
+  /usr/include/sys/_types/_ssize_t.h /usr/include/secure/_stdio.h \
+  /usr/include/secure/_common.h /usr/include/string.h \
+  /usr/include/sys/_types/_rsize_t.h /usr/include/strings.h \
+  /usr/include/secure/_string.h /usr/include/regex.h \
+  /usr/include/assert.h /usr/include/pthread.h \
+  /usr/include/pthread/pthread_impl.h /usr/include/pthread/sched.h \
+  /usr/include/time.h /usr/include/sys/_types/_clock_t.h \
+  /usr/include/sys/_types/_time_t.h /usr/include/sys/_types/_timespec.h \
+  /usr/include/sys/_pthread/_pthread_cond_t.h \
+  /usr/include/sys/_pthread/_pthread_condattr_t.h \
+  /usr/include/sys/_pthread/_pthread_key_t.h \
+  /usr/include/sys/_pthread/_pthread_mutex_t.h \
+  /usr/include/sys/_pthread/_pthread_mutexattr_t.h \
+  /usr/include/sys/_pthread/_pthread_once_t.h \
+  /usr/include/sys/_pthread/_pthread_rwlock_t.h \
+  /usr/include/sys/_pthread/_pthread_rwlockattr_t.h \
+  /usr/include/sys/_pthread/_pthread_t.h /usr/include/pthread/qos.h \
+  /usr/include/sys/qos.h /usr/include/sys/_types/_mach_port_t.h \
+  /usr/include/signal.h /usr/include/sys/time.h \
+  /usr/include/sys/_types/_fd_def.h /usr/include/sys/_types/_timeval64.h \
+  /usr/include/sys/_types/_suseconds_t.h \
+  /usr/include/sys/_types/_fd_setsize.h \
+  /usr/include/sys/_types/_fd_set.h /usr/include/sys/_types/_fd_clr.h \
+  /usr/include/sys/_types/_fd_isset.h /usr/include/sys/_types/_fd_zero.h \
+  /usr/include/sys/_types/_fd_copy.h /usr/include/sys/_select.h \
+  /usr/include/netinet/in.h /usr/include/sys/_types/_in_addr_t.h \
+  /usr/include/sys/_types/_in_port_t.h /usr/include/sys/socket.h \
+  /usr/include/sys/types.h /usr/include/sys/_types/_blkcnt_t.h \
+  /usr/include/sys/_types/_blksize_t.h /usr/include/sys/_types/_gid_t.h \
+  /usr/include/sys/_types/_ino_t.h /usr/include/sys/_types/_ino64_t.h \
+  /usr/include/sys/_types/_key_t.h /usr/include/sys/_types/_nlink_t.h \
+  /usr/include/sys/_types/_useconds_t.h \
+  /usr/include/sys/_types/_fsblkcnt_t.h \
+  /usr/include/sys/_types/_fsfilcnt_t.h /usr/include/machine/_param.h \
+  /usr/include/i386/_param.h /usr/include/sys/_types/_sa_family_t.h \
+  /usr/include/sys/_types/_socklen_t.h \
+  /usr/include/sys/_types/_iovec_t.h /usr/include/netinet6/in6.h \
+  /usr/include/math.h src/metrics.h src/config.h /usr/include/syslog.h \
+  /usr/include/sys/syslog.h \
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/7.0.2/include/stdbool.h \
+  src/radix.h src/counter.h src/timer.h src/cm_quantile.h src/heap.h \
+  src/hashmap.h src/set.h src/hll.h src/streaming.h src/conn_handler.h \
+  src/networking.h
 
 /usr/include/errno.h:
 
-/usr/include/features.h:
+/usr/include/sys/errno.h:
 
-/usr/include/x86_64-linux-gnu/sys/cdefs.h:
+/usr/include/sys/cdefs.h:
 
-/usr/include/x86_64-linux-gnu/bits/wordsize.h:
+/usr/include/sys/_symbol_aliasing.h:
 
-/usr/include/x86_64-linux-gnu/gnu/stubs.h:
+/usr/include/sys/_posix_availability.h:
 
-/usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
-
-/usr/include/x86_64-linux-gnu/bits/errno.h:
-
-/usr/include/linux/errno.h:
-
-/usr/include/x86_64-linux-gnu/asm/errno.h:
-
-/usr/include/asm-generic/errno.h:
-
-/usr/include/asm-generic/errno-base.h:
+/usr/include/sys/_types/_errno_t.h:
 
 /usr/include/stdlib.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/4.9/include/stddef.h:
+/usr/include/Availability.h:
 
-/usr/include/x86_64-linux-gnu/bits/waitflags.h:
+/usr/include/AvailabilityInternal.h:
 
-/usr/include/x86_64-linux-gnu/bits/waitstatus.h:
+/usr/include/_types.h:
 
-/usr/include/endian.h:
+/usr/include/sys/_types.h:
 
-/usr/include/x86_64-linux-gnu/bits/endian.h:
+/usr/include/machine/_types.h:
 
-/usr/include/x86_64-linux-gnu/bits/byteswap.h:
+/usr/include/i386/_types.h:
 
-/usr/include/x86_64-linux-gnu/bits/types.h:
+/usr/include/sys/_pthread/_pthread_types.h:
 
-/usr/include/x86_64-linux-gnu/bits/typesizes.h:
+/usr/include/sys/wait.h:
 
-/usr/include/x86_64-linux-gnu/bits/byteswap-16.h:
+/usr/include/sys/_types/_pid_t.h:
 
-/usr/include/xlocale.h:
+/usr/include/sys/_types/_id_t.h:
 
-/usr/include/x86_64-linux-gnu/sys/types.h:
+/usr/include/sys/signal.h:
 
-/usr/include/time.h:
+/usr/include/sys/appleapiopts.h:
 
-/usr/include/x86_64-linux-gnu/sys/select.h:
+/usr/include/machine/signal.h:
 
-/usr/include/x86_64-linux-gnu/bits/select.h:
+/usr/include/i386/signal.h:
 
-/usr/include/x86_64-linux-gnu/bits/sigset.h:
+/usr/include/machine/_mcontext.h:
 
-/usr/include/x86_64-linux-gnu/bits/time.h:
+/usr/include/i386/_mcontext.h:
 
-/usr/include/x86_64-linux-gnu/sys/sysmacros.h:
+/usr/include/mach/i386/_structs.h:
 
-/usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
+/usr/include/sys/_pthread/_pthread_attr_t.h:
+
+/usr/include/sys/_types/_sigaltstack.h:
+
+/usr/include/sys/_types/_ucontext.h:
+
+/usr/include/sys/_types/_sigset_t.h:
+
+/usr/include/sys/_types/_size_t.h:
+
+/usr/include/sys/_types/_uid_t.h:
+
+/usr/include/sys/resource.h:
+
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/7.0.2/include/stdint.h:
+
+/usr/include/stdint.h:
+
+/usr/include/sys/_types/_int8_t.h:
+
+/usr/include/sys/_types/_int16_t.h:
+
+/usr/include/sys/_types/_int32_t.h:
+
+/usr/include/sys/_types/_int64_t.h:
+
+/usr/include/_types/_uint8_t.h:
+
+/usr/include/_types/_uint16_t.h:
+
+/usr/include/_types/_uint32_t.h:
+
+/usr/include/_types/_uint64_t.h:
+
+/usr/include/sys/_types/_intptr_t.h:
+
+/usr/include/sys/_types/_uintptr_t.h:
+
+/usr/include/_types/_intmax_t.h:
+
+/usr/include/_types/_uintmax_t.h:
+
+/usr/include/sys/_types/_timeval.h:
+
+/usr/include/machine/endian.h:
+
+/usr/include/i386/endian.h:
+
+/usr/include/sys/_endian.h:
+
+/usr/include/libkern/_OSByteOrder.h:
+
+/usr/include/libkern/i386/_OSByteOrder.h:
 
 /usr/include/alloca.h:
 
-/usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h:
+/usr/include/sys/_types/_ct_rune_t.h:
 
-/usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
+/usr/include/sys/_types/_rune_t.h:
+
+/usr/include/sys/_types/_wchar_t.h:
+
+/usr/include/sys/_types/_null.h:
+
+/usr/include/machine/types.h:
+
+/usr/include/i386/types.h:
+
+/usr/include/sys/_types/_dev_t.h:
+
+/usr/include/sys/_types/_mode_t.h:
 
 /usr/include/stdio.h:
 
-/usr/include/libio.h:
+/usr/include/sys/_types/_va_list.h:
 
-/usr/include/_G_config.h:
+/usr/include/sys/stdio.h:
 
-/usr/include/wchar.h:
+/usr/include/sys/_types/_off_t.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/4.9/include/stdarg.h:
+/usr/include/sys/_types/_ssize_t.h:
 
-/usr/include/x86_64-linux-gnu/bits/stdio_lim.h:
+/usr/include/secure/_stdio.h:
 
-/usr/include/x86_64-linux-gnu/bits/sys_errlist.h:
-
-/usr/include/x86_64-linux-gnu/bits/stdio.h:
+/usr/include/secure/_common.h:
 
 /usr/include/string.h:
 
-/usr/include/x86_64-linux-gnu/bits/string.h:
+/usr/include/sys/_types/_rsize_t.h:
 
-/usr/include/x86_64-linux-gnu/bits/string2.h:
+/usr/include/strings.h:
+
+/usr/include/secure/_string.h:
 
 /usr/include/regex.h:
 
@@ -167,79 +226,109 @@ src/conn_handler.o: src/conn_handler.c /usr/include/stdc-predef.h \
 
 /usr/include/pthread.h:
 
-/usr/include/sched.h:
+/usr/include/pthread/pthread_impl.h:
 
-/usr/include/x86_64-linux-gnu/bits/sched.h:
+/usr/include/pthread/sched.h:
 
-/usr/include/x86_64-linux-gnu/bits/timex.h:
+/usr/include/time.h:
 
-/usr/include/x86_64-linux-gnu/bits/setjmp.h:
+/usr/include/sys/_types/_clock_t.h:
+
+/usr/include/sys/_types/_time_t.h:
+
+/usr/include/sys/_types/_timespec.h:
+
+/usr/include/sys/_pthread/_pthread_cond_t.h:
+
+/usr/include/sys/_pthread/_pthread_condattr_t.h:
+
+/usr/include/sys/_pthread/_pthread_key_t.h:
+
+/usr/include/sys/_pthread/_pthread_mutex_t.h:
+
+/usr/include/sys/_pthread/_pthread_mutexattr_t.h:
+
+/usr/include/sys/_pthread/_pthread_once_t.h:
+
+/usr/include/sys/_pthread/_pthread_rwlock_t.h:
+
+/usr/include/sys/_pthread/_pthread_rwlockattr_t.h:
+
+/usr/include/sys/_pthread/_pthread_t.h:
+
+/usr/include/pthread/qos.h:
+
+/usr/include/sys/qos.h:
+
+/usr/include/sys/_types/_mach_port_t.h:
 
 /usr/include/signal.h:
 
-/usr/include/x86_64-linux-gnu/bits/signum.h:
+/usr/include/sys/time.h:
 
-/usr/include/x86_64-linux-gnu/bits/siginfo.h:
+/usr/include/sys/_types/_fd_def.h:
 
-/usr/include/x86_64-linux-gnu/bits/sigaction.h:
+/usr/include/sys/_types/_timeval64.h:
 
-/usr/include/x86_64-linux-gnu/bits/sigcontext.h:
+/usr/include/sys/_types/_suseconds_t.h:
 
-/usr/include/x86_64-linux-gnu/bits/sigstack.h:
+/usr/include/sys/_types/_fd_setsize.h:
 
-/usr/include/x86_64-linux-gnu/sys/ucontext.h:
+/usr/include/sys/_types/_fd_set.h:
 
-/usr/include/x86_64-linux-gnu/bits/sigthread.h:
+/usr/include/sys/_types/_fd_clr.h:
 
-/usr/include/x86_64-linux-gnu/sys/time.h:
+/usr/include/sys/_types/_fd_isset.h:
+
+/usr/include/sys/_types/_fd_zero.h:
+
+/usr/include/sys/_types/_fd_copy.h:
+
+/usr/include/sys/_select.h:
 
 /usr/include/netinet/in.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/4.9/include/stdint.h:
+/usr/include/sys/_types/_in_addr_t.h:
 
-/usr/include/stdint.h:
+/usr/include/sys/_types/_in_port_t.h:
 
-/usr/include/x86_64-linux-gnu/bits/wchar.h:
+/usr/include/sys/socket.h:
 
-/usr/include/x86_64-linux-gnu/sys/socket.h:
+/usr/include/sys/types.h:
 
-/usr/include/x86_64-linux-gnu/sys/uio.h:
+/usr/include/sys/_types/_blkcnt_t.h:
 
-/usr/include/x86_64-linux-gnu/bits/uio.h:
+/usr/include/sys/_types/_blksize_t.h:
 
-/usr/include/x86_64-linux-gnu/bits/socket.h:
+/usr/include/sys/_types/_gid_t.h:
 
-/usr/include/x86_64-linux-gnu/bits/socket_type.h:
+/usr/include/sys/_types/_ino_t.h:
 
-/usr/include/x86_64-linux-gnu/bits/sockaddr.h:
+/usr/include/sys/_types/_ino64_t.h:
 
-/usr/include/x86_64-linux-gnu/asm/socket.h:
+/usr/include/sys/_types/_key_t.h:
 
-/usr/include/asm-generic/socket.h:
+/usr/include/sys/_types/_nlink_t.h:
 
-/usr/include/x86_64-linux-gnu/asm/sockios.h:
+/usr/include/sys/_types/_useconds_t.h:
 
-/usr/include/asm-generic/sockios.h:
+/usr/include/sys/_types/_fsblkcnt_t.h:
 
-/usr/include/x86_64-linux-gnu/bits/in.h:
+/usr/include/sys/_types/_fsfilcnt_t.h:
+
+/usr/include/machine/_param.h:
+
+/usr/include/i386/_param.h:
+
+/usr/include/sys/_types/_sa_family_t.h:
+
+/usr/include/sys/_types/_socklen_t.h:
+
+/usr/include/sys/_types/_iovec_t.h:
+
+/usr/include/netinet6/in6.h:
 
 /usr/include/math.h:
-
-/usr/include/x86_64-linux-gnu/bits/huge_val.h:
-
-/usr/include/x86_64-linux-gnu/bits/huge_valf.h:
-
-/usr/include/x86_64-linux-gnu/bits/huge_vall.h:
-
-/usr/include/x86_64-linux-gnu/bits/inf.h:
-
-/usr/include/x86_64-linux-gnu/bits/nan.h:
-
-/usr/include/x86_64-linux-gnu/bits/mathdef.h:
-
-/usr/include/x86_64-linux-gnu/bits/mathcalls.h:
-
-/usr/include/x86_64-linux-gnu/bits/mathinline.h:
 
 src/metrics.h:
 
@@ -247,11 +336,9 @@ src/config.h:
 
 /usr/include/syslog.h:
 
-/usr/include/x86_64-linux-gnu/sys/syslog.h:
+/usr/include/sys/syslog.h:
 
-/usr/include/x86_64-linux-gnu/bits/syslog-path.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/4.9/include/stdbool.h:
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/7.0.2/include/stdbool.h:
 
 src/radix.h:
 

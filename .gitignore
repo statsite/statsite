@@ -23,6 +23,9 @@ deb/statsite
 depcomp
 compile
 
+.deps
+src/.deps
+/src/.deps
 
 # http://www.gnu.org/software/automake
 
