@@ -1,0 +1,6 @@
+src/hll_constants.o: src/hll_constants.c /usr/include/stdc-predef.h \
+ src/hll_constants.h
+
+/usr/include/stdc-predef.h:
+
+src/hll_constants.h:

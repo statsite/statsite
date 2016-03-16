@@ -9,7 +9,7 @@
 #include <syslog.h>
 #include <unistd.h>
 #include "config.h"
-#include "ini.h"
+#include "inih.h"
 #include "hll.h"
 
 /**
@@ -682,4 +682,3 @@ ERR:
     free(t);
     return 1;
 }
-

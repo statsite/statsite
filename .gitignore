@@ -20,3 +20,8 @@ deb/statsite
 *.deb
 .vagrant
 *.pyc
+missing
+COPYING
+INSTALL
+depcomp
+compile

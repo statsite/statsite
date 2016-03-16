@@ -1,8 +1,8 @@
 SOURCES=\
 ./ae.c \
 
-CFLAGS   = -g -std=c99 -Wpointer-arith 
-LDFLAGS  = 
+CFLAGS   = -g -std=c99 -Wpointer-arith
+LDFLAGS  =
 
 OBJECTS=$(SOURCES:%.c=%.o)
 
@@ -14,5 +14,3 @@ libae.a: $(OBJECTS)
 .PHONY: clean
 clean:
 	$(RM) *.o *.a
-
-
