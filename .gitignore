@@ -20,8 +20,32 @@ deb/statsite
 *.deb
 .vagrant
 *.pyc
-missing
-COPYING
-INSTALL
 depcomp
 compile
+
+
+# http://www.gnu.org/software/automake
+
+Makefile.in
+
+# http://www.gnu.org/software/autoconf
+
+/autom4te.cache
+/autoscan.log
+/autoscan-*.log
+/aclocal.m4
+/compile
+/config.h.in
+/configure
+/configure.scan
+/depcomp
+/install-sh
+/missing
+/stamp-h1
+
+ac_config
+autom4te.cache
+
+
+#OSX
+.DS_Store

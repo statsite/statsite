@@ -107,13 +107,13 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
-am_src_statsite_OBJECTS = src/cm_quantile.$(OBJEXT) \
-	src/config.$(OBJEXT) src/conn_handler.$(OBJEXT) \
-	src/counter.$(OBJEXT) src/hashmap.$(OBJEXT) src/heap.$(OBJEXT) \
-	src/hll.$(OBJEXT) src/hll_constants.$(OBJEXT) \
-	src/metrics.$(OBJEXT) src/networking.$(OBJEXT) \
-	src/radix.$(OBJEXT) src/set.$(OBJEXT) src/statsite.$(OBJEXT) \
-	src/streaming.$(OBJEXT) src/timer.$(OBJEXT)
+am_src_statsite_OBJECTS = src/hashmap.$(OBJEXT) src/heap.$(OBJEXT) \
+	src/radix.$(OBJEXT) src/hll_constants.$(OBJEXT) \
+	src/hll.$(OBJEXT) src/set.$(OBJEXT) src/cm_quantile.$(OBJEXT) \
+	src/timer.$(OBJEXT) src/counter.$(OBJEXT) \
+	src/metrics.$(OBJEXT) src/streaming.$(OBJEXT) \
+	src/config.$(OBJEXT) src/networking.$(OBJEXT) \
+	src/conn_handler.$(OBJEXT) src/statsite.$(OBJEXT)
 src_statsite_OBJECTS = $(am_src_statsite_OBJECTS)
 src_statsite_DEPENDENCIES = deps/ae/libae.a deps/inih/libinih.a \
 	deps/murmurhash/libmurmur.a
@@ -363,35 +363,21 @@ AM_CFLAGS = -g -std=gnu99 -pthread -D_GNU_SOURCE -DLOG_PERROR=0 -O3 -pthread -lm
 #=========================================================
 # statsite, the binary itself
 src_statsite_SOURCES = \
-       src/cm_quantile.c \
-       src/cm_quantile.h \
-       src/config.c \
-       src/config.h \
-       src/conn_handler.c \
-       src/conn_handler.h \
-       src/counter.c \
-       src/counter.h \
        src/hashmap.c \
-       src/hashmap.h \
        src/heap.c \
-       src/heap.h \
-       src/hll.c \
-       src/hll_constants.c \
-       src/hll_constants.h \
-       src/hll.h \
-       src/metrics.c \
-       src/metrics.h \
-       src/networking.c \
-       src/networking.h \
        src/radix.c \
-       src/radix.h \
+       src/hll_constants.c \
+       src/hll.c \
        src/set.c \
-       src/set.h \
-       src/statsite.c \
-       src/streaming.c \
-       src/streaming.h \
+       src/cm_quantile.c \
        src/timer.c \
-       src/timer.h
+       src/counter.c \
+       src/metrics.c \
+       src/streaming.c \
+       src/config.c \
+       src/networking.c \
+       src/conn_handler.c \
+       src/statsite.c
 
 src_statsite_LDADD = deps/ae/libae.a deps/inih/libinih.a deps/murmurhash/libmurmur.a
 all: all-recursive
@@ -487,31 +473,31 @@ src/$(am__dirstamp):
 src/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/$(DEPDIR)
 	@: > src/$(DEPDIR)/$(am__dirstamp)
-src/cm_quantile.$(OBJEXT): src/$(am__dirstamp) \
-	src/$(DEPDIR)/$(am__dirstamp)
-src/config.$(OBJEXT): src/$(am__dirstamp) \
-	src/$(DEPDIR)/$(am__dirstamp)
-src/conn_handler.$(OBJEXT): src/$(am__dirstamp) \
-	src/$(DEPDIR)/$(am__dirstamp)
-src/counter.$(OBJEXT): src/$(am__dirstamp) \
-	src/$(DEPDIR)/$(am__dirstamp)
 src/hashmap.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/heap.$(OBJEXT): src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
-src/hll.$(OBJEXT): src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
+src/radix.$(OBJEXT): src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/hll_constants.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
+src/hll.$(OBJEXT): src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
+src/set.$(OBJEXT): src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
+src/cm_quantile.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
+src/timer.$(OBJEXT): src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
+src/counter.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/metrics.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
-src/networking.$(OBJEXT): src/$(am__dirstamp) \
-	src/$(DEPDIR)/$(am__dirstamp)
-src/radix.$(OBJEXT): src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
-src/set.$(OBJEXT): src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
-src/statsite.$(OBJEXT): src/$(am__dirstamp) \
-	src/$(DEPDIR)/$(am__dirstamp)
 src/streaming.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
-src/timer.$(OBJEXT): src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
+src/config.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
+src/networking.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
+src/conn_handler.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
+src/statsite.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 
 src/statsite$(EXEEXT): $(src_statsite_OBJECTS) $(src_statsite_DEPENDENCIES) $(EXTRA_src_statsite_DEPENDENCIES) src/$(am__dirstamp)
 	@rm -f src/statsite$(EXEEXT)
