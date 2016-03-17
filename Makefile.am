@@ -32,14 +32,16 @@ src_statsite_SOURCES = \
 src_statsite_LDADD = deps/ae/libae.a deps/inih/libinih.a deps/murmurhash/libmurmur.a
 
 
-# Compiler options from the scons file, not using them right now
-
+# Standard compiler options from the scons file, for reference
 #CFLAGS = '-g -std=c99 -D_GNU_SOURCE -Wall -Werror -Wstrict-aliasing=0 -O3 -pthread -Ideps/inih/ -Ideps/ae/ -Isrc/'
 #CFLAGS_WITHOUT_ERR = '-g -std=c99 -D_GNU_SOURCE -O3 -pthread -Ideps/inih/ -Ideps/ae/ -Isrc/'
 
 # Compiler options for SunOS from the scons file
 ##    statsite_with_err_cc_flags = '-g -std=gnu99 -D_GNU_SOURCE -DLOG_PERROR=0 -Wall -Wstrict-aliasing=0 -Wformat=0 -O3 -pthread -Ideps/inih/ -Ideps/ae/ -Isrc/'
 ##    statsite_without_err_cc_flags = '-g -std=gnu99 -D_GNU_SOURCE -DLOG_PERROR=0 -O3 -pthread -Ideps/inih/ -Ideps/ae/ -Isrc/'
+
+scons-build:
+	scons statsite
 
 test:
 	scons test_runner

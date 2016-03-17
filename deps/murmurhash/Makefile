@@ -3,6 +3,7 @@ SOURCES=\
 
 CFLAGS   = -std=c99 -O3
 LDFLAGS  =
+CC = /usr/bin/gcc
 
 OBJECTS=$(SOURCES:%.c=%.o)
 

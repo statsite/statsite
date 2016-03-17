@@ -3,6 +3,7 @@ SOURCES=\
 
 CFLAGS   = -g -std=c99 -Wpointer-arith
 LDFLAGS  =
+CC = /usr/bin/gcc
 
 OBJECTS=$(SOURCES:%.c=%.o)
 
