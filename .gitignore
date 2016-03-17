@@ -57,6 +57,7 @@ Makefile.in
 autom4te.cache/requests
 config.guess
 config.sub
+config.log
 install-sh
 ltmain.sh
 

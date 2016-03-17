@@ -82,11 +82,10 @@ bin_PROGRAMS = src/statsite$(EXEEXT)
 subdir = .
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) \
-	$(top_srcdir)/ac_config/depcomp compile ac_config/compile \
-	config.guess ac_config/config.guess config.sub \
-	ac_config/config.sub depcomp ac_config/depcomp install-sh \
-	ac_config/install-sh missing ac_config/missing ltmain.sh \
-	ac_config/ltmain.sh $(top_srcdir)/ac_config/compile \
+	$(top_srcdir)/ac_config/depcomp ac_config/compile \
+	ac_config/config.guess ac_config/config.sub ac_config/depcomp \
+	ac_config/install-sh ac_config/missing ac_config/ltmain.sh \
+	$(top_srcdir)/ac_config/compile \
 	$(top_srcdir)/ac_config/config.guess \
 	$(top_srcdir)/ac_config/config.sub \
 	$(top_srcdir)/ac_config/install-sh \
@@ -988,12 +987,14 @@ uninstall-am: uninstall-binPROGRAMS
 	uninstall-am uninstall-binPROGRAMS
 
 
-# Compiler options from the scons file, not using them right now
-
+# Standard compiler options from the scons file, for reference
 #CFLAGS = '-g -std=c99 -D_GNU_SOURCE -Wall -Werror -Wstrict-aliasing=0 -O3 -pthread -Ideps/inih/ -Ideps/ae/ -Isrc/'
 #CFLAGS_WITHOUT_ERR = '-g -std=c99 -D_GNU_SOURCE -O3 -pthread -Ideps/inih/ -Ideps/ae/ -Isrc/'
 
 # Compiler options for SunOS from the scons file
+
+scons-build:
+	scons statsite
 
 test:
 	scons test_runner
