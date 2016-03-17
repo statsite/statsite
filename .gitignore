@@ -23,7 +23,7 @@ deb/statsite
 depcomp
 compile
 
-.deps
+.deps/*
 src/.deps
 /src/.deps
 
@@ -52,3 +52,11 @@ autom4te.cache
 
 #OSX
 .DS_Store
+
+Makefile.in
+autom4te.cache/requests
+config.guess
+config.sub
+install-sh
+ltmain.sh
+
