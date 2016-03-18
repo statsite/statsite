@@ -23,6 +23,10 @@ deb/statsite
 depcomp
 compile
 
+integ/.cache
+config.log
+
+.deps
 .deps/*
 src/.deps
 /src/.deps
