@@ -15,3 +15,5 @@ libinih.a: $(OBJECTS)
 .PHONY: clean
 clean:
 	$(RM) *.o *.a
+
+distclean: clean
