@@ -1,5 +1,7 @@
+## Process this file with automake to produce Makefile.in
+
 AUTOMAKE_OPTIONS := subdir-objects
-ACLOCAL_AMFLAGS := -I m4
+ACLOCAL_AMFLAGS = -I m4
 
 
 SUBDIRS = deps/ae deps/inih deps/murmurhash .

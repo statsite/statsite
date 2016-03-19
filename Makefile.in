@@ -300,6 +300,10 @@ RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+STATSITE_MAJOR_VERSION = @STATSITE_MAJOR_VERSION@
+STATSITE_MICRO_VERSION = @STATSITE_MICRO_VERSION@
+STATSITE_MINOR_VERSION = @STATSITE_MINOR_VERSION@
+STATSITE_VERSION = @STATSITE_VERSION@
 STRIP = @STRIP@
 VERSION = @VERSION@
 abs_builddir = @abs_builddir@
@@ -355,7 +359,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS := subdir-objects
-ACLOCAL_AMFLAGS := -I m4
+ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = deps/ae deps/inih deps/murmurhash .
 AM_CFLAGS = -g -std=gnu99 -pthread -D_GNU_SOURCE -DLOG_PERROR=0 -O3 -pthread -lm -lrt -Ideps/inih/ -Ideps/ae/ -Isrc/
 

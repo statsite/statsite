@@ -33,22 +33,22 @@ src/.deps
 
 # http://www.gnu.org/software/automake
 
-Makefile.in
+Makefile
 
 # http://www.gnu.org/software/autoconf
 
-/autom4te.cache
-/autoscan.log
-/autoscan-*.log
-/aclocal.m4
-/compile
-/config.h.in
-/configure
-/configure.scan
-/depcomp
-/install-sh
-/missing
-/stamp-h1
+autom4te.cache
+autoscan.log
+autoscan-*.log
+aclocal.m4
+compile
+config.h.in
+configure.scan
+config.status
+depcomp
+install-sh
+missing
+stamp-h1
 
 ac_config
 autom4te.cache
@@ -57,11 +57,8 @@ autom4te.cache
 #OSX
 .DS_Store
 
-Makefile.in
 autom4te.cache/requests
 config.guess
 config.sub
 config.log
-install-sh
-ltmain.sh
 
