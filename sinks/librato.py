@@ -40,6 +40,8 @@ import os
 #                  https://github.com/librato/statsd-librato-backend#setting-the-source-per-metric
 #  - floor_time_secs: Floor samples to this time (should match statsite flush_interval.
 #  - prefix: Metric name prefix to set for all metrics.
+#  - extended_counters: true/false, look for statsite extended_counters, default false.
+#                       This should match your statsite config for extended_counters.
 #
 ###
 
@@ -70,6 +72,7 @@ class LibratoStore(object):
         self.max_metrics_payload = 500
 
         self.timer_re = re.compile("^timers\.")
+        self.ex_count_re = re.compile("^counts\.")
         self.type_re = re.compile("^(kv|timers|counts|gauges|sets)\.(.+)$")
 
         self.sfx_map = {
@@ -141,7 +144,12 @@ class LibratoStore(object):
         else:
             self.source_prefix = None
 
-    def split_timer_metric(self, name):
+        if config.has_option(sect, "extended_counters"):
+            self.extended_counters = config.getboolean(sect, "extended_counters")
+        else:
+            self.extended_counters = False
+
+    def split_multipart_metric(self, name):
         m = self.sfx_re.match(name)
         if m != None:
             if self.sfx_map[m.group(2)] != None:
@@ -162,8 +170,14 @@ class LibratoStore(object):
 
         value = float(value)
         source = self.source
-        istimer = self.timer_re.match(key) != None
         name = self.type_re.match(key).group(2)
+
+        ismultipart = False
+        if self.timer_re.match(key) != None:
+            ismultipart = True
+        if self.extended_counters and \
+           self.ex_count_re.match(key) != None:
+            ismultipart = True
 
         # Match the source regex
         if self.source_re != None:
@@ -173,8 +187,8 @@ class LibratoStore(object):
                 name = name[0:m.start(0)] + name[m.end(0):]
 
         subf = None
-        if istimer:
-            name, subf = self.split_timer_metric(name)
+        if ismultipart:
+            name, subf = self.split_multipart_metric(name)
         if subf == None:
             subf = 'value'
 
