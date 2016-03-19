@@ -29,18 +29,12 @@ AC_SUBST(STATSITE_MICRO_VERSION)
 AC_SUBST(STATSITE_VERSION)
 
 # Checks for programs.
-AC_PROG_AWK
-AC_PROG_CC
-
-# Automake wants this for per-target CFLAGS
-AM_PROG_CC_C_O
-AC_PROG_INSTALL
-AC_PROG_LN_S
-AC_PROG_LIBTOOL
-
 AC_PROG_CC([gcc cc])
 
-LT_INIT
+# Automake wants this for per-target CFLAGS
+AC_PROG_INSTALL
+AC_PROG_LN_S
 
+LT_INIT
 
 AC_OUTPUT(Makefile)
