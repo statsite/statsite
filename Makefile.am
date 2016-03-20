@@ -6,6 +6,10 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = deps/ae deps/inih deps/murmurhash .
 
+
+CLEANFILES = test_runner
+
+
 bin_PROGRAMS = src/statsite
 
 AM_CFLAGS = -g -std=gnu99 -pthread -D_GNU_SOURCE -DLOG_PERROR=0 -O3 -pthread -lm -lrt -Ideps/inih/ -Ideps/ae/ -Isrc/
@@ -41,6 +45,7 @@ src_statsite_LDADD = deps/ae/libae.a deps/inih/libinih.a deps/murmurhash/libmurm
 # Compiler options for SunOS from the scons file
 ##    statsite_with_err_cc_flags = '-g -std=gnu99 -D_GNU_SOURCE -DLOG_PERROR=0 -Wall -Wstrict-aliasing=0 -Wformat=0 -O3 -pthread -Ideps/inih/ -Ideps/ae/ -Isrc/'
 ##    statsite_without_err_cc_flags = '-g -std=gnu99 -D_GNU_SOURCE -DLOG_PERROR=0 -O3 -pthread -Ideps/inih/ -Ideps/ae/ -Isrc/'
+
 
 scons-build:
 	scons statsite
