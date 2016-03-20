@@ -53,6 +53,7 @@ stamp-h1
 ac_config
 autom4te.cache
 
+.dirstamp
 
 #OSX
 .DS_Store
