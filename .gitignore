@@ -40,7 +40,6 @@ Makefile
 autom4te.cache
 autoscan.log
 autoscan-*.log
-aclocal.m4
 compile
 config.h.in
 configure.scan
