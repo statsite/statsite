@@ -12,7 +12,7 @@ CLEANFILES = test_runner
 
 bin_PROGRAMS = src/statsite
 
-AM_CFLAGS = -g -std=gnu99 -pthread -D_GNU_SOURCE -DLOG_PERROR=0 -O3 -pthread -lm -lrt -Ideps/inih/ -Ideps/ae/ -Isrc/
+AM_CFLAGS = -g -std=gnu99 -pthread -D_GNU_SOURCE -DLOG_PERROR=0 -O3 -pthread -lm @LINK_TO_RT@ -Ideps/inih/ -Ideps/ae/ -Isrc/
 
 #=========================================================
 # statsite, the binary itself
@@ -59,12 +59,13 @@ integ: build test
 	py.test integ/
 
 sdist: clean
-	mkdir -vp ./dist
-	tar --exclude statsite.tar.gz -czvf ./dist/statsite.tar.gz .
+	mkdir -vp /tmp/statsite-@STATSITE_VERSION@
+	cp -R . /tmp/statsite-@STATSITE_VERSION@
+	tar -zcv --exclude='.git' --exclude='.gitignore' -f statsite-@STATSITE_VERSION@.tar.gz -C /tmp statsite-@STATSITE_VERSION@
 
 rpms: sdist build
 	mkdir -vp $(RPMBUILDROOT)
-	cp -v dist/*.tar.gz $(RPMBUILDROOT)
+	cp -v *.tar.gz $(RPMBUILDROOT)
 	cp -v rpm/statsite.spec $(RPMBUILDROOT)
 	rpmbuild --define "_topdir $(RPMBUILDROOT)" \
         --define "_builddir %{_topdir}" \

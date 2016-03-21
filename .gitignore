@@ -62,3 +62,8 @@ config.guess
 config.sub
 config.log
 
+Makefile.in
+Makefile
+libtool
+aclocal.m4
+ac_config

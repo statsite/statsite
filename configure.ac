@@ -22,14 +22,21 @@ AC_USE_SYSTEM_EXTENSIONS
 
 AM_INIT_AUTOMAKE(foreign subdir-objects)
 
+# Check if we have librt
+AC_CHECK_LIB([rt], [clock_gettime], [LINK_TO_RT=-lrt], [LINK_TO_RT=])
+
+
 # This replaces a few constants we setup previously
 AC_SUBST(STATSITE_MAJOR_VERSION)
 AC_SUBST(STATSITE_MINOR_VERSION)
 AC_SUBST(STATSITE_MICRO_VERSION)
 AC_SUBST(STATSITE_VERSION)
+AC_SUBST(LINK_TO_RT)
 
 # Checks for programs.
 AC_PROG_CC([gcc cc])
+
+
 
 # Automake wants this for per-target CFLAGS
 AC_PROG_INSTALL
