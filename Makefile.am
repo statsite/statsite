@@ -46,6 +46,7 @@ src_statsite_LDADD = deps/ae/libae.a deps/inih/libinih.a deps/murmurhash/libmurm
 ##    statsite_with_err_cc_flags = '-g -std=gnu99 -D_GNU_SOURCE -DLOG_PERROR=0 -Wall -Wstrict-aliasing=0 -Wformat=0 -O3 -pthread -Ideps/inih/ -Ideps/ae/ -Isrc/'
 ##    statsite_without_err_cc_flags = '-g -std=gnu99 -D_GNU_SOURCE -DLOG_PERROR=0 -O3 -pthread -Ideps/inih/ -Ideps/ae/ -Isrc/'
 
+EXTRA_DIST = .
 
 scons-build:
 	scons statsite
@@ -74,7 +75,4 @@ rpms: sdist build
         --define "_sourcedir  %{_topdir}" \
         -ba $(RPMBUILDROOT)/statsite.spec
 
-.PHONY: build test
-
-
-.PHONY: all test clean sdist
+.PHONY: all test clean sdist build
