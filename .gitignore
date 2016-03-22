@@ -33,7 +33,7 @@ src/.deps
 
 # http://www.gnu.org/software/automake
 
-Makefile
+/Makefile
 
 # http://www.gnu.org/software/autoconf
 
@@ -63,7 +63,7 @@ config.sub
 config.log
 
 Makefile.in
-Makefile
+/Makefile
 libtool
 aclocal.m4
 ac_config

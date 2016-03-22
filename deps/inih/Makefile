@@ -17,3 +17,5 @@ clean:
 	$(RM) *.o *.a
 
 distclean: clean
+install:
+uninstall:
