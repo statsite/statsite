@@ -1,15 +1,15 @@
 SOURCES=\
-./ae.c \
+./MurmurHash3.c \
 
-CFLAGS   = -g -std=c99 -Wpointer-arith
+CFLAGS   = -std=c99 -O3
 LDFLAGS  =
 CC = /usr/bin/gcc
 
 OBJECTS=$(SOURCES:%.c=%.o)
 
-all: libae.a
+all: libmurmur.a
 
-libae.a: $(OBJECTS)
+libmurmur.a: $(OBJECTS)
 	$(AR) rcs $@ $(OBJECTS)
 
 .PHONY: clean

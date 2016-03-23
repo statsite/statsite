@@ -11,7 +11,7 @@ http://code.google.com/p/inih/
 #include <ctype.h>
 #include <string.h>
 
-#include "ini.h"
+#include "inih.h"
 
 #define MAX_LINE 1024
 #define MAX_SECTION 64

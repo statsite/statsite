@@ -1,15 +1,15 @@
 SOURCES=\
-./ae.c \
+./inih.c \
 
-CFLAGS   = -g -std=c99 -Wpointer-arith
+CFLAGS   = -O3
 LDFLAGS  =
 CC = /usr/bin/gcc
 
 OBJECTS=$(SOURCES:%.c=%.o)
 
-all: libae.a
+all: libinih.a
 
-libae.a: $(OBJECTS)
+libinih.a: $(OBJECTS)
 	$(AR) rcs $@ $(OBJECTS)
 
 .PHONY: clean
