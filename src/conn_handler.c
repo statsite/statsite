@@ -414,9 +414,11 @@ static double str2double(const char *s, char **end) {
     char neg = 0;
     const char *orig_s = s;
 
-    if (*s == '-') {
-        neg = 1;
-        s++;
+    switch (*s) {
+        case '-':
+            neg = 1;
+        case '+':
+            s++;
     }
     for (; *s >= '0' && *s <= '9'; s++) {
         val = (val * 10.0) + (*s - '0');
@@ -484,12 +486,8 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
                 type = GAUGE;
 
                 // Check if this is a delta update
-                switch (*val_str) {
-                    case '+':
-                        // Advance past the + to avoid breaking str2double
-                        val_str++;
-                    case '-':
-                        type = GAUGE_DELTA;
+                if (*val_str == '+' || *val_str == '-') {
+                    type = GAUGE_DELTA;
                 }
                 break;
             case 's':
@@ -498,7 +496,7 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
             default:
                 type = UNKNOWN;
                 syslog(LOG_WARNING, "Received unknown metric type! Input: %c", *type_str);
-                goto ERR_RET;
+                goto END_LOOP;
         }
 
         // Increment the number of inputs received
@@ -515,7 +513,7 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
         val = str2double(val_str, &endptr);
         if (unlikely(endptr == val_str || errno == ERANGE)) {
             syslog(LOG_WARNING, "Failed value conversion! Input: %s", val_str);
-            goto ERR_RET;
+            goto END_LOOP;
         }
 
         // Handle counter/timer sampling if applicable
@@ -523,7 +521,7 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
             double unchecked_rate = str2double(sample_str, &endptr);
             if (unlikely(endptr == sample_str)) {
                 syslog(LOG_WARNING, "Failed sample rate conversion! Input: %s", sample_str);
-                goto ERR_RET;
+                goto END_LOOP;
             }
             if (likely(unchecked_rate > 0 && unchecked_rate <= 1)) {
                 sample_rate = unchecked_rate;
