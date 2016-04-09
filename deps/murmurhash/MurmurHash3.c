@@ -12,7 +12,7 @@
 //-----------------------------------------------------------------------------
 // Platform-specific functions and macros
 
-#define	FORCE_INLINE __attribute__((always_inline))
+#define	FORCE_INLINE inline __attribute__((always_inline))
 
 inline uint64_t rotl64(uint64_t x, int8_t r){
   return (x << r) | (x >> (64 - r));
@@ -124,4 +124,3 @@ void MurmurHash3_x64_128 ( const void * key, const int len,
   ((uint64_t*)out)[0] = h1;
   ((uint64_t*)out)[1] = h2;
 }
-
