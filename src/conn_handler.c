@@ -12,6 +12,7 @@
 #include "metrics.h"
 #include "streaming.h"
 #include "conn_handler.h"
+#include <inttypes.h>
 
 /*
  * Binary defines
@@ -112,7 +113,7 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
         case COUNTER:
             if (GLOBAL_CONFIG->extended_counters) {
                 if (counters_config->count) {
-                    STREAM("%s%s.count|%lu|%lld\n", prefix, name, counter_count(value));
+                    STREAM("%s%s.count|%"PRIu64"|%lld\n", prefix, name, counter_count(value));
                 }
                 if (counters_config->mean) {
                     STREAM("%s%s.mean|%f|%lld\n", prefix, name, counter_mean(value));
@@ -141,7 +142,7 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
             break;
 
         case SET:
-            STREAM("%s%s|%lu|%lld\n", prefix, name, set_size(value));
+            STREAM("%s%s|%"PRIu64"|%lld\n", prefix, name, set_size(value));
             break;
 
         case TIMER:
@@ -162,7 +163,7 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
                 STREAM("%s%s.upper|%f|%lld\n", prefix, name, timer_max(&t->tm));
             }
             if (timers_config->count) {
-                STREAM("%s%s.count|%lu|%lld\n", prefix, name, timer_count(&t->tm));
+                STREAM("%s%s.count|%"PRIu64"|%lld\n", prefix, name, timer_count(&t->tm));
             }
             if (timers_config->stdev) {
                 STREAM("%s%s.stdev|%f|%lld\n", prefix, name, timer_stddev(&t->tm));
