@@ -467,7 +467,7 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
         if (likely(!status)) status |= buffer_after_terminator(val_str, after_len, '|', &type_str, &after_len);
         if (unlikely(status)) {
             syslog(LOG_WARNING, "Failed parse metric! Input: %s", buf);
-            goto ERR_RET;
+            goto END_LOOP;
         }
 
         // Convert the type

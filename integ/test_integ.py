@@ -331,6 +331,18 @@ class TestIntegUDP(object):
         assert out in ("counts.foobar|600.000000|%d\n" % (now),
                        "counts.foobar|600.000000|%d\n" % (now - 1))
 
+    def test_counters_signed(self, servers):
+        "Tests adding kv pairs"
+        _, server, output = servers
+        server.sendall("foobar:+100|c\n")
+        server.sendall("foobar:+200|c\n")
+        server.sendall("foobar:-50|c\n")
+        wait_file(output)
+        now = time.time()
+        out = open(output).read()
+        assert out in ("counts.foobar|250.000000|%d\n" % (now),
+                       "counts.foobar|250.000000|%d\n" % (now - 1))
+
     def test_counters_sample(self, servers):
         "Tests adding kv pairs"
         _, server, output = servers
@@ -342,6 +354,17 @@ class TestIntegUDP(object):
         out = open(output).read()
         assert out in ("counts.foobar|6000.000000|%d\n" % (now),
                        "counts.foobar|6000.000000|%d\n" % (now - 1))
+
+    def test_wrong_protocol_in_a_batch(self, servers):
+        "Tests adding kv pairs"
+        _, server, output = servers
+        server.sendall("foobar10c\nfoobar:10|c\nfoobar:10|c\n")
+        server.sendall("foobar:c\nfoobar:10|c\nfoobar:10|c\n")
+        wait_file(output)
+        now = time.time()
+        out = open(output).read()
+        assert out in ("counts.foobar|40.000000|%d\n" % (now),
+                       "counts.foobar|40.000000|%d\n" % (now - 1))
 
     def test_counters_no_newlines(self, servers):
         "Tests adding counters without a trailing new line"
