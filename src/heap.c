@@ -44,7 +44,7 @@ static int ENTRIES_PER_PAGE = 0;
  * Stores the number of bytes in a single
  * page of memory.
  */
-static int PAGE_SIZE = 0;
+static int MEM_PAGE_SIZE = 0;
 
 // Helper function to map a number of pages into memory
 // Returns NULL on error, otherwise returns a pointer to the
@@ -54,13 +54,13 @@ static void* map_in_pages(int page_count) {
     assert(page_count > 0);
 
     // Call malloc to get the pages
-    void* addr = malloc(page_count*PAGE_SIZE);
+    void* addr = malloc(page_count*MEM_PAGE_SIZE);
 
     if (!addr)
         return NULL;
     else {
         // Clear the memory
-        bzero(addr,page_count*PAGE_SIZE);
+        bzero(addr,page_count*MEM_PAGE_SIZE);
 
         // Return the address
         return addr;
@@ -98,12 +98,12 @@ int compare_int_keys(register void* key1, register void* key2) {
 // Creates a new heap
 void heap_create(heap* h, int initial_size, int (*comp_func)(void*,void*)) {
     // Check if we need to setup our globals
-    if (PAGE_SIZE == 0) {
+    if (MEM_PAGE_SIZE == 0) {
         // Get the page size
-        PAGE_SIZE = getpagesize();
+        MEM_PAGE_SIZE = getpagesize();
 
         // Calculate the max entries
-        ENTRIES_PER_PAGE = PAGE_SIZE / sizeof(heap_entry);
+        ENTRIES_PER_PAGE = MEM_PAGE_SIZE / sizeof(heap_entry);
     }
 
     // Check that initial size is greater than 0, else set it to ENTRIES_PER_PAGE
@@ -185,7 +185,7 @@ void heap_insert(heap *h, void* key, void* value) {
         heap_entry* new_table = map_in_pages(new_size);
 
         // Copy the old entries, copy the entire pages
-        memcpy(new_table, h->table, h->allocated_pages*PAGE_SIZE);
+        memcpy(new_table, h->table, h->allocated_pages*MEM_PAGE_SIZE);
 
         // Cleanup the old table
         map_out_pages(h->table, h->allocated_pages);
@@ -344,7 +344,7 @@ int heap_delmin(heap* h, void** key, void** value) {
         heap_entry* new_table = map_in_pages(new_size);
 
         // Copy the old entries, copy the entire pages
-        memcpy(new_table, h->table, used_pages*PAGE_SIZE);
+        memcpy(new_table, h->table, used_pages*MEM_PAGE_SIZE);
 
         // Cleanup the old table
         map_out_pages(h->table, h->allocated_pages);
@@ -376,5 +376,3 @@ void heap_foreach(heap* h, void (*func)(void*,void*)) {
         func(entry->key, entry->value);
     }
 }
-
-
