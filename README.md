@@ -82,7 +82,7 @@ Estimation Algorithm".
 Install
 -------
 
-Download and build from source. This requires `autoconf` and `automake` to be available,
+Download and build from source. This requires `autoconf`, `automake` and `libtool` to be available,
 available usually through a system package manager. Steps:
 
     $ git clone https://github.com/armon/statsite.git
