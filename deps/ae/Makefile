@@ -16,6 +16,8 @@ libae.a: $(OBJECTS)
 clean:
 	$(RM) *.o *.a
 
+dist:
+distdir:
 distclean: clean
 install:
 uninstall:

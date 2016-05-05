@@ -56,6 +56,10 @@ nobase_pkgdata_DATA = sinks/*
 ## Stuff we want to include for the default dist task (not sdist)
 EXTRA_DIST = .
 
+## Where to store the dist
+
+distdir = ../$(PACKAGE)-$(VERSION)
+
 # Targets
 scons-build:
 	scons statsite
@@ -71,6 +75,7 @@ sdist: clean
 	mkdir -vp /tmp/statsite-@STATSITE_VERSION@
 	cp -R . /tmp/statsite-@STATSITE_VERSION@
 	tar -zcv --exclude='.git' --exclude='.gitignore' -f statsite-@STATSITE_VERSION@.tar.gz -C /tmp statsite-@STATSITE_VERSION@
+	rm -r . /tmp/statsite-@STATSITE_VERSION@
 
 rpms: sdist build
 	mkdir -vp $(RPMBUILDROOT)

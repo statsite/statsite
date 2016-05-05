@@ -9,7 +9,6 @@ STATSITE_MICRO_VERSION=1
 STATSITE_VERSION=$STATSITE_MAJOR_VERSION.$STATSITE_MINOR_VERSION.$STATSITE_MICRO_VERSION
 
 
-AC_CONFIG_SRCDIR([src/statsite.c])
 
 # place to put some extra build scripts installed
 AC_CONFIG_AUX_DIR([ac_config])
@@ -20,11 +19,55 @@ AC_CONFIG_MACRO_DIR([m4])
 # define things like _GNU_SOURCE appropriately
 AC_USE_SYSTEM_EXTENSIONS
 
-AM_INIT_AUTOMAKE(foreign subdir-objects)
+
+AC_CONFIG_SRCDIR([src/statsite.c])
+#AC_CONFIG_HEADERS([config.h]) # add this for cool version support in the future, config.h.in that is.
+
+# Checks for programs.
+AC_PROG_CXX
+AC_PROG_AWK
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
+AC_PROG_RANLIB
+# Automake wants this for per-target CFLAGS
+AC_PROG_INSTALL
+AC_PROG_LN_S
+
 
 # Check if we have librt
 AC_CHECK_LIB([rt], [clock_gettime], [LINK_TO_RT=-lrt], [LINK_TO_RT=])
 
+
+Checks for header files.
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h limits.h netdb.h netinet/in.h stdint.h stdlib.h string.h strings.h sys/socket.h sys/time.h syslog.h unistd.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_CHECK_HEADER_STDBOOL
+AC_C_INLINE
+AC_TYPE_INT8_T
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
+AC_TYPE_UINT16_T
+AC_TYPE_UINT32_T
+AC_TYPE_UINT64_T
+AC_TYPE_UINT8_T
+
+# Checks for library functions.
+AC_FUNC_ALLOCA
+AC_FUNC_FORK
+AC_FUNC_MALLOC
+AC_FUNC_REALLOC
+AC_FUNC_STRTOD
+AC_CHECK_FUNCS([bzero dup2 getpagesize gettimeofday inet_ntoa memchr memset pow select socket sqrt strcasecmp strdup strerror strncasecmp strtol])
+
+
+
+
+AM_INIT_AUTOMAKE(foreign subdir-objects)
 
 # This replaces a few constants we setup previously
 AC_SUBST(STATSITE_MAJOR_VERSION)
@@ -33,14 +76,7 @@ AC_SUBST(STATSITE_MICRO_VERSION)
 AC_SUBST(STATSITE_VERSION)
 AC_SUBST(LINK_TO_RT)
 
-# Checks for programs.
-AC_PROG_CC([gcc cc])
 
-
-
-# Automake wants this for per-target CFLAGS
-AC_PROG_INSTALL
-AC_PROG_LN_S
 
 LT_INIT
 
