@@ -11,6 +11,8 @@
 *.la
 *.a
 
+deps/check-0.9.8/tests/.deps
+deps/check-0.9.8/tests/.libs
 .lvimrc
 .sconsign.dblite
 tests/build/

@@ -31,7 +31,6 @@ AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
 # Automake wants this for per-target CFLAGS
 AC_PROG_INSTALL
 AC_PROG_LN_S
@@ -45,7 +44,7 @@ Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h limits.h netdb.h netinet/in.h stdint.h stdlib.h string.h strings.h sys/socket.h sys/time.h syslog.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_CHECK_HEADER_STDBOOL
+#AC_CHECK_HEADER_STDBOOL # - this seems to be archived
 AC_C_INLINE
 AC_TYPE_INT8_T
 AC_TYPE_PID_T
