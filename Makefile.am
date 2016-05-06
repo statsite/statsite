@@ -4,7 +4,7 @@ AUTOMAKE_OPTIONS := subdir-objects
 ACLOCAL_AMFLAGS = -I m4
 
 
-SUBDIRS = deps/ae deps/inih deps/murmurhash .
+SUBDIRS = deps/ae deps/inih deps/murmurhash man .
 
 
 CLEANFILES = test_runner
