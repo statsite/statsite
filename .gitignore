@@ -43,7 +43,6 @@ autom4te.cache
 autoscan.log
 autoscan-*.log
 compile
-config.h.in
 configure.scan
 config.status
 depcomp
@@ -66,6 +65,8 @@ config.log
 
 Makefile.in
 /Makefile
+man/Makefile
+Makefile
 libtool
 aclocal.m4
 ac_config
