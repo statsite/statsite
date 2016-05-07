@@ -82,8 +82,8 @@ clean-local: clean-local-check
 
 .PHONY: clean-local-check
 clean-local-check:
-	rm .sconsign.dblite
-	rm -rf deps/check-0.9.8/src/.libs
+	test ! -f ".sconsign.dblite" || rm -f .sconsign.dblite
+	test ! -d "deps/check-0.9.8/src/.libs" || rm -fr deps/check-0.9.8/src/.libs
 
 rpms: sdist build
 	mkdir -vp $(RPMBUILDROOT)
