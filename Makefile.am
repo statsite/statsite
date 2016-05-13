@@ -72,6 +72,7 @@ sdist: clean
 	cp -R . /tmp/statsite-@STATSITE_VERSION@
 	tar -zcv --exclude='.git' --exclude='.gitignore' -f statsite-@STATSITE_VERSION@.tar.gz -C /tmp statsite-@STATSITE_VERSION@
 
+RPMBUILDROOT=/tmp/rpm-build
 rpms: sdist build
 	mkdir -vp $(RPMBUILDROOT)
 	cp -v *.tar.gz $(RPMBUILDROOT)
