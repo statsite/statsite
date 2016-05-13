@@ -7,7 +7,7 @@ Summary:	A C implementation of statsd.
 Group:		Applications
 License:	See the LICENSE file.
 URL:		https://github.com/armon/statsite
-Source0:	statsite.tar.gz
+Source0:	%{name}-%{version}.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 BuildRequires:	scons check-devel %{?el7:systemd} %{?fedora:systemd}
 AutoReqProv:	No
@@ -26,7 +26,7 @@ getent passwd  %{name}  >/dev/null || \
 exit 0
 
 %prep
-%setup -c %{name}-%{version}
+%setup
 
 %build
 make %{?_smp_mflags}
