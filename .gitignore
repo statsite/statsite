@@ -49,18 +49,15 @@ install-sh
 missing
 stamp-h1
 
-ac_config
 autom4te.cache
 
 .dirstamp
+/dist/
+/config.*
 
 #OSX
 .DS_Store
 
-autom4te.cache/requests
-config.guess
-config.sub
-config.log
 
 Makefile.in
 /Makefile
