@@ -119,7 +119,7 @@ Here is an example configuration file::
     flush_interval = 10
     timer_eps = 0.01
     set_eps = 0.02
-    stream_cmd = python sinks/graphite.py localhost 2003
+    stream_cmd = python sinks/graphite.py localhost 2003 statsite
 
     [histogram_api]
     prefix=api
