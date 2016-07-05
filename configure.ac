@@ -1,11 +1,11 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT([Statsite], [0.7.1])
+AC_INIT([Statsite], [0.8.0])
 
 STATSITE_MAJOR_VERSION=0
-STATSITE_MINOR_VERSION=7
-STATSITE_MICRO_VERSION=1
+STATSITE_MINOR_VERSION=8
+STATSITE_MICRO_VERSION=0
 STATSITE_VERSION=$STATSITE_MAJOR_VERSION.$STATSITE_MINOR_VERSION.$STATSITE_MICRO_VERSION
 
 
