@@ -57,7 +57,7 @@ class GraphiteStore(object):
         # Serialize writes to the socket
         try:
             self._write_metric(data)
-        except:
+        except Exception:
             self.logger.exception("Failed to write out the metrics!")
 
     def close(self):
@@ -68,7 +68,7 @@ class GraphiteStore(object):
         try:
             if self.sock:
                 self.sock.close()
-        except:
+        except Exception:
             self.logger.warning("Failed to close connection!")
 
     def _create_socket(self):
@@ -76,7 +76,7 @@ class GraphiteStore(object):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             sock.connect((self.host, self.port))
-        except:
+        except Exception:
             self.logger.error("Failed to connect!")
             sock = None
         return sock

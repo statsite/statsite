@@ -164,7 +164,7 @@ class InfluxDBStore(object):
             else:
                 self.logger.info(info)
 
-        except:
+        except Exception:
             self.logger.exception('Failed to send metrics to InfluxDB:', res.status, res.reason)
 
         conn.close()
@@ -215,7 +215,7 @@ class InfluxDBStore(object):
         try:
             res = conn.getresponse()
             self.logger.info("%s, %s" %(res.status, res.reason))
-        except:
+        except Exception:
             self.logger.exception('Failed to send metrics to InfluxDB:', res.status, res.reason)
 
         conn.close()
