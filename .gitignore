@@ -60,6 +60,7 @@ autom4te.cache
 #OSX
 .DS_Store
 
+/libtool
 
 Makefile.in
 /Makefile
