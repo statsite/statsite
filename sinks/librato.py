@@ -296,7 +296,7 @@ class LibratoStore(object):
         try:
             uname = os.uname()
             system = "; ".join([uname[0], uname[4]])
-        except:
+        except Exception:
             system = os.name()
 
         pver = sys.version_info
