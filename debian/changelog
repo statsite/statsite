@@ -1,0 +1,5 @@
+statsite (0.7.1-1) UNRELEASED; urgency=low
+
+  * Initial release. (Closes: #182)
+
+ -- John Keates <john@keates.nl>  Sat, 07 May 2016 17:06:59 +0200

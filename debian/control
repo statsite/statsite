@@ -1,0 +1,12 @@
+Source: statsite
+Maintainer: John Keates <john@keates.nl>
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 9)
+
+Package: statsite
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: C implementation of statsd
+ Statsite collects stats and sends them to an upstream server.

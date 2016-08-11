@@ -75,7 +75,15 @@ sdist: clean
 	mkdir -vp /tmp/statsite-@STATSITE_VERSION@
 	cp -R . /tmp/statsite-@STATSITE_VERSION@
 	tar -zcv --exclude='.git' --exclude='.gitignore' -f statsite-@STATSITE_VERSION@.tar.gz -C /tmp statsite-@STATSITE_VERSION@
-	rm -r . /tmp/statsite-@STATSITE_VERSION@
+	rm -r /tmp/statsite-@STATSITE_VERSION@
+
+
+clean-local: clean-local-check
+
+.PHONY: clean-local-check
+clean-local-check:
+	test ! -f ".sconsign.dblite" || rm -f .sconsign.dblite
+	test ! -d "deps/check-0.9.8/src/.libs" || rm -fr deps/check-0.9.8/src/.libs
 
 RPMBUILDROOT=/tmp/rpm-build
 rpms: sdist build

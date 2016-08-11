@@ -27,7 +27,8 @@ compile
 
 integ/.cache
 config.log
-
+.sconsign.dblite
+.libs
 .deps
 .deps/*
 src/.deps
