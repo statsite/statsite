@@ -1,6 +1,11 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
+
+## TODO: below here, we define the version number twice, it would make more
+#        sense to use the variables if possible. Adding it to statsite as a -v
+#        would be appreciated too.
+
 AC_INIT([Statsite], [0.8.0])
 
 STATSITE_MAJOR_VERSION=0
