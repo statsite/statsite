@@ -41,12 +41,12 @@ make install
 
 When using the Git repo directly and not a source distribution tarball, additional
 steps might be required to get autotools up. The steps are quite automated,
-and contained within bootstrap.sh. It mostly consists of:
+and contained within bootstrap.sh. It mostly consists of the bare mininum:
 
 - aclocal
-- libtoolize
-- autoconf
+- libtoolize or glibtoolize
 - automake
+- autoconf
 
 after which a working platform-specific Makefile is ready for use. When working on
 code you may need to re-run this, or maybe use the autoheader and autoreconf tools
@@ -77,7 +77,49 @@ Install the packages according to the following snippet:
 
 ~~~~
 sudo apt-get update
-sudo apt-get -y install build-essential scons python-setuptools lsof git automake texlive check libtool
+sudo apt-get -y install build-essential libtool autoconf automake scons python-setuptools lsof git texlive check
 sudo easy_install pip
 sudo pip install pytest
+~~~~
+
+You can then run bootstrap.sh to kick off autotools:
+~~~~
+cd statsite #be sure you are in the statsite directory
+./bootstrap.sh
+~~~~
+
+afterwards you can configure the build and build it, with the option to directly install afterwards:
+~~~~
+cd statsite #be sure you are in the statsite directory if you weren't already
+./configure
+make
+sudo make install
+~~~~
+
+The statsite binary after installation is linked like this on Debian 8:
+~~~~
+linux-vdso.so.1 (0x00007ffd43ba1000)
+libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007fa2e1ccf000)
+librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007fa2e1ac7000)
+libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007fa2e18aa000)
+libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fa2e14ff000)
+/lib64/ld-linux-x86-64.so.2 (0x00007fa2e1fd0000)
+~~~~
+
+If you want to run unit tests and integration tests, you will need a few extra packages:
+
+~~~~
+sudo apt-get update
+sudo apt-get -y install build-essential libtool autoconf automake scons python-setuptools lsof git texlive check
+sudo easy_install pip
+sudo pip install pytest
+~~~~
+
+with those packages installed you can run the tests:
+~~~~
+cd statsite #be sure you are in the statsite directory
+./bootstrap.sh
+./configure
+make test
+make integ
 ~~~~
