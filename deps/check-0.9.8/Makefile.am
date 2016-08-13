@@ -112,6 +112,8 @@ dorelease: releasevars doc/check.html prereleasecheck
 	@echo "so you'll have to manually roll back if you abort."
 	@echo "CTRL-D to complete, or exit 1 to abort."
 	${SHELL}
-	
+
+dist:
+distdir:
 
 .PHONY: releasevars prereleasecheck preparerelease dorelease .svnrelease

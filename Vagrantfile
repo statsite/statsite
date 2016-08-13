@@ -7,7 +7,7 @@ echo Provisioning started...
 echo
 
 sudo apt-get update
-sudo apt-get -y install build-essential scons python-setuptools lsof git automake
+sudo apt-get -y install build-essential scons python-setuptools lsof git automake texlive
 sudo easy_install pip
 sudo pip install pytest
 
@@ -24,6 +24,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "debian/jessie64"
   config.vm.network "private_network", ip: "33.33.33.40"
   config.vm.synced_folder ".", "/vagrant", type: "nfs"
+  config.vm.synced_folder ".", "/home/vagrant/statsite", type: "nfs"
 
   # Provision using the shell to install fog
   config.vm.provision :shell, :inline => $script

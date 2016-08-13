@@ -4,7 +4,7 @@ AUTOMAKE_OPTIONS := subdir-objects
 ACLOCAL_AMFLAGS = -I m4
 
 
-SUBDIRS = deps/ae deps/inih deps/murmurhash .
+SUBDIRS = deps/ae deps/inih deps/murmurhash man .
 
 
 CLEANFILES = test_runner
@@ -56,6 +56,10 @@ nobase_pkgdata_DATA = sinks/*
 ## Stuff we want to include for the default dist task (not sdist)
 EXTRA_DIST = .
 
+## Where to store the dist
+
+distdir = ../$(PACKAGE)-$(VERSION)
+
 # Targets
 scons-build:
 	scons statsite
@@ -71,6 +75,15 @@ sdist: clean
 	mkdir -vp /tmp/statsite-@STATSITE_VERSION@
 	cp -R . /tmp/statsite-@STATSITE_VERSION@
 	tar -zcv --exclude='.git' --exclude='.gitignore' -f statsite-@STATSITE_VERSION@.tar.gz -C /tmp statsite-@STATSITE_VERSION@
+	rm -r /tmp/statsite-@STATSITE_VERSION@
+
+
+clean-local: clean-local-check
+
+.PHONY: clean-local-check
+clean-local-check:
+	test ! -f ".sconsign.dblite" || rm -f .sconsign.dblite
+	test ! -d "deps/check-0.9.8/src/.libs" || rm -fr deps/check-0.9.8/src/.libs
 
 RPMBUILDROOT=/tmp/rpm-build
 rpms: sdist build
