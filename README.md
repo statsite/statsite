@@ -82,6 +82,8 @@ Estimation Algorithm".
 Install
 -------
 
+The following quickstart will probably work. If not, see INSTALL.md for detailed information.
+
 Download and build from source. This requires `autoconf`, `automake` and `libtool` to be available,
 available usually through a system package manager. Steps:
 
@@ -91,6 +93,8 @@ available usually through a system package manager. Steps:
     $ ./configure
     $ make
     $ ./src/statsite
+
+If you get any errors, you may need to check if all dependencies are installed, see INSTALL.md.
 
 Building the test code may generate errors if libcheck is not available.
 To build the test code successfully, do the following::
@@ -429,4 +433,3 @@ but not including the next bin.
 To enable the binary sink protocol, add a configuration variable `binary_stream`
 to the configuration file with the value `yes`. An example sink is provided in
 `sinks/binary_sink.py`.
-
