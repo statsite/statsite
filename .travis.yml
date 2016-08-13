@@ -4,6 +4,7 @@ python:
 before_install:
   - sudo apt-get -y install scons
   - pushd deps/check-0.9.8
+  - autoreconf
   - ./configure
   - make
   - sudo make install
