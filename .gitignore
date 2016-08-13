@@ -71,3 +71,23 @@ aclocal.m4
 ac_config
 m4
 configure
+
+
+# Some stuff that apparently doesn't get tracked by wildcards
+deps/check-0.9.8/doc/check_money.1-2.c.diff
+deps/check-0.9.8/doc/check_money.2-3.c.diff
+deps/check-0.9.8/doc/check_money.3-6.c.diff
+deps/check-0.9.8/doc/check_money.6-7.c.diff
+deps/check-0.9.8/doc/money.1-2.h.diff
+deps/check-0.9.8/doc/money.1-3.c.diff
+deps/check-0.9.8/doc/money.3-4.c.diff
+deps/check-0.9.8/doc/money.4-5.c.diff
+deps/check-0.9.8/doc/money.5-6.c.diff
+deps/check-0.9.8/src/exported.sym
+deps/check-0.9.8/tests/check_check
+deps/check-0.9.8/tests/check_check_export
+deps/check-0.9.8/tests/check_stress
+deps/check-0.9.8/tests/check_thread_stress
+deps/check-0.9.8/tests/ex_log_output
+deps/check-0.9.8/tests/ex_output
+deps/check-0.9.8/tests/ex_xml_output
