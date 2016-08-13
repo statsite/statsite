@@ -74,6 +74,14 @@ configure
 
 
 # Some stuff that apparently doesn't get tracked by wildcards
+deps/check-0.9.8/config.h
+deps/check-0.9.8/config.h.in
+deps/check-0.9.8/config.h.in~
+deps/check-0.9.8/config.status
+deps/check-0.9.8/configure
+deps/check-0.9.8/doc/check.info
+deps/check-0.9.8/doc/stamp-vti
+deps/check-0.9.8/doc/version.texi
 deps/check-0.9.8/doc/check_money.1-2.c.diff
 deps/check-0.9.8/doc/check_money.2-3.c.diff
 deps/check-0.9.8/doc/check_money.3-6.c.diff
