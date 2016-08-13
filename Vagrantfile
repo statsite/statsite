@@ -7,7 +7,7 @@ echo Provisioning started...
 echo
 
 sudo apt-get update
-sudo apt-get -y install build-essential scons python-setuptools lsof git automake texlive check
+sudo apt-get -y install build-essential scons python-setuptools lsof git automake texlive check libtool
 sudo easy_install pip
 sudo pip install pytest
 
