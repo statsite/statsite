@@ -26,7 +26,7 @@ AC_USE_SYSTEM_EXTENSIONS
 
 
 AC_CONFIG_SRCDIR([src/statsite.c])
-#AC_CONFIG_HEADERS([config.h]) # add this for cool version support in the future, config.h.in that is.
+AC_CONFIG_HEADERS([src/buildconfig.h]) # add this for cool version support in the future, config.h.in that is.
 
 # Checks for programs.
 AC_PROG_CXX
@@ -80,6 +80,14 @@ AC_SUBST(STATSITE_MICRO_VERSION)
 AC_SUBST(STATSITE_VERSION)
 AC_SUBST(LINK_TO_RT)
 
+# PKG-Config
+PKG_CHECK_MODULES([CHECK], [check >= 0.9.7])
+
+# tests
+TESTS = test_runner
+check_PROGRAMS = test_runner
+test_runner_SOURCES = tests/runner.c $(top_builddir)/tests/runner.h
+test_runner_CFLAGS = @CHECK_CFLAGS@
 
 
 LT_INIT

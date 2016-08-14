@@ -39,7 +39,10 @@ make
 make install
 ~~~~
 
-When using the Git repo directly and not a source distribution tarball, additional
+This will get you a plain local installation of statsite, no tests,
+no integration tests and no special packages and stuff.
+
+When using the git repo directly and not a source distribution tarball, additional
 steps might be required to get autotools up. The steps are quite automated,
 and contained within bootstrap.sh. It mostly consists of the bare mininum:
 
@@ -61,10 +64,43 @@ Most of the dependencies are included in standard Linux distributions,
 but embedded toolchains and/or slightly less-POSIX systems may need special care
 to get all dependencies installed.
 
-Two internal dependencies are included with the project: ae and murmurhash.
+Internal dependencies are included with the project: inih, ae and murmurhash.
 For integration and unit tests, you need check (or, libcheck) and pytest. They
 usually exist within your distribution's package repository or have standard
 procedures for acquiring them.
+
+The `check` or `libcheck` as it is called can be built from source if you wish.
+We included check-0.9.8 in the git tree as this is what was used since the first release.
+To build this, you will need to get the dependencies setup as listed in deps/check-0.9.8/INSTALL.
+Currently, we the requirements are:
+
+- automake-1.9.6 (1.11.3 on OS X if you are using /usr/bin/ar)
+- autoconf-2.59
+- libtool-1.5.22
+- pkg-config-0.20
+- texinfo-4.7 (for documentation)
+- tetex-bin (or any texinfo-compatible TeX installation, for documentation)
+- POSIX sed
+
+Check should be easy to build, a standard setup will do:
+
+~~~~
+# make sure you are in the check directory
+cd check-0.9.8
+./configure
+make
+make install
+~~~~
+
+This is how the packaged `check` gets built, and how source distributions are built.
+If you use a git version, you may need to setup its autotools parts,
+check has it's own install docs on that.
+
+For pytest, you can use pip/easy_install, or if you really want to do it manually,
+see https://github.com/pytest-dev/pytest for the python code which is all you need.
+
+Distro-specifics
+================
 
 Some distributions have specific packages you can use to make it easier for yourself,
 the following have been tested:
@@ -72,7 +108,7 @@ the following have been tested:
 Debian
 ------
 
-On debian, check and pytest are in the standard repos, as well as all build tools.
+On Debian, check and pytest are in the standard repos, as well as all build tools.
 Install the packages according to the following snippet:
 
 ~~~~
@@ -84,13 +120,15 @@ sudo pip install pytest
 
 You can then run bootstrap.sh to kick off autotools:
 ~~~~
-cd statsite #be sure you are in the statsite directory
+# be sure you are in the statsite directory
+cd statsite
 ./bootstrap.sh
 ~~~~
 
 afterwards you can configure the build and build it, with the option to directly install afterwards:
 ~~~~
-cd statsite #be sure you are in the statsite directory if you weren't already
+# be sure you are in the statsite directory if you weren't already
+cd statsite
 ./configure
 make
 sudo make install
@@ -117,7 +155,8 @@ sudo pip install pytest
 
 with those packages installed you can run the tests:
 ~~~~
-cd statsite #be sure you are in the statsite directory
+# be sure you are in the statsite directory if you weren't already
+cd statsite
 ./bootstrap.sh
 ./configure
 make test
