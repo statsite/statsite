@@ -1,11 +1,6 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-
-## TODO: below here, we define the version number twice, it would make more
-#        sense to use the variables if possible. Adding it to statsite as a -v
-#        would be appreciated too.
-
 AC_INIT([Statsite], [0.8.0])
 
 STATSITE_MAJOR_VERSION=0
@@ -26,7 +21,7 @@ AC_USE_SYSTEM_EXTENSIONS
 
 
 AC_CONFIG_SRCDIR([src/statsite.c])
-AC_CONFIG_HEADERS([src/buildconfig.h]) # add this for cool version support in the future, config.h.in that is.
+AC_CONFIG_HEADERS([src/buildconfig.h])
 
 # Checks for programs.
 AC_PROG_CXX
@@ -69,6 +64,16 @@ AC_FUNC_STRTOD
 AC_CHECK_FUNCS([bzero dup2 getpagesize gettimeofday inet_ntoa memchr memset pow select socket sqrt strcasecmp strdup strerror strncasecmp strtol])
 
 
+# PKG-Config
+PKG_CHECK_MODULES([CHECK], [check >= 0.9.7], [have_check="yes"], AC_MSG_WARN([Check not found; cannot run unit tests!]))
+
+AM_CONDITIONAL(HAVE_CHECK, test x"$have_check" = "xyes")
+
+# tests
+TESTS = test_runner
+check_PROGRAMS = test_runner
+test_runner_SOURCES = tests/runner.c $(top_builddir)/tests/runner.h
+test_runner_CFLAGS = @CHECK_CFLAGS@
 
 
 AM_INIT_AUTOMAKE(foreign subdir-objects)
@@ -80,14 +85,7 @@ AC_SUBST(STATSITE_MICRO_VERSION)
 AC_SUBST(STATSITE_VERSION)
 AC_SUBST(LINK_TO_RT)
 
-# PKG-Config
-PKG_CHECK_MODULES([CHECK], [check >= 0.9.7])
 
-# tests
-TESTS = test_runner
-check_PROGRAMS = test_runner
-test_runner_SOURCES = tests/runner.c $(top_builddir)/tests/runner.h
-test_runner_CFLAGS = @CHECK_CFLAGS@
 
 
 LT_INIT

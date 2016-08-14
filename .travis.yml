@@ -3,8 +3,8 @@ python:
   - "2.7"
 before_install:
   - sudo apt-get -y install scons
-  - pushd deps/check-0.9.8
-  - autoreconf
+  - pushd deps/check-0.10.0
+  - autoreconf -i --install
   - ./configure
   - make
   - sudo make install

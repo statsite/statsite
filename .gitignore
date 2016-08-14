@@ -99,3 +99,7 @@ deps/check-0.9.8/tests/check_thread_stress
 deps/check-0.9.8/tests/ex_log_output
 deps/check-0.9.8/tests/ex_output
 deps/check-0.9.8/tests/ex_xml_output
+
+
+src/buildconfig.h
+src/buildconfig.h.in
