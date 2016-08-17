@@ -54,7 +54,7 @@ nobase_pkgdata_DATA = sinks/*
 
 
 ## Stuff we want to include for the default dist task (not sdist)
-EXTRA_DIST = .
+EXTRA_DIST = . #everything
 
 ## Where to store the dist
 

@@ -1,6 +1,8 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
+
+## Set the version in both instances below here:
 AC_INIT([Statsite], [0.8.0])
 
 STATSITE_MAJOR_VERSION=0
