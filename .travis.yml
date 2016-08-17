@@ -5,7 +5,7 @@ before_install:
   - sudo apt-get -qq update
   - sudo apt-get -y install scons pkg-config autoconf automake libtool texinfo sed
   - pushd deps/check-0.10.0
-  - mkdir m4
+  - mkdir -p m4
   - autoreconf -fiv
   - ./configure
   - make
