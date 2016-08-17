@@ -103,3 +103,8 @@ deps/check-0.9.8/tests/ex_xml_output
 
 src/buildconfig.h
 src/buildconfig.h.in
+
+
+deps/check-0.10.0/build-aux/
+deps/check-0.10.0/config.h.in
+deps/check-0.10.0/config.h.in~
