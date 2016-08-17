@@ -12,7 +12,7 @@ before_install:
   - sudo make install
   - sudo ldconfig
   - popd
-  - ./autogen.sh
+  - autoreconf -fiv
   - ./configure
   - make
   - scons statsite test_runner
