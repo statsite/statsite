@@ -2,7 +2,8 @@ language: python
 python:
   - "2.7"
 before_install:
-  - sudo apt-get -y install scons
+  - sudo apt-get -qq update
+  - sudo apt-get -y install scons pkg-config autoconf automake libtool texinfo sed
   - pushd deps/check-0.10.0
   - mkdir m4
   - autoreconf -fiv
