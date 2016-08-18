@@ -66,16 +66,16 @@ AC_FUNC_STRTOD
 AC_CHECK_FUNCS([bzero dup2 getpagesize gettimeofday inet_ntoa memchr memset pow select socket sqrt strcasecmp strdup strerror strncasecmp strtol])
 
 
-# PKG-Config
+# PKG-Config based checks
 PKG_CHECK_MODULES([CHECK], [check >= 0.9.7], [have_check="yes"], AC_MSG_WARN([Check not found; cannot run unit tests!]))
 
 AM_CONDITIONAL(HAVE_CHECK, test x"$have_check" = "xyes")
 
 # tests
-TESTS = test_runner
-check_PROGRAMS = test_runner
-test_runner_SOURCES = tests/runner.c $(top_builddir)/tests/runner.h
-test_runner_CFLAGS = @CHECK_CFLAGS@
+#TESTS = test_runner
+#check_PROGRAMS = test_runner
+#test_runner_SOURCES = tests/runner.c $(top_builddir)/tests/runner.h
+#test_runner_CFLAGS = @CHECK_CFLAGS@
 
 
 AM_INIT_AUTOMAKE(foreign subdir-objects)

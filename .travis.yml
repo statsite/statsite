@@ -12,11 +12,12 @@ before_install:
   - sudo make install
   - sudo ldconfig
   - popd
+  - mkdir -p m4
   - autoreconf -fiv
-  - ./configure
-  - make
-  - scons statsite test_runner
+#  - ./configure
+#  - make
+#  - scons statsite test_runner
 install: pip install pytest==2.3.4
-script: ./bootstrap.sh && ./configure && make && make test && py.test integ/
-
+#script: ./bootstrap.sh && ./configure && make && make test && py.test integ/
+script: ./autogen.sh && ./configure && make && make check && make integ
 #./test_runner && py.test integ/

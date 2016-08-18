@@ -7,8 +7,6 @@ ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = deps/ae deps/inih deps/murmurhash man .
 
 
-CLEANFILES = test_runner
-
 AM_CFLAGS = -g -std=gnu99 -pthread -D_GNU_SOURCE -DLOG_PERROR=0 -O3 -pthread -lm @LINK_TO_RT@ -Ideps/inih/ -Ideps/ae/ -Isrc/
 
 #=========================================================
@@ -59,6 +57,39 @@ EXTRA_DIST = . #everything
 ## Where to store the dist
 
 distdir = ../$(PACKAGE)-$(VERSION)
+
+
+#libcheck
+
+
+if HAVE_CHECK
+check_PROGRAMS = tests/runner
+tests_runner_SOURCES = \
+src/hashmap.c \
+src/heap.c \
+src/radix.c \
+src/hll_constants.c \
+src/hll.c \
+src/set.c \
+src/cm_quantile.c \
+src/timer.c \
+src/counter.c \
+src/metrics.c \
+src/streaming.c \
+src/config.c \
+src/networking.c \
+src/conn_handler.c \
+tests/runner.c
+
+tests_runner_CFLAGS = -g -std=gnu99 -pthread -D_GNU_SOURCE -DLOG_PERROR=0 -O3 -pthread -lm @LINK_TO_RT@ -Ideps/inih/ -Ideps/ae/ -Isrc/
+tests_runner_LDFLAGS = -g -pg -no-install
+tests_runner_LDADD = deps/ae/libae.a deps/inih/libinih.a deps/murmurhash/libmurmur.a @CHECK_LIBS@
+TESTS = tests/runner
+TESTS_ENVIRONMENT = CK_FORK=yes
+CK_VERBOSITY = verbose
+CLEANFILES = tests/test_runner.log
+endif
+
 
 # Targets
 scons-build:
