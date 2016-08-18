@@ -82,3 +82,10 @@ deps/check-0.10.0/checkmk/checkmk
 deps/check-0.10.0/config.h
 deps/check-0.10.0/src/check.h
 deps/check-0.10.0/tests/test_vars
+
+gmon.out
+src/buildconfig.h.in~
+test-suite.log
+tests/runner
+tests/runner.log
+tests/runner.trs
