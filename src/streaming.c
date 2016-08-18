@@ -48,7 +48,7 @@ int stream_to_command(metrics *m, void *data, stream_callback cb, char *cmd) {
         close(filedes[1]);
 
         // Try to run the command
-        res = execl("/bin/sh", "streaming", "-c", cmd, NULL);
+        res = execl("/bin/sh", "sh", "-c", cmd, NULL);
         if (res != 0) perror("Failed to execute command!");
 
         // Always exit
