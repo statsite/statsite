@@ -45,7 +45,7 @@ src_statsite_LDADD = deps/ae/libae.a deps/inih/libinih.a deps/murmurhash/libmurm
 
 ## Install directions:
 # This makes statsite the result for make install, also allows for make uninstall if needed
-bin_PROGRAMS = src/statsite
+bin_PROGRAMS = statsite
 
 # This adds the sinks on make install, also allows for make uninstall if needed
 nobase_pkgdata_DATA = sinks/*
