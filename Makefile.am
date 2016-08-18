@@ -12,7 +12,7 @@ AM_CFLAGS = -g -std=gnu99 -pthread -D_GNU_SOURCE -DLOG_PERROR=0 -O3 -pthread -lm
 #=========================================================
 # statsite, the binary itself
 
-src_statsite_SOURCES = \
+statsite_SOURCES = \
        src/hashmap.c \
        src/heap.c \
        src/radix.c \
@@ -30,7 +30,7 @@ src_statsite_SOURCES = \
        src/statsite.c
 
 
-src_statsite_LDADD = deps/ae/libae.a deps/inih/libinih.a deps/murmurhash/libmurmur.a
+statsite_LDADD = deps/ae/libae.a deps/inih/libinih.a deps/murmurhash/libmurmur.a
 
 
 # Standard compiler options from the scons file, for reference
