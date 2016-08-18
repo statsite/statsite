@@ -11,7 +11,7 @@ echo
 #sudo easy_install pip
 #sudo pip install pytest
 
-#cd /vagrant/deps/check-0.9.8/
+#cd /vagrant/deps/check-0.10.0/
 #autoreconf
 #./configure
 #make
@@ -33,17 +33,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.post_up_message = <<MSG
 
-     The box is ready. Statsite is in /vagrant.
-     When making changes to configure.ac or Makefile.am, run bootstrap.sh,
+     The box is ready. Statsite is in /vagrant and /home/vagrant.
+     When making changes to configure.ac or Makefile.am, run autogen.sh,
      and when you have your dependencies in order, ./configure again.
 
-     Dependencies were already installed, they are:
-#     - build-essential
-#     - automake
-#     - check
-#     - scons
-#     - pytest
-
+     Dependencies were not automatically installed, you have to do that first.
      To build: use make, to test: make test.
 
 

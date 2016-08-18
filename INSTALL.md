@@ -31,7 +31,7 @@ found, and if it's a critical error, it will stop.
 Building
 --------
 
-When using a source distribution, it's usually as simple as executing:
+When using a non-git source tarball distribution, it's usually as simple as executing:
 
 ~~~~
 ./configure
@@ -40,11 +40,11 @@ make install
 ~~~~
 
 This will get you a plain local installation of statsite, no tests,
-no integration tests and no special packages and stuff.
+no integration tests and no special packages.
 
 When using the git repo directly and not a source distribution tarball, additional
 steps might be required to get autotools up. The steps are quite automated,
-and contained within bootstrap.sh. It mostly consists of the bare mininum:
+and contained within autogen.sh. It mostly consists of the bare mininum:
 
 - aclocal
 - libtoolize or glibtoolize
@@ -53,7 +53,7 @@ and contained within bootstrap.sh. It mostly consists of the bare mininum:
 
 after which a working platform-specific Makefile is ready for use. When working on
 code you may need to re-run this, or maybe use the autoheader and autoreconf tools
-to only update the parts you changed. Running bootstrap.sh also works, but might take
+to only update the parts you changed. Running autogen.sh also works, but might take
 a few seconds longer to run.
 
 
@@ -70,8 +70,8 @@ usually exist within your distribution's package repository or have standard
 procedures for acquiring them.
 
 The `check` or `libcheck` as it is called can be built from source if you wish.
-We included check-0.9.8 in the git tree as this is what was used since the first release.
-To build this, you will need to get the dependencies setup as listed in deps/check-0.9.8/INSTALL.
+We included check-0.10.0 in the git tree as this is what was used since the first release.
+To build this, you will need to get the dependencies setup as listed in deps/check-0.10.0/INSTALL.
 Currently, we the requirements are:
 
 - automake-1.9.6 (1.11.3 on OS X if you are using /usr/bin/ar)
@@ -86,7 +86,7 @@ Check should be easy to build, a standard setup will do:
 
 ~~~~
 # make sure you are in the check directory
-cd check-0.9.8
+cd check-0.10.0
 ./configure
 make
 make install
@@ -118,11 +118,11 @@ sudo easy_install pip
 sudo pip install pytest
 ~~~~
 
-You can then run bootstrap.sh to kick off autotools:
+You can then run autogen.sh to kick off autotools:
 ~~~~
 # be sure you are in the statsite directory
 cd statsite
-./bootstrap.sh
+./autogen.sh
 ~~~~
 
 afterwards you can configure the build and build it, with the option to directly install afterwards:
@@ -157,7 +157,7 @@ with those packages installed you can run the tests:
 ~~~~
 # be sure you are in the statsite directory if you weren't already
 cd statsite
-./bootstrap.sh
+./autogen.sh
 ./configure
 make test
 make integ
