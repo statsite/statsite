@@ -459,6 +459,8 @@ static int handle_ascii_client_connect(statsite_conn_handler *handle) {
     double sample_rate = 1.0;
 
     while (1) {
+        sample_rate = 1.0;
+
         status = extract_to_terminator(handle->conn, '\n', &buf, &buf_len, &should_free);
         if (status == -1) return 0; // Return if no command is available
 
