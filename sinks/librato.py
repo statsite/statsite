@@ -67,7 +67,8 @@ class LibratoStore(object):
 
         self.flush_timeout_secs = 5
         self.gauges = {}
-
+        self.measurements = {}
+        
         # Limit our payload sizes
         self.max_metrics_payload = 500
 
@@ -148,6 +149,19 @@ class LibratoStore(object):
             self.extended_counters = config.getboolean(sect, "extended_counters")
         else:
             self.extended_counters = False
+        
+        # Check if we want to also send measurements to legacy Librato API
+        if config.has_option(sect, "write_to_legacy"):
+            self.write_to_legacy = config.getboolean(sect, "write_to_legacy")
+        else:
+            self.write_to_legacy = True
+        
+        # Global Tags
+        if config.has_option(sect, "tags"):
+            self.tags = config.get(sect, "tags")
+        else:
+            self.tags = {}
+    
 
     def split_multipart_metric(self, name):
         m = self.sfx_re.match(name)
@@ -162,6 +176,28 @@ class LibratoStore(object):
 
     def sanitize(self, name):
         return self.sanitize_re.sub("_", name)
+    
+    def parse_tags(self, name):
+        # Find and parse the tags from the name using the syntax name#tag1=value,tag2=value
+        s = name.split("#")
+        tags = {}
+        
+        if len(s) > 1:
+            # Store the actual name
+            name = s.pop(0)
+            
+            # Parse the tags out
+            raw_tags = s.pop().split(",")
+            for raw_tag in raw_tags:
+                # Get the key and value from tag=value
+                tag_pair = raw_tag.split("=")
+                tag_key = tag_pair[0]
+                tag_value = tag_pair[1]
+                tags[tag_key] = tag_value
+            
+        return name, tags
+                
+        
 
     def add_measure(self, key, value, time):
         ts = int(time)
@@ -195,6 +231,9 @@ class LibratoStore(object):
         # Bail if skipping
         if name == None:
             return
+            
+        # Parse the tags out
+        name, tags = self.parse_tags(name)
 
         # Add a metric prefix
         if self.prefix:
@@ -206,17 +245,31 @@ class LibratoStore(object):
 
         name = self.sanitize(name)
         source = self.sanitize(source)
+        
+        # Add the source as a tag
+        tags['host'] = source
 
         k = "%s\t%s" % (name, source)
+        
+        if k not in self.measurements:
+            self.measurements[k] = {
+                'name': name,
+                'tags' : tags,
+                'time' : ts
+            }
+            
+        self.measurements[k][subf] = value
+        
+        # Build out the legacy gauges
         if k not in self.gauges:
             self.gauges[k] = {
-                'name' : name,
-                'source' : source,
-                'measure_time' : ts,
-                }
-
+                'name': name,
+                'source': source,
+                'measure_time': ts
+            }
+            
         self.gauges[k][subf] = value
-
+            
     def build(self, metrics):
         """
         Build metric data to send to Librato
@@ -233,14 +286,18 @@ class LibratoStore(object):
 
             self.add_measure(k, vs, ts)
 
-    def flush_payload(self, headers, g):
+    def flush_payload(self, headers, m, legacy = False):
         """
         POST a payload to Librato.
         """
-
-        body = json.dumps({ 'gauges' : g })
-
-        url = "%s/v1/metrics" % (self.api)
+        
+        if legacy:
+            body = json.dumps({ 'gauges' : m })
+            url = "%s/v1/metrics" % (self.api)
+        else:
+            body = json.dumps({ 'measurements' : m, 'tags': self.tags })
+            url = "%s/v1/measurements" % (self.api)
+                
         req = urllib2.Request(url, body, headers)
 
         try:
@@ -265,9 +322,9 @@ class LibratoStore(object):
         """
 
         # Nothing to do
-        if len(self.gauges) == 0:
+        if len(self.measurements) == 0:
             return
-
+    
         headers = {
             'Content-Type': 'application/json',
             'User-Agent': self.build_user_agent(),
@@ -275,9 +332,13 @@ class LibratoStore(object):
             }
 
         metrics = []
+        legacy_metrics = []
         count = 0
-        for g in self.gauges.values():
-            metrics.append(g)
+        
+        values = self.measurements.values()
+        
+        for measure in values:
+            metrics.append(measure)
             count += 1
 
             if count >= self.max_metrics_payload:
@@ -287,6 +348,25 @@ class LibratoStore(object):
 
         if count > 0:
             self.flush_payload(headers, metrics)
+        
+        # If enabled, submit flush metrics to Librato's legacy API
+        if self.write_to_legacy:
+            if len(self.gauges) == 0:
+                return
+            values = self.gauges.values()
+            
+            for measure in values:
+                legacy_metrics.append(measure)
+                count += 1
+
+                if count >= self.max_metrics_payload:
+                    self.flush_payload(headers, legacy_metrics, True)
+                    count = 0
+                    legacy_metrics = []
+
+            if count > 0:
+                self.flush_payload(headers, legacy_metrics, True)
+        
 
     def build_basic_auth(self):
         base64string = base64.encodestring('%s:%s' % (self.email, self.token))
@@ -313,7 +393,7 @@ if __name__ == "__main__":
 
     # Get all the inputs
     metrics = sys.stdin.read()
-
+    
     # Flush
     librato.build(metrics.splitlines())
     librato.flush()

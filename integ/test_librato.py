@@ -28,7 +28,9 @@ timers.query.stdev|0.000000|1401577507
 timers.query.median|1017.000000|1401577507
 timers.query.p95|1017.000000|1401577507
 timers.query.p99|1017.000000|1401577507
-timers.query.rate|16.950000|1401577507\
+timers.query.rate|16.950000|1401577507
+timers.tags#tag1=value1|16.000000|1401577507
+timers.tags_sum#tag1=value1,tag2=value2.sum|1.000000|1401577507\
     """)
 
     f = tempfile.NamedTemporaryFile(delete=False)
@@ -72,6 +74,7 @@ class TestLibrato(object):
             "min":          1017.0,
             "sum_squares":  1034289.0,
         }
+        
         assert expected_output == self.librato.gauges["query\tlocalhost"]
 
     def test_counts_send_as_gauges(self):
@@ -113,3 +116,24 @@ class TestLibrato(object):
         }
 
         assert expected_output == self.librato.gauges["baby-animals.active_sessions\tproduction.puppy-cam-1"]
+    
+    def test_measurements_with_tags(self):
+        expected_output = {
+            "name":         "tags",
+            "time":         1401577507,
+            "value":        16.0,
+            "tags":         { "host": "localhost", "tag1": "value1" }
+        }
+        
+        assert expected_output == self.librato.measurements["tags\tlocalhost"]
+
+    def test_measurements_with_suffix(self):
+        expected_output = {
+            "name":         "tags_sum",
+            "time":         1401577507,
+            "sum" :         1.0,
+            "tags":         { "host": "localhost", "tag1": "value1", "tag2": "value2" }
+        }
+        
+        assert expected_output == self.librato.measurements["tags_sum\tlocalhost"]
+        
