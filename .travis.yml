@@ -2,15 +2,17 @@ language: python
 python:
   - "2.7"
 before_install:
-  - sudo apt-get -y install scons
-  - pushd deps/check-0.9.8
+  - sudo apt-get -qq update
+  - sudo apt-get -y install pkg-config autoconf automake libtool texinfo sed
+  - pushd deps/check-0.10.0
+  - mkdir -p m4
+  - autoreconf -fiv
   - ./configure
   - make
   - sudo make install
   - sudo ldconfig
   - popd
-  - scons statsite test_runner
-install: pip install pytest==2.3.4
-script: ./bootstrap.sh && ./configure && make test && py.test integ/
-
-#./test_runner && py.test integ/
+  - mkdir -p m4
+  - autoreconf -fiv
+install: pip install pytest==2.9.2
+script: ./autogen.sh && ./configure && make && make check && py.test integ/

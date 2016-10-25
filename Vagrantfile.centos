@@ -1,0 +1,46 @@
+VAGRANTFILE_API_VERSION = "2"
+
+$script = <<CODE
+
+echo
+echo Provisioning started...
+echo
+
+#sudo apt-get update
+#sudo apt-get -y install build-essential scons python-setuptools lsof git automake texlive check libtool
+#sudo easy_install pip
+#sudo pip install pytest
+
+#cd /vagrant/deps/check-0.10.0/
+#autoreconf
+#./configure
+#make
+#make install
+#ldconfig
+
+CODE
+
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = "centos/7"
+  config.vm.network "private_network", ip: "33.33.44.40"
+  config.vm.synced_folder ".", "/vagrant", type: "nfs"
+  config.vm.synced_folder ".", "/home/vagrant/statsite", type: "nfs"
+
+  # Provision using the shell to install fog
+  config.vm.provision :shell, :inline => $script
+
+
+  config.vm.post_up_message = <<MSG
+
+     The box is ready. Statsite is in /vagrant and /home/vagrant.
+     When making changes to configure.ac or Makefile.am, run autogen.sh,
+     and when you have your dependencies in order, ./configure again.
+
+     Dependencies were not automatically installed, you have to do that first.
+     To build: use make, to test: make test.
+
+
+MSG
+
+end

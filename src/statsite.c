@@ -16,9 +16,11 @@
 #include <syslog.h>
 #include <unistd.h>
 #include <signal.h>
+#include "buildconfig.h"
 #include "config.h"
 #include "conn_handler.h"
 #include "networking.h"
+
 
 /**
  * Our signal handler updates this variable to
@@ -30,11 +32,19 @@ static volatile int SIGNUM;
  * Prints our usage to stderr
  */
 void show_usage() {
-    fprintf(stderr, "usage: statsite [-h] [-f filename]\n\
+    fprintf(stderr, "usage: statsite [-v] [-h] [-f filename]\n\
 \n\
+    -v : Shows the statsite version\n\
     -h : Displays this help info\n\
     -f : Reads the configuration from this file\n\
 \n");
+}
+
+/**
+ * Prints our version number to stderr
+ */
+void show_version(){
+  fprintf(stderr, "statsite version %s\n", VERSION);
 }
 
 /**
@@ -42,11 +52,15 @@ void show_usage() {
  */
 int parse_cmd_line_args(int argc, char **argv, char **config_file) {
     int enable_help = 0;
+    int enable_version = 0;
 
     int c;
     opterr = 0;
-    while ((c = getopt(argc, argv, "hf:w:")) != -1) {
+    while ((c = getopt(argc, argv, "vhf:w:")) != -1) {
         switch (c) {
+            case 'v':
+                enable_version = 1;
+                break;
             case 'h':
                 enable_help = 1;
                 break;
@@ -74,6 +88,14 @@ int parse_cmd_line_args(int argc, char **argv, char **config_file) {
         show_usage();
         return 1;
     }
+
+    // Check if we need to show version
+    if (enable_version) {
+        show_version();
+        return 1;
+    }
+
+    show_version();
 
     return 0;
 }
@@ -155,7 +177,7 @@ int main(int argc, char **argv) {
 
     // Initialize syslog with configured facility
     setup_syslog(config->syslog_log_facility, config->daemonize);
-    
+
     // Set prefixes for each message type
     if (prepare_prefixes(config)) {
         syslog(LOG_ERR, "Failed to get prefixes!");

@@ -4,17 +4,15 @@ AUTOMAKE_OPTIONS := subdir-objects
 ACLOCAL_AMFLAGS = -I m4
 
 
-SUBDIRS = deps/ae deps/inih deps/murmurhash .
+SUBDIRS = deps/ae deps/inih deps/murmurhash man .
 
-
-CLEANFILES = test_runner
 
 AM_CFLAGS = -g -std=gnu99 -pthread -D_GNU_SOURCE -DLOG_PERROR=0 -O3 -pthread -lm @LINK_TO_RT@ -Ideps/inih/ -Ideps/ae/ -Isrc/
 
 #=========================================================
 # statsite, the binary itself
 
-src_statsite_SOURCES = \
+statsite_SOURCES = \
        src/hashmap.c \
        src/heap.c \
        src/radix.c \
@@ -32,45 +30,72 @@ src_statsite_SOURCES = \
        src/statsite.c
 
 
-src_statsite_LDADD = deps/ae/libae.a deps/inih/libinih.a deps/murmurhash/libmurmur.a
-
-
-# Standard compiler options from the scons file, for reference
-#CFLAGS = '-g -std=c99 -D_GNU_SOURCE -Wall -Werror -Wstrict-aliasing=0 -O3 -pthread -Ideps/inih/ -Ideps/ae/ -Isrc/'
-#CFLAGS_WITHOUT_ERR = '-g -std=c99 -D_GNU_SOURCE -O3 -pthread -Ideps/inih/ -Ideps/ae/ -Isrc/'
-
-# Compiler options for SunOS from the scons file
-##    statsite_with_err_cc_flags = '-g -std=gnu99 -D_GNU_SOURCE -DLOG_PERROR=0 -Wall -Wstrict-aliasing=0 -Wformat=0 -O3 -pthread -Ideps/inih/ -Ideps/ae/ -Isrc/'
-##    statsite_without_err_cc_flags = '-g -std=gnu99 -D_GNU_SOURCE -DLOG_PERROR=0 -O3 -pthread -Ideps/inih/ -Ideps/ae/ -Isrc/'
-
-
+statsite_LDADD = deps/ae/libae.a deps/inih/libinih.a deps/murmurhash/libmurmur.a
 
 ## Install directions:
-# This makes statsite the result for make install, also allows for make uninstall if needed
-bin_PROGRAMS = src/statsite
+bin_PROGRAMS = statsite
 
 # This adds the sinks on make install, also allows for make uninstall if needed
 nobase_pkgdata_DATA = sinks/*
 
 
 ## Stuff we want to include for the default dist task (not sdist)
-EXTRA_DIST = .
+EXTRA_DIST = . #everything
+
+## Where to store the dist
+
+distdir = ../$(PACKAGE)-$(VERSION)
+
+
+#libcheck
+if HAVE_CHECK
+check_PROGRAMS = tests/runner
+tests_runner_SOURCES = \
+src/hashmap.c \
+src/heap.c \
+src/radix.c \
+src/hll_constants.c \
+src/hll.c \
+src/set.c \
+src/cm_quantile.c \
+src/timer.c \
+src/counter.c \
+src/metrics.c \
+src/streaming.c \
+src/config.c \
+src/networking.c \
+src/conn_handler.c \
+tests/runner.c
+
+tests_runner_CFLAGS = -g -std=gnu99 -pthread -D_GNU_SOURCE -DLOG_PERROR=0 -O3 -pthread -lm @LINK_TO_RT@ -Ideps/inih/ -Ideps/ae/ -Isrc/
+tests_runner_LDFLAGS = -g -pg -no-install
+tests_runner_LDADD = deps/ae/libae.a deps/inih/libinih.a deps/murmurhash/libmurmur.a @CHECK_LIBS@
+TESTS = tests/runner
+TESTS_ENVIRONMENT = CK_FORK=yes
+CK_VERBOSITY = verbose
+CLEANFILES = tests/test_runner.log
+endif
+
 
 # Targets
-scons-build:
-	scons statsite
+test: integ
 
-test:
-	scons test_runner
-	./test_runner
-
-integ: build test
+integ: all
 	py.test integ/
 
 sdist: clean
 	mkdir -vp /tmp/statsite-@STATSITE_VERSION@
 	cp -R . /tmp/statsite-@STATSITE_VERSION@
 	tar -zcv --exclude='.git' --exclude='.gitignore' -f statsite-@STATSITE_VERSION@.tar.gz -C /tmp statsite-@STATSITE_VERSION@
+	rm -r /tmp/statsite-@STATSITE_VERSION@
+
+
+clean-local: clean-local-check
+
+.PHONY: clean-local-check
+clean-local-check:
+	test ! -f ".sconsign.dblite" || rm -f .sconsign.dblite
+	test ! -d "deps/check-0.9.8/src/.libs" || rm -fr deps/check-0.9.8/src/.libs
 
 RPMBUILDROOT=/tmp/rpm-build
 rpms: sdist build
