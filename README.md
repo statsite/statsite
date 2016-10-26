@@ -1,4 +1,4 @@
-Statsite [![Build Status](https://travis-ci.org/armon/statsite.png)](https://travis-ci.org/armon/statsite)
+Statsite [![Build Status](https://travis-ci.org/statsite/statsite.png)](https://travis-ci.org/statsite/statsite)
 ========
 
 Statsite is a metrics aggregation server. Statsite is based heavily
@@ -87,7 +87,7 @@ The following quickstart will probably work. If not, see INSTALL.md for detailed
 Download and build from source. This requires `autoconf`, `automake` and `libtool` to be available,
 available usually through a system package manager. Steps:
 
-    $ git clone https://github.com/armon/statsite.git
+    $ git clone https://github.com/statsite/statsite.git
     $ cd statsite
     $ ./autogen.sh
     $ ./configure
