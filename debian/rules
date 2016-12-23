@@ -1,3 +1,20 @@
 #!/usr/bin/make -f
+
+DEB_BUILD_OPTIONS=nocheck
+
 %:
 	dh $@
+
+override_dh_auto_install:
+	install -g 0 -o 0 -d debian/statsite/etc/statsite
+	install -g 0 -o 0 -d debian/statsite/lib/systemd/system
+	install -g 0 -o 0 -d debian/statsite/usr/bin
+	install -g 0 -o 0 -d debian/statsite/usr/share/statsite
+
+	cp etc/statsite/statsite.deb.conf debian/statsite/etc/statsite/statsite.conf
+	cp statsite debian/statsite/usr/bin
+	cp systemd/statsite.service debian/statsite/lib/systemd/system
+	cp -r sinks debian/statsite/usr/share/statsite
+	rm debian/statsite/usr/share/statsite/sinks/*.pyc
+
+	dh_installman

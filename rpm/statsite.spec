@@ -32,24 +32,23 @@ exit 0
 make %{?_smp_mflags}
 
 %install
-mkdir -vp $RPM_BUILD_ROOT/usr/sbin
+mkdir -vp $RPM_BUILD_ROOT/usr/bin
 mkdir -vp $RPM_BUILD_ROOT/etc/init.d
 mkdir -vp $RPM_BUILD_ROOT/etc/%{name}
 mkdir -vp $RPM_BUILD_ROOT/etc/tmpfiles.d
 mkdir -vp $RPM_BUILD_ROOT/usr/libexec/%{name}
-mkdir -vp $RPM_BUILD_ROOT/var/run/%{name}
 mkdir -vp $RPM_BUILD_ROOT/var/lib/%{name}
 
 %if 0%{?fedora}%{?el7}
 mkdir -vp $RPM_BUILD_ROOT/%{_unitdir}
-install -m 644 rpm/statsite.service $RPM_BUILD_ROOT/%{_unitdir}
+install -m 644 systemd/statsite.service $RPM_BUILD_ROOT/%{_unitdir}
 install -m 644 rpm/statsite.tmpfiles.conf $RPM_BUILD_ROOT/etc/tmpfiles.d/statsite.conf
 %else
 install -m 755 rpm/statsite.initscript $RPM_BUILD_ROOT/etc/init.d/statsite
 %endif
 
-install -m 755 src/statsite $RPM_BUILD_ROOT/usr/sbin
-install -m 644 rpm/statsite.conf.example $RPM_BUILD_ROOT/etc/%{name}/statsite.conf
+install -m 755 src/statsite $RPM_BUILD_ROOT/usr/bin
+install -m 644 etc/statsite/statsite.rpm.conf $RPM_BUILD_ROOT/etc/%{name}/statsite.conf
 cp -a sinks $RPM_BUILD_ROOT/usr/libexec/%{name}
 
 %clean
@@ -99,9 +98,8 @@ exit 0
 %doc LICENSE
 %doc CHANGELOG.md
 %doc README.md
-%doc rpm/statsite.conf.example
 %config /etc/%{name}/statsite.conf
-%attr(755, root, root) /usr/sbin/statsite
+%attr(755, root, root) /usr/bin/statsite
 %if 0%{?fedora}%{?el7}
 %attr(644, root, root) %{_unitdir}/statsite.service
 %dir /etc/tmpfiles.d
@@ -111,7 +109,6 @@ exit 0
 %endif
 %dir /usr/libexec/statsite
 %dir /usr/libexec/statsite/sinks
-%attr(755, statsite, statsite) /var/run/statsite
 %attr(755, statsite, statsite) /var/lib/statsite
 %attr(755, root, root) /usr/libexec/statsite/sinks/__init__.py
 %attr(755, root, root) /usr/libexec/statsite/sinks/binary_sink.py

@@ -15,7 +15,7 @@
 .sconsign.dblite
 tests/build/
 test_runner
-statsite
+/statsite
 deb/statsite
 *.deb
 .vagrant
