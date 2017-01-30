@@ -1,0 +1,11 @@
+[Unit]
+Description=statsite stats aggregator
+
+[Service]
+User=statsite
+Group=statsite
+ExecStart=/usr/bin/statsite -f /etc/statsite/statsite.conf
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

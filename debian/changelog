@@ -1,3 +1,9 @@
+statsite (0.8.0-1) UNRELEASED; urgency=low
+
+  * Improve systemd support on.
+
+ -- Viacheslav Chimishuk <vchimishuk@yandex.ru>  Fri, 23 Dec 2016 23:28:59 +0200
+
 statsite (0.7.1-1) UNRELEASED; urgency=low
 
   * Initial release. (Closes: #182)
