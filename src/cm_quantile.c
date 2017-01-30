@@ -53,7 +53,7 @@ int init_cm_quantile(double eps, double *quantiles, uint32_t num_quants, cm_quan
     if (eps <= 0 or eps >= 0.5) return -1;
 
     // Verify the quantiles
-    if (!num_quants) return -1;
+    // if (!num_quants) return -1;
     for (int i=0; i < num_quants; i++) {
         double val = quantiles[i];
         if (val <= 0 or val >= 1) return -1;
