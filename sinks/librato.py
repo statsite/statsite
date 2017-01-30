@@ -78,7 +78,6 @@ class LibratoStore(object):
 
         self.sfx_map = {
             'sum': 'sum',
-            'sum_sq' : 'sum_squares',
             'count' : 'count',
             'stdev' : None,
             'lower' : 'min',
