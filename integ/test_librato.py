@@ -19,7 +19,6 @@ def build_librato(options={}):
     options.setdefault("statsite_output", """\
 counts.active_sessions|1.000000|1401577507
 timers.query.sum|1017.000000|1401577507
-timers.query.sum_sq|1034289.000000|1401577507
 timers.query.mean|1017.000000|1401577507
 timers.query.lower|1017.000000|1401577507
 timers.query.upper|1017.000000|1401577507
@@ -71,8 +70,7 @@ class TestLibrato(object):
             "count":        1.0,
             "sum":          1017.0,
             "max":          1017.0,
-            "min":          1017.0,
-            "sum_squares":  1034289.0,
+            "min":          1017.0
         }
         
         assert expected_output == self.librato.gauges["query\tlocalhost"]
