@@ -78,6 +78,7 @@ class LibratoStore(object):
 
         self.sfx_map = {
             'sum': 'sum',
+            'sum_sq': None,
             'count' : 'count',
             'stdev' : None,
             'lower' : 'min',
@@ -176,24 +177,39 @@ class LibratoStore(object):
     def sanitize(self, name):
         return self.sanitize_re.sub("_", name)
     
-    def parse_tags(self, name):
+    def parse_tags(self, name, multipart):
         # Find and parse the tags from the name using the syntax name#tag1=value,tag2=value
         s = name.split("#")
         tags = {}
+        raw_tags = []
         
         if len(s) > 1:
-            # Store the actual name
             name = s.pop(0)
-            
+            # Timers will append .p90, .p99 etc to the end of the value of the last tag. Parse the suffix out if this is the last tag's value and set the name
+            if multipart:
+                raw_tags = s.pop().split(",")
+                last_tag = raw_tags.pop(-1)
+                last_tag_split = last_tag.split('.')
+
+                # Store the proper name. The suffix is the last element in split of the last tag.
+                name = name + "." + last_tag_split.pop(-1)
+
+                # Put the tag, without the suffix, back in the list of raw tags
+                if len(last_tag_split) > 1:
+                    # We had periods in the tag value...
+                    raw_tags.extend(".".join(last_tag_split))
+                else:
+                    raw_tags.extend(last_tag_split)
+            else:         
+                raw_tags = s.pop().split(",")
+
             # Parse the tags out
-            raw_tags = s.pop().split(",")
             for raw_tag in raw_tags:
                 # Get the key and value from tag=value
                 tag_pair = raw_tag.split("=")
                 tag_key = tag_pair[0]
                 tag_value = tag_pair[1]
                 tags[tag_key] = tag_value
-            
         return name, tags
                 
         
@@ -225,6 +241,8 @@ class LibratoStore(object):
                 source = m.group(1)
                 name = name[0:m.start(0)] + name[m.end(0):]
 
+        # Parse the tags out
+        name, tags = self.parse_tags(name, ismultipart)
         subf = None
         if ismultipart:
             name, subf = self.split_multipart_metric(name)
@@ -235,9 +253,6 @@ class LibratoStore(object):
         if name == None:
             return
             
-        # Parse the tags out
-        name, tags = self.parse_tags(name)
-
         # Add a metric prefix
         if self.prefix:
             name = "%s.%s" % (self.prefix, name)

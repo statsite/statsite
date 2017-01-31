@@ -28,8 +28,8 @@ timers.query.median|1017.000000|1401577507
 timers.query.p95|1017.000000|1401577507
 timers.query.p99|1017.000000|1401577507
 timers.query.rate|16.950000|1401577507
-timers.tags#tag1=value1|16.000000|1401577507
-timers.tags_sum#tag1=value1,tag2=value2.sum|1.000000|1401577507\
+counts.tags#tag1=value1|16.000000|1401577507
+timers.tags_many#tag1=value1,tag2=value2.sum|1.000000|1401577507\
     """)
 
     f = tempfile.NamedTemporaryFile(delete=False)
@@ -127,11 +127,12 @@ class TestLibrato(object):
 
     def test_measurements_with_suffix(self):
         expected_output = {
-            "name":         "tags_sum",
+            "name":         "tags_many",
             "time":         1401577507,
             "sum" :         1.0,
             "tags":         { "host": "localhost", "tag1": "value1", "tag2": "value2" }
         }
+        print(self.librato.measurements)
         
-        assert expected_output == self.librato.measurements["tags_sum\tlocalhost"]
+        assert expected_output == self.librato.measurements["tags_many\tlocalhost"]
         
