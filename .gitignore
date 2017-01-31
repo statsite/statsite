@@ -25,7 +25,8 @@ compile
 
 integ/.cache
 config.log
-
+.sconsign.dblite
+.libs
 .deps
 .deps/*
 src/.deps
@@ -41,7 +42,6 @@ autom4te.cache
 autoscan.log
 autoscan-*.log
 compile
-config.h.in
 configure.scan
 config.status
 depcomp
@@ -58,11 +58,34 @@ autom4te.cache
 #OSX
 .DS_Store
 
+/libtool
 
 Makefile.in
 /Makefile
+man/Makefile
+Makefile
 libtool
 aclocal.m4
 ac_config
-m4
 configure
+
+src/buildconfig.h
+src/buildconfig.h.in
+
+
+deps/check-0.10.0/build-aux/
+deps/check-0.10.0/config.h.in
+deps/check-0.10.0/config.h.in~
+deps/check-0.10.0/check.pc
+deps/check-0.10.0/check_stdint.h
+deps/check-0.10.0/checkmk/checkmk
+deps/check-0.10.0/config.h
+deps/check-0.10.0/src/check.h
+deps/check-0.10.0/tests/test_vars
+
+gmon.out
+src/buildconfig.h.in~
+test-suite.log
+tests/runner
+tests/runner.log
+tests/runner.trs

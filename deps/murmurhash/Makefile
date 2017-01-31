@@ -16,6 +16,10 @@ libmurmur.a: $(OBJECTS)
 clean:
 	$(RM) *.o *.a
 
+check: all
+test: all
+dist:
+distdir:
 distclean: clean
 install:
 uninstall:

@@ -1,0 +1,74 @@
+About Check
+-----------
+
+Check is a unit testing framework for C. It features a simple interface
+for defining unit tests, putting little in the way of the
+developer. Tests are run in a separate address space, so Check can
+catch both assertion failures and code errors that cause segmentation
+faults or other signals. The output from unit tests can be used within
+source code editors and IDEs.
+
+See http://check.sourceforge.net/ for more information, including a
+tutorial.  The tutorial is also available as `info check'.
+
+Installation
+------------
+
+Check has the following dependencies:
+
+  automake-1.9.6 (1.11.3 on OS X if you are using /usr/bin/ar)
+  autoconf-2.59
+  libtool-1.5.22
+  pkg-config-0.20
+  texinfo-4.7 (for documentation)
+  tetex-bin (or any texinfo-compatible TeX installation, for documentation)
+  POSIX sed
+
+The versions specified may be higher than those actually needed.
+
+First, do
+
+$ autoreconf --install
+
+in this directory to set everything up.  autoreconf calls all of the
+necessary tools for you, like autoconf, automake, autoheader, etc.  If
+you ever change something during development, run autoreconf again
+(without --install), and it will perform the minimum set of actions
+necessary.
+
+Then, read the directions in INSTALL if you need more information.
+
+Linking against Check
+---------------------
+
+Check uses variadic macros in check.h, and the strict C90 options for
+gcc will complain about this.  In gcc 4.0 and above you can turn this
+off explicitly with -Wno-variadic-macros.  In a future API it would be
+nice to eliminate these macros.
+
+Debian rationale for not having upstream build packages (.deb files)
+--------------------------------------------------------------------
+
+For debian, it is highly undesirable if the upstream source contains a
+debian directory as this one will never be the same as the "official"
+Debian one, and patching is easier if it's not around.
+
+Sometimes upstream insists on having the possibility to build Debian
+packages themselves, in which case it is best to have a debian
+directory in the CVS, but not ship it when doing "make dist".
+
+Sometimes upstream insists on shipping the debian directory to their
+users so these can easily build a .deb, which is really bad because
+they usually don't remember to change the Debian changelog and version
+accordingly, and generally don't know enough about Debian policy to
+make conforming packages.
+
+So in the end you will have different broken packages compiled on
+various systems floating around which all have the same version number
+and look like official packages.
+
+  -- Robert Lemmen, 2006
+
+The same holds for .rpm packages.  The Check maintainer for Fedora
+Extras, Tom 'spot' Callaway, confirmed that they do not depend on an
+upstream rpm target in Check.

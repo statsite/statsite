@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/p/check/code/!svn/ver/1219/tags/check-0.10.0/cmake
+END
+CheckHeaderDirent.cmake
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/p/check/code/!svn/ver/1219/tags/check-0.10.0/cmake/CheckHeaderDirent.cmake
+END
+check_stdint.h.in
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/p/check/code/!svn/ver/1219/tags/check-0.10.0/cmake/check_stdint.h.in
+END
+CheckTypeExists.cmake
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/p/check/code/!svn/ver/1219/tags/check-0.10.0/cmake/CheckTypeExists.cmake
+END
+config.h.in
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/p/check/code/!svn/ver/1219/tags/check-0.10.0/cmake/config.h.in
+END
+CheckStructMember.cmake
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/p/check/code/!svn/ver/1219/tags/check-0.10.0/cmake/CheckStructMember.cmake
+END

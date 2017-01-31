@@ -1,0 +1,327 @@
+#!/bin/sh
+
+. ./test_vars
+
+##################
+# stdout output
+##################
+suite_output="Running suite(s): S1
+ S2
+ XML escape \" ' < > & tests"
+
+exp_silent=""
+
+if [ $HAVE_FORK -eq 1 ]; then
+exp_minimal_result="37%: Checks: 8, Failures: 4, Errors: 1"
+else
+exp_minimal_result="42%: Checks: 7, Failures: 4, Errors: 0"
+fi
+exp_minimal="$suite_output
+$exp_minimal_result"
+
+if [ $HAVE_FORK -eq 1 ]; then
+exp_normal_result="37%: Checks: 8, Failures: 4, Errors: 1
+${SRCDIR}ex_output.c:17:F:Core:test_fail:0: Failure
+${SRCDIR}ex_output.c:26:E:Core:test_exit:0: (after this point) Early exit with return value 1
+${SRCDIR}ex_output.c:52:F:Core:test_loop:0: Iteration 0 failed
+${SRCDIR}ex_output.c:52:F:Core:test_loop:2: Iteration 2 failed
+${SRCDIR}ex_output.c:58:F:description \" ' < > &:test_xml_esc_fail_msg:0: fail \" ' < > & message"
+else
+exp_normal_result="42%: Checks: 7, Failures: 4, Errors: 0
+${SRCDIR}ex_output.c:17:F:Core:test_fail:0: Failure
+${SRCDIR}ex_output.c:52:F:Core:test_loop:0: Iteration 0 failed
+${SRCDIR}ex_output.c:52:F:Core:test_loop:2: Iteration 2 failed
+${SRCDIR}ex_output.c:58:F:description \" ' < > &:test_xml_esc_fail_msg:0: fail \" ' < > & message"
+fi
+exp_normal="$suite_output
+$exp_normal_result"
+
+
+if [ $HAVE_FORK -eq 1 ]; then
+exp_verbose_result="37%: Checks: 8, Failures: 4, Errors: 1
+${SRCDIR}ex_output.c:11:P:Core:test_pass:0: Passed
+${SRCDIR}ex_output.c:17:F:Core:test_fail:0: Failure
+${SRCDIR}ex_output.c:26:E:Core:test_exit:0: (after this point) Early exit with return value 1
+${SRCDIR}ex_output.c:46:P:Core:test_pass2:0: Passed
+${SRCDIR}ex_output.c:52:F:Core:test_loop:0: Iteration 0 failed
+${SRCDIR}ex_output.c:52:P:Core:test_loop:1: Passed
+${SRCDIR}ex_output.c:52:F:Core:test_loop:2: Iteration 2 failed
+${SRCDIR}ex_output.c:58:F:description \" ' < > &:test_xml_esc_fail_msg:0: fail \" ' < > & message"
+else
+exp_verbose_result="42%: Checks: 7, Failures: 4, Errors: 0
+${SRCDIR}ex_output.c:11:P:Core:test_pass:0: Passed
+${SRCDIR}ex_output.c:17:F:Core:test_fail:0: Failure
+${SRCDIR}ex_output.c:46:P:Core:test_pass2:0: Passed
+${SRCDIR}ex_output.c:52:F:Core:test_loop:0: Iteration 0 failed
+${SRCDIR}ex_output.c:52:P:Core:test_loop:1: Passed
+${SRCDIR}ex_output.c:52:F:Core:test_loop:2: Iteration 2 failed
+${SRCDIR}ex_output.c:58:F:description \" ' < > &:test_xml_esc_fail_msg:0: fail \" ' < > & message"
+fi
+exp_verbose="$suite_output
+$exp_verbose_result"
+
+if [ $HAVE_FORK -eq 1 ]; then
+exp_subunit="test: Core:test_pass
+success: Core:test_pass
+test: Core:test_fail
+failure: Core:test_fail [
+${SRCDIR}ex_output.c:17: Failure
+]
+test: Core:test_exit
+error: Core:test_exit [
+${SRCDIR}ex_output.c:26: (after this point) Early exit with return value 1
+]
+test: Core:test_pass2
+success: Core:test_pass2
+test: Core:test_loop
+failure: Core:test_loop [
+${SRCDIR}ex_output.c:52: Iteration 0 failed
+]
+test: Core:test_loop
+success: Core:test_loop
+test: Core:test_loop
+failure: Core:test_loop [
+${SRCDIR}ex_output.c:52: Iteration 2 failed
+]
+test: description \" ' < > &:test_xml_esc_fail_msg
+failure: description \" ' < > &:test_xml_esc_fail_msg [
+${SRCDIR}ex_output.c:58: fail \" ' < > & message
+]"
+else
+exp_subunit="test: Core:test_pass
+success: Core:test_pass
+test: Core:test_fail
+failure: Core:test_fail [
+${SRCDIR}ex_output.c:17: Failure
+]
+test: Core:test_pass2
+success: Core:test_pass2
+test: Core:test_loop
+failure: Core:test_loop [
+${SRCDIR}ex_output.c:52: Iteration 0 failed
+]
+test: Core:test_loop
+success: Core:test_loop
+test: Core:test_loop
+failure: Core:test_loop [
+${SRCDIR}ex_output.c:52: Iteration 2 failed
+]
+test: description \" ' < > &:test_xml_esc_fail_msg
+failure: description \" ' < > &:test_xml_esc_fail_msg [
+${SRCDIR}ex_output.c:58: fail \" ' < > & message
+]"
+fi
+
+##################
+# log output
+##################
+if [ $HAVE_FORK -eq 1 ]; then
+expected_log_log="Running suite S1
+${SRCDIR}ex_output.c:11:P:Core:test_pass:0: Passed
+${SRCDIR}ex_output.c:17:F:Core:test_fail:0: Failure
+${SRCDIR}ex_output.c:26:E:Core:test_exit:0: (after this point) Early exit with return value 1
+Running suite S2
+${SRCDIR}ex_output.c:46:P:Core:test_pass2:0: Passed
+${SRCDIR}ex_output.c:52:F:Core:test_loop:0: Iteration 0 failed
+${SRCDIR}ex_output.c:52:P:Core:test_loop:1: Passed
+${SRCDIR}ex_output.c:52:F:Core:test_loop:2: Iteration 2 failed
+Running suite XML escape \" ' < > & tests
+${SRCDIR}ex_output.c:58:F:description \" ' < > &:test_xml_esc_fail_msg:0: fail \" ' < > & message
+Results for all suites run:
+37%: Checks: 8, Failures: 4, Errors: 1"
+else
+expected_log_log="Running suite S1
+${SRCDIR}ex_output.c:11:P:Core:test_pass:0: Passed
+${SRCDIR}ex_output.c:17:F:Core:test_fail:0: Failure
+Running suite S2
+${SRCDIR}ex_output.c:46:P:Core:test_pass2:0: Passed
+${SRCDIR}ex_output.c:52:F:Core:test_loop:0: Iteration 0 failed
+${SRCDIR}ex_output.c:52:P:Core:test_loop:1: Passed
+${SRCDIR}ex_output.c:52:F:Core:test_loop:2: Iteration 2 failed
+Running suite XML escape \" ' < > & tests
+${SRCDIR}ex_output.c:58:F:description \" ' < > &:test_xml_esc_fail_msg:0: fail \" ' < > & message
+Results for all suites run:
+42%: Checks: 7, Failures: 4, Errors: 0"
+fi
+
+##################
+# xml output
+##################
+if [ $HAVE_FORK -eq 1 ]; then
+expected_xml="<?xml version=\"1.0\"?>
+<?xml-stylesheet type=\"text/xsl\" href=\"http://check.sourceforge.net/xml/check_unittest.xslt\"?>
+<testsuites xmlns=\"http://check.sourceforge.net/ns\">
+  <suite>
+    <title>S1</title>
+    <test result=\"success\">
+      <fn>ex_output.c:11</fn>
+      <id>test_pass</id>
+      <iteration>0</iteration>
+      <description>Core</description>
+      <message>Passed</message>
+    </test>
+    <test result=\"failure\">
+      <fn>ex_output.c:17</fn>
+      <id>test_fail</id>
+      <iteration>0</iteration>
+      <description>Core</description>
+      <message>Failure</message>
+    </test>
+    <test result=\"error\">
+      <fn>ex_output.c:26</fn>
+      <id>test_exit</id>
+      <iteration>0</iteration>
+      <description>Core</description>
+      <message>Early exit with return value 1</message>
+    </test>
+  </suite>
+  <suite>
+    <title>S2</title>
+    <test result=\"success\">
+      <fn>ex_output.c:46</fn>
+      <id>test_pass2</id>
+      <iteration>0</iteration>
+      <description>Core</description>
+      <message>Passed</message>
+    </test>
+    <test result=\"failure\">
+      <fn>ex_output.c:52</fn>
+      <id>test_loop</id>
+      <iteration>0</iteration>
+      <description>Core</description>
+      <message>Iteration 0 failed</message>
+    </test>
+    <test result=\"success\">
+      <fn>ex_output.c:52</fn>
+      <id>test_loop</id>
+      <iteration>1</iteration>
+      <description>Core</description>
+      <message>Passed</message>
+    </test>
+    <test result=\"failure\">
+      <fn>ex_output.c:52</fn>
+      <id>test_loop</id>
+      <iteration>2</iteration>
+      <description>Core</description>
+      <message>Iteration 2 failed</message>
+    </test>
+  </suite>
+  <suite>
+    <title>XML escape &quot; &apos; &lt; &gt; &amp; tests</title>
+    <test result=\"failure\">
+      <fn>ex_output.c:58</fn>
+      <id>test_xml_esc_fail_msg</id>
+      <iteration>0</iteration>
+      <description>description &quot; &apos; &lt; &gt; &amp;</description>
+      <message>fail &quot; &apos; &lt; &gt; &amp; message</message>
+    </test>
+  </suite>
+</testsuites>"
+expected_duration_count=9
+else
+expected_xml="<?xml version=\"1.0\"?>
+<?xml-stylesheet type=\"text/xsl\" href=\"http://check.sourceforge.net/xml/check_unittest.xslt\"?>
+<testsuites xmlns=\"http://check.sourceforge.net/ns\">
+  <suite>
+    <title>S1</title>
+    <test result=\"success\">
+      <fn>ex_output.c:11</fn>
+      <id>test_pass</id>
+      <iteration>0</iteration>
+      <description>Core</description>
+      <message>Passed</message>
+    </test>
+    <test result=\"failure\">
+      <fn>ex_output.c:17</fn>
+      <id>test_fail</id>
+      <iteration>0</iteration>
+      <description>Core</description>
+      <message>Failure</message>
+    </test>
+  </suite>
+  <suite>
+    <title>S2</title>
+    <test result=\"success\">
+      <fn>ex_output.c:46</fn>
+      <id>test_pass2</id>
+      <iteration>0</iteration>
+      <description>Core</description>
+      <message>Passed</message>
+    </test>
+    <test result=\"failure\">
+      <fn>ex_output.c:52</fn>
+      <id>test_loop</id>
+      <iteration>0</iteration>
+      <description>Core</description>
+      <message>Iteration 0 failed</message>
+    </test>
+    <test result=\"success\">
+      <fn>ex_output.c:52</fn>
+      <id>test_loop</id>
+      <iteration>1</iteration>
+      <description>Core</description>
+      <message>Passed</message>
+    </test>
+    <test result=\"failure\">
+      <fn>ex_output.c:52</fn>
+      <id>test_loop</id>
+      <iteration>2</iteration>
+      <description>Core</description>
+      <message>Iteration 2 failed</message>
+    </test>
+  </suite>
+  <suite>
+    <title>XML escape &quot; &apos; &lt; &gt; &amp; tests</title>
+    <test result=\"failure\">
+      <fn>ex_output.c:58</fn>
+      <id>test_xml_esc_fail_msg</id>
+      <iteration>0</iteration>
+      <description>description &quot; &apos; &lt; &gt; &amp;</description>
+      <message>fail &quot; &apos; &lt; &gt; &amp; message</message>
+    </test>
+  </suite>
+</testsuites>"
+expected_duration_count=8
+fi
+
+##################
+# tap output
+##################
+if [ $HAVE_FORK -eq 1 ]; then
+expected_normal_tap="ok 1 - ${SRCDIR}ex_output.c:Core:test_pass: Passed
+not ok 2 - ${SRCDIR}ex_output.c:Core:test_fail: Failure
+not ok 3 - ${SRCDIR}ex_output.c:Core:test_exit: Early exit with return value 1
+ok 4 - ${SRCDIR}ex_output.c:Core:test_pass2: Passed
+not ok 5 - ${SRCDIR}ex_output.c:Core:test_loop: Iteration 0 failed
+ok 6 - ${SRCDIR}ex_output.c:Core:test_loop: Passed
+not ok 7 - ${SRCDIR}ex_output.c:Core:test_loop: Iteration 2 failed
+not ok 8 - ${SRCDIR}ex_output.c:description \" ' < > &:test_xml_esc_fail_msg: fail \" ' < > & message
+1..8"
+expected_aborted_tap="ok 1 - ${SRCDIR}ex_output.c:Core:test_pass: Passed
+not ok 2 - ${SRCDIR}ex_output.c:Core:test_fail: Failure
+not ok 3 - ${SRCDIR}ex_output.c:Core:test_exit: Early exit with return value 1
+not ok 4 - ${SRCDIR}ex_output.c:Core:test_abort: Early exit with return value 1
+ok 5 - ${SRCDIR}ex_output.c:Core:test_pass2: Passed
+not ok 6 - ${SRCDIR}ex_output.c:Core:test_loop: Iteration 0 failed
+ok 7 - ${SRCDIR}ex_output.c:Core:test_loop: Passed
+not ok 8 - ${SRCDIR}ex_output.c:Core:test_loop: Iteration 2 failed
+not ok 9 - ${SRCDIR}ex_output.c:description \" ' < > &:test_xml_esc_fail_msg: fail \" ' < > & message
+1..9"
+else
+expected_normal_tap="ok 1 - ${SRCDIR}ex_output.c:Core:test_pass: Passed
+not ok 2 - ${SRCDIR}ex_output.c:Core:test_fail: Failure
+ok 3 - ${SRCDIR}ex_output.c:Core:test_pass2: Passed
+not ok 4 - ${SRCDIR}ex_output.c:Core:test_loop: Iteration 0 failed
+ok 5 - ${SRCDIR}ex_output.c:Core:test_loop: Passed
+not ok 6 - ${SRCDIR}ex_output.c:Core:test_loop: Iteration 2 failed
+not ok 7 - ${SRCDIR}ex_output.c:description \" ' < > &:test_xml_esc_fail_msg: fail \" ' < > & message
+1..7"
+# When fork() is unavailable, one of the tests
+# will invoke exit() which will terminate the
+# unit testing program. In that case, the tap
+# results will be incomplete, but the required
+# test plan will be missing, signaling that
+# something bad happened.
+expected_aborted_tap="ok 1 - ${SRCDIR}ex_output.c:Core:test_pass: Passed
+not ok 2 - ${SRCDIR}ex_output.c:Core:test_fail: Failure"
+fi
