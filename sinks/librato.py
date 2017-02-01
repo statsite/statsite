@@ -196,8 +196,10 @@ class LibratoStore(object):
 
                 # Put the tag, without the suffix, back in the list of raw tags
                 if len(last_tag_split) > 1:
-                    # We had periods in the tag value...
-                    raw_tags.extend(".".join(last_tag_split))
+                    t = ".".join(last_tag_split)
+                    # # We had periods in the tag value...
+                    raw_tags.append(t)
+                    # raw_tags.extend(last_tag_split)
                 else:
                     raw_tags.extend(last_tag_split)
             else:         

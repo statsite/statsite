@@ -29,7 +29,8 @@ timers.query.p95|1017.000000|1401577507
 timers.query.p99|1017.000000|1401577507
 timers.query.rate|16.950000|1401577507
 counts.tags#tag1=value1|16.000000|1401577507
-timers.tags_many#tag1=value1,tag2=value2.p90|16.000000|1401577507\
+timers.tags_many#tag1=value1,tag2=value2.p90|16.000000|1401577507
+timers.tags_many_dots#tag1=value1,tag2=value.now.p90|16.000000|1401577507\
     """)
 
     f = tempfile.NamedTemporaryFile(delete=False)
@@ -135,3 +136,11 @@ class TestLibrato(object):
 
         assert expected_output == self.librato.measurements["tags_many.p90\tlocalhost"]
         
+    def test_measurements_with_period_in_tag_value_and_suffix(self):
+        expected_output = {
+            "name":         "tags_many_dots.p90",
+            "time":         1401577507,
+            "value" :         16.0,
+            "tags":         { "host": "localhost", "tag1": "value1", "tag2": "value.now" }
+        }
+        assert expected_output == self.librato.measurements["tags_many_dots.p90\tlocalhost"]
