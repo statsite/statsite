@@ -1,6 +1,7 @@
 """
 Supports flushing statsite metrics to Librato
 """
+import ast
 import sys
 import socket
 import logging
@@ -154,14 +155,13 @@ class LibratoStore(object):
         if config.has_option(sect, "write_to_legacy"):
             self.write_to_legacy = config.getboolean(sect, "write_to_legacy")
         else:
-            self.write_to_legacy = True
+            self.write_to_legacy = False
         
         # Global Tags
         if config.has_option(sect, "tags"):
-            self.tags = config.get(sect, "tags")
+            self.tags = ast.literal_eval(config.get(sect, "tags"))
         else:
             self.tags = {}
-    
 
     def split_multipart_metric(self, name):
         m = self.sfx_re.match(name)
