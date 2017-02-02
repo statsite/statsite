@@ -123,7 +123,7 @@ class TestLibrato(object):
             "name":         "tags",
             "time":         1401577507,
             "value":        16.0,
-            "tags":         { "tag1": "value1" }
+            "tags":         { "source": "localhost", "tag1": "value1" }
         }
         
         assert expected_output == self.librato.measurements["tags\tlocalhost"]
@@ -133,7 +133,7 @@ class TestLibrato(object):
             "name":         "tags_many.p90",
             "time":         1401577507,
             "value" :         16.0,
-            "tags":         { "tag1": "value1", "tag2": "value2" }
+            "tags":         { "source": "localhost", "tag1": "value1", "tag2": "value2" }
         }
 
         assert expected_output == self.librato.measurements["tags_many.p90\tlocalhost"]
@@ -143,6 +143,6 @@ class TestLibrato(object):
             "name":         "tags_many_dots.p90",
             "time":         1401577507,
             "value" :         16.0,
-            "tags":         { "tag1": "value1", "tag2": "value.now" }
+            "tags":         { "source": "localhost", "tag1": "value1", "tag2": "value.now" }
         }
         assert expected_output == self.librato.measurements["tags_many_dots.p90\tlocalhost"]

@@ -117,8 +117,9 @@ class LibratoStore(object):
 
         if config.has_option(sect, 'source'):
             self.source = config.get(sect, 'source')
+            self.host = config.get(sect, 'source')
         else:
-            self.source = socket.gethostname()
+            self.host = socket.gethostname()
 
         if config.has_option(sect, 'source_regex'):
             reg = config.get(sect, 'source_regex')
@@ -236,17 +237,16 @@ class LibratoStore(object):
            self.ex_count_re.match(key) != None:
             ismultipart = True
 
-        if self.write_to_legacy:
-            # Match the source regex
-            if self.source_re != None:
-                m = self.source_re.search(name)
-                if m != None:
-                    source = m.group(1)
-                    name = name[0:m.start(0)] + name[m.end(0):]
+        # Match the source regex
+        if self.source_re != None:
+            m = self.source_re.search(name)
+            if m != None:
+                source = m.group(1)
+                name = name[0:m.start(0)] + name[m.end(0):]
 
-            # Add a source prefix
-            if self.source_prefix:
-                source = "%s.%s" % (self.source_prefix, source)
+        # Add a source prefix
+        if self.source_prefix:
+            source = "%s.%s" % (self.source_prefix, source)
 
 
         # Parse the tags out
@@ -268,8 +268,13 @@ class LibratoStore(object):
         name = self.sanitize(name)
         source = self.sanitize(source)
         
-        # Add the source as a global tag
-        self.tags['host'] = source
+        # Add the hostname as a global tag
+        self.tags['host'] = self.host
+
+        # Add source as a measurement tag if there is a source
+        if source:
+            tags['source'] = source
+
 
         k = "%s\t%s" % (name, source)
         
