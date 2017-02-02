@@ -236,12 +236,18 @@ class LibratoStore(object):
            self.ex_count_re.match(key) != None:
             ismultipart = True
 
-        # Match the source regex
-        if self.source_re != None:
-            m = self.source_re.search(name)
-            if m != None:
-                source = m.group(1)
-                name = name[0:m.start(0)] + name[m.end(0):]
+        if self.write_to_legacy:
+            # Match the source regex
+            if self.source_re != None:
+                m = self.source_re.search(name)
+                if m != None:
+                    source = m.group(1)
+                    name = name[0:m.start(0)] + name[m.end(0):]
+
+            # Add a source prefix
+            if self.source_prefix:
+                source = "%s.%s" % (self.source_prefix, source)
+
 
         # Parse the tags out
         name, tags = self.parse_tags(name, ismultipart)
@@ -259,15 +265,11 @@ class LibratoStore(object):
         if self.prefix:
             name = "%s.%s" % (self.prefix, name)
 
-        # Add a source prefix
-        if self.source_prefix:
-            source = "%s.%s" % (self.source_prefix, source)
-
         name = self.sanitize(name)
         source = self.sanitize(source)
         
-        # Add the source as a tag
-        tags['host'] = source
+        # Add the source as a global tag
+        self.tags['host'] = source
 
         k = "%s\t%s" % (name, source)
         
