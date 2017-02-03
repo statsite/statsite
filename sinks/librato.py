@@ -117,7 +117,9 @@ class LibratoStore(object):
 
         if config.has_option(sect, 'source'):
             self.source = config.get(sect, 'source')
-            self.host = config.get(sect, 'source')
+        
+        if config.has_option(sect, 'host')
+            self.host = config.get(sect, 'host')
         else:
             self.host = socket.gethostname()
 
