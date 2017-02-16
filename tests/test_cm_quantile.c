@@ -20,7 +20,7 @@ START_TEST(test_cm_init_no_quants)
 {
     cm_quantile cm;
     int res = init_cm_quantile(0.01, NULL, 0, &cm);
-    fail_unless(res == -1);
+    fail_unless(res == 0);
 }
 END_TEST
 
