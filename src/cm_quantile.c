@@ -146,12 +146,10 @@ int cm_add_sample(cm_quantile *cm, double sample) {
  * @return 0 on success.
  */
 int cm_flush(cm_quantile *cm) {
-    int rounds = 0;
     while (heap_size(cm->bufLess) or heap_size(cm->bufMore)) {
         if (heap_size(cm->bufMore) == 0) cm_reset_insert_cursor(cm);
         cm_insert(cm);
         cm_compress(cm);
-        rounds++;
     }
     return 0;
 }
@@ -372,4 +370,3 @@ static uint64_t cm_threshold(cm_quantile *cm, uint64_t rank) {
 
     return min_val;
 }
-
