@@ -19,7 +19,6 @@ def build_librato(options={}):
     options.setdefault("statsite_output", """\
 counts.active_sessions|1.000000|1401577507
 timers.query.sum|1017.000000|1401577507
-timers.query.sum_sq|1034289.000000|1401577507
 timers.query.mean|1017.000000|1401577507
 timers.query.lower|1017.000000|1401577507
 timers.query.upper|1017.000000|1401577507
@@ -28,7 +27,10 @@ timers.query.stdev|0.000000|1401577507
 timers.query.median|1017.000000|1401577507
 timers.query.p95|1017.000000|1401577507
 timers.query.p99|1017.000000|1401577507
-timers.query.rate|16.950000|1401577507\
+timers.query.rate|16.950000|1401577507
+counts.tags#tag1=value1|16.000000|1401577507
+timers.tags_many#tag1=value1,tag2=value2.p90|16.000000|1401577507
+timers.tags_many_dots#tag1=value1,tag2=value.now.p90|16.000000|1401577507\
     """)
 
     f = tempfile.NamedTemporaryFile(delete=False)
@@ -53,6 +55,8 @@ source = localhost\
         config += "\nsource_regex = %s" % (options["source_regex"])
     if "source_prefix" in options:
         config += "\nsource_prefix = %s" % (options["source_prefix"])
+    
+    config += "\nwrite_to_legacy = True" 
 
     return config
 
@@ -69,9 +73,9 @@ class TestLibrato(object):
             "count":        1.0,
             "sum":          1017.0,
             "max":          1017.0,
-            "min":          1017.0,
-            "sum_squares":  1034289.0,
+            "min":          1017.0
         }
+        
         assert expected_output == self.librato.gauges["query\tlocalhost"]
 
     def test_counts_send_as_gauges(self):
@@ -113,3 +117,32 @@ class TestLibrato(object):
         }
 
         assert expected_output == self.librato.gauges["baby-animals.active_sessions\tproduction.puppy-cam-1"]
+    
+    def test_measurements_with_tags(self):
+        expected_output = {
+            "name":         "tags",
+            "time":         1401577507,
+            "value":        16.0,
+            "tags":         { "source": "localhost", "tag1": "value1" }
+        }
+        
+        assert expected_output == self.librato.measurements["tags\tlocalhost"]
+
+    def test_measurements_with_suffix(self):
+        expected_output = {
+            "name":         "tags_many.p90",
+            "time":         1401577507,
+            "value" :         16.0,
+            "tags":         { "source": "localhost", "tag1": "value1", "tag2": "value2" }
+        }
+
+        assert expected_output == self.librato.measurements["tags_many.p90\tlocalhost"]
+        
+    def test_measurements_with_period_in_tag_value_and_suffix(self):
+        expected_output = {
+            "name":         "tags_many_dots.p90",
+            "time":         1401577507,
+            "value" :         16.0,
+            "tags":         { "source": "localhost", "tag1": "value1", "tag2": "value.now" }
+        }
+        assert expected_output == self.librato.measurements["tags_many_dots.p90\tlocalhost"]

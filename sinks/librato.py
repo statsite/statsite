@@ -1,6 +1,7 @@
 """
 Supports flushing statsite metrics to Librato
 """
+import ast
 import sys
 import socket
 import logging
@@ -67,7 +68,8 @@ class LibratoStore(object):
 
         self.flush_timeout_secs = 5
         self.gauges = {}
-
+        self.measurements = {}
+        
         # Limit our payload sizes
         self.max_metrics_payload = 500
 
@@ -77,7 +79,7 @@ class LibratoStore(object):
 
         self.sfx_map = {
             'sum': 'sum',
-            'sum_sq' : 'sum_squares',
+            'sum_sq': None,
             'count' : 'count',
             'stdev' : None,
             'lower' : 'min',
@@ -115,8 +117,11 @@ class LibratoStore(object):
 
         if config.has_option(sect, 'source'):
             self.source = config.get(sect, 'source')
+        
+        if config.has_option(sect, 'host')
+            self.host = config.get(sect, 'host')
         else:
-            self.source = socket.gethostname()
+            self.host = socket.gethostname()
 
         if config.has_option(sect, 'source_regex'):
             reg = config.get(sect, 'source_regex')
@@ -148,6 +153,18 @@ class LibratoStore(object):
             self.extended_counters = config.getboolean(sect, "extended_counters")
         else:
             self.extended_counters = False
+        
+        # Check if we want to also send measurements to legacy Librato API
+        if config.has_option(sect, "write_to_legacy"):
+            self.write_to_legacy = config.getboolean(sect, "write_to_legacy")
+        else:
+            self.write_to_legacy = False
+        
+        # Global Tags
+        if config.has_option(sect, "tags"):
+            self.tags = ast.literal_eval(config.get(sect, "tags"))
+        else:
+            self.tags = {}
 
     def split_multipart_metric(self, name):
         m = self.sfx_re.match(name)
@@ -162,6 +179,45 @@ class LibratoStore(object):
 
     def sanitize(self, name):
         return self.sanitize_re.sub("_", name)
+    
+    def parse_tags(self, name, multipart):
+        # Find and parse the tags from the name using the syntax name#tag1=value,tag2=value
+        s = name.split("#")
+        tags = {}
+        raw_tags = []
+        
+        if len(s) > 1:
+            name = s.pop(0)
+            # Timers will append .p90, .p99 etc to the end of the value of the last tag. Parse the suffix out if this is the last tag's value and set the name
+            if multipart:
+                raw_tags = s.pop().split(",")
+                last_tag = raw_tags.pop(-1)
+                last_tag_split = last_tag.split('.')
+
+                # Store the proper name. The suffix is the last element in split of the last tag.
+                name = name + "." + last_tag_split.pop(-1)
+
+                # Put the tag, without the suffix, back in the list of raw tags
+                if len(last_tag_split) > 1:
+                    t = ".".join(last_tag_split)
+                    # # We had periods in the tag value...
+                    raw_tags.append(t)
+                    # raw_tags.extend(last_tag_split)
+                else:
+                    raw_tags.extend(last_tag_split)
+            else:         
+                raw_tags = s.pop().split(",")
+
+            # Parse the tags out
+            for raw_tag in raw_tags:
+                # Get the key and value from tag=value
+                tag_pair = raw_tag.split("=")
+                tag_key = tag_pair[0]
+                tag_value = tag_pair[1]
+                tags[tag_key] = tag_value
+        return name, tags
+                
+        
 
     def add_measure(self, key, value, time):
         # metric and source names must be 255 or fewer characters
@@ -190,6 +246,13 @@ class LibratoStore(object):
                 source = m.group(1)
                 name = name[0:m.start(0)] + name[m.end(0):]
 
+        # Add a source prefix
+        if self.source_prefix:
+            source = "%s.%s" % (self.source_prefix, source)
+
+
+        # Parse the tags out
+        name, tags = self.parse_tags(name, ismultipart)
         subf = None
         if ismultipart:
             name, subf = self.split_multipart_metric(name)
@@ -199,28 +262,43 @@ class LibratoStore(object):
         # Bail if skipping
         if name == None:
             return
-
+            
         # Add a metric prefix
         if self.prefix:
             name = "%s.%s" % (self.prefix, name)
 
-        # Add a source prefix
-        if self.source_prefix:
-            source = "%s.%s" % (self.source_prefix, source)
-
         name = self.sanitize(name)
         source = self.sanitize(source)
+        
+        # Add the hostname as a global tag
+        self.tags['host'] = self.host
+
+        # Add source as a measurement tag if there is a source
+        if source:
+            tags['source'] = source
+
 
         k = "%s\t%s" % (name, source)
+        
+        if k not in self.measurements:
+            self.measurements[k] = {
+                'name': name,
+                'tags' : tags,
+                'time' : ts
+            }
+            
+        self.measurements[k][subf] = value
+        
+        # Build out the legacy gauges
         if k not in self.gauges:
             self.gauges[k] = {
-                'name' : name,
-                'source' : source,
-                'measure_time' : ts,
-                }
-
+                'name': name,
+                'source': source,
+                'measure_time': ts
+            }
+            
         self.gauges[k][subf] = value
-
+            
     def build(self, metrics):
         """
         Build metric data to send to Librato
@@ -237,14 +315,18 @@ class LibratoStore(object):
 
             self.add_measure(k, vs, ts)
 
-    def flush_payload(self, headers, g):
+    def flush_payload(self, headers, m, legacy = False):
         """
         POST a payload to Librato.
         """
-
-        body = json.dumps({ 'gauges' : g })
-
-        url = "%s/v1/metrics" % (self.api)
+        
+        if legacy:
+            body = json.dumps({ 'gauges' : m })
+            url = "%s/v1/metrics" % (self.api)
+        else:
+            body = json.dumps({ 'measurements' : m, 'tags': self.tags })
+            url = "%s/v1/measurements" % (self.api)
+                
         req = urllib2.Request(url, body, headers)
 
         try:
@@ -269,9 +351,9 @@ class LibratoStore(object):
         """
 
         # Nothing to do
-        if len(self.gauges) == 0:
+        if len(self.measurements) == 0:
             return
-
+    
         headers = {
             'Content-Type': 'application/json',
             'User-Agent': self.build_user_agent(),
@@ -279,9 +361,13 @@ class LibratoStore(object):
             }
 
         metrics = []
+        legacy_metrics = []
         count = 0
-        for g in self.gauges.values():
-            metrics.append(g)
+        
+        values = self.measurements.values()
+        
+        for measure in values:
+            metrics.append(measure)
             count += 1
 
             if count >= self.max_metrics_payload:
@@ -291,6 +377,25 @@ class LibratoStore(object):
 
         if count > 0:
             self.flush_payload(headers, metrics)
+        
+        # If enabled, submit flush metrics to Librato's legacy API
+        if self.write_to_legacy:
+            if len(self.gauges) == 0:
+                return
+            values = self.gauges.values()
+            
+            for measure in values:
+                legacy_metrics.append(measure)
+                count += 1
+
+                if count >= self.max_metrics_payload:
+                    self.flush_payload(headers, legacy_metrics, True)
+                    count = 0
+                    legacy_metrics = []
+
+            if count > 0:
+                self.flush_payload(headers, legacy_metrics, True)
+        
 
     def build_basic_auth(self):
         base64string = base64.encodestring('%s:%s' % (self.email, self.token))
@@ -317,7 +422,7 @@ if __name__ == "__main__":
 
     # Get all the inputs
     metrics = sys.stdin.read()
-
+    
     # Flush
     librato.build(metrics.splitlines())
     librato.flush()
