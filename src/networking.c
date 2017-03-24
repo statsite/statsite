@@ -232,6 +232,14 @@ static int setup_udp_listener(statsite_networking *netconf) {
     int flags = fcntl(udp_listener_fd, F_GETFL, 0);
     fcntl(udp_listener_fd, F_SETFL, flags | O_NONBLOCK);
 
+    // Set the RCVBUF socket buffer
+    if (netconf->config->udp_rcvbuf) {
+        optval = netconf->config->udp_rcvbuf;
+        if (setsockopt(udp_listener_fd, SOL_SOCKET, SO_RCVBUF, &optval, sizeof(optval))) {
+            syslog(LOG_ERR, "Failed to set SO_RCVBUF! Err: %s\n", strerror(errno));
+        }
+    }
+
     // Allocate a connection object for the UDP socket,
     // ensure a min-buffer size of 64K
     conn_info *conn = get_conn(netconf, udp_listener_fd);

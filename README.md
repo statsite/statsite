@@ -155,6 +155,9 @@ options must exist in the `statsite` section of the INI file:
 
 * udp\_port : Integer, sets the UDP port. Default 8125. 0 to disable.
 
+* udp_rcvbuf : Integer, sets the SO_RCVBUF socket buffer in bytes on the UDP port.
+  Defaults to 0 which does not change the OS default setting.
+
 * bind\_address : The address to bind on. Defaults to 0.0.0.0
 
 * parse\_stdin: Enables parsing stdin as an input stream. Defaults to 0.
