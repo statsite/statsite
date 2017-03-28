@@ -272,6 +272,11 @@ aggregated and this is sent to the store.
 Gauges also support "delta" updates, which are supported by prefixing the
 value with either a `+` or a `-`. This implies you can't explicitly set a gauge to a negative number without first setting it to zero.
 
+Multiple metrics may be batched together in one UDP packet a separated by a
+newline (`\n`) character.  Care must be taken to keep UDP data size smaller
+than the network MTU minus 28 bytes for IP/UDP headers.  Statsite supports
+a maximum UDP data length of 1500 bytes.
+
 Examples:
 
 The following is a simple key/value pair, in this case reporting how many
