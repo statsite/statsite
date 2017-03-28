@@ -48,6 +48,7 @@ typedef struct histogram_config {
 typedef struct {
     int tcp_port;
     int udp_port;
+    int udp_rcvbuf;
     char *bind_address;
     bool parse_stdin;
     char *log_level;

@@ -14,7 +14,7 @@ command -v libtoolize >/dev/null 2>&1 && libtoolize --force --copy
 # Execute glibtoolize as that's what OSX has, usually
 command -v glibtoolize >/dev/null 2>&1 && glibtoolize --force --copy
 
-#autoheader # We dont need this (yet?)
+autoheader # We dont need this (yet?)
 
 automake --add-missing --copy
 autoconf

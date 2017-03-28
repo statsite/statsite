@@ -4,10 +4,12 @@ Supports flushing metrics to graphite
 import sys
 import socket
 import logging
+import pickle
+import struct
 
 
 class GraphiteStore(object):
-    def __init__(self, host="localhost", port=2003, prefix="statsite.", attempts=3):
+    def __init__(self, host="localhost", port=2003, prefix="statsite.", attempts=3, protocol='lines'):
         """
         Implements an interface that allows metrics to be persisted to Graphite.
         Raises a :class:`ValueError` on bad arguments.
@@ -26,6 +28,8 @@ class GraphiteStore(object):
             raise ValueError("Port must be positive!")
         if attempts < 1:
             raise ValueError("Must have at least 1 attempt!")
+        if protocol not in ["pickle", "lines"]:
+            raise ValueError("Supported protocols are pickle, lines")
 
         self.logger = logging.getLogger("statsite.graphitestore")
         self.host = host
@@ -33,8 +37,9 @@ class GraphiteStore(object):
         self.prefix = prefix
         self.attempts = attempts
         self.sock = self._create_socket()
+        self.flush = self.flush_pickle if protocol == "pickle" else self.flush_lines
 
-    def flush(self, metrics):
+    def flush_lines(self, metrics):
         """
         Flushes the metrics provided to Graphite.
 
@@ -57,6 +62,40 @@ class GraphiteStore(object):
         # Serialize writes to the socket
         try:
             self._write_metric(data)
+        except Exception:
+            self.logger.exception("Failed to write out the metrics!")
+
+
+    def flush_pickle(self, metrics):
+        """
+        Flushes the metrics provided to Graphite.
+
+       :Parameters:
+        - `metrics` : A list of "key|value|timestamp" strings.
+        """
+        if not metrics:
+            return
+
+        # transform a list of strings into the list of tuples that
+        # pickle graphite interface supports, in the form of
+        # (key, (timestamp, value))
+        # http://graphite.readthedocs.io/en/latest/feeding-carbon.html#the-pickle-protocol
+        metrics_fmt = []
+        for m in metrics:
+            if m.count("|") == 2:
+                met = m.split("|")
+                metrics_fmt.append((self.prefix + met[0], (met[2], met[1])))
+
+        # do pickle the list of tuples
+        # add the header the pickle protocol wants
+        payload = pickle.dumps(metrics_fmt, protocol=2)
+        header = struct.pack("!L", len(payload))
+        message = header + payload
+
+        self.logger.info("Outputting %d metrics" % len(metrics))
+
+        try:
+            self._write_metric(message)
         except Exception:
             self.logger.exception("Failed to write out the metrics!")
 

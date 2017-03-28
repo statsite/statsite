@@ -29,6 +29,7 @@ static double default_quantiles[] = {0.5, 0.95, 0.99};
 static const statsite_config DEFAULT_CONFIG = {
     8125,               // TCP defaults to 8125
     8125,               // UDP on 8125
+    0,                  // RCVBUF for UDP sockets unchanged from OS default
     "::",               // Listen on all addresses
     false,              // Do not parse stdin by default
     "DEBUG",            // DEBUG level
@@ -311,6 +312,8 @@ static int config_callback(void* user, const char* section, const char* name, co
         return value_to_int(value, &config->tcp_port);
     } else if (NAME_MATCH("udp_port")) {
         return value_to_int(value, &config->udp_port);
+    } else if (NAME_MATCH("udp_rcvbuf")) {
+        return value_to_int(value, &config->udp_rcvbuf);
     } else if (NAME_MATCH("flush_interval")) {
          return value_to_int(value, &config->flush_interval);
     } else if (NAME_MATCH("parse_stdin")) {

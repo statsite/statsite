@@ -53,7 +53,7 @@ int init_cm_quantile(double eps, double *quantiles, uint32_t num_quants, cm_quan
     if (eps <= 0 or eps >= 0.5) return -1;
 
     // Verify the quantiles
-    if (!num_quants) return -1;
+    // if (!num_quants) return -1;
     for (int i=0; i < num_quants; i++) {
         double val = quantiles[i];
         if (val <= 0 or val >= 1) return -1;
@@ -146,12 +146,10 @@ int cm_add_sample(cm_quantile *cm, double sample) {
  * @return 0 on success.
  */
 int cm_flush(cm_quantile *cm) {
-    int rounds = 0;
     while (heap_size(cm->bufLess) or heap_size(cm->bufMore)) {
         if (heap_size(cm->bufMore) == 0) cm_reset_insert_cursor(cm);
         cm_insert(cm);
         cm_compress(cm);
-        rounds++;
     }
     return 0;
 }
@@ -372,4 +370,3 @@ static uint64_t cm_threshold(cm_quantile *cm, uint64_t rank) {
 
     return min_val;
 }
-
