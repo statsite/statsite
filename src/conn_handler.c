@@ -610,6 +610,16 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
         if (peek_client_bytes(handle->conn, MIN_BINARY_HEADER_SIZE, (char**)&cmd, &should_free))
             return 0;  // Return if no command is available
 
+        // Check for UDP record separator inserted by UDP handler
+        if (cmd[0] == '\n') {
+            if (should_free)
+                free(cmd);
+            if (seek_client_bytes(handle->conn, 1))
+                return 0;  // End of buffer, shouldn't happen
+            if (peek_client_bytes(handle->conn, MIN_BINARY_HEADER_SIZE, (char**)&cmd, &should_free))
+                return 0;  // found end of buffer
+        }
+
         // Check for the magic byte
         if (unlikely(cmd[0] != BINARY_MAGIC_BYTE)) {
             syslog(LOG_WARNING, "Received command from binary stream without magic byte! Byte: %u", cmd[0]);
