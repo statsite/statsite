@@ -47,14 +47,15 @@ def build_librato_config(options):
     config = """\
 [librato]
 email = john@example.com
-token = 02ac4003c4fcd11bf9cee34e34263155dc7ba1906c322d167db6ab4b2cd2082b
-source = localhost\
+token = 02ac4003c4fcd11bf9cee34e34263155dc7ba1906c322d167db6ab4b2cd2082b\
     """
-
+    if "source" in options:
+        config += "\nsource = %s" % (options["source"])
     if "source_regex" in options:
         config += "\nsource_regex = %s" % (options["source_regex"])
     if "source_prefix" in options:
         config += "\nsource_prefix = %s" % (options["source_prefix"])
+
     
     config += "\nwrite_to_legacy = True" 
 
@@ -63,7 +64,7 @@ source = localhost\
 
 class TestLibrato(object):
     def setup_method(self, method):
-        self.librato = build_librato()
+        self.librato = build_librato({"source": "localhost"})
 
     def test_gauge_specific_params_on_timers(self):
         expected_output = {
@@ -91,6 +92,7 @@ class TestLibrato(object):
         self.librato = build_librato({
             "statsite_output": "counts.baby-animals.source__puppy-cam-1__.active_sessions|1.000000|1401577507",
             "source_regex": "\.source__(.*?)__",
+            "source": "localhost"
         })
 
         expected_output = {
@@ -107,6 +109,7 @@ class TestLibrato(object):
             "statsite_output": "counts.baby-animals.source__puppy-cam-1__.active_sessions|1.000000|1401577507",
             "source_regex": "\.source__(.*?)__",
             "source_prefix": "production",
+            "source": "localhost"
         })
 
         expected_output = {
@@ -127,6 +130,17 @@ class TestLibrato(object):
         }
         
         assert expected_output == self.librato.measurements["tags\tlocalhost"]
+
+    def test_measurements_with_tags_no_source(self):
+        self.librato = build_librato()
+        expected_output = {
+            "name":         "tags",
+            "time":         1401577507,
+            "value":        16.0,
+            "tags":         { "tag1": "value1" }
+        }
+        
+        assert expected_output == self.librato.measurements["tags"]
 
     def test_measurements_with_suffix(self):
         expected_output = {

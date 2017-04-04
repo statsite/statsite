@@ -117,6 +117,8 @@ class LibratoStore(object):
 
         if config.has_option(sect, 'source'):
             self.source = config.get(sect, 'source')
+        else:
+            self.source = None
         
         if config.has_option(sect, 'host'):
             self.host = config.get(sect, 'host')
@@ -268,18 +270,23 @@ class LibratoStore(object):
             name = "%s.%s" % (self.prefix, name)
 
         name = self.sanitize(name)
-        source = self.sanitize(source)
         
         # Add the hostname as a global tag
         self.tags['host'] = self.host
 
-        # Add source as a measurement tag if there is a source
         if source:
+            # Sanitize
+            source = self.sanitize(source)
+
+            # Add a tag of source
             tags['source'] = source
 
+            # Build a key for the dict that will hold all the measurements to
+            # submit
+            k = "%s\t%s" % (name, source)
+        else:
+            k = name
 
-        k = "%s\t%s" % (name, source)
-        
         if k not in self.measurements:
             self.measurements[k] = {
                 'name': name,
