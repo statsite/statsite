@@ -64,7 +64,7 @@ class LibratoStore(object):
         self.parse_conf(conffile)
 
         self.sink_name = "statsite-librato"
-        self.sink_version = "0.0.1"
+        self.sink_version = "1.0.1"
 
         self.flush_timeout_secs = 5
         self.gauges = {}
@@ -118,7 +118,7 @@ class LibratoStore(object):
         if config.has_option(sect, 'source'):
             self.source = config.get(sect, 'source')
         
-        if config.has_option(sect, 'host')
+        if config.has_option(sect, 'host'):
             self.host = config.get(sect, 'host')
         else:
             self.host = socket.gethostname()
