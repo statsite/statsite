@@ -4,8 +4,6 @@ Description=Statsite metrics aggregation server
 [Service]
 User=statsite
 Group=statsite
-RuntimeDirectory=statsite
-PIDFile=/var/run/statsite/statsite.pid
 ExecStart=/usr/bin/statsite -f /etc/statsite/statsite.conf
 Restart=on-failure
 

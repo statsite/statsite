@@ -18,15 +18,4 @@ pre-start script
     test -r /etc/statsite/statsite.conf || { stop; exit 1; }
 end script
 
-script
-    exec /usr/bin/statsite -f /etc/statsite/statsite.conf
-end script
-
-post-start script
-  PID=`status statsite | egrep -oi '([0-9]+)$' | head -n1`
-  echo $PID > /var/run/statsite/statsite.pid
-end script
-
-post-stop script
-  rm -f /var/run/statsite/statsite.pid
-end script
+exec /usr/bin/statsite -f /etc/statsite/statsite.conf
