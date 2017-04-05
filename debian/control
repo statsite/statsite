@@ -3,7 +3,11 @@ Maintainer: John Keates <john@keates.nl>
 Section: misc
 Priority: optional
 Standards-Version: 3.9.2
-Build-Depends: debhelper (>= 9), dh-autoreconf, check, python-pytest
+Build-Depends: debhelper (>= 9),
+               dh-autoreconf,
+               dh-systemd,
+               check,
+               python-pytest
 
 Package: statsite
 Architecture: any

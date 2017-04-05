@@ -1,0 +1,14 @@
+[Unit]
+Description=Statsite metrics aggregation server
+
+[Service]
+Type=forking
+User=statsite
+Group=statsite
+RuntimeDirectory=/var/run/statsite
+PIDFile=/var/run/statsite/statsite.pid
+ExecStart=/usr/bin/statsite -f /etc/statsite/statsite.conf
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,37 @@
+#! /bin/sh
+# postinst script for statsite
+#
+
+set -e
+
+PACKAGE="statsite"
+USER="${PACKAGE}"
+GROUP="${PACKAGE}"
+HOME="/var/run/${PACKAGE}"
+
+case "$1" in
+configure)
+
+	if ! getent passwd -- "${USER}" >/dev/null 2>&1 ; then
+	adduser --home "${HOME}" \
+		--group \
+		--system \
+		--disabled-password \
+		--no-create-home \
+		--gecos "Debian Statsite daemon user" \
+		"${USER}"
+	fi
+
+    OWNER=$(env stat -c '%U' "${HOME}")
+    if [ -d "${HOME}" ] && [ "x$OWNER" = "x$USER" ] ; then
+        echo 'Fixing permissions ...'
+        if ! dpkg-statoverride --list "${HOME}" >/dev/null 2>&1; then
+            dpkg-statoverride --update --add "${USER}" "${GROUP}" 0755 "${HOME}"
+        fi
+    fi
+;;
+esac
+
+#DEBHELPER#
+
+exit 0
