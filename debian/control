@@ -6,7 +6,7 @@ Standards-Version: 3.9.2
 Build-Depends: debhelper (>= 9),
                dh-autoreconf,
                dh-systemd,
-               check,
+               check (>= 0.10.0),
                python-pytest
 
 Package: statsite
