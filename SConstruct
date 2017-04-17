@@ -28,6 +28,15 @@ if platform.system() == "Darwin":
     env.Append(CCFLAGS= ' -I/usr/local/include/')
     env.Append(LINKFLAGS= ' -L/usr/local/lib/')
 
+instdir = ARGUMENTS.get('PREFIX')
+if instdir == None:
+   instdir = "/usr/local"
+bin = '%s/bin' % instdir
+etc = '/etc'
+share = '%s/share/statsite' % instdir
+
+env_install = Environment()
+
 objs = env_statsite_with_err.Object('src/hashmap', 'src/hashmap.c')           + \
         env_statsite_with_err.Object('src/heap', 'src/heap.c')                + \
         env_statsite_with_err.Object('src/radix', 'src/radix.c')              + \
@@ -52,5 +61,20 @@ elif platform.system() == 'SunOS':
 statsite = env_statsite_with_err.Program('statsite', objs + ["src/statsite.c"], LIBS=statsite_libs)
 statsite_test = env_statsite_without_err.Program('test_runner', objs + Glob("tests/runner.c"), LIBS=statsite_libs + ["check"])
 
+statsite_conf = env_statsite_with_err.File('src/statsite.conf')
+cloudwatch = env_install.File('sinks/cloudwatch.sh')
+binary_sink = env_install.File('sinks/binary_sink.py')
+graphite_sink = env_install.File('sinks/graphite.py')
+gmetric_sink = env_install.File('sinks/gmetric.py')
+influxdb_sink = env_install.File('sinks/influxdb.py')
+librato_sink = env_install.File('sinks/librato.py')
+opentsdb_sink = env_install.File('sinks/opentsdb.js')
+json_sink = env_install.File('sinks/statsite_json_sink.rb')
+
 # By default, only compile statsite
 Default(statsite)
+
+env_install.Install(bin, statsite)
+env_install.Install(share, [cloudwatch, binary_sink, graphite_sink, gmetric_sink, opentsdb_sink, influxdb_sink, librato_sink])
+env_install.Install(etc, statsite_conf)
+env_install.Alias('install', [bin, etc, share])
