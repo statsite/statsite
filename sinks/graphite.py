@@ -51,12 +51,13 @@ class GraphiteStore(object):
 
         self.logger.info("Outputting %d metrics" % len(metrics))
 
-        # Construct the output, ensure no spaces in metric name
+        # Construct the output, ensure no spaces and slashes in metric name
         lines = list()
         for m in metrics:
             if m.count("|") == 2:
                 met = m.split("|")
-                lines.append("%s %s %s" % (self.prefix + met[0].strip().replace(" ", "_"), met[2], met[1]))
+                met[0] = met[0].strip().replace(" ", "_").replace("/", "_")
+                lines.append("%s %s %s" % (self.prefix + met[0], met[2], met[1]))
 
         data = "\n".join(lines) + "\n"
 
