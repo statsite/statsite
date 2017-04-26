@@ -162,3 +162,14 @@ cd statsite
 make test
 make integ
 ~~~~
+
+
+
+
+CentOS
+------
+
+Install packages:
+
+yum groupinstall 'Development Tools'
+yum install check
