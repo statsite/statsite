@@ -438,18 +438,22 @@ static int read_client_data(conn_info *conn) {
  * of what to do.
  */
 static void handle_udp_message(aeEventLoop *loop, int fd, void *edata, int mask) {
-		statsite_networking *netconf = (statsite_networking *) edata;
+    struct iovec vectors[2];
+    int num_vectors;
+    ssize_t read_bytes;
+    statsite_networking *netconf = (statsite_networking *) edata;
 
-    while (1) {
-        // Get the associated connection struct
-        conn_info *conn = netconf->udp_client;
+    // Get the associated connection struct
+    conn_info *conn = netconf->udp_client;
 
-        // Clear the input buffer
-        circbuf_clear(&conn->input);
+    // Clear the input buffer
+    circbuf_clear(&conn->input);
 
+    // Loop until our buffer cannot hold another UDP packet (using a 1500
+    // byte MTU) or we cannot read another packet off the wire.  We do not
+    // read continuously off of the UDP socket to preserve timer execution.
+    while (circbuf_avail_buf(&conn->input) > 1500) {
         // Build the IO vectors to perform the read
-        struct iovec vectors[2];
-        int num_vectors;
         circbuf_setup_readv_iovec(&conn->input, (struct iovec*)&vectors, &num_vectors);
 
         /*
@@ -458,20 +462,19 @@ static void handle_udp_message(aeEventLoop *loop, int fd, void *edata, int mask)
          * be a contiguous buffer.
          */
         assert(num_vectors == 1);
-        ssize_t read_bytes = recv(fd, vectors[0].iov_base,
-                                    vectors[0].iov_len, 0);
+        read_bytes = recv(fd, vectors[0].iov_base, vectors[0].iov_len, 0);
 
         // Make sure we actually read something
         if (read_bytes == 0) {
             syslog(LOG_DEBUG, "Got empty UDP packet. [%d]\n", fd);
-            return;
+            continue;
 
         } else if (read_bytes == -1) {
             if (errno != EAGAIN && errno != EINTR) {
                 syslog(LOG_ERR, "Failed to recv() from connection [%d]! %s.",
                         fd, strerror(errno));
             }
-            return;
+            break;
         }
 
         // Update the write cursor
@@ -482,11 +485,11 @@ static void handle_udp_message(aeEventLoop *loop, int fd, void *edata, int mask)
         // it's not present.
         if (conn->input.buffer[conn->input.write_cursor - 1] != '\n')
             circbuf_write(&conn->input, "\n", 1);
-
-        // Invoke the connection handler
-        statsite_conn_handler handle = {netconf->config, netconf->udp_client};
-        handle_client_connect(&handle);
     }
+
+    // Invoke the connection handler
+    statsite_conn_handler handle = {netconf->config, netconf->udp_client};
+    handle_client_connect(&handle);
 }
 
 
