@@ -49,14 +49,16 @@ class GraphiteStore(object):
         if not metrics:
             return
 
-        # Construct the output
-        metrics = [m.split("|") for m in metrics if m and m.count("|") == 2]
-
         self.logger.info("Outputting %d metrics" % len(metrics))
-        if self.prefix:
-            lines = ["%s%s %s %s" % (self.prefix, k, v, ts) for k, v, ts in metrics]
-        else:
-            lines = ["%s %s %s" % (k, v, ts) for k, v, ts in metrics]
+
+        # Construct the output, ensure no spaces and slashes in metric name
+        lines = list()
+        for m in metrics:
+            if m.count("|") == 2:
+                met = m.split("|")
+                met[0] = met[0].strip().replace(" ", "_").replace("/", "_")
+                lines.append("%s %s %s" % (self.prefix + met[0], met[2], met[1]))
+
         data = "\n".join(lines) + "\n"
 
         # Serialize writes to the socket
