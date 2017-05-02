@@ -1,0 +1,1 @@
+/lib/init/upstart-job /etc/init.d/statsite

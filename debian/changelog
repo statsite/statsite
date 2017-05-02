@@ -1,4 +1,4 @@
-statsite (0.8.0-1) UNRELEASED; urgency=low
+statsite (0.8.1-1) UNRELEASED; urgency=low
 
   [ John Keates ]
   * Initial release. (Closes: #182)
@@ -6,4 +6,7 @@ statsite (0.8.0-1) UNRELEASED; urgency=low
   [ John Keates ]
   * Update to 0.8.0-HEAD
 
- -- John Keates <john@keates.nl>  Wed, 23 Nov 2016 10:24:36 +0000
+  [ John Keates ]
+  * Update to 0.8.1
+
+ -- John Keates <john@keates.nl>  Tue, 02 May 2017 00:34:02 +0000
