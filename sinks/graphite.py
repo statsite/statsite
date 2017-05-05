@@ -9,7 +9,8 @@ import struct
 
 
 class GraphiteStore(object):
-    def __init__(self, host="localhost", port=2003, prefix="statsite.", attempts=3, protocol='lines'):
+    def __init__(self, host="localhost", port=2003, prefix="statsite.", attempts=3,
+                 protocol='lines'):
         """
         Implements an interface that allows metrics to be persisted to Graphite.
         Raises a :class:`ValueError` on bad arguments.
@@ -49,14 +50,20 @@ class GraphiteStore(object):
         if not metrics:
             return
 
-        # Construct the output
-        metrics = [m.split("|") for m in metrics if m and m.count("|") == 2]
+        self.logger.info("Outputting %d metrics", len(metrics))
 
-        self.logger.info("Outputting %d metrics" % len(metrics))
-        if self.prefix:
-            lines = ["%s%s %s %s" % (self.prefix, k, v, ts) for k, v, ts in metrics]
-        else:
-            lines = ["%s %s %s" % (k, v, ts) for k, v, ts in metrics]
+        # Construct the output, ensure no spaces and slashes in metric name
+        # The data sent must be in the following format:
+        #     <metric path> <metric value> <metric timestamp>
+        # NOTE <metric value> <metric timestamp> are inverted with respect of pickle protocol
+        # http://graphite.readthedocs.io/en/latest/feeding-carbon.html#the-plaintext-protocol
+        lines = list()
+        for m in metrics:
+            if m.count("|") == 2:
+                met = m.split("|")
+                met[0] = met[0].strip().replace(" ", "_").replace("/", "_")
+                lines.append("%s %s %s" % (self.prefix + met[0], met[1], met[2]))
+
         data = "\n".join(lines) + "\n"
 
         # Serialize writes to the socket
@@ -64,7 +71,6 @@ class GraphiteStore(object):
             self._write_metric(data)
         except Exception:
             self.logger.exception("Failed to write out the metrics!")
-
 
     def flush_pickle(self, metrics):
         """
@@ -92,7 +98,7 @@ class GraphiteStore(object):
         header = struct.pack("!L", len(payload))
         message = header + payload
 
-        self.logger.info("Outputting %d metrics" % len(metrics))
+        self.logger.info("Outputting %d metrics", len(metrics))
 
         try:
             self._write_metric(message)
@@ -132,7 +138,8 @@ class GraphiteStore(object):
 
             self.sock = self._create_socket()
 
-        self.logger.critical("Failed to flush to Graphite! Gave up after %d attempts." % self.attempts)
+        self.logger.critical("Failed to flush to Graphite! Gave up after %d attempts.",
+                             self.attempts)
 
 
 if __name__ == "__main__":

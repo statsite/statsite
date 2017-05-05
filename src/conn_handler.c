@@ -358,10 +358,15 @@ void flush_interval_trigger() {
     // Start a flush thread
     pthread_t thread;
     sigset_t oldset;
+    pthread_attr_t attr;
     sigset_t newset;
     sigfillset(&newset);
     pthread_sigmask(SIG_BLOCK, &newset, &oldset);
-    int err = pthread_create(&thread, NULL, flush_thread, old);
+
+    pthread_attr_init(&attr);
+    pthread_attr_setstacksize(&attr, 256 * 1024);
+
+    int err = pthread_create(&thread, &attr, flush_thread, old);
     pthread_sigmask(SIG_SETMASK, &oldset, NULL);
 
     if (err == 0) {

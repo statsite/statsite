@@ -31,12 +31,21 @@ int stream_to_command(metrics *m, void *data, stream_callback cb, char *cmd) {
     // Create a pipe to the child
     int filedes[2] = {0, 0};
     int res = pipe(filedes);
-    if (res < 0) return res;
+    if (res < 0){
+      perror("Can't create pipe");
+      return res;
+    }
 
     // Fork and exec
     int status = 0;
     pid_t pid = fork();
-    if (pid < 0) return res;
+    if (pid < 0){
+      close(filedes[0]);
+      close(filedes[1]);
+
+      perror("Can't fork");
+      return res;
+    }
 
     // Check if we are the child
     if (pid == 0) {
@@ -74,7 +83,7 @@ int stream_to_command(metrics *m, void *data, stream_callback cb, char *cmd) {
 
     // Wait for termination
     do {
-        if (waitpid(pid, &status, 0) < 0) break;
+        if (waitpid(pid, &status, WNOHANG) < 0) break;
         usleep(100000);
     } while (!WIFEXITED(status));
 
