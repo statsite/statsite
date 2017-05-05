@@ -52,12 +52,15 @@ class GraphiteStore(object):
         self.logger.info("Outputting %d metrics" % len(metrics))
 
         # Construct the output, ensure no spaces and slashes in metric name
+        # The data sent must be in the following format: <metric path> <metric value> <metric timestamp>
+        # NOTE <metric value> <metric timestamp> are inverted with respect of pickle protocol
+        # http://graphite.readthedocs.io/en/latest/feeding-carbon.html#the-plaintext-protocol
         lines = list()
         for m in metrics:
             if m.count("|") == 2:
                 met = m.split("|")
                 met[0] = met[0].strip().replace(" ", "_").replace("/", "_")
-                lines.append("%s %s %s" % (self.prefix + met[0], met[2], met[1]))
+                lines.append("%s %s %s" % (self.prefix + met[0], met[1], met[2]))
 
         data = "\n".join(lines) + "\n"
 
