@@ -8,6 +8,10 @@ import pickle
 import struct
 
 
+# Initialize the logger
+logging.basicConfig()
+
+
 class GraphiteStore(object):
     def __init__(self, host="localhost", port=2003, prefix="statsite.", attempts=3,
                  protocol='lines'):
@@ -142,10 +146,7 @@ class GraphiteStore(object):
                              self.attempts)
 
 
-if __name__ == "__main__":
-    # Initialize the logger
-    logging.basicConfig()
-
+def main():
     # Intialize from our arguments
     graphite = GraphiteStore(*sys.argv[1:])
 
@@ -155,3 +156,7 @@ if __name__ == "__main__":
     # Flush
     graphite.flush(metrics.splitlines())
     graphite.close()
+
+
+if __name__ == "__main__":
+    main()
