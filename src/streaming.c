@@ -67,7 +67,7 @@ int stream_to_command(metrics *m, void *data, stream_callback cb, char *cmd) {
         close(filedes[0]);
         waitpid(pid, &status, WNOHANG);
     }
-
+    
     // Create a file wrapper
     FILE *f = fdopen(filedes[1], "w");
 
@@ -83,8 +83,8 @@ int stream_to_command(metrics *m, void *data, stream_callback cb, char *cmd) {
 
     // Wait for termination
     do {
-        if (waitpid(pid, &status, WNOHANG) < 0) break;
         usleep(100000);
+        if (waitpid(pid, &status, 0) < 0) break;
     } while (!WIFEXITED(status));
 
     // Return the result of the process
