@@ -38,6 +38,10 @@ bin_PROGRAMS = statsite
 # This adds the sinks on make install, also allows for make uninstall if needed
 nobase_pkgdata_DATA = sinks/*
 
+configdir = /etc/statsite
+nobase_dist_config_DATA = statsite.conf.example
+
+
 
 ## Stuff we want to include for the default dist task (not sdist)
 EXTRA_DIST = . #everything

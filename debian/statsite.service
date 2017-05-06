@@ -1,5 +1,6 @@
 [Unit]
 Description=Statsite metrics aggregation server
+Documentation=man:statsite https://github.com/statsite
 
 [Service]
 User=statsite

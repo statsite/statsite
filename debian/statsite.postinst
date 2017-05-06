@@ -4,8 +4,7 @@
 
 set -e
 
-case "$1" in
-configure)
+if [ "$1" = "configure" ]; then
 
 	if ! getent passwd -- statsite >/dev/null 2>&1 ; then
 	adduser --home /nonexistent \
@@ -13,12 +12,17 @@ configure)
 		--system \
 		--disabled-password \
 		--no-create-home \
-		--gecos "Debian Statsite daemon user" \
+		--gecos "statsite daemon user" \
 		statsite
 	fi
 
-;;
-esac
+	# Ensure configuration files are readable by the dedicated statsite user.
+	chgrp -R statsite /etc/statsite
+
+	# For upgrades: Ensure configuration files are not world-readable.
+	find /etc/statsite -perm -o+r -type f -exec chmod 640 '{}' \;
+
+fi
 
 #DEBHELPER#
 

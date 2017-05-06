@@ -3,14 +3,7 @@ Maintainer: John Keates <john@keates.nl>
 Section: misc
 Priority: optional
 Standards-Version: 3.9.2
-Build-Depends: debhelper (>= 9),
-               dh-autoreconf,
-               dh-systemd,
-               pkg-config,
-               lsof,
-               netcat-openbsd,
-               check (>= 0.10.0),
-               python-pytest
+Build-Depends: debhelper (>= 9), dh-systemd, dh-autoreconf, dh-systemd, pkg-config, python-pytest
 
 Package: statsite
 Architecture: any
