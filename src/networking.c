@@ -324,7 +324,15 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
     }
 
     // Setup the timer
-    netconf->flush_timer = aeCreateTimeEvent(netconf->loop, config->flush_interval * 1000, handle_flush_event, netconf, NULL);
+    long long first_flush_ms = config->flush_interval * 1000;
+    if (config->aligned_flush) {
+      struct timeval now;
+      gettimeofday(&now, NULL);
+      first_flush_ms -= (now.tv_sec % config->flush_interval) * 1000;
+      first_flush_ms -= (now.tv_usec / 1000);
+      if (first_flush_ms <= 0) first_flush_ms = config->flush_interval * 1000;
+    }
+    netconf->flush_timer = aeCreateTimeEvent(netconf->loop, first_flush_ms, handle_flush_event, netconf, NULL);
 
     // Prepare the conn handlers
     init_conn_handler(config);
@@ -341,9 +349,17 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
  */
 static int handle_flush_event(aeEventLoop *loop, long long id, void *edata) {
     statsite_networking *netconf = (statsite_networking *) edata;
+    long long next_flush_ms = netconf->config->flush_interval * 1000;
     // Inform the connection handler of the timeout
     flush_interval_trigger();
-    return netconf->config->flush_interval * 1000;
+    if (netconf->config->aligned_flush) {
+    struct timeval now;
+      gettimeofday(&now, NULL);
+      next_flush_ms -= (now.tv_sec % netconf->config->flush_interval) * 1000;
+      next_flush_ms -= (now.tv_usec / 1000);
+      if (next_flush_ms <= 0) next_flush_ms = netconf->config->flush_interval * 1000;
+    }
+    return next_flush_ms;
 }
 
 
