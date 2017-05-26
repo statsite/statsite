@@ -59,6 +59,7 @@ typedef struct {
     char *stream_cmd;
     int flush_interval;
     bool daemonize;
+    bool aligned_flush;
     char *pid_file;
     bool binary_stream;
     char *input_counter;
