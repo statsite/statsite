@@ -19,7 +19,7 @@ NON_ALNUM = re.compile(r"[^a-zA-Z_\-0-9\.]")
 
 class GraphiteStore(object):
     def __init__(self, host="localhost", port=2003, prefix="statsite.", attempts=3,
-                 protocol='lines', normalize=None):
+                 protocol='lines', normalize=None, socket_timeout=2):
         """
         Implements an interface that allows metrics to be persisted to Graphite.
         Raises a :class:`ValueError` on bad arguments.
@@ -53,6 +53,7 @@ class GraphiteStore(object):
         self.port = port
         self.prefix = prefix
         self.attempts = attempts
+        self.socket_timeout = None if socket_timeout == "infinity" else socket_timeout
         self.sock = self._create_socket()
         self.flush = self.flush_pickle if protocol == "pickle" else self.flush_lines
         self.metrics = []
@@ -137,6 +138,7 @@ class GraphiteStore(object):
     def _create_socket(self):
         """Creates a socket and connects to the graphite server"""
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(self.socket_timeout)
         try:
             sock.connect((self.host, self.port))
         except StandardError:
