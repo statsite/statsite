@@ -1,5 +1,11 @@
 
-all: ascii_parser_condensed.c ascii_parser_std.c
+.PHONY: std condensed
+
+std: ascii_parser_std.c
+	mv $< ascii_parser.c
+
+condensed: ascii_parser_condensed.c
+	mv $< ascii_parser.c
 
 ascii_parser_condensed.c: ascii_parser_condensed.rl
 	ragel $^ -o $@
