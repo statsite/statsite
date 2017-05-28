@@ -13,6 +13,7 @@ AM_CFLAGS = -g -std=gnu99 -pthread -D_GNU_SOURCE -DLOG_PERROR=0 -O3 -pthread -lm
 # statsite, the binary itself
 
 statsite_SOURCES = \
+       src/ascii_parser.c \
        src/hashmap.c \
        src/heap.c \
        src/radix.c \
@@ -55,6 +56,7 @@ distdir = ../$(PACKAGE)-$(VERSION)
 if HAVE_CHECK
 check_PROGRAMS = tests/runner
 tests_runner_SOURCES = \
+src/ascii_parser.c \
 src/hashmap.c \
 src/heap.c \
 src/radix.c \
