@@ -1,0 +1,22 @@
+[statsite]
+port=8125
+udp_port=8125
+log_level=INFO
+flush_interval=10
+timer_eps=0.01
+set_eps=0.02
+stream_cmd=python /usr/share/statsite/sinks/graphite.py localhost 2003
+daemonize=1
+pid_file=/var/run/statsite/statsite.pid
+
+[histogram_api]
+prefix=api
+min=0
+max=100
+width=5
+
+[histogram_default]
+prefix=
+min=0
+max=200
+width=20

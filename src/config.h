@@ -48,6 +48,7 @@ typedef struct histogram_config {
 typedef struct {
     int tcp_port;
     int udp_port;
+    int udp_rcvbuf;
     char *bind_address;
     bool parse_stdin;
     char *log_level;
@@ -58,6 +59,7 @@ typedef struct {
     char *stream_cmd;
     int flush_interval;
     bool daemonize;
+    bool aligned_flush;
     char *pid_file;
     bool binary_stream;
     char *input_counter;

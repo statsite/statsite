@@ -232,6 +232,14 @@ static int setup_udp_listener(statsite_networking *netconf) {
     int flags = fcntl(udp_listener_fd, F_GETFL, 0);
     fcntl(udp_listener_fd, F_SETFL, flags | O_NONBLOCK);
 
+    // Set the RCVBUF socket buffer
+    if (netconf->config->udp_rcvbuf) {
+        optval = netconf->config->udp_rcvbuf;
+        if (setsockopt(udp_listener_fd, SOL_SOCKET, SO_RCVBUF, &optval, sizeof(optval))) {
+            syslog(LOG_ERR, "Failed to set SO_RCVBUF! Err: %s\n", strerror(errno));
+        }
+    }
+
     // Allocate a connection object for the UDP socket,
     // ensure a min-buffer size of 64K
     conn_info *conn = get_conn(netconf, udp_listener_fd);
@@ -269,6 +277,20 @@ static int setup_stdin_listener(statsite_networking *netconf) {
     // Initialize the stdin event
     aeCreateFileEvent(netconf->loop, STDIN_FILENO, AE_READABLE, invoke_event_handler, conn);
     return 0;
+}
+
+/**
+ * Adjust flush interval to align with clock
+ * @arg flush_interval The flush interval from configuration
+ */
+static long long align_timer(int flush_interval) {
+  long long next_flush_ms = flush_interval * 1000;
+  struct timeval now;
+  gettimeofday(&now, NULL);
+  next_flush_ms -= (now.tv_sec % flush_interval) * 1000;
+  next_flush_ms -= (now.tv_usec / 1000);
+  if (next_flush_ms <= 0) next_flush_ms = flush_interval * 1000;
+  return next_flush_ms;
 }
 
 /**
@@ -316,7 +338,11 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
     }
 
     // Setup the timer
-    netconf->flush_timer = aeCreateTimeEvent(netconf->loop, config->flush_interval * 1000, handle_flush_event, netconf, NULL);
+    long long first_flush_ms = config->flush_interval * 1000;
+    if (config->aligned_flush) {
+      first_flush_ms = align_timer(config->flush_interval);
+    }
+    netconf->flush_timer = aeCreateTimeEvent(netconf->loop, first_flush_ms, handle_flush_event, netconf, NULL);
 
     // Prepare the conn handlers
     init_conn_handler(config);
@@ -333,9 +359,13 @@ int init_networking(statsite_config *config, statsite_networking **netconf_out) 
  */
 static int handle_flush_event(aeEventLoop *loop, long long id, void *edata) {
     statsite_networking *netconf = (statsite_networking *) edata;
+    long long next_flush_ms = netconf->config->flush_interval * 1000;
     // Inform the connection handler of the timeout
     flush_interval_trigger();
-    return netconf->config->flush_interval * 1000;
+    if (netconf->config->aligned_flush) {
+      next_flush_ms = align_timer(netconf->config->flush_interval);
+    }
+    return next_flush_ms;
 }
 
 
@@ -430,18 +460,22 @@ static int read_client_data(conn_info *conn) {
  * of what to do.
  */
 static void handle_udp_message(aeEventLoop *loop, int fd, void *edata, int mask) {
-		statsite_networking *netconf = (statsite_networking *) edata;
+    struct iovec vectors[2];
+    int num_vectors;
+    ssize_t read_bytes;
+    statsite_networking *netconf = (statsite_networking *) edata;
 
-    while (1) {
-        // Get the associated connection struct
-        conn_info *conn = netconf->udp_client;
+    // Get the associated connection struct
+    conn_info *conn = netconf->udp_client;
 
-        // Clear the input buffer
-        circbuf_clear(&conn->input);
+    // Clear the input buffer
+    circbuf_clear(&conn->input);
 
+    // Loop until our buffer cannot hold another UDP packet (using a 1500
+    // byte MTU) or we cannot read another packet off the wire.  We do not
+    // read continuously off of the UDP socket to preserve timer execution.
+    while (circbuf_avail_buf(&conn->input) > 1500) {
         // Build the IO vectors to perform the read
-        struct iovec vectors[2];
-        int num_vectors;
         circbuf_setup_readv_iovec(&conn->input, (struct iovec*)&vectors, &num_vectors);
 
         /*
@@ -450,20 +484,19 @@ static void handle_udp_message(aeEventLoop *loop, int fd, void *edata, int mask)
          * be a contiguous buffer.
          */
         assert(num_vectors == 1);
-        ssize_t read_bytes = recv(fd, vectors[0].iov_base,
-                                    vectors[0].iov_len, 0);
+        read_bytes = recv(fd, vectors[0].iov_base, vectors[0].iov_len, 0);
 
         // Make sure we actually read something
         if (read_bytes == 0) {
             syslog(LOG_DEBUG, "Got empty UDP packet. [%d]\n", fd);
-            return;
+            continue;
 
         } else if (read_bytes == -1) {
             if (errno != EAGAIN && errno != EINTR) {
                 syslog(LOG_ERR, "Failed to recv() from connection [%d]! %s.",
                         fd, strerror(errno));
             }
-            return;
+            break;
         }
 
         // Update the write cursor
@@ -474,11 +507,11 @@ static void handle_udp_message(aeEventLoop *loop, int fd, void *edata, int mask)
         // it's not present.
         if (conn->input.buffer[conn->input.write_cursor - 1] != '\n')
             circbuf_write(&conn->input, "\n", 1);
-
-        // Invoke the connection handler
-        statsite_conn_handler handle = {netconf->config, netconf->udp_client};
-        handle_client_connect(&handle);
     }
+
+    // Invoke the connection handler
+    statsite_conn_handler handle = {netconf->config, netconf->udp_client};
+    handle_client_connect(&handle);
 }
 
 

@@ -3,7 +3,7 @@ python:
   - "2.7"
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get -y install pkg-config autoconf automake libtool texinfo sed
+  - sudo apt-get -y install pkg-config autoconf automake libtool texinfo sed make python-pip debhelper
   - pushd deps/check-0.10.0
   - mkdir -p m4
   - autoreconf -fiv

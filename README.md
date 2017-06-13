@@ -155,6 +155,9 @@ options must exist in the `statsite` section of the INI file:
 
 * udp\_port : Integer, sets the UDP port. Default 8125. 0 to disable.
 
+* udp_rcvbuf : Integer, sets the SO_RCVBUF socket buffer in bytes on the UDP port.
+  Defaults to 0 which does not change the OS default setting.
+
 * bind\_address : The address to bind on. Defaults to 0.0.0.0
 
 * parse\_stdin: Enables parsing stdin as an input stream. Defaults to 0.
@@ -268,6 +271,11 @@ aggregated and this is sent to the store.
 
 Gauges also support "delta" updates, which are supported by prefixing the
 value with either a `+` or a `-`. This implies you can't explicitly set a gauge to a negative number without first setting it to zero.
+
+Multiple metrics may be batched together in one UDP packet a separated by a
+newline (`\n`) character.  Care must be taken to keep UDP data size smaller
+than the network MTU minus 28 bytes for IP/UDP headers.  Statsite supports
+a maximum UDP data length of 1500 bytes.
 
 Examples:
 

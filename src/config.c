@@ -29,6 +29,7 @@ static double default_quantiles[] = {0.5, 0.95, 0.99};
 static const statsite_config DEFAULT_CONFIG = {
     8125,               // TCP defaults to 8125
     8125,               // UDP on 8125
+    0,                  // RCVBUF for UDP sockets unchanged from OS default
     "::",               // Listen on all addresses
     false,              // Do not parse stdin by default
     "DEBUG",            // DEBUG level
@@ -39,6 +40,7 @@ static const statsite_config DEFAULT_CONFIG = {
     "cat",              // Pipe to cat
     10,                 // Flush every 10 seconds
     0,                  // Do not daemonize
+    0,                  // Align flush interval to clock
     "/var/run/statsite.pid", // Default pidfile path
     0,                  // Do not use binary output by default
     NULL,               // Do not track number of messages received
@@ -311,12 +313,16 @@ static int config_callback(void* user, const char* section, const char* name, co
         return value_to_int(value, &config->tcp_port);
     } else if (NAME_MATCH("udp_port")) {
         return value_to_int(value, &config->udp_port);
+    } else if (NAME_MATCH("udp_rcvbuf")) {
+        return value_to_int(value, &config->udp_rcvbuf);
     } else if (NAME_MATCH("flush_interval")) {
          return value_to_int(value, &config->flush_interval);
     } else if (NAME_MATCH("parse_stdin")) {
         return value_to_bool(value, &config->parse_stdin);
     } else if (NAME_MATCH("daemonize")) {
         return value_to_bool(value, &config->daemonize);
+    } else if (NAME_MATCH("aligned_flush")) {
+        return value_to_bool(value, &config->aligned_flush);
     } else if (NAME_MATCH("binary_stream")) {
         return value_to_bool(value, &config->binary_stream);
     } else if (NAME_MATCH("use_type_prefix")) {

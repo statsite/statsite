@@ -1,0 +1,21 @@
+#
+# Statsite metrics aggregation server
+#
+
+description     "statsite"
+
+start on runlevel [2345]
+stop on runlevel [!2345]
+
+respawn
+respawn limit 10 5
+console log
+
+setuid statsite
+setgid statsite
+
+pre-start script
+    test -r /etc/statsite/statsite.conf || { stop; exit 1; }
+end script
+
+exec /usr/bin/statsite -f /etc/statsite/statsite.conf

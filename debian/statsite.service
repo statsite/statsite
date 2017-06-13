@@ -1,0 +1,12 @@
+[Unit]
+Description=Statsite metrics aggregation server
+Documentation=man:statsite https://github.com/statsite
+
+[Service]
+User=statsite
+Group=statsite
+ExecStart=/usr/bin/statsite -f /etc/statsite/statsite.conf
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

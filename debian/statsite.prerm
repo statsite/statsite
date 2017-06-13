@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+
+#DEBHELPER#
+
+# byte-compiled Python libraries cleanup
+rm -f /usr/share/statsite/sinks/*.pyc
+
+exit 0

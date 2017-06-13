@@ -3,11 +3,11 @@
 
 
 ## Set the version in both instances below here:
-AC_INIT([Statsite], [0.8.0])
+AC_INIT([Statsite], [0.8.1])
 
 STATSITE_MAJOR_VERSION=0
 STATSITE_MINOR_VERSION=8
-STATSITE_MICRO_VERSION=0
+STATSITE_MICRO_VERSION=1
 STATSITE_VERSION=$STATSITE_MAJOR_VERSION.$STATSITE_MINOR_VERSION.$STATSITE_MICRO_VERSION
 
 
@@ -42,7 +42,7 @@ AC_PROG_LN_S
 AC_CHECK_LIB([rt], [clock_gettime], [LINK_TO_RT=-lrt], [LINK_TO_RT=])
 
 
-Checks for header files.
+# Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h limits.h netdb.h netinet/in.h stdint.h stdlib.h string.h strings.h sys/socket.h sys/time.h syslog.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.

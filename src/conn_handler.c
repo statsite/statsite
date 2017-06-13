@@ -13,6 +13,7 @@
 #include "streaming.h"
 #include "conn_handler.h"
 #include <inttypes.h>
+#include "ascii_parser.h"
 
 /*
  * Binary defines
@@ -73,6 +74,9 @@ static const int MIN_BINARY_HEADER_SIZE = 6;
  */
 static metrics *GLOBAL_METRICS;
 static statsite_config *GLOBAL_CONFIG;
+
+void emit_stat(metric_type type,
+    token *name, token *value, token *samplerate);
 
 /**
  * Invoked to initialize the conn handler layer.
@@ -358,10 +362,15 @@ void flush_interval_trigger() {
     // Start a flush thread
     pthread_t thread;
     sigset_t oldset;
+    pthread_attr_t attr;
     sigset_t newset;
     sigfillset(&newset);
     pthread_sigmask(SIG_BLOCK, &newset, &oldset);
-    int err = pthread_create(&thread, NULL, flush_thread, old);
+
+    pthread_attr_init(&attr);
+    pthread_attr_setstacksize(&attr, 256 * 1024);
+
+    int err = pthread_create(&thread, &attr, flush_thread, old);
     pthread_sigmask(SIG_SETMASK, &oldset, NULL);
 
     if (err == 0) {
@@ -444,6 +453,57 @@ static double str2double(const char *s, char **end) {
     return val;
 }
 
+void emit_stat(metric_type type,
+		token *name, token *value, token *samplerate)
+{
+    double val = 0.0, sample_rate = 1.0;
+    char *endptr;
+
+    if (type == GAUGE) {
+        // Check if this is a delta update
+        if (value->start[0] == '+' || value->start[0] == '-') {
+            type = GAUGE_DELTA;
+        }
+    }
+    // Increment the number of inputs received
+    if (GLOBAL_CONFIG->input_counter)
+    metrics_add_sample(GLOBAL_METRICS, COUNTER, GLOBAL_CONFIG->input_counter, 1, sample_rate);
+
+    name->start[name->len] = '\0';
+    value->start[value->len] = '\0';
+
+    // Fast track the set-updates
+    if (type == SET) {
+        metrics_set_update(GLOBAL_METRICS, name->start, value->start);
+		    return;
+    }
+
+    // Convert the value to a double
+    val = str2double(value->start, &endptr);
+    if (unlikely(endptr == value->start || errno == ERANGE)) {
+        syslog(LOG_WARNING, "Failed value conversion! Input: %.*s", value->len, value->start);
+        return;
+    }
+
+    // Handle counter/timer sampling if applicable
+    if ((type == COUNTER || type == TIMER) && samplerate->len > 1) {
+        double unchecked_rate = str2double(samplerate->start, &endptr);
+        if (unlikely(endptr == samplerate->start)) {
+            syslog(LOG_WARNING, "Failed sample rate conversion! Input: %.*s", samplerate->len, samplerate->start);
+            return;
+        }
+        if (likely(unchecked_rate > 0 && unchecked_rate <= 1)) {
+            sample_rate = unchecked_rate;
+            if (type == COUNTER) {
+                 val = val * (1.0 / sample_rate);
+            }
+        }
+    }
+
+    // Store the sample
+    metrics_add_sample(GLOBAL_METRICS, type, name->start, val, sample_rate);
+}
+
 /**
  * Invoked to handle ASCII commands. This is the default
  * mode for statsite, to be backwards compatible with statsd
@@ -452,100 +512,20 @@ static double str2double(const char *s, char **end) {
  */
 static int handle_ascii_client_connect(statsite_conn_handler *handle) {
     // Look for the next command line
-    char *buf, *key, *val_str, *type_str, *sample_str, *endptr;
-    metric_type type;
-    int buf_len, should_free, status, i, after_len;
-    double val;
-    double sample_rate = 1.0;
+    char *buf;
+    int buf_len, should_free, status;
 
+		ascpp ascii_parser = ascpp_init(emit_stat);
     while (1) {
-        sample_rate = 1.0;
-
         status = extract_to_terminator(handle->conn, '\n', &buf, &buf_len, &should_free);
         if (status == -1) return 0; // Return if no command is available
 
-        // Check for a valid metric
-        // Scan for the colon
-        status = buffer_after_terminator(buf, buf_len, ':', &val_str, &after_len);
-        if (likely(!status)) status |= buffer_after_terminator(val_str, after_len, '|', &type_str, &after_len);
-        if (unlikely(status)) {
-            syslog(LOG_WARNING, "Failed parse metric! Input: %s", buf);
-            goto END_LOOP;
-        }
+        buf[buf_len-1] = '\n';
+        ascpp_exec(&ascii_parser, buf, buf_len);
 
-        // Convert the type
-        switch (*type_str) {
-            case 'c':
-                type = COUNTER;
-                break;
-            case 'h':
-            case 'm':
-                type = TIMER;
-                break;
-            case 'k':
-                type = KEY_VAL;
-                break;
-            case 'g':
-                type = GAUGE;
-
-                // Check if this is a delta update
-                if (*val_str == '+' || *val_str == '-') {
-                    type = GAUGE_DELTA;
-                }
-                break;
-            case 's':
-                type = SET;
-                break;
-            default:
-                type = UNKNOWN;
-                syslog(LOG_WARNING, "Received unknown metric type! Input: %c", *type_str);
-                goto END_LOOP;
-        }
-
-        // Increment the number of inputs received
-        if (GLOBAL_CONFIG->input_counter)
-            metrics_add_sample(GLOBAL_METRICS, COUNTER, GLOBAL_CONFIG->input_counter, 1, sample_rate);
-
-        // Fast track the set-updates
-        if (type == SET) {
-            metrics_set_update(GLOBAL_METRICS, buf, val_str);
-            goto END_LOOP;
-        }
-
-        // Convert the value to a double
-        val = str2double(val_str, &endptr);
-        if (unlikely(endptr == val_str || errno == ERANGE)) {
-            syslog(LOG_WARNING, "Failed value conversion! Input: %s", val_str);
-            goto END_LOOP;
-        }
-
-        // Handle counter/timer sampling if applicable
-        if ((type == COUNTER || type == TIMER) && !buffer_after_terminator(type_str, after_len, '@', &sample_str, &after_len)) {
-            double unchecked_rate = str2double(sample_str, &endptr);
-            if (unlikely(endptr == sample_str)) {
-                syslog(LOG_WARNING, "Failed sample rate conversion! Input: %s", sample_str);
-                goto END_LOOP;
-            }
-            if (likely(unchecked_rate > 0 && unchecked_rate <= 1)) {
-                sample_rate = unchecked_rate;
-                if (type == COUNTER) {
-                    val = val * (1.0 / sample_rate);
-                }
-            }
-        }
-
-        // Store the sample
-        metrics_add_sample(GLOBAL_METRICS, type, buf, val, sample_rate);
-
-END_LOOP:
         // Make sure to free the command buffer if we need to
         if (should_free) free(buf);
     }
-
-    return 0;
-ERR_RET:
-    if (should_free) free(buf);
-    return -1;
 }
 
 // Handles the binary set command
@@ -609,6 +589,16 @@ static int handle_binary_client_connect(statsite_conn_handler *handle) {
         // Metric value - 8 bytes OR Set Length 2 bytes
         if (peek_client_bytes(handle->conn, MIN_BINARY_HEADER_SIZE, (char**)&cmd, &should_free))
             return 0;  // Return if no command is available
+
+        // Check for UDP record separator inserted by UDP handler
+        if (cmd[0] == '\n') {
+            if (should_free)
+                free(cmd);
+            if (seek_client_bytes(handle->conn, 1))
+                return 0;  // End of buffer, shouldn't happen
+            if (peek_client_bytes(handle->conn, MIN_BINARY_HEADER_SIZE, (char**)&cmd, &should_free))
+                return 0;  // found end of buffer
+        }
 
         // Check for the magic byte
         if (unlikely(cmd[0] != BINARY_MAGIC_BYTE)) {
@@ -681,31 +671,3 @@ ERR_RET:
     return -1;
 }
 
-
-/**
- * Scans the input buffer of a given length up to a terminator.
- * Then sets the start of the buffer after the terminator including
- * the length of the after buffer.
- * @arg buf The input buffer
- * @arg buf_len The length of the input buffer
- * @arg terminator The terminator to scan to. Replaced with the null terminator.
- * @arg after_term Output. Set to the byte after the terminator.
- * @arg after_len Output. Set to the length of the output buffer.
- * @return 0 if terminator found. -1 otherwise.
- */
-static int buffer_after_terminator(char *buf, int buf_len, char terminator, char **after_term, int *after_len) {
-    // Scan for a space
-    char *term_addr = memchr(buf, terminator, buf_len);
-    if (!term_addr) {
-        *after_term = NULL;
-        return -1;
-    }
-
-    // Convert the space to a null-seperator
-    *term_addr = '\0';
-
-    // Provide the arg buffer, and arg_len
-    *after_term = term_addr+1;
-    *after_len = buf_len - (term_addr - buf + 1);
-    return 0;
-}

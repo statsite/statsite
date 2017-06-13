@@ -268,6 +268,18 @@ class TestInteg(object):
         assert "counts.scientific4|0.000040|" in out
         assert "counts.underflow1|" not in out
 
+#    def test_condensed(self, servers):
+#        "Tests adding condensed stats"
+#        _, server, output = servers
+#        server.sendall("foo:4|c:5|ms:3|ms:7|g\n")
+#
+#        wait_file(output)
+#        now = time.time()
+#        out = open(output).read()
+#        assert ("counts.foo|4.000") in out
+#        assert ("timers.foo.sum|8.000") in out
+#        assert ("gauges.foo|7.000") in out
+
 
 class TestIntegUDP(object):
     def test_kv(self, servers):

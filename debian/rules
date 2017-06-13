@@ -1,3 +1,8 @@
 #!/usr/bin/make -f
+
 %:
-	dh $@
+	dh $@ --with autoreconf,systemd
+
+override_dh_auto_install:
+	rm -f sinks/*.pyc
+	dh_auto_install

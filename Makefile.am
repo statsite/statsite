@@ -13,6 +13,7 @@ AM_CFLAGS = -g -std=gnu99 -pthread -D_GNU_SOURCE -DLOG_PERROR=0 -O3 -pthread -lm
 # statsite, the binary itself
 
 statsite_SOURCES = \
+       src/ascii_parser.c \
        src/hashmap.c \
        src/heap.c \
        src/radix.c \
@@ -38,6 +39,10 @@ bin_PROGRAMS = statsite
 # This adds the sinks on make install, also allows for make uninstall if needed
 nobase_pkgdata_DATA = sinks/*
 
+configdir = /etc/statsite
+nobase_dist_config_DATA = statsite.conf.example
+
+
 
 ## Stuff we want to include for the default dist task (not sdist)
 EXTRA_DIST = . #everything
@@ -51,6 +56,7 @@ distdir = ../$(PACKAGE)-$(VERSION)
 if HAVE_CHECK
 check_PROGRAMS = tests/runner
 tests_runner_SOURCES = \
+src/ascii_parser.c \
 src/hashmap.c \
 src/heap.c \
 src/radix.c \
