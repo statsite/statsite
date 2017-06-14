@@ -271,7 +271,7 @@ class LibratoStore(object):
 
         name = self.sanitize(name)
         
-        # Add the hostname as a global tag
+        # Add the hostname as a global tag. 
         self.tags['host'] = self.host
 
         if source:
@@ -331,7 +331,8 @@ class LibratoStore(object):
             body = json.dumps({ 'gauges' : m })
             url = "%s/v1/metrics" % (self.api)
         else:
-            body = json.dumps({ 'measurements' : m, 'tags': self.tags })
+            global_tags = self.tags
+            body = json.dumps({ 'measurements' : m, 'tags': global_tags })
             url = "%s/v1/measurements" % (self.api)
                 
         req = urllib2.Request(url, body, headers)
@@ -367,20 +368,20 @@ class LibratoStore(object):
             'Authorization': 'Basic %s' % self.build_basic_auth()
             }
 
-        metrics = []
+        tagged_metrics = []
         legacy_metrics = []
         count = 0
         
         values = self.measurements.values()
         
         for measure in values:
-            metrics.append(measure)
+            tagged_metrics.append(measure)
             count += 1
 
             if count >= self.max_metrics_payload:
-                self.flush_payload(headers, metrics)
+                self.flush_payload(headers, tagged_metrics)
                 count = 0
-                metrics = []
+                tagged_metrics = []
 
         if count > 0:
             self.flush_payload(headers, metrics)

@@ -28,7 +28,7 @@ timers.query.median|1017.000000|1401577507
 timers.query.p95|1017.000000|1401577507
 timers.query.p99|1017.000000|1401577507
 timers.query.rate|16.950000|1401577507
-counts.tags#tag1=value1|16.000000|1401577507
+counts.query.tags#tag1=value1|16.000000|1401577507
 timers.tags_many#tag1=value1,tag2=value2.p90|16.000000|1401577507
 timers.tags_many_dots#tag1=value1,tag2=value.now.p90|16.000000|1401577507\
     """)
@@ -56,8 +56,13 @@ token = 02ac4003c4fcd11bf9cee34e34263155dc7ba1906c322d167db6ab4b2cd2082b\
     if "source_prefix" in options:
         config += "\nsource_prefix = %s" % (options["source_prefix"])
 
+    if "host" in options:
+        config += "\nhost = %s" % (options["host"])
     
-    config += "\nwrite_to_legacy = True" 
+    if "write_to_legacy" in options:
+        config += "\nwrite_to_legacy = %s" % (options["write_to_legacy"])
+    else:
+        config += "\nwrite_to_legacy = True" 
 
     return config
 
@@ -123,24 +128,28 @@ class TestLibrato(object):
     
     def test_measurements_with_tags(self):
         expected_output = {
-            "name":         "tags",
+            "name":         "query.tags",
             "time":         1401577507,
             "value":        16.0,
             "tags":         { "source": "localhost", "tag1": "value1" }
         }
         
-        assert expected_output == self.librato.measurements["tags\tlocalhost"]
+        # No top level sources allowed here...
+        assert False == self.librato.measurements.has_key("source")
+        assert expected_output == self.librato.measurements["query.tags\tlocalhost"]
 
     def test_measurements_with_tags_no_source(self):
         self.librato = build_librato()
         expected_output = {
-            "name":         "tags",
+            "name":         "query.tags",
             "time":         1401577507,
             "value":        16.0,
             "tags":         { "tag1": "value1" }
         }
-        
-        assert expected_output == self.librato.measurements["tags"]
+
+        # No top level sources allowed here...
+        assert False == self.librato.measurements.has_key("source")
+        assert expected_output == self.librato.measurements["query.tags"]
 
     def test_measurements_with_suffix(self):
         expected_output = {
@@ -160,3 +169,32 @@ class TestLibrato(object):
             "tags":         { "source": "localhost", "tag1": "value1", "tag2": "value.now" }
         }
         assert expected_output == self.librato.measurements["tags_many_dots.p90\tlocalhost"]
+    
+    def test_write_to_legacy(self):
+        expected_tags_output = {
+            "name":         "active_sessions",
+            "time":         1401577507,
+            "value":        1.0,
+            "tags":         { "source": "localhost" }
+        }
+
+        expected_legacy_output = {
+            "name":         "active_sessions",
+            "source":       "localhost",
+            "measure_time": 1401577507,
+            "value":        1.0,
+        }
+        assert expected_tags_output == self.librato.measurements["active_sessions\tlocalhost"]
+        assert expected_legacy_output == self.librato.gauges["active_sessions\tlocalhost"]
+
+    def test_measurements_with_host(self):
+        self.librato = build_librato({"host": "localhost"})
+        expected_output = {
+            "name":         "query.tags",
+            "time":         1401577507,
+            "value":        16.0,
+            "tags":         { "tag1": "value1" }
+        }
+        
+        assert {"host": "localhost" } == self.librato.tags
+        assert expected_output == self.librato.measurements["query.tags"]
