@@ -28,9 +28,8 @@ timers.query.median|1017.000000|1401577507
 timers.query.p95|1017.000000|1401577507
 timers.query.p99|1017.000000|1401577507
 timers.query.rate|16.950000|1401577507
-counts.query.tags#tag1=value1|16.000000|1401577507
-timers.tags_many#tag1=value1,tag2=value2.p90|16.000000|1401577507
-timers.tags_many_dots#tag1=value1,tag2=value.now.p90|16.000000|1401577507\
+counts.requests.2xx#environment=stg|16.000000|1401577507
+timers.request#tag1=value1,tag2=value2.p90|16.000000|1401577507\
     """)
 
     f = tempfile.NamedTemporaryFile(delete=False)
@@ -125,50 +124,165 @@ class TestLibrato(object):
         }
 
         assert expected_output == self.librato.gauges["baby-animals.active_sessions\tproduction.puppy-cam-1"]
-    
+
+
+    # TAG-BASED MEASUREMENTS
+
+    def test_parse_tags(self):
+        # multipart defaults to False
+        metric, tags = self.librato.parse_tags("foo#role=db,env=prod,one=two")
+        assert metric == 'foo'
+        assert tags == {"role": "db", "env": "prod", "one": "two"}
+
+    def test_parse_tags_multipart(self):
+        metric, tags = self.librato.parse_tags("foo#role=db,env=prod,one=two", True)
+        assert metric == 'foo'
+        assert tags == {"role": "db", "env": "prod", "one": "two"}
+
+    def test_parse_tags_no_tags(self):
+        # multipart defaults to False
+        metric, tags = self.librato.parse_tags("foo")
+        assert metric == 'foo'
+        assert tags == {}
+
     def test_measurements_with_tags(self):
+        self.librato = build_librato({
+            "statsite_output": "counts.requests.2xx#user_id=123,environment=stg|42|1401577507",
+        })
         expected_output = {
-            "name":         "query.tags",
-            "time":         1401577507,
-            "value":        16.0,
-            "tags":         { "source": "localhost", "tag1": "value1" }
+            "name": "requests.2xx",
+            "time": 1401577507,
+            "value": 42,
+            "tags": { "environment": "stg", "user_id": "123"}
+        }
+
+        # No top level sources allowed here...
+        assert False == self.librato.measurements.has_key("source")
+        assert False == self.librato.tags.has_key("source")
+        assert expected_output == self.librato.measurements["requests.2xx"]
+
+    def test_host_tag_autopopulated(self):
+        # 'host' is automatically defaulted to `hostname` unless specified in the config
+        assert self.librato.tags.has_key("host")
+    
+    def test_measurements_with_tags_and_source(self):
+        self.librato = build_librato({
+            "statsite_output": "counts.requests.2xx#environment=stg|42|1401577507",
+            "source": "myhost"
+        })
+        expected_output = {
+            "name": "requests.2xx",
+            "time": 1401577507,
+            "value": 42,
+            "tags": { "source": "myhost", "environment": "stg" }
         }
         
+        # This should default to `hostname`
+        assert self.librato.tags.has_key("host")
         # No top level sources allowed here...
         assert False == self.librato.measurements.has_key("source")
-        assert expected_output == self.librato.measurements["query.tags\tlocalhost"]
+        assert expected_output == self.librato.measurements["requests.2xx\tmyhost"]
 
-    def test_measurements_with_tags_no_source(self):
-        self.librato = build_librato()
+
+    def test_metric_with_different_tagsets(self):
+        data = """\
+counts.requests.2xx#environment=stg,user_id=123|42|1401577507
+counts.requests.2xx#environment=stg,user_id=456|43|1401577507
+counts.requests.2xx#environment=stg|85|1401577507
+"""
+        self.librato = build_librato({"statsite_output": data})
+        expected_output = [
+            {
+                "name": "requests.2xx",
+                "time": 1401577507,
+                "value": 42.0,
+                "tags": { "environment": "stg", "user_id": "123"}
+            },
+            {
+                "name": "requests.2xx",
+                "time": 1401577507,
+                "value": 43,
+                "tags": { "environment": "stg", "user_id": "456"}
+            },
+            {
+                "name": "requests.2xx",
+                "time": 1401577507,
+                "value": 85,
+                "tags": { "environment": "stg"}
+            }
+        ]
+
+        result = self.librato.measurements["requests.2xx"]
+        print(expected_output)
+        print(result)
+        assert expected_output == result
+
+    def test_timer_with_percentile_suffix(self):
+        # Statsite will tack the p90 onto the actual metric name before we get it
+        self.librato = build_librato({
+            "statsite_output": "timers.request#env=prod,tag2=value2.p90|16.000000|1401577507"
+        })
         expected_output = {
-            "name":         "query.tags",
-            "time":         1401577507,
-            "value":        16.0,
-            "tags":         { "tag1": "value1" }
+            "name": "request.p90",
+            "time": 1401577507,
+            "value": 16.0,
+            "tags": { "env": "prod", "tag2": "value2" }
         }
 
-        # No top level sources allowed here...
-        assert False == self.librato.measurements.has_key("source")
-        assert expected_output == self.librato.measurements["query.tags"]
+        assert expected_output == self.librato.measurements["request.p90"]
 
-    def test_measurements_with_suffix(self):
+    def test_timer_with_multiple_dotted_tag_values(self):
+        metric = "timers.request#env=prod,tag1=value1.foo,tag2=value2.bar,tag3=value3.baz|16.123|1401577507"
+        self.librato = build_librato({
+            "statsite_output": metric
+        })
         expected_output = {
-            "name":         "tags_many.p90",
-            "time":         1401577507,
-            "value" :         16.0,
-            "tags":         { "source": "localhost", "tag1": "value1", "tag2": "value2" }
+            "name": "request.baz",
+            "time": 1401577507,
+            "value": 16.123,
+            "tags": { "env": "prod", "tag1": "value1.foo", "tag2": "value2.bar", "tag3": "value3" }
         }
 
-        assert expected_output == self.librato.measurements["tags_many.p90\tlocalhost"]
+        print(self.librato.measurements)
+        assert expected_output == self.librato.measurements["request.baz"]
+
+    def test_timer_with_arbitrary_suffix(self):
+        self.librato = build_librato({
+            "statsite_output": "timers.request#env=prod,tag2=value2.foo|16.123|1401577507"
+        })
+        expected_output = {
+            "name": "request.foo",
+            "time": 1401577507,
+            "value": 16.123,
+            "tags": { "env": "prod", "tag2": "value2" }
+        }
+
+        assert expected_output == self.librato.measurements["request.foo"]
+
+    def test_gauges_with_dotted_tags(self):
+        self.librato = build_librato({
+            "statsite_output": "gauges.request#env=prod,tag2=foo.bar|16.000000|1401577507"
+        })
+        expected_output = {
+            "name": "request",
+            "time": 1401577507,
+            "value": 16.0,
+            "tags": { "env": "prod", "tag2": "foo.bar" }
+        }
+
+        assert expected_output == self.librato.measurements["request"]
         
     def test_measurements_with_period_in_tag_value_and_suffix(self):
+        self.librato = build_librato({
+            "statsite_output": "timers.tags_many_dots#tag1=value1,tag2=value.dotted.p90|16.000000|1401577507"
+        })
         expected_output = {
-            "name":         "tags_many_dots.p90",
-            "time":         1401577507,
-            "value" :         16.0,
-            "tags":         { "source": "localhost", "tag1": "value1", "tag2": "value.now" }
+            "name": "tags_many_dots.p90",
+            "time": 1401577507,
+            "value": 16.0,
+            "tags": { "tag1": "value1", "tag2": "value.dotted" }
         }
-        assert expected_output == self.librato.measurements["tags_many_dots.p90\tlocalhost"]
+        assert expected_output == self.librato.measurements["tags_many_dots.p90"]
     
     def test_write_to_legacy(self):
         expected_tags_output = {
@@ -190,11 +304,11 @@ class TestLibrato(object):
     def test_measurements_with_host(self):
         self.librato = build_librato({"host": "localhost"})
         expected_output = {
-            "name":         "query.tags",
+            "name":         "requests.2xx",
             "time":         1401577507,
             "value":        16.0,
-            "tags":         { "tag1": "value1" }
+            "tags":         { "environment": "stg" }
         }
         
         assert {"host": "localhost" } == self.librato.tags
-        assert expected_output == self.librato.measurements["query.tags"]
+        assert expected_output == self.librato.measurements["requests.2xx"]

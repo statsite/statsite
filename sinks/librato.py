@@ -182,7 +182,7 @@ class LibratoStore(object):
     def sanitize(self, name):
         return self.sanitize_re.sub("_", name)
     
-    def parse_tags(self, name, multipart):
+    def parse_tags(self, name, multipart=False):
         # Find and parse the tags from the name using the syntax name#tag1=value,tag2=value
         s = name.split("#")
         tags = {}
@@ -190,14 +190,15 @@ class LibratoStore(object):
         
         if len(s) > 1:
             name = s.pop(0)
-            # Timers will append .p90, .p99 etc to the end of the value of the last tag. Parse the suffix out if this is the last tag's value and set the name
+            raw_tags = s.pop().split(",")
             if multipart:
-                raw_tags = s.pop().split(",")
-                last_tag = raw_tags.pop(-1)
+                # Timers will append .p90, .p99 etc to the end of the "metric name"
+                # Parse the suffix out and append to the metric name
+                last_tag = raw_tags.pop()
                 last_tag_split = last_tag.split('.')
 
                 # Store the proper name. The suffix is the last element in split of the last tag.
-                name = name + "." + last_tag_split.pop(-1)
+                name = name + "." + last_tag_split.pop()
 
                 # Put the tag, without the suffix, back in the list of raw tags
                 if len(last_tag_split) > 1:
@@ -207,15 +208,11 @@ class LibratoStore(object):
                     # raw_tags.extend(last_tag_split)
                 else:
                     raw_tags.extend(last_tag_split)
-            else:         
-                raw_tags = s.pop().split(",")
 
             # Parse the tags out
             for raw_tag in raw_tags:
                 # Get the key and value from tag=value
-                tag_pair = raw_tag.split("=")
-                tag_key = tag_pair[0]
-                tag_value = tag_pair[1]
+                tag_key, tag_value = raw_tag.split("=")
                 tags[tag_key] = tag_value
         return name, tags
                 
@@ -288,13 +285,16 @@ class LibratoStore(object):
             k = name
 
         if k not in self.measurements:
-            self.measurements[k] = {
-                'name': name,
-                'tags' : tags,
-                'time' : ts
-            }
+            self.measurements[k] = []
+        meas = {
+            'name': name,
+            'tags' : tags,
+            'time' : ts,
+            subf: value
+        }
+        self.measurements[k].append(meas)
             
-        self.measurements[k][subf] = value
+        # self.measurements[k][subf] = value
         
         # Build out the legacy gauges
         if k not in self.gauges:
@@ -372,19 +372,18 @@ class LibratoStore(object):
         legacy_metrics = []
         count = 0
         
-        values = self.measurements.values()
-        
-        for measure in values:
-            tagged_metrics.append(measure)
-            count += 1
+        for v in self.measurements.values():
+            for metric in v:
+                tagged_metrics.append(metric)
+                count += 1
 
-            if count >= self.max_metrics_payload:
-                self.flush_payload(headers, tagged_metrics)
-                count = 0
-                tagged_metrics = []
+                if count >= self.max_metrics_payload:
+                    self.flush_payload(headers, tagged_metrics)
+                    count = 0
+                    tagged_metrics = []
 
         if count > 0:
-            self.flush_payload(headers, metrics)
+            self.flush_payload(headers, tagged_metrics)
         
         # If enabled, submit flush metrics to Librato's legacy API
         if self.write_to_legacy:
