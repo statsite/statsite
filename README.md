@@ -183,6 +183,11 @@ options must exist in the `statsite` section of the INI file:
   `flush_interval` seconds to handle the metrics. It can be any executable.
   It should read inputs over stdin and exit with status code 0 on success.
 
+* aligned\_flush : If set, flushes will be aligned on `flush_interval` boundaries, eg.
+  for a 15 second flush interval the flushes would be aligned to (0,15,30,45) boundaries 
+  of every minute. This means the first flush period might be shorter than the flush
+  interval depending on the start time of statsite.
+
 * input\_counter : If set, statsite will count how many commands it received
   in the flush interval, and the count will be emitted under this name. For
   example if set to "numStats", then statsite will emit "counter.numStats" with
