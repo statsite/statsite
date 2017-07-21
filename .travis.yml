@@ -14,5 +14,5 @@ before_install:
   - popd
   - mkdir -p m4
   - autoreconf -fiv
-install: pip install pytest==2.9.2
+install: pip install pytest==2.9.2 requests==2.18.1
 script: ./autogen.sh && ./configure && make && make check && py.test integ/
