@@ -29,6 +29,7 @@ Features
   - Librato
   - CloudWatch
   - OpenTSDB
+  - HTTP
 * Binary protocol
 * TCP, UDP, and STDIN
 * Fast
