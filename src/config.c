@@ -146,37 +146,41 @@ static int value_to_list_of_doubles(const char *val, double **result, int *count
 included_metrics_config csv_to_included_metrics_config(const char *value)
 {
 
-    included_metrics_config included_metrics_cfg = (included_metrics_config){false, false, false, false, false, false, false, false};
+    included_metrics_config included_metrics_cfg = (included_metrics_config){false, false, false, false, false, false, false, false, false, false};
 
-    char* token;
+    const char* token;
+    size_t token_len;
+    const char *skip = ", ";
 
-    char s[256];
-    strcpy(s, value);
-    token = strtok(s,",");
-    while( token != NULL )
+    token = value;
+    token += strspn(token, skip);
+    token_len = strcspn(token, skip);
+    while( token_len > 2 )
     {
-        if (strcasecmp(token, "COUNT") == 0){
+        if (strncasecmp(token, "COUNT", token_len) == 0){
             included_metrics_cfg.count = true;
-        } else if(strcasecmp(token, "MEAN") == 0){
+        } else if(strncasecmp(token, "MEAN", token_len) == 0){
             included_metrics_cfg.mean = true;
-        } else if (strcasecmp(token, "STDEV") == 0){
+        } else if (strncasecmp(token, "STDEV", token_len) == 0){
             included_metrics_cfg.stdev = true;
-        } else if (strcasecmp(token, "SUM") == 0){
+        } else if (strncasecmp(token, "SUM", token_len) == 0){
             included_metrics_cfg.sum = true;
-        } else if (strcasecmp(token, "SUM_SQ") == 0){
+        } else if (strncasecmp(token, "SUM_SQ", token_len) == 0){
             included_metrics_cfg.sum_sq = true;
-        } else if (strcasecmp(token, "LOWER") == 0){
+        } else if (strncasecmp(token, "LOWER", token_len) == 0){
             included_metrics_cfg.lower = true;
-        } else if (strcasecmp(token, "UPPER") == 0){
+        } else if (strncasecmp(token, "UPPER", token_len) == 0){
             included_metrics_cfg.upper = true;
-        } else if (strcasecmp(token, "RATE") == 0){
+        } else if (strncasecmp(token, "RATE", token_len) == 0){
             included_metrics_cfg.rate = true;
-        } else if (strcasecmp(token, "MEDIAN") == 0){
+        } else if (strncasecmp(token, "MEDIAN", token_len) == 0){
             included_metrics_cfg.median = true;
-        } else if (strcasecmp(token, "SAMPLE_RATE") == 0){
+        } else if (strncasecmp(token, "SAMPLE_RATE", token_len) == 0){
             included_metrics_cfg.sample_rate = true;
         }
-        token = strtok(NULL, ",");
+        token += token_len;
+        token += strspn(token, skip);
+        token_len = strcspn(token, skip);
     }
 
     return included_metrics_cfg;
