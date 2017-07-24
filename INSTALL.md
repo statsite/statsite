@@ -19,6 +19,7 @@ using the git sources, and running tests:
 - gcc (or compatible C compiler)
 - tex (if you're recompiling check)
 - pytest
+- requests (python-requests)
 - scons (for legacy build and test scripts)
 
 These dependencies have dependencies of their own, pytest requires python for
@@ -96,8 +97,11 @@ This is how the packaged `check` gets built, and how source distributions are bu
 If you use a git version, you may need to setup its autotools parts,
 check has it's own install docs on that.
 
-For pytest, you can use pip/easy_install, or if you really want to do it manually,
-see https://github.com/pytest-dev/pytest for the python code which is all you need.
+For python test dependencies, you can use pip/easy_install, or if you really want
+to do it manually, see below links for the python packages required.
+
+- pytest (https://github.com/pytest-dev/pytest)
+- requests (http://github.com/requests/requests)
 
 Distro-specifics
 ================
@@ -115,7 +119,7 @@ Install the packages according to the following snippet:
 sudo apt-get update
 sudo apt-get -y install build-essential libtool autoconf automake scons python-setuptools lsof git texlive check
 sudo easy_install pip
-sudo pip install pytest
+sudo pip install pytest requests
 ~~~~
 
 You can then run autogen.sh to kick off autotools:
@@ -150,7 +154,7 @@ If you want to run unit tests and integration tests, you will need a few extra p
 sudo apt-get update
 sudo apt-get -y install build-essential libtool autoconf automake scons python-setuptools lsof git texlive check
 sudo easy_install pip
-sudo pip install pytest
+sudo pip install pytest requests
 ~~~~
 
 with those packages installed you can run the tests:
