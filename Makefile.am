@@ -93,7 +93,7 @@ sdist: clean
 	mkdir -vp /tmp/statsite-@STATSITE_VERSION@
 	cp -R . /tmp/statsite-@STATSITE_VERSION@
 	tar -zcv --exclude='.git' --exclude='.gitignore' -f statsite-@STATSITE_VERSION@.tar.gz -C /tmp statsite-@STATSITE_VERSION@
-	rm -r /tmp/statsite-@STATSITE_VERSION@
+	rm -rf /tmp/statsite-@STATSITE_VERSION@
 
 
 clean-local: clean-local-check
