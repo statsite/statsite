@@ -122,6 +122,7 @@ exit 0
 %attr(755, root, root) /usr/libexec/statsite/sinks/graphite.py
 %attr(755, root, root) /usr/libexec/statsite/sinks/cloudwatch.sh
 %attr(755, root, root) /usr/libexec/statsite/sinks/opentsdb.js
+%attr(755, root, root) /usr/libexec/statsite/sinks/http.py
 
 %changelog
 * Tue May 12 2015 Yann Ramin <yann@twitter.com> - 0.7.1-1
