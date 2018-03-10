@@ -114,7 +114,7 @@ Usage
 -----
 
 Statsite is configured using a simple INI file.
-Here is an example configuration file::
+Here is an example configuration file:
 
     [statsite]
     port = 8125
