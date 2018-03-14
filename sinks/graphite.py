@@ -82,6 +82,11 @@ class GraphiteStore(object):
             k = self.normalize_func(k)
             self.metrics.append(((k), v, ts))
 
+    def send_metrics(self):
+        self.logger.info("Outputting %d metrics", len(self.metrics))
+        self.flush()
+        self.metrics = []
+
     def flush_lines(self):
         """
         Flushes the metrics provided to Graphite.
@@ -163,21 +168,18 @@ class GraphiteStore(object):
 
 
 def main():
-
     # Intialize from our arguments
     graphite = GraphiteStore(*sys.argv[1:])
 
-    # Get all the inputs
-    while True:
-        try:
-            graphite.append(raw_input().strip())
-        except EOFError:
-            break
+    METRICS_PER_FLUSH = 5000
 
-    # Flush
-    graphite.logger.info("Outputting %d metrics", len(graphite.metrics))
-    graphite.flush()
-    graphite.close()
+    # Get all the inputs
+    for line in sys.stdin:
+        if len(graphite.metrics) >= METRICS_PER_FLUSH:
+            graphite.send_metrics()
+        graphite.append(line.strip())
+
+    graphite.send_metrics()
 
 
 if __name__ == "__main__":
