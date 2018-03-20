@@ -53,7 +53,6 @@ static const statsite_config DEFAULT_CONFIG = {
     {"", "kv.", "gauges.", "counts.", "timers.", "sets.", ""},
     {},
     false,              // Extended counters off by default
-    {true, true, true, true, true, true, true, true, false, false},   // All extended counter metrics except sample_rate and median
     {true, true, true, true, true, true, true, true, true, true},   // All timer metrics on by default
     false,              // Do not prefix binary stream by default
                         // Number of quantiles
@@ -138,7 +137,7 @@ static int value_to_list_of_doubles(const char *val, double **result, int *count
 
 
 /**
-* Parsing the extended counters config
+* Parsing the extended metrics config
 * @arg config The global config
 * @arg value the extended counters to be used
 *
@@ -369,8 +368,6 @@ static int config_callback(void* user, const char* section, const char* name, co
         config->prefixes[TIMER] = strdup(value);
     } else if (NAME_MATCH("sets_prefix")) {
         config->prefixes[SET] = strdup(value);
-    } else if (NAME_MATCH("extended_counters_include")) {
-        config->ext_counters_config = csv_to_included_metrics_config(value);
     } else if (NAME_MATCH("timers_include")) {
         config->timers_config = csv_to_included_metrics_config(value);
     } else if (NAME_MATCH("kv_prefix")) {

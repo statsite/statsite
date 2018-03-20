@@ -212,15 +212,8 @@ options must exist in the `statsite` section of the INI file:
   each message type. Defaults to respectively: "kv.", "gauges.", "counts.",
   "sets.", "timers.". Values will be ignored if use_type_prefix set to 0.
 
-* extended\_counters : If enabled, the counter output is extended to include
-  all the computed summary values. Otherwise, the counter is emitted as just
-  the sum value. Summary values include `count`, `mean`, `stdev`, `sum`, `sum_sq`,
-  `lower`, `upper`, and `rate`.
+* extended\_counters : If enabled, the counter output will be extended to include the rate
   Defaults to false.
-
-* extended\_counters\_include : Allows you to configure which extended counters to include
-  through a comma separated list of values, extended\_counters must be set to true. Supported values include `count`, `mean`, `stdev`, `sum`, `sum_sq`,
-  `lower`, `upper`, and `rate`. If this option is not specified but extended_counters is set to true, then all values will be included by default.
 
 * timers\_include : Allows you to configure which timer metrics to include
   through a comma separated list of values. Supported values include `count`, `mean`, `stdev`, `sum`, `sum_sq`,

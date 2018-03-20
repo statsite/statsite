@@ -125,10 +125,7 @@ int main(void)
     tcase_add_test(tc8, test_sane_prefixes);
     tcase_add_test(tc8, test_sane_global_prefix);
     tcase_add_test(tc8, test_sane_quantiles);
-    tcase_add_test(tc8, test_extended_counters_include_count_only);
-    tcase_add_test(tc8, test_extended_counters_include_count_rate);
-    tcase_add_test(tc8, test_extended_counters_include_all_selected);
-    tcase_add_test(tc8, test_extended_counters_include_all_by_default);
+    tcase_add_test(tc8, test_extended_counters);
     tcase_add_test(tc8, test_timers_include_count_only);
     tcase_add_test(tc8, test_timers_include_count_rate);
     tcase_add_test(tc8, test_timers_include_all_selected);

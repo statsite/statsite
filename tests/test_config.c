@@ -27,16 +27,6 @@ START_TEST(test_config_get_default)
     fail_unless(strcmp(config.pid_file, "/var/run/statsite.pid") == 0);
     fail_unless(config.input_counter == NULL);
     fail_unless(config.extended_counters == false);
-    fail_unless(config.ext_counters_config.count == true);
-    fail_unless(config.ext_counters_config.mean == true);
-    fail_unless(config.ext_counters_config.stdev == true);
-    fail_unless(config.ext_counters_config.sum == true);
-    fail_unless(config.ext_counters_config.sum_sq == true);
-    fail_unless(config.ext_counters_config.lower == true);
-    fail_unless(config.ext_counters_config.upper == true);
-    fail_unless(config.ext_counters_config.rate == true);
-    fail_unless(config.ext_counters_config.median == false);
-    fail_unless(config.ext_counters_config.sample_rate == false);
     fail_unless(config.timers_config.count == true);
     fail_unless(config.timers_config.mean == true);
     fail_unless(config.timers_config.stdev == true);
@@ -76,16 +66,6 @@ START_TEST(test_config_bad_file)
     fail_unless(strcmp(config.pid_file, "/var/run/statsite.pid") == 0);
     fail_unless(config.input_counter == NULL);
     fail_unless(config.extended_counters == false);
-    fail_unless(config.ext_counters_config.count == true);
-    fail_unless(config.ext_counters_config.mean == true);
-    fail_unless(config.ext_counters_config.stdev == true);
-    fail_unless(config.ext_counters_config.sum == true);
-    fail_unless(config.ext_counters_config.sum_sq == true);
-    fail_unless(config.ext_counters_config.lower == true);
-    fail_unless(config.ext_counters_config.upper == true);
-    fail_unless(config.ext_counters_config.rate == true);
-    fail_unless(config.ext_counters_config.median == false);
-    fail_unless(config.ext_counters_config.sample_rate == false);
     fail_unless(config.timers_config.count == true);
     fail_unless(config.timers_config.mean == true);
     fail_unless(config.timers_config.stdev == true);
@@ -130,16 +110,6 @@ START_TEST(test_config_empty_file)
     fail_unless(strcmp(config.pid_file, "/var/run/statsite.pid") == 0);
     fail_unless(config.input_counter == NULL);
     fail_unless(config.extended_counters == false);
-    fail_unless(config.ext_counters_config.count == true);
-    fail_unless(config.ext_counters_config.mean == true);
-    fail_unless(config.ext_counters_config.stdev == true);
-    fail_unless(config.ext_counters_config.sum == true);
-    fail_unless(config.ext_counters_config.sum_sq == true);
-    fail_unless(config.ext_counters_config.lower == true);
-    fail_unless(config.ext_counters_config.upper == true);
-    fail_unless(config.ext_counters_config.rate == true);
-    fail_unless(config.ext_counters_config.median == false);
-    fail_unless(config.ext_counters_config.sample_rate == false);
     fail_unless(config.timers_config.count == true);
     fail_unless(config.timers_config.mean == true);
     fail_unless(config.timers_config.stdev == true);
@@ -629,9 +599,9 @@ sets_prefix=foo.sets.bar.";
 }
 END_TEST
 
-START_TEST(test_extended_counters_include_count_only)
+START_TEST(test_extended_counters)
 {
-    int fh = open("/tmp/extended_counters_include_count_config", O_CREAT|O_RDWR, 0777);
+    int fh = open("/tmp/extended_counters", O_CREAT|O_RDWR, 0777);
     char *buf = "[statsite]\n\
 port = 10000\n\
 udp_port = 10001\n\
@@ -647,7 +617,6 @@ binary_stream = true\n\
 input_counter = foobar\n\
 pid_file = /tmp/statsite.pid\n\
 extended_counters = true\n\
-extended_counters_include = COUNT\n\
 prefix_binary_stream = true\n\
 quantiles = 0.5, 0.90, 0.95, 0.99\n";
     write(fh, buf, strlen(buf));
@@ -655,7 +624,7 @@ quantiles = 0.5, 0.90, 0.95, 0.99\n";
     close(fh);
 
     statsite_config config;
-    int res = config_from_filename("/tmp/extended_counters_include_count_config", &config);
+    int res = config_from_filename("/tmp/extended_counters", &config);
     fail_unless(res == 0);
 
     // Should get the config
@@ -674,16 +643,6 @@ quantiles = 0.5, 0.90, 0.95, 0.99\n";
     fail_unless(strcmp(config.input_counter, "foobar") == 0);
     fail_unless(config.extended_counters == true);
     // Only the count extended counter should be included
-    fail_unless(config.ext_counters_config.count == true);
-    fail_unless(config.ext_counters_config.mean == false);
-    fail_unless(config.ext_counters_config.stdev == false);
-    fail_unless(config.ext_counters_config.sum == false);
-    fail_unless(config.ext_counters_config.sum_sq == false);
-    fail_unless(config.ext_counters_config.lower == false);
-    fail_unless(config.ext_counters_config.upper == false);
-    fail_unless(config.ext_counters_config.rate == false);
-    fail_unless(config.ext_counters_config.median == false);
-    fail_unless(config.ext_counters_config.sample_rate == false);
     fail_unless(config.prefix_binary_stream == true);
     fail_unless(config.num_quantiles == 4);
     fail_unless(config.quantiles[0] == 0.5);
@@ -691,204 +650,7 @@ quantiles = 0.5, 0.90, 0.95, 0.99\n";
     fail_unless(config.quantiles[2] == 0.95);
     fail_unless(config.quantiles[3] == 0.99);
 
-    unlink("/tmp/extended_counters_include_count_config");
-}
-END_TEST
-
-START_TEST(test_extended_counters_include_count_rate)
-{
-    int fh = open("/tmp/extended_counters_include_count_rate_config", O_CREAT|O_RDWR, 0777);
-    char *buf = "[statsite]\n\
-port = 10000\n\
-udp_port = 10001\n\
-parse_stdin = true\n\
-flush_interval = 120\n\
-timer_eps = 0.005\n\
-set_eps = 0.03\n\
-stream_cmd = foo\n\
-log_level = INFO\n\
-log_facility = local3\n\
-daemonize = true\n\
-binary_stream = true\n\
-input_counter = foobar\n\
-pid_file = /tmp/statsite.pid\n\
-extended_counters = true\n\
-extended_counters_include = COUNT,RATE\n\
-prefix_binary_stream = true\n\
-quantiles = 0.5, 0.90, 0.95, 0.99\n";
-    write(fh, buf, strlen(buf));
-    fchmod(fh, 777);
-    close(fh);
-
-    statsite_config config;
-    int res = config_from_filename("/tmp/extended_counters_include_count_rate_config", &config);
-    fail_unless(res == 0);
-
-    // Should get the config
-    fail_unless(config.tcp_port == 10000);
-    fail_unless(config.udp_port == 10001);
-    fail_unless(config.parse_stdin == true);
-    fail_unless(strcmp(config.log_level, "INFO") == 0);
-    fail_unless(strcmp(config.log_facility, "local3") == 0);
-    fail_unless(config.timer_eps == (double)0.005);
-    fail_unless(config.set_eps == (double)0.03);
-    fail_unless(strcmp(config.stream_cmd, "foo") == 0);
-    fail_unless(config.flush_interval == 120);
-    fail_unless(config.daemonize == true);
-    fail_unless(config.binary_stream == true);
-    fail_unless(strcmp(config.pid_file, "/tmp/statsite.pid") == 0);
-    fail_unless(strcmp(config.input_counter, "foobar") == 0);
-    fail_unless(config.extended_counters == true);
-    // Both count and rate extended counters should be included
-    fail_unless(config.ext_counters_config.count == true);
-    fail_unless(config.ext_counters_config.mean == false);
-    fail_unless(config.ext_counters_config.stdev == false);
-    fail_unless(config.ext_counters_config.sum == false);
-    fail_unless(config.ext_counters_config.sum_sq == false);
-    fail_unless(config.ext_counters_config.lower == false);
-    fail_unless(config.ext_counters_config.upper == false);
-    fail_unless(config.ext_counters_config.rate == true);
-    fail_unless(config.ext_counters_config.median == false);
-    fail_unless(config.ext_counters_config.sample_rate == false);
-    fail_unless(config.prefix_binary_stream == true);
-    fail_unless(config.num_quantiles == 4);
-    fail_unless(config.quantiles[0] == 0.5);
-    fail_unless(config.quantiles[1] == 0.90);
-    fail_unless(config.quantiles[2] == 0.95);
-    fail_unless(config.quantiles[3] == 0.99);
-
-    unlink("/tmp/extended_counters_include_count_rate_config");
-}
-END_TEST
-
-START_TEST(test_extended_counters_include_all_selected)
-{
-    int fh = open("/tmp/extended_counters_include_all_selected_config", O_CREAT|O_RDWR, 0777);
-    char *buf = "[statsite]\n\
-port = 10000\n\
-udp_port = 10001\n\
-parse_stdin = true\n\
-flush_interval = 120\n\
-timer_eps = 0.005\n\
-set_eps = 0.03\n\
-stream_cmd = foo\n\
-log_level = INFO\n\
-log_facility = local3\n\
-daemonize = true\n\
-binary_stream = true\n\
-input_counter = foobar\n\
-pid_file = /tmp/statsite.pid\n\
-extended_counters = true\n\
-extended_counters_include = COUNT,MEAN,STDEV,SUM,SUM_SQ,LOWER,UPPER,RATE\n\
-prefix_binary_stream = true\n\
-quantiles = 0.5, 0.90, 0.95, 0.99\n";
-    write(fh, buf, strlen(buf));
-    fchmod(fh, 777);
-    close(fh);
-
-    statsite_config config;
-    int res = config_from_filename("/tmp/extended_counters_include_all_selected_config", &config);
-    fail_unless(res == 0);
-
-    // Should get the config
-    fail_unless(config.tcp_port == 10000);
-    fail_unless(config.udp_port == 10001);
-    fail_unless(config.parse_stdin == true);
-    fail_unless(strcmp(config.log_level, "INFO") == 0);
-    fail_unless(strcmp(config.log_facility, "local3") == 0);
-    fail_unless(config.timer_eps == (double)0.005);
-    fail_unless(config.set_eps == (double)0.03);
-    fail_unless(strcmp(config.stream_cmd, "foo") == 0);
-    fail_unless(config.flush_interval == 120);
-    fail_unless(config.daemonize == true);
-    fail_unless(config.binary_stream == true);
-    fail_unless(strcmp(config.pid_file, "/tmp/statsite.pid") == 0);
-    fail_unless(strcmp(config.input_counter, "foobar") == 0);
-    fail_unless(config.extended_counters == true);
-    // Since all extended counters were included they should all be selected
-    fail_unless(config.ext_counters_config.count == true);
-    fail_unless(config.ext_counters_config.mean == true);
-    fail_unless(config.ext_counters_config.stdev == true);
-    fail_unless(config.ext_counters_config.sum == true);
-    fail_unless(config.ext_counters_config.sum_sq == true);
-    fail_unless(config.ext_counters_config.lower == true);
-    fail_unless(config.ext_counters_config.upper == true);
-    fail_unless(config.ext_counters_config.rate == true);
-    fail_unless(config.ext_counters_config.median == false);
-    fail_unless(config.ext_counters_config.sample_rate == false);
-    fail_unless(config.prefix_binary_stream == true);
-    fail_unless(config.num_quantiles == 4);
-    fail_unless(config.quantiles[0] == 0.5);
-    fail_unless(config.quantiles[1] == 0.90);
-    fail_unless(config.quantiles[2] == 0.95);
-    fail_unless(config.quantiles[3] == 0.99);
-
-    unlink("/tmp/extended_counters_include_all_selected_config");
-}
-END_TEST
-
-START_TEST(test_extended_counters_include_all_by_default)
-{
-    int fh = open("/tmp/extended_counters_include_all_by_default_config", O_CREAT|O_RDWR, 0777);
-    char *buf = "[statsite]\n\
-port = 10000\n\
-udp_port = 10001\n\
-parse_stdin = true\n\
-flush_interval = 120\n\
-timer_eps = 0.005\n\
-set_eps = 0.03\n\
-stream_cmd = foo\n\
-log_level = INFO\n\
-log_facility = local3\n\
-daemonize = true\n\
-binary_stream = true\n\
-input_counter = foobar\n\
-pid_file = /tmp/statsite.pid\n\
-extended_counters = true\n\
-prefix_binary_stream = true\n\
-quantiles = 0.5, 0.90, 0.95, 0.99\n";
-    write(fh, buf, strlen(buf));
-    fchmod(fh, 777);
-    close(fh);
-
-    statsite_config config;
-    int res = config_from_filename("/tmp/extended_counters_include_all_by_default_config", &config);
-    fail_unless(res == 0);
-
-    // Should get the config
-    fail_unless(config.tcp_port == 10000);
-    fail_unless(config.udp_port == 10001);
-    fail_unless(config.parse_stdin == true);
-    fail_unless(strcmp(config.log_level, "INFO") == 0);
-    fail_unless(strcmp(config.log_facility, "local3") == 0);
-    fail_unless(config.timer_eps == (double)0.005);
-    fail_unless(config.set_eps == (double)0.03);
-    fail_unless(strcmp(config.stream_cmd, "foo") == 0);
-    fail_unless(config.flush_interval == 120);
-    fail_unless(config.daemonize == true);
-    fail_unless(config.binary_stream == true);
-    fail_unless(strcmp(config.pid_file, "/tmp/statsite.pid") == 0);
-    fail_unless(strcmp(config.input_counter, "foobar") == 0);
-    fail_unless(config.extended_counters == true);
-    // If the extended_counters_include config property is not in the config file all extended counters should be included by default
-    fail_unless(config.ext_counters_config.count == true);
-    fail_unless(config.ext_counters_config.mean == true);
-    fail_unless(config.ext_counters_config.stdev == true);
-    fail_unless(config.ext_counters_config.sum == true);
-    fail_unless(config.ext_counters_config.sum_sq == true);
-    fail_unless(config.ext_counters_config.lower == true);
-    fail_unless(config.ext_counters_config.upper == true);
-    fail_unless(config.ext_counters_config.rate == true);
-    fail_unless(config.ext_counters_config.median == false);
-    fail_unless(config.ext_counters_config.sample_rate == false);
-    fail_unless(config.prefix_binary_stream == true);
-    fail_unless(config.num_quantiles == 4);
-    fail_unless(config.quantiles[0] == 0.5);
-    fail_unless(config.quantiles[1] == 0.90);
-    fail_unless(config.quantiles[2] == 0.95);
-    fail_unless(config.quantiles[3] == 0.99);
-
-    unlink("/tmp/extended_counters_include_all_by_default_config");
+    unlink("/tmp/extended_counters");
 }
 END_TEST
 

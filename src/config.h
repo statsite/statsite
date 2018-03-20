@@ -72,7 +72,6 @@ typedef struct {
     char* prefixes[METRIC_TYPES];
     char* prefixes_final[METRIC_TYPES];
     bool extended_counters;
-    included_metrics_config ext_counters_config;
     included_metrics_config timers_config;
     bool prefix_binary_stream;
     int num_quantiles;
