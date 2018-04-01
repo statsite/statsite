@@ -115,7 +115,11 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
 
         case COUNTER:
             if (GLOBAL_CONFIG->extended_counters) {
-                STREAM("%s%s.count|%f|%lld\n", prefix, name, counter_sum(value));
+                if (GLOBAL_CONFIG->legacy_extended_counters) {
+                    STREAM("%s%s.count|%"PRIu64"|%lld\n", prefix, name, counter_count(value));
+                } else {
+                    STREAM("%s%s.count|%f|%lld\n", prefix, name, counter_sum(value));
+                }
                 STREAM("%s%s.rate|%f|%lld\n", prefix, name, counter_sum(value) / GLOBAL_CONFIG->flush_interval);
             } else {
                 STREAM("%s%s|%f|%lld\n", prefix, name, counter_sum(value));

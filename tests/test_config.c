@@ -8,11 +8,8 @@
 #include <errno.h>
 #include "config.h"
 
-START_TEST(test_config_get_default)
-{
-    statsite_config config;
-    int res = config_from_filename(NULL, &config);
-    fail_unless(res == 0);
+
+static void check_default_config(statsite_config config) {
     fail_unless(config.tcp_port == 8125);
     fail_unless(config.udp_port == 8125);
     fail_unless(config.parse_stdin == false);
@@ -27,6 +24,7 @@ START_TEST(test_config_get_default)
     fail_unless(strcmp(config.pid_file, "/var/run/statsite.pid") == 0);
     fail_unless(config.input_counter == NULL);
     fail_unless(config.extended_counters == false);
+    fail_unless(config.legacy_extended_counters == true);
     fail_unless(config.timers_config.count == true);
     fail_unless(config.timers_config.mean == true);
     fail_unless(config.timers_config.stdev == true);
@@ -43,6 +41,14 @@ START_TEST(test_config_get_default)
     fail_unless(config.quantiles[1] == 0.95);
     fail_unless(config.quantiles[2] == 0.99);
 }
+
+START_TEST(test_config_get_default)
+{
+    statsite_config config;
+    int res = config_from_filename(NULL, &config);
+    fail_unless(res == 0);
+    check_default_config(config);
+}
 END_TEST
 
 START_TEST(test_config_bad_file)
@@ -52,36 +58,7 @@ START_TEST(test_config_bad_file)
     fail_unless(res == -ENOENT);
 
     // Should get the defaults...
-    fail_unless(config.tcp_port == 8125);
-    fail_unless(config.udp_port == 8125);
-    fail_unless(config.parse_stdin == false);
-    fail_unless(strcmp(config.log_level, "DEBUG") == 0);
-    fail_unless(config.syslog_log_level == LOG_DEBUG);
-    fail_unless(config.syslog_log_facility == LOG_LOCAL0);
-    fail_unless(config.timer_eps == (double)1e-2);
-    fail_unless(strcmp(config.stream_cmd, "cat") == 0);
-    fail_unless(config.flush_interval == 10);
-    fail_unless(config.daemonize == false);
-    fail_unless(config.binary_stream == false);
-    fail_unless(strcmp(config.pid_file, "/var/run/statsite.pid") == 0);
-    fail_unless(config.input_counter == NULL);
-    fail_unless(config.extended_counters == false);
-    fail_unless(config.timers_config.count == true);
-    fail_unless(config.timers_config.mean == true);
-    fail_unless(config.timers_config.stdev == true);
-    fail_unless(config.timers_config.sum == true);
-    fail_unless(config.timers_config.sum_sq == true);
-    fail_unless(config.timers_config.lower == true);
-    fail_unless(config.timers_config.upper == true);
-    fail_unless(config.timers_config.rate == true);
-    fail_unless(config.timers_config.median == true);
-    fail_unless(config.timers_config.sample_rate == true);
-    fail_unless(config.prefix_binary_stream == false);
-    fail_unless(config.num_quantiles == 3);
-    fail_unless(config.quantiles[0] == 0.5);
-    fail_unless(config.quantiles[1] == 0.95);
-    fail_unless(config.quantiles[2] == 0.99);
-
+    check_default_config(config);
 }
 END_TEST
 
@@ -96,35 +73,7 @@ START_TEST(test_config_empty_file)
     fail_unless(res == 0);
 
     // Should get the defaults...
-    fail_unless(config.tcp_port == 8125);
-    fail_unless(config.udp_port == 8125);
-    fail_unless(config.parse_stdin == false);
-    fail_unless(strcmp(config.log_level, "DEBUG") == 0);
-    fail_unless(config.syslog_log_level == LOG_DEBUG);
-    fail_unless(config.syslog_log_facility == LOG_LOCAL0);
-    fail_unless(config.timer_eps == (double)1e-2);
-    fail_unless(strcmp(config.stream_cmd, "cat") == 0);
-    fail_unless(config.flush_interval == 10);
-    fail_unless(config.daemonize == false);
-    fail_unless(config.binary_stream == false);
-    fail_unless(strcmp(config.pid_file, "/var/run/statsite.pid") == 0);
-    fail_unless(config.input_counter == NULL);
-    fail_unless(config.extended_counters == false);
-    fail_unless(config.timers_config.count == true);
-    fail_unless(config.timers_config.mean == true);
-    fail_unless(config.timers_config.stdev == true);
-    fail_unless(config.timers_config.sum == true);
-    fail_unless(config.timers_config.sum_sq == true);
-    fail_unless(config.timers_config.lower == true);
-    fail_unless(config.timers_config.upper == true);
-    fail_unless(config.timers_config.rate == true);
-    fail_unless(config.timers_config.median == true);
-    fail_unless(config.timers_config.sample_rate == true);
-    fail_unless(config.prefix_binary_stream == false);
-    fail_unless(config.num_quantiles == 3);
-    fail_unless(config.quantiles[0] == 0.5);
-    fail_unless(config.quantiles[1] == 0.95);
-    fail_unless(config.quantiles[2] == 0.99);
+    check_default_config(config);
 
     unlink("/tmp/zero_file");
 }
@@ -617,6 +566,7 @@ binary_stream = true\n\
 input_counter = foobar\n\
 pid_file = /tmp/statsite.pid\n\
 extended_counters = true\n\
+legacy_extended_counters = false\n\
 prefix_binary_stream = true\n\
 quantiles = 0.5, 0.90, 0.95, 0.99\n";
     write(fh, buf, strlen(buf));
@@ -642,6 +592,7 @@ quantiles = 0.5, 0.90, 0.95, 0.99\n";
     fail_unless(strcmp(config.pid_file, "/tmp/statsite.pid") == 0);
     fail_unless(strcmp(config.input_counter, "foobar") == 0);
     fail_unless(config.extended_counters == true);
+    fail_unless(config.legacy_extended_counters == false);
     // Only the count extended counter should be included
     fail_unless(config.prefix_binary_stream == true);
     fail_unless(config.num_quantiles == 4);

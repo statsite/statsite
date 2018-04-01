@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 typedef struct {
+    uint64_t count;        // Count of items
     double sum;            // Sum of the values
 } counter;
 
@@ -20,6 +21,13 @@ int init_counter(counter *counter);
  * @return 0 on success.
  */
 int counter_add_sample(counter *counter, double sample, double sample_rate);
+
+/**
+ * Returns the number of samples in the counter
+ * @arg counter The counter to query
+ * @return The number of samples
+ */
+uint64_t counter_count(counter *counter);
 
 /**
  * Returns the sum of the counter

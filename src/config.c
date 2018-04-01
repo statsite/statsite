@@ -53,6 +53,7 @@ static const statsite_config DEFAULT_CONFIG = {
     {"", "kv.", "gauges.", "counts.", "timers.", "sets.", ""},
     {},
     false,              // Extended counters off by default
+    true,               // Legacy behaviour of extended counters
     {true, true, true, true, true, true, true, true, true, true},   // All timer metrics on by default
     false,              // Do not prefix binary stream by default
                         // Number of quantiles
@@ -332,6 +333,8 @@ static int config_callback(void* user, const char* section, const char* name, co
         return value_to_bool(value, &config->use_type_prefix);
     } else if (NAME_MATCH("extended_counters")) {
         return value_to_bool(value, &config->extended_counters);
+    } else if (NAME_MATCH("legacy_extended_counters")) {
+        return value_to_bool(value, &config->legacy_extended_counters);
     } else if (NAME_MATCH("prefix_binary_stream")) {
         return value_to_bool(value, &config->prefix_binary_stream);
 
