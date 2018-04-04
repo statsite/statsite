@@ -231,7 +231,11 @@ static int stream_formatter_bin(FILE *pipe, void *data, metric_type type, char *
             break;
 
         case COUNTER:
-            STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_COUNT, counter_sum(value));
+            if (GLOBAL_CONFIG->legacy_extended_counters) {
+                STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_COUNT, counter_count(value));
+            } else {
+                STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_COUNT, counter_sum(value));
+            }
             STREAM_BIN(BIN_TYPE_COUNTER, BIN_OUT_RATE, counter_sum(value) / GLOBAL_CONFIG->flush_interval);
             break;
 

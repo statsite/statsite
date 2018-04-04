@@ -268,7 +268,7 @@ class TestInteg(object):
         if format_output(now - 1, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["count"], 600) in out:
             now = now - 1
 
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["count"], 600) in out
+        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["count"], 3) in out
         assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["rate"], 600) in out
 
     def test_meters(self, servers):
@@ -373,10 +373,10 @@ class TestIntegPrefix(object):
         out = open(output).read()
 
         # Adjust for time drift
-        if format_output(now - 1, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["count"], 600) in out:
+        if format_output(now - 1, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["count"], 3) in out:
             now = now - 1
 
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["count"], 600) in out
+        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["count"], 3) in out
         assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["rate"], 600) in out
 
     def test_meters(self, serversPrefix):
