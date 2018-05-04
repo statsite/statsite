@@ -265,16 +265,10 @@ class TestInteg(object):
         out = open(output).read()
 
         # Adjust for time drift
-        if format_output(now - 1, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum"], 600) in out:
+        if format_output(now - 1, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["count"], 600) in out:
             now = now - 1
 
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum"], 600) in out
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum sq"], 140000) in out
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["mean"], 200) in out
         assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["count"], 3) in out
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["stddev"], 100) in out
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["min"], 100) in out
-        assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["max"], 300) in out
         assert format_output(now, "foobar", BIN_TYPES["c"], VAL_TYPE_MAP["rate"], 600) in out
 
     def test_meters(self, servers):
@@ -379,16 +373,10 @@ class TestIntegPrefix(object):
         out = open(output).read()
 
         # Adjust for time drift
-        if format_output(now - 1, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum"], 600) in out:
+        if format_output(now - 1, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["count"], 3) in out:
             now = now - 1
 
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum"], 600) in out
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["sum sq"], 140000) in out
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["mean"], 200) in out
         assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["count"], 3) in out
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["stddev"], 100) in out
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["min"], 100) in out
-        assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["max"], 300) in out
         assert format_output(now, "counts.foobar", BIN_TYPES["c"], VAL_TYPE_MAP["rate"], 600) in out
 
     def test_meters(self, serversPrefix):
@@ -463,4 +451,3 @@ class TestIntegPrefix(object):
 
 if __name__ == "__main__":
     sys.exit(pytest.main(args="-k TestInteg."))
-
