@@ -11,6 +11,7 @@ RUN ./autogen.sh
 RUN ./configure
 RUN make
 RUN make install
+COPY statsite.docker.example /etc/statsite/statsite.conf
 # At this point, we have built the binary and have installed all of the
 # core files, which the following Dockerfile build stage will COPY in.
 
@@ -21,12 +22,12 @@ RUN make install
 FROM ubuntu:16.04
 
 RUN apt-get update && apt-get install -y python python-requests && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /etc/statsite/statsite.conf /etc/statsite/statsite.conf
 COPY --from=builder /usr/local/bin/statsite /usr/local/bin/statsite
 COPY --from=builder /usr/local/share/statsite/ /usr/local/share/statsite/
 
 # You'll need to mount your configuration in here.
 VOLUME /etc/statsite
-ENV STATSITE_CONFIG_PATH=/etc/statsite/statsite.conf
 
-ENTRYPOINT /usr/local/bin/statsite
-CMD -f ${STATSITE_CONFIG_PATH}
+ENTRYPOINT ["/usr/local/bin/statsite"]
+CMD ["-f","/etc/statsite/statsite.conf"]
