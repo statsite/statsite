@@ -22,7 +22,7 @@ FROM ubuntu:16.04
 
 RUN apt-get update && apt-get install -y python python-requests && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /usr/local/bin/statsite /usr/local/bin/statsite
-COPY --from=builder /usr/local/share/statsite /usr/local/share/statsite
+COPY --from=builder /usr/local/share/statsite/ /usr/local/share/statsite/
 
 # You'll need to mount your configuration in here.
 VOLUME /etc/statsite
