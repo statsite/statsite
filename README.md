@@ -110,6 +110,26 @@ To build the test code successfully, do the following::
 
 At this point, the test code should build successfully.
 
+Docker
+------
+
+You can build your own image of docker using the Dockerfile
+
+    $ git clone https://github.com/statsite/statsite.git
+    $ cd statsite
+    $ docker build -t statsite/statsite:latest .
+    $ docker run statsite/statsite:latest
+
+You can override the configuration via a mount that provide a `statsite.conf`
+
+    $ docker run -v /config/statsite:/etc/statsite statsite/statsite:latest
+
+Or override the configuration with a different path by passing it in the `CMD`
+
+    $ docker run -v /config/statsite:/tmp statsite/statsite:latest -f /tmp/statsite.docker.example
+
+See [statsite.docker.conf](https://github.com/statsite/statsite/blob/master/statsite.docker.example) for a starting point
+
 Usage
 -----
 
