@@ -21,7 +21,7 @@ COPY statsite.docker.example /etc/statsite/statsite.conf
 # the previous stage, we lessen image bloat and installed package set.
 FROM ubuntu:16.04
 
-RUN apt-get update && apt-get install -y python python-requests && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y nodejs python python-requests && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /etc/statsite/statsite.conf /etc/statsite/statsite.conf
 COPY --from=builder /usr/local/bin/statsite /usr/local/bin/statsite
 COPY --from=builder /usr/local/share/statsite/ /usr/local/share/statsite/
