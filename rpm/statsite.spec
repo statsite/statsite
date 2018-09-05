@@ -9,7 +9,7 @@ License:	See the LICENSE file.
 URL:		https://github.com/armon/statsite
 Source0:	%{name}-%{version}.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
-BuildRequires:	scons check-devel %{?el7:systemd} %{?fedora:systemd}
+BuildRequires:	libtool automake autoconf scons check-devel %{?el7:systemd} %{?fedora:systemd}
 AutoReqProv:	No
 Requires(pre):  shadow-utils
 
@@ -29,6 +29,8 @@ exit 0
 %setup
 
 %build
+./autogen.sh
+%configure
 make %{?_smp_mflags}
 
 %install
