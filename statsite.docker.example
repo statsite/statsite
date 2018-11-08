@@ -5,7 +5,7 @@ log_level=INFO
 flush_interval=10
 timer_eps=0.01
 set_eps=0.02
-stream_cmd=python /usr/share/statsite/sinks/graphite.py localhost 2003
+stream_cmd=python /usr/local/share/statsite/sinks/graphite.py localhost 2003
 
 [histogram_api]
 prefix=api
