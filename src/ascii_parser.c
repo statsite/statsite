@@ -31,69 +31,70 @@ static const char _ascii_protocol_parser_actions[] = {
 	0, 1, 0, 1, 2, 1, 3, 1, 
 	5, 1, 6, 1, 7, 1, 8, 1, 
 	9, 1, 10, 1, 11, 2, 1, 0, 
-	2, 4, 8
+	2, 4, 7, 2, 4, 8
 };
 
 static const char _ascii_protocol_parser_key_offsets[] = {
 	0, 0, 1, 2, 3, 4, 10, 12, 
-	13, 14, 15, 16, 17, 18, 19, 20, 
-	21, 22, 22
+	13, 14, 15, 16, 18, 19, 20, 21, 
+	22, 23, 24, 25, 26, 26
 };
 
 static const char _ascii_protocol_parser_trans_keys[] = {
 	58, 58, 124, 124, 99, 103, 104, 107, 
 	109, 115, 10, 124, 64, 10, 10, 10, 
-	10, 118, 10, 115, 10, 10, 0
+	10, 124, 64, 10, 10, 118, 10, 115, 
+	10, 10, 0
 };
 
 static const char _ascii_protocol_parser_single_lengths[] = {
 	0, 1, 1, 1, 1, 6, 2, 1, 
-	1, 1, 1, 1, 1, 1, 1, 1, 
-	1, 0, 0
+	1, 1, 1, 2, 1, 1, 1, 1, 
+	1, 1, 1, 1, 0, 0
 };
 
 static const char _ascii_protocol_parser_range_lengths[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0
+	0, 0, 0, 0, 0, 0
 };
 
 static const char _ascii_protocol_parser_index_offsets[] = {
 	0, 0, 2, 4, 6, 8, 15, 18, 
-	20, 22, 24, 26, 28, 30, 32, 34, 
-	36, 38, 39
+	20, 22, 24, 26, 29, 31, 33, 35, 
+	37, 39, 41, 43, 45, 46
 };
 
 static const char _ascii_protocol_parser_trans_targs[] = {
 	0, 2, 3, 2, 0, 4, 5, 4, 
-	6, 10, 11, 12, 14, 15, 0, 17, 
-	7, 0, 8, 0, 0, 9, 17, 9, 
-	17, 0, 17, 0, 13, 0, 17, 0, 
-	11, 0, 17, 0, 18, 16, 0, 0, 
-	0
+	6, 10, 11, 15, 17, 18, 0, 20, 
+	7, 0, 8, 0, 0, 9, 20, 9, 
+	20, 0, 20, 12, 0, 13, 0, 0, 
+	14, 20, 14, 16, 0, 20, 0, 11, 
+	0, 20, 0, 21, 19, 0, 0, 0
 };
 
 static const char _ascii_protocol_parser_trans_actions[] = {
 	17, 21, 3, 0, 17, 1, 5, 0, 
 	0, 0, 0, 0, 0, 0, 17, 13, 
-	0, 17, 0, 17, 17, 1, 24, 0, 
-	9, 17, 11, 17, 0, 17, 7, 17, 
-	0, 17, 15, 17, 19, 0, 0, 0, 
-	0
+	0, 17, 0, 17, 17, 1, 27, 0, 
+	9, 17, 11, 0, 17, 0, 17, 17, 
+	1, 24, 0, 0, 17, 7, 17, 0, 
+	17, 15, 17, 19, 0, 0, 0, 0
 };
 
 static const char _ascii_protocol_parser_eof_actions[] = {
 	0, 17, 17, 17, 17, 17, 17, 17, 
 	17, 17, 17, 17, 17, 17, 17, 17, 
-	0, 0, 0
+	17, 17, 17, 0, 0, 0
 };
 
 static const int ascii_protocol_parser_start = 1;
-static const int ascii_protocol_parser_first_final = 17;
+static const int ascii_protocol_parser_first_final = 20;
 static const int ascii_protocol_parser_error = 0;
 
 static const int ascii_protocol_parser_en_main = 1;
-static const int ascii_protocol_parser_en_line = 16;
+static const int ascii_protocol_parser_en_line = 19;
 
 
 #line 57 "ascii_parser_std.rl"
@@ -106,7 +107,7 @@ ascpp ascpp_init(metric_cb cb) {
 
   /* Init */
   
-#line 110 "ascii_parser_std.c"
+#line 111 "ascii_parser_std.c"
 	{
 	cs = ascii_protocol_parser_start;
 	}
@@ -130,7 +131,7 @@ void ascpp_exec(ascpp *parser, char *buffer, size_t len) {
 
   /* Exec */
   
-#line 134 "ascii_parser_std.c"
+#line 135 "ascii_parser_std.c"
 	{
 	int _klen;
 	unsigned int _trans;
@@ -245,13 +246,13 @@ _match:
 	break;
 	case 10:
 #line 29 "ascii_parser_std.rl"
-	{ ret=-1; p--; {cs = 16; goto _again;} }
+	{ ret=-1; p--; {cs = 19;goto _again;} }
 	break;
 	case 11:
 #line 44 "ascii_parser_std.rl"
-	{ {cs = 1; goto _again;} }
+	{ {cs = 1;goto _again;} }
 	break;
-#line 255 "ascii_parser_std.c"
+#line 256 "ascii_parser_std.c"
 		}
 	}
 
@@ -269,9 +270,11 @@ _again:
 		switch ( *__acts++ ) {
 	case 10:
 #line 29 "ascii_parser_std.rl"
-	{ ret=-1; p--; {cs = 16; goto _again;} }
+	{ ret=-1; p--; {cs = 19;	if ( p == pe )
+		goto _test_eof;
+goto _again;} }
 	break;
-#line 275 "ascii_parser_std.c"
+#line 278 "ascii_parser_std.c"
 		}
 	}
 	}

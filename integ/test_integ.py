@@ -212,6 +212,30 @@ class TestInteg(object):
         assert "timers.noobs.rate|4950" in out
         assert "timers.noobs.sample_rate|100" in out
 
+    def test_timers_with_rate(self, servers):
+        "Tests timers with sampling rate"
+        server, _, output = servers
+        msg = ""
+        for x in xrange(100):
+            msg += "withrate:%d|ms|@0.5\n" % x
+        server.sendall(msg)
+
+        wait_file(output)
+        out = open(output).read()
+        assert "timers.withrate.sum|4950" in out
+        assert "timers.withrate.sum_sq|328350" in out
+        assert "timers.withrate.mean|49.500000" in out
+        assert "timers.withrate.lower|0.000000" in out
+        assert "timers.withrate.upper|99.000000" in out
+        assert "timers.withrate.count|200" in out
+        assert "timers.withrate.stdev|29.011492" in out
+        assert "timers.withrate.median|49.000000" in out
+        assert "timers.withrate.p90|90.000000" in out
+        assert "timers.withrate.p95|95.000000" in out
+        assert "timers.withrate.p99|99.000000" in out
+        assert "timers.withrate.rate|4950" in out
+        assert "timers.withrate.sample_rate|200.0" in out
+
     def test_histogram(self, servers):
         "Tests adding keys with histograms"
         server, _, output = servers
