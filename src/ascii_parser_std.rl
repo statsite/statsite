@@ -28,15 +28,15 @@
 
   action stat_err        { ret=-1; fhold; fgoto line; }
 
-  valstr       = (any - '|')+                       >Mark %Value;
-  name         = (any - ':')+                       >Mark %Name;
-  samplerate   = (any - '\n')+                      >Mark %SampleRate;
+  valstr       = (any - '|')+                                   >Mark %Value;
+  name         = (any - ':')+                                   >Mark %Name;
+  samplerate   = (any - '\n')+                                  >Mark %SampleRate;
 
-  keyvalue     = valstr '|kv'                       %KeyValue;
-  gauge        = valstr '|g'                        %Gauge;
-  timer        = valstr '|' ('h' | 'ms')            %Timer;
-  counter      = valstr ('|c' ('|@' samplerate)?)   %Counter;
-  set          = valstr '|s'                        %Set;
+  keyvalue     = valstr '|kv'                                   %KeyValue;
+  gauge        = valstr '|g'                                    %Gauge;
+  timer        = valstr ('|' ('h' | 'ms') ('|@' samplerate)?)   %Timer;
+  counter      = valstr ('|c' ('|@' samplerate)?)               %Counter;
+  set          = valstr '|s'                                    %Set;
 
   stat         = (name (':' (keyvalue | gauge | timer | counter | set))) >Reset $err(stat_err); 
 
