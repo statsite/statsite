@@ -348,7 +348,7 @@ Here is an example of the simplest possible Python sink:
     import sys
 
     lines = sys.stdin.read().split("\n")
-    metrics = [l.split("|") for l in lines]
+    metrics = [l.split("|") for l in lines if l]
 
     for key, value, timestamp in metrics:
         print key, value, timestamp
