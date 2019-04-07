@@ -119,7 +119,8 @@ Install the packages according to the following snippet:
 sudo apt-get update
 sudo apt-get -y install build-essential libtool autoconf automake scons python-setuptools lsof git texlive check
 sudo easy_install pip
-sudo pip install pytest requests
+sudo pip install pytest==3.4.0 
+sudo pip install requests==2.21.0
 ~~~~
 
 You can then run autogen.sh to kick off autotools:
@@ -154,7 +155,8 @@ If you want to run unit tests and integration tests, you will need a few extra p
 sudo apt-get update
 sudo apt-get -y install build-essential libtool autoconf automake scons python-setuptools lsof git texlive check
 sudo easy_install pip
-sudo pip install pytest requests
+sudo pip install pytest==3.4.0 
+sudo pip install requests==2.21.0
 ~~~~
 
 with those packages installed you can run the tests:
