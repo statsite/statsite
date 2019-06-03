@@ -9,7 +9,7 @@ typedef int(*hashmap_callback)(void *data, const char *key, void *value);
 
 /**
  * Creates a new hashmap and allocates space for it.
- * @arg initial_size The minimim initial size. 0 for default (64).
+ * @arg initial_size The minimim initial size. 0 for default (128).
  * @arg map Output. Set to the address of the map
  * @return 0 on success.
  */

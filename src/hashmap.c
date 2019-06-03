@@ -25,12 +25,12 @@ extern void MurmurHash3_x64_128(const void * key, const int len, const uint32_t 
 
 /**
  * Creates a new hashmap and allocates space for it.
- * @arg initial_size The minimim initial size. 0 for default (64).
+ * @arg initial_size The minimim initial size. 0 for default (128).
  * @arg map Output. Set to the address of the map
  * @return 0 on success.
  */
 int hashmap_init(int initial_size, hashmap **map) {
-    // Default to 64 if no size
+    // Default to 128 if no size
     if (initial_size <= 0) {
        initial_size = DEFAULT_CAPACITY;
 
