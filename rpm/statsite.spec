@@ -9,7 +9,7 @@ License:	See the LICENSE file.
 URL:		https://github.com/armon/statsite
 Source0:	%{name}-%{version}.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
-BuildRequires:	libtool automake autoconf scons check-devel %{?el7:systemd} %{?fedora:systemd}
+BuildRequires:	libtool automake autoconf check-devel %{?el7:systemd} %{?fedora:systemd}
 AutoReqProv:	No
 Requires(pre):  shadow-utils
 
@@ -31,37 +31,38 @@ exit 0
 %build
 ./autogen.sh
 %configure
-make %{?_smp_mflags}
+%{__make} %{?_smp_mflags}
 
 %install
-mkdir -vp $RPM_BUILD_ROOT/usr/sbin
-mkdir -vp $RPM_BUILD_ROOT/etc/init.d
-mkdir -vp $RPM_BUILD_ROOT/etc/%{name}
-mkdir -vp $RPM_BUILD_ROOT/etc/tmpfiles.d
-mkdir -vp $RPM_BUILD_ROOT/usr/libexec/%{name}
-mkdir -vp $RPM_BUILD_ROOT/var/run/%{name}
-mkdir -vp $RPM_BUILD_ROOT/var/lib/%{name}
+%{__mkdir} -vp $RPM_BUILD_ROOT/%{_sbindir}
+%{__mkdir} -vp $RPM_BUILD_ROOT/%{_sysconfdir}/init.d
+%{__mkdir} -vp $RPM_BUILD_ROOT/%{_sysconfdir}/%{name}
+%{__mkdir} -vp $RPM_BUILD_ROOT/%{_tmpfilesdir}
+%{__mkdir} -vp $RPM_BUILD_ROOT/%{_libexecdir}/%{name}
+%{__mkdir} -vp $RPM_BUILD_ROOT/%{_rundir}/%{name}
+%{__mkdir} -vp $RPM_BUILD_ROOT/%{_sharedstatedir}/%{name}
 
 %if 0%{?fedora}%{?el7}
-mkdir -vp $RPM_BUILD_ROOT/%{_unitdir}
-install -m 644 rpm/statsite.service $RPM_BUILD_ROOT/%{_unitdir}
-install -m 644 rpm/statsite.tmpfiles.conf $RPM_BUILD_ROOT/etc/tmpfiles.d/statsite.conf
+%{__mkdir} -vp $RPM_BUILD_ROOT/%{_unitdir}
+%{__install} -m 644 rpm/statsite.service $RPM_BUILD_ROOT/%{_unitdir}
+%{__install} -m 644 rpm/statsite.tmpfiles.conf $RPM_BUILD_ROOT/%{_tmpfilesdir}/statsite.conf
 %else
-install -m 755 rpm/statsite.initscript $RPM_BUILD_ROOT/etc/init.d/statsite
+%{__install} -m 755 rpm/statsite.initscript $RPM_BUILD_ROOT/%{_sysconfdir}/init.d/statsite
 %endif
 
-install -m 755 statsite $RPM_BUILD_ROOT/usr/sbin
-install -m 644 rpm/statsite.conf.example $RPM_BUILD_ROOT/etc/%{name}/statsite.conf
-cp -a sinks $RPM_BUILD_ROOT/usr/libexec/%{name}
+%{__install} -m 755 statsite $RPM_BUILD_ROOT/%{_sbindir}
+%{__install} -m 644 rpm/statsite.conf.example $RPM_BUILD_ROOT/%{_sysconfdir}/%{name}/statsite.conf
+%{__cp} -a sinks $RPM_BUILD_ROOT/%{_libexecdir}/%{name}
 
 %clean
-make clean
-[ "%{buildroot}" != "/" ] && rm -rf %{buildroot}
+%{__make} clean
+[ "%{buildroot}" != "/" ] && %{__rm} -rf %{buildroot}
 
 %post
 if [ "$1" = 1 ] ; then
 %if 0%{?fedora}%{?el7}
 	systemctl daemon-reload
+	%tmpfiles_create %{_tmpfilesdir}/statsite.conf
 %else
 	/sbin/chkconfig --add %{name}
 	/sbin/chkconfig %{name} off
@@ -102,31 +103,33 @@ exit 0
 %doc CHANGELOG.md
 %doc README.md
 %doc rpm/statsite.conf.example
-%config /etc/%{name}/statsite.conf
-%attr(755, root, root) /usr/sbin/statsite
+%config %{_sysconfdir}/%{name}/statsite.conf
+%attr(755, root, root) %{_sbindir}/statsite
 %if 0%{?fedora}%{?el7}
 %attr(644, root, root) %{_unitdir}/statsite.service
-%dir /etc/tmpfiles.d
-%attr(644, root, root) /etc/tmpfiles.d/statsite.conf
+%attr(644, root, root) %{_tmpfilesdir}/statsite.conf
 %else
-%attr(755, root, root) /etc/init.d/statsite
+%attr(755, root, root) %{_sysconfdir}/init.d/statsite
 %endif
-%dir /usr/libexec/statsite
-%dir /usr/libexec/statsite/sinks
-%attr(755, statsite, statsite) /var/run/statsite
-%attr(755, statsite, statsite) /var/lib/statsite
-%attr(755, root, root) /usr/libexec/statsite/sinks/__init__.py
-%attr(755, root, root) /usr/libexec/statsite/sinks/binary_sink.py
-%attr(755, root, root) /usr/libexec/statsite/sinks/librato.py
-%attr(755, root, root) /usr/libexec/statsite/sinks/statsite_json_sink.rb
-%attr(755, root, root) /usr/libexec/statsite/sinks/gmetric.py
-%attr(755, root, root) /usr/libexec/statsite/sinks/influxdb.py
-%attr(755, root, root) /usr/libexec/statsite/sinks/graphite.py
-%attr(755, root, root) /usr/libexec/statsite/sinks/cloudwatch.sh
-%attr(755, root, root) /usr/libexec/statsite/sinks/opentsdb.js
-%attr(755, root, root) /usr/libexec/statsite/sinks/http.py
+%dir %{_libexecdir}/statsite
+%dir %{_libexecdir}/statsite/sinks
+%attr(755, statsite, statsite) %{_rundir}/statsite
+%attr(755, statsite, statsite) %{_sharedstatedir}/statsite
+%attr(755, root, root) %{_libexecdir}/statsite/sinks/__init__.py
+%attr(755, root, root) %{_libexecdir}/statsite/sinks/binary_sink.py
+%attr(755, root, root) %{_libexecdir}/statsite/sinks/librato.py
+%attr(755, root, root) %{_libexecdir}/statsite/sinks/statsite_json_sink.rb
+%attr(755, root, root) %{_libexecdir}/statsite/sinks/gmetric.py
+%attr(755, root, root) %{_libexecdir}/statsite/sinks/influxdb.py
+%attr(755, root, root) %{_libexecdir}/statsite/sinks/graphite.py
+%attr(755, root, root) %{_libexecdir}/statsite/sinks/cloudwatch.sh
+%attr(755, root, root) %{_libexecdir}/statsite/sinks/opentsdb.js
+%attr(755, root, root) %{_libexecdir}/statsite/sinks/http.py
 
 %changelog
+* Wed Aug 21 2019 Mark Cranny <crannym1@gmail.com>
+- Refactor SPEC file to use standard macros, tmpfiles_create etc
+
 * Tue May 12 2015 Yann Ramin <yann@twitter.com> - 0.7.1-1
 - Add a statsite user and group
 - Add systemd support
