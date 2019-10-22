@@ -98,7 +98,7 @@ available usually through a system package manager. Steps:
 If you get any errors, you may need to check if all dependencies are installed, see INSTALL.md.
 
 Building the test code may generate errors if libcheck is not available.
-To build the test code successfully, do the following::
+To build the test code successfully, do the following:
 
     $ cd deps/check-0.10.0/
     $ ./configure
