@@ -212,7 +212,7 @@ class LibratoStore(object):
             # Parse the tags out
             for raw_tag in raw_tags:
                 # Get the key and value from tag=value
-                tag_key, tag_value = raw_tag.split("=")
+                tag_key, tag_value = raw_tag.split("=", 1)
                 tags[tag_key] = tag_value
         return name, tags
                 
