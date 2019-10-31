@@ -15,7 +15,7 @@
 #include "cm_quantile.h"
 
 /* Static declarations */
-static void cm_add_to_buffer(cm_quantile *cm, double value);
+static void cm_add_to_buffer(cm_quantile *cm, double value, uint64_t count);
 static double cm_insert_point_value(cm_quantile *cm);
 static void cm_reset_insert_cursor(cm_quantile *cm);
 static int cm_cursor_increment(cm_quantile *cm);
@@ -132,8 +132,8 @@ int destroy_cm_quantile(cm_quantile *cm) {
  * @arg sample The new sample value
  * @return 0 on success.
  */
-int cm_add_sample(cm_quantile *cm, double sample) {
-    cm_add_to_buffer(cm, sample);
+int cm_add_sample(cm_quantile *cm, double sample, uint64_t count) {
+    cm_add_to_buffer(cm, sample, count);
     cm_insert(cm);
     cm_compress(cm);
     return 0;
@@ -183,10 +183,11 @@ double cm_query(cm_quantile *cm, double quantile) {
 /**
  * Adds a new sample to the buffer
  */
-static void cm_add_to_buffer(cm_quantile *cm, double value) {
+static void cm_add_to_buffer(cm_quantile *cm, double value, uint64_t count) {
     // Allocate a new sample
     cm_sample *s = calloc(1, sizeof(cm_sample));
     s->value = value;
+    s->width = count;
 
     /*
      * Check the cursor value.
@@ -250,11 +251,10 @@ static void cm_insert(cm_quantile *cm) {
     cm_sample *samp;
     if (!cm->samples) {
         if (!heap_delmin(cm->bufMore, NULL, (void**)&samp)) return;
-        samp->width = 1;
         samp->delta = 0;
         cm->samples = samp;
         cm->end = samp;
-        cm->num_values++;
+        cm->num_values += samp->width;
         cm->num_samples++;
         cm->insert.curs = samp;
 		return;
@@ -271,10 +271,9 @@ static void cm_insert(cm_quantile *cm) {
     for (int i=0; i < incr_size and cm->insert.curs; i++) {
         while (heap_min(cm->bufMore, (void**)&val, NULL) && *val <= cm_insert_point_value(cm)) {
             heap_delmin(cm->bufMore, NULL, (void**)&samp);
-            samp->width = 1;
             samp->delta = cm->insert.curs->width + cm->insert.curs->delta - 1;
             cm_insert_sample(cm, cm->insert.curs, samp);
-            cm->num_values++;
+            cm->num_values += samp->width;
             cm->num_samples++;
 
             // Check if we need to update the compress cursor
@@ -290,10 +289,9 @@ static void cm_insert(cm_quantile *cm) {
     if (cm->insert.curs == NULL) {
         while (heap_min(cm->bufMore, (void**)&val, NULL) && *val > cm->end->value) {
             heap_delmin(cm->bufMore, NULL, (void**)&samp);
-            samp->width = 1;
             samp->delta = 0;
             cm_append_sample(cm, samp);
-            cm->num_values++;
+            cm->num_values += samp->width;
             cm->num_samples++;
         }
 

@@ -79,6 +79,8 @@ int main(void)
     tcase_add_test(tc4, test_timer_init_add_destroy);
     tcase_add_test(tc4, test_timer_add_loop);
     tcase_add_test(tc4, test_timer_sample_rate);
+    tcase_add_test(tc4, test_timer_sample_rate_2);
+    tcase_add_test(tc4, test_timer_variable_sample_rate);
 
     // Add the counter tests
     suite_add_tcase(s1, tc5);

@@ -443,7 +443,7 @@ void emit_stat(metric_type type,
     // Convert the value to a double
     val = str2double(value->start, &endptr);
     if (unlikely(endptr == value->start || errno == ERANGE)) {
-        syslog(LOG_WARNING, "Failed value conversion! Input: %.*s", value->len, value->start);
+        syslog(LOG_WARNING, "Failed value conversion! Input: %.*s", (int)value->len, value->start);
         return;
     }
 
@@ -451,7 +451,7 @@ void emit_stat(metric_type type,
     if ((type == COUNTER || type == TIMER) && samplerate->len > 1) {
         double unchecked_rate = str2double(samplerate->start, &endptr);
         if (unlikely(endptr == samplerate->start)) {
-            syslog(LOG_WARNING, "Failed sample rate conversion! Input: %.*s", samplerate->len, samplerate->start);
+            syslog(LOG_WARNING, "Failed sample rate conversion! Input: %.*s", (int)samplerate->len, samplerate->start);
             return;
         }
         if (likely(unchecked_rate > 0 && unchecked_rate <= 1)) {

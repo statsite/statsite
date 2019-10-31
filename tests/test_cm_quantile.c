@@ -50,7 +50,7 @@ START_TEST(test_cm_init_add_destroy)
     int res = init_cm_quantile(0.01, (double*)&quants, 3, &cm);
     fail_unless(res == 0);
 
-    res = cm_add_sample(&cm, 100.0);
+    res = cm_add_sample(&cm, 100.0, 1);
     fail_unless(res == 0);
 
     res = destroy_cm_quantile(&cm);
@@ -67,7 +67,7 @@ START_TEST(test_cm_init_add_loop_destroy)
     fail_unless(res == 0);
 
     for (int i=0; i<1000; i++) {
-        res = cm_add_sample(&cm, i);
+        res = cm_add_sample(&cm, i, 1);
         fail_unless(res == 0);
     }
 
@@ -99,7 +99,7 @@ START_TEST(test_cm_init_add_query_destroy)
     int res = init_cm_quantile(0.01, (double*)&quants, 3, &cm);
     fail_unless(res == 0);
 
-    res = cm_add_sample(&cm, 100.0);
+    res = cm_add_sample(&cm, 100.0, 1);
     fail_unless(res == 0);
 
     double val = cm_query(&cm, 0.5);
@@ -117,13 +117,13 @@ START_TEST(test_cm_init_add3_query_destroy)
     int res = init_cm_quantile(0.01, (double*)&quants, 3, &cm);
     fail_unless(res == 0);
 
-    res = cm_add_sample(&cm, 100.0);
+    res = cm_add_sample(&cm, 100.0, 1);
     fail_unless(res == 0);
 
-    res = cm_add_sample(&cm, 200.0);
+    res = cm_add_sample(&cm, 200.0, 1);
     fail_unless(res == 0);
 
-    res = cm_add_sample(&cm, 300.0);
+    res = cm_add_sample(&cm, 300.0, 1);
     fail_unless(res == 0);
 
     res = cm_flush(&cm);
@@ -144,7 +144,7 @@ START_TEST(test_cm_init_add_negative_query_destroy)
     int res = init_cm_quantile(0.01, (double*)&quants, 3, &cm);
     fail_unless(res == 0);
 
-    res = cm_add_sample(&cm, -100.0);
+    res = cm_add_sample(&cm, -100.0, 1);
     fail_unless(res == 0);
 
     double val = cm_query(&cm, 0.5);
@@ -171,7 +171,7 @@ START_TEST(test_cm_init_add_loop_query_destroy)
     fail_unless(res == 0);
 
     for (int i=0; i < 100000; i++) {
-        res = cm_add_sample(&cm, i);
+        res = cm_add_sample(&cm, i, 1);
         fail_unless(res == 0);
     }
 
@@ -200,12 +200,12 @@ START_TEST(test_cm_init_add_loop_tail_query_destroy)
     fail_unless(res == 0);
 
     for (int i=0; i < 1000; i++) {
-        res = cm_add_sample(&cm, 1.0);
+        res = cm_add_sample(&cm, 1.0, 1);
         fail_unless(res == 0);
     }
 
     // Add a huge sample value (10M)
-    res = cm_add_sample(&cm, 10000000.0);
+    res = cm_add_sample(&cm, 10000000.0, 1);
     fail_unless(res == 0);
 
     res = cm_flush(&cm);
@@ -234,7 +234,7 @@ START_TEST(test_cm_init_add_loop_rev_query_destroy)
     fail_unless(res == 0);
 
     for (int i=100000; i > 0; i--) {
-        res = cm_add_sample(&cm, i);
+        res = cm_add_sample(&cm, i, 1);
         fail_unless(res == 0);
     }
 
@@ -264,7 +264,7 @@ START_TEST(test_cm_init_add_loop_random_query_destroy)
 
     srandom(42);
     for (int i=0; i < 100000; i++) {
-        res = cm_add_sample(&cm, random());
+        res = cm_add_sample(&cm, random(), 1);
         fail_unless(res == 0);
     }
 

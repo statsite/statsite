@@ -13,7 +13,6 @@ static void finalize_timer(timer *timer);
  * @return 0 on success.
  */
 int init_timer(double eps, double *quantiles, uint32_t num_quants, timer *timer) {
-    timer->actual_count = 0;
     timer->count = 0;
     timer->sum = 0;
     timer->squared_sum = 0;
@@ -39,12 +38,12 @@ int destroy_timer(timer *timer) {
  * @return 0 on success.
  */
 int timer_add_sample(timer *timer, double sample, double sample_rate) {
-    timer->actual_count += 1;
-    timer->count += (1 / sample_rate);
-    timer->sum += sample;
-    timer->squared_sum += pow(sample, 2);
+    uint64_t count = (1 / sample_rate);
+    timer->count += count;
+    timer->sum += sample * count;
+    timer->squared_sum += pow(sample, 2) * count;
     timer->finalized = 0;
-    return cm_add_sample(&timer->cm, sample);
+    return cm_add_sample(&timer->cm, sample, count);
 }
 
 /**
@@ -84,7 +83,7 @@ double timer_min(timer *timer) {
  * @return The mean value
  */
 double timer_mean(timer *timer) {
-    return (timer->actual_count) ? timer->sum / timer->actual_count : 0;
+    return (timer->count) ? timer->sum / timer->count : 0;
 }
 
 /**
@@ -93,8 +92,8 @@ double timer_mean(timer *timer) {
  * @return The sample standard deviation
  */
 double timer_stddev(timer *timer) {
-    double num = (timer->actual_count * timer->squared_sum) - pow(timer->sum, 2);
-    double div = timer->actual_count * (timer->actual_count - 1);
+    double num = (timer->count * timer->squared_sum) - pow(timer->sum, 2);
+    double div = timer->count * (timer->count - 1);
     if (div == 0) return 0;
     return sqrt(num / div);
 }
