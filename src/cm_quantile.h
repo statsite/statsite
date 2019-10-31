@@ -36,7 +36,7 @@ typedef struct {
     uint64_t num_values;    // Number of values added
 
     cm_sample *samples;     // Sorted linked list of samples
-    cm_sample *end;         // Pointer to the end of the sampels
+    cm_sample *end;         // Pointer to the end of the samples
     heap *bufLess, *bufMore;// Sample buffer
 
     struct cm_insert_cursor insert;     // Insertion cursor
@@ -65,9 +65,10 @@ int destroy_cm_quantile(cm_quantile *cm);
  * Adds a new sample to the struct
  * @arg cm_quantile The cm_quantile to add to
  * @arg sample The new sample value
+ * @arg count number of samples to add
  * @return 0 on success.
  */
-int cm_add_sample(cm_quantile *cm, double sample);
+int cm_add_sample(cm_quantile *cm, double sample, uint64_t count);
 
 /**
  * Queries for a quantile value

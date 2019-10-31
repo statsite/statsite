@@ -222,18 +222,18 @@ class TestInteg(object):
 
         wait_file(output)
         out = open(output).read()
-        assert "timers.withrate.sum|4950" in out
-        assert "timers.withrate.sum_sq|328350" in out
+        assert "timers.withrate.sum|9900" in out
+        assert "timers.withrate.sum_sq|656700" in out
         assert "timers.withrate.mean|49.500000" in out
         assert "timers.withrate.lower|0.000000" in out
         assert "timers.withrate.upper|99.000000" in out
         assert "timers.withrate.count|200" in out
-        assert "timers.withrate.stdev|29.011492" in out
-        assert "timers.withrate.median|49.000000" in out
+        assert "timers.withrate.stdev|28.938507" in out
+        assert "timers.withrate.median|50.000000" in out
         assert "timers.withrate.p90|90.000000" in out
         assert "timers.withrate.p95|95.000000" in out
         assert "timers.withrate.p99|99.000000" in out
-        assert "timers.withrate.rate|4950" in out
+        assert "timers.withrate.rate|9900" in out
         assert "timers.withrate.sample_rate|200.0" in out
 
     def test_histogram(self, servers):
