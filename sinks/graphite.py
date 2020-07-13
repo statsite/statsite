@@ -7,7 +7,7 @@ import socket
 import logging
 import pickle
 import struct
-
+from builtins import range
 
 # Initialize the logger
 logging.basicConfig()
@@ -100,7 +100,7 @@ class GraphiteStore(object):
         # Serialize writes to the socket
         try:
             self._write_metric(data)
-        except StandardError:
+        except ValueError:
             self.logger.exception("Failed to write out the metrics!")
 
     def flush_pickle(self):
@@ -146,17 +146,17 @@ class GraphiteStore(object):
         sock.settimeout(self.socket_timeout)
         try:
             sock.connect((self.host, self.port))
-        except StandardError:
+        except ValueError:
             self.logger.error("Failed to connect!")
             sock = None
         return sock
 
     def _write_metric(self, metric):
         """Tries to write a string to the socket, reconnecting on any errors"""
-        for _ in xrange(self.attempts):
+        for _ in range(self.attempts):
             if self.sock:
                 try:
-                    self.sock.sendall(metric)
+                    self.sock.sendall(metric.encode())
                     return
                 except socket.error:
                     self.logger.exception("Error while flushing to graphite. Reattempting...")
