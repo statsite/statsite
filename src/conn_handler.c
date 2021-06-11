@@ -98,6 +98,7 @@ void init_conn_handler(statsite_config *config) {
  */
 static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name, void *value) {
     #define STREAM(...) if (fprintf(pipe, __VA_ARGS__, (long long)tv->tv_sec) < 0) return 1;
+    #define STREAM_N(N, ...) if (fprintf(pipe, __VA_ARGS__, (long long)tv->tv_sec) < 0) return 1;
     struct timeval *tv = data;
     timer_hist *t;
     int i;
@@ -115,12 +116,14 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
 
         case COUNTER:
             if (GLOBAL_CONFIG->extended_counters) {
+                char *n = metric_name_format(name, ".count");
                 if (GLOBAL_CONFIG->legacy_extended_counters) {
-                    STREAM("%s%s.count|%"PRIu64"|%lld\n", prefix, name, counter_count(value));
+                    STREAM("%s%s|%"PRIu64"|%lld\n", prefix, n, counter_count(value));
                 } else {
-                    STREAM("%s%s.count|%f|%lld\n", prefix, name, counter_sum(value));
+                    STREAM("%s%s|%f|%lld\n", prefix, n, counter_sum(value));
                 }
-                STREAM("%s%s.rate|%f|%lld\n", prefix, name, counter_sum(value) / GLOBAL_CONFIG->flush_interval);
+                n = metric_name_format(name, ".rate");
+                STREAM("%s%s|%f|%lld\n", prefix, n, counter_sum(value) / GLOBAL_CONFIG->flush_interval);
             } else {
                 STREAM("%s%s|%f|%lld\n", prefix, name, counter_sum(value));
             }
@@ -133,48 +136,62 @@ static int stream_formatter(FILE *pipe, void *data, metric_type type, char *name
         case TIMER:
             t = (timer_hist*)value;
             if (timers_config->sum) {
-                STREAM("%s%s.sum|%f|%lld\n", prefix, name, timer_sum(&t->tm));
+                char *n = metric_name_format(name, ".sum");
+                STREAM("%s%s|%f|%lld\n", prefix, n, timer_sum(&t->tm));
             }
             if (timers_config->sum_sq) {
-                STREAM("%s%s.sum_sq|%f|%lld\n", prefix, name, timer_squared_sum(&t->tm));
+                char *n = metric_name_format(name, ".sum_sq");
+                STREAM("%s%s|%f|%lld\n", prefix, n, timer_squared_sum(&t->tm));
             }
             if (timers_config->mean) {
-                STREAM("%s%s.mean|%f|%lld\n", prefix, name, timer_mean(&t->tm));
+                char *n = metric_name_format(name, ".mean");
+                STREAM("%s%s|%f|%lld\n", prefix, n, timer_mean(&t->tm));
             }
             if (timers_config->lower) {
-                STREAM("%s%s.lower|%f|%lld\n", prefix, name, timer_min(&t->tm));
+                char *n = metric_name_format(name, ".lower");
+                STREAM("%s%s|%f|%lld\n", prefix, n, timer_min(&t->tm));
             }
             if (timers_config->upper) {
-                STREAM("%s%s.upper|%f|%lld\n", prefix, name, timer_max(&t->tm));
+                char *n = metric_name_format(name, ".upper");
+                STREAM("%s%s|%f|%lld\n", prefix, n, timer_max(&t->tm));
             }
             if (timers_config->count) {
-                STREAM("%s%s.count|%"PRIu64"|%lld\n", prefix, name, timer_count(&t->tm));
+                char *n = metric_name_format(name, ".count");
+                STREAM("%s%s|%"PRIu64"|%lld\n", prefix, n, timer_count(&t->tm));
             }
             if (timers_config->stdev) {
-                STREAM("%s%s.stdev|%f|%lld\n", prefix, name, timer_stddev(&t->tm));
+                char *n = metric_name_format(name, ".stdev");
+                STREAM("%s%s|%f|%lld\n", prefix, n, timer_stddev(&t->tm));
             }
             for (i=0; i < GLOBAL_CONFIG->num_quantiles; i++) {
+                char *n;
+                double q = timer_query(&t->tm, GLOBAL_CONFIG->quantiles[i]);
                 if (timers_config->median && GLOBAL_CONFIG->quantiles[i] == 0.5) {
-                    STREAM("%s%s.median|%f|%lld\n", prefix, name, timer_query(&t->tm, 0.5));
+                    n = metric_name_format(name, ".median");
+                    STREAM("%s%s|%f|%lld\n", prefix, n, q);
                 }
-                STREAM("%s%s.p%0.0f|%f|%lld\n", prefix, name,
-                    GLOBAL_CONFIG->quantiles[i] * 100,
-                    timer_query(&t->tm, GLOBAL_CONFIG->quantiles[i]));
+                n = metric_name_format_pcnt(name, ".p", GLOBAL_CONFIG->quantiles[i]);
+                STREAM("%s%s|%f|%lld\n", prefix, n, q);
             }
             if (timers_config->rate) {
-                STREAM("%s%s.rate|%f|%lld\n", prefix, name, timer_sum(&t->tm) / GLOBAL_CONFIG->flush_interval);
+                char *n = metric_name_format(name, ".rate");
+                STREAM("%s%s|%f|%lld\n", prefix, n, timer_sum(&t->tm) / GLOBAL_CONFIG->flush_interval);
             }
             if (timers_config->sample_rate) {
-                STREAM("%s%s.sample_rate|%f|%lld\n", prefix, name, (double)timer_count(&t->tm) / GLOBAL_CONFIG->flush_interval);
+                char *n = metric_name_format(name, ".sample_rate");
+                STREAM("%s%s|%f|%lld\n", prefix, n, (double)timer_count(&t->tm) / GLOBAL_CONFIG->flush_interval);
             }
 
             // Stream the histogram values
             if (t->conf) {
-                STREAM("%s%s.histogram.bin_<%0.2f|%u|%lld\n", prefix, name, t->conf->min_val, t->counts[0]);
+                char *n = metric_name_format_hist(name, ".histogram.bin_<", t->conf->min_val);
+                STREAM("%s%s|%u|%lld\n", prefix, n, t->counts[0]);
                 for (i=0; i < t->conf->num_bins-2; i++) {
-                    STREAM("%s%s.histogram.bin_%0.2f|%u|%lld\n", prefix, name, t->conf->min_val+(t->conf->bin_width*i), t->counts[i+1]);
+                    n = metric_name_format_hist(name, ".histogram.bin_", t->conf->min_val+(t->conf->bin_width*i));
+                    STREAM("%s%s|%u|%lld\n", prefix, n, t->counts[i+1]);
                 }
-                STREAM("%s%s.histogram.bin_>%0.2f|%u|%lld\n", prefix, name, t->conf->max_val, t->counts[i+1]);
+                n = metric_name_format_hist(name, ".histogram.bin_>", t->conf->max_val);
+                STREAM("%s%s|%u|%lld\n", prefix, n, t->counts[i+1]);
             }
             break;
 
