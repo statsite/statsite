@@ -25,7 +25,8 @@ BINARY_SET_HEADER = struct.Struct("<BBHH")
 BIN_TYPES = {"kv": 1, "c": 2, "ms": 3, "set": 4, "g": 5, "delta": 6}
 
 
-def pytest_funcarg__servers(request):
+@pytest.fixture
+def servers(request):
     "Returns a new APIHandler with a filter manager"
     # Create tmpdir and delete after
     tmpdir = tempfile.mkdtemp()

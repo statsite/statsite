@@ -15,7 +15,8 @@ except ImportError:
     sys.exit(1)
 
 
-def pytest_funcarg__servers(request):
+@pytest.fixture
+def servers(request):
     "Returns a new APIHandler with a filter manager"
     # Create tmpdir and delete after
     tmpdir = tempfile.mkdtemp()
@@ -49,13 +50,13 @@ timers_include = MEAN,STDEV,SUM,SUM_SQ,LOWER,UPPER,SAMPLE_RATE
             proc.wait()
             shutil.rmtree(tmpdir)
         except:
-            print proc
+            print(proc)
             pass
     request.addfinalizer(cleanup)
 
     # Make a connection to the server
     connected = False
-    for x in xrange(3):
+    for x in range(3):
         try:
             conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             conn.settimeout(1)
@@ -112,3 +113,5 @@ class TestInteg(object):
         assert "timers.foobar.sample_rate|3" in out
 
 
+if __name__ == "__main__":
+    sys.exit(pytest.main(args="-k TestInteg."))

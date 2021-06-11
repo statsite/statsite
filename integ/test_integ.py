@@ -17,7 +17,8 @@ except ImportError:
     sys.exit(1)
 
 
-def pytest_funcarg__servers(request):
+@pytest.fixture
+def servers(request):
     "Returns a new APIHandler with a filter manager"
     # Create tmpdir and delete after
     tmpdir = tempfile.mkdtemp()
@@ -57,13 +58,13 @@ width=10
             proc.wait()
             shutil.rmtree(tmpdir)
         except:
-            print proc
+            print(proc)
             pass
     request.addfinalizer(cleanup)
 
     # Make a connection to the server
     connected = False
-    for x in xrange(3):
+    for x in range(3):
         try:
             conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             conn.settimeout(1)
@@ -97,72 +98,161 @@ def wait_file(path, timeout=5):
         time.sleep(0.1)
 
 
+def verify_line(line, test_set, times_list):
+    for test in test_set:
+        if line.startswith(test):
+            for t in times_list:
+                v = "%s%d\n" % (test, t)
+                if line == v:
+                    test_set.remove(test)
+                    return
+        else:
+            l = line.split('|')
+            t = test.split('|')
+            if l[0] == t[0]:
+                assert line == test, "value in line mismatch with test sets"
+
+    # line not founded
+    assert line in test_set, "line not found in test sets"
+
+def verify_lines(lines, test_set, times_list):
+    for line in lines:
+        verify_line(line, test_set, times_list)
+
+    # check for not founded test sets
+    assert not test_set, "test sets not found in out"
+
+def verify(output, test_set, times_list):
+    lines = open(output).readlines()
+    verify_lines(lines, test_set, times_list)
+
+    
 class TestInteg(object):
     def test_kv(self, servers):
         "Tests adding kv pairs"
         server, _, output = servers
-        server.sendall("tubez:100|kv\n")
+
+        server.sendall("tubez1:100|kv\n")
+
+        server.sendall("tubez2;env=prod:50|kv\n") # Tagged metric
 
         wait_file(output)
         now = time.time()
-        out = open(output).read()
-        assert out in ("kv.tubez|100.000000|%d\n" % now, "kv.tubez|100.000000|%d\n" % (now - 1))
+
+        test_set = {
+            "kv.tubez1|100.000000|",
+            "kv.tubez2;env=prod|50.000000|"
+        }
+        times_list = [ now, now - 1 ]
+
+        verify(output, test_set, times_list)
 
     def test_gauges(self, servers):
         "Tests adding gauges"
         server, _, output = servers
+        
         server.sendall("g1:1|g\n")
         server.sendall("g1:50|g\n")
+
+        server.sendall("g2;env=prod:4|g\n") # Tagged metric
+        server.sendall("g2;env=prod:5|g\n")
+
         wait_file(output)
         now = time.time()
-        out = open(output).read()
-        assert out in ("gauges.g1|50.000000|%d\n" % now, "gauges.g1|50.000000|%d\n" % (now - 1))
+
+        test_set = {
+            "gauges.g1|50.000000|",
+            "gauges.g2;env=prod|5.000000|"
+        }
+        times_list = [ now, now - 1 ]
+
+        verify(output, test_set, times_list)
 
     def test_gauges_delta(self, servers):
         "Tests adding gauges"
         server, _, output = servers
-        server.sendall("gd:+50|g\n")
-        server.sendall("gd:+50|g\n")
+        
+        server.sendall("gd1:+50|g\n")
+        server.sendall("gd1:+50|g\n")
+
+        server.sendall("gd2;env=prod:+4|g\n") # Tagged metric
+        server.sendall("gd2;env=prod:+5|g\n")
+
         wait_file(output)
         now = time.time()
-        out = open(output).read()
-        assert out in ("gauges.gd|100.000000|%d\n" % now, "gauges.gd|100.000000|%d\n" % (now - 1))
+
+        test_set = {
+            "gauges.gd1|100.000000|",
+            "gauges.gd2;env=prod|9.000000|"
+        }
+        times_list = [ now, now - 1 ]
+
+        verify(output, test_set, times_list)
 
     def test_gauges_delta_neg(self, servers):
         "Tests adding gauges"
         server, _, output = servers
-        server.sendall("gd:-50|g\n")
-        server.sendall("gd:-50|g\n")
+       
+        server.sendall("gd1:-50|g\n")
+        server.sendall("gd1:-50|g\n")
+
+        server.sendall("gd2;env=prod:+4|g\n") # Tagged metric
+        server.sendall("gd2;env=prod:-5|g\n")
+
         wait_file(output)
         now = time.time()
-        out = open(output).read()
-        assert out in ("gauges.gd|-100.000000|%d\n" % now, "gauges.gd|-100.000000|%d\n" % (now - 1))
+
+        test_set = {
+            "gauges.gd1|-100.000000|",
+            "gauges.gd2;env=prod|-1.000000|"
+        }
+        times_list = [ now, now - 1 ]
+
+        verify(output, test_set, times_list)
 
     def test_counters(self, servers):
-        "Tests adding kv pairs"
+        "Tests adding counters"
         server, _, output = servers
-        server.sendall("foobar:100|c\n")
-        server.sendall("foobar:200|c\n")
-        server.sendall("foobar:300|c\n")
+
+        server.sendall("foobar1:100|c\n")
+        server.sendall("foobar1:200|c\n")
+        server.sendall("foobar1:300|c\n")
+
+        server.sendall("foobar2;env=prod:2|c\n") # Tagged metric
+        server.sendall("foobar2;env=prod:3|c\n")
 
         wait_file(output)
         now = time.time()
-        out = open(output).read()
-        assert out in ("counts.foobar|600.000000|%d\n" % (now),
-                       "counts.foobar|600.000000|%d\n" % (now - 1))
+
+        test_set = {
+            "counts.foobar1|600.000000|",
+            "counts.foobar2;env=prod|5.000000|"
+        }
+        times_list = [ now, now - 1 ]
+
+        verify(output, test_set, times_list)
 
     def test_counters_sample(self, servers):
-        "Tests adding kv pairs"
+        "Tests adding counters sample"
         server, _, output = servers
-        server.sendall("foobar:100|c|@0.1\n")
-        server.sendall("foobar:200|c|@0.1\n")
-        server.sendall("foobar:300|c|@0.1\n")
+        
+        server.sendall("foobar1:100|c|@0.1\n")
+        server.sendall("foobar1:200|c|@0.1\n")
+        server.sendall("foobar1:300|c|@0.1\n")
+
+        server.sendall("foobar2;env=prod:2|c|@0.1\n") # Tagged metric
+        server.sendall("foobar2;env=prod:3|c|@0.1\n")
 
         wait_file(output)
         now = time.time()
-        out = open(output).read()
-        assert out in ("counts.foobar|6000.000000|%d\n" % (now),
-                       "counts.foobar|6000.000000|%d\n" % (now - 1))
+
+        test_set = {
+            "counts.foobar1|6000.000000|",
+            "counts.foobar2;env=prod|50.000000|"
+        }
+        times_list = [ now, now - 1 ]
+
+        verify(output, test_set, times_list)
 
     def test_meters_alias(self, servers):
         "Tests adding timing data with the 'h' alias"
@@ -189,34 +279,59 @@ class TestInteg(object):
         assert "timers.val.sample_rate|100" in out
 
     def test_meters(self, servers):
-        "Tests adding kv pairs"
+        "Tests adding meters"
         server, _, output = servers
+
         msg = ""
-        for x in xrange(100):
-            msg += "noobs:%d|ms\n" % x
+        for x in range(100):
+            msg += "noobs1:%d|ms\n" % x
+            msg += "noobs2;env=prod:%d|ms\n" % x # Tagged metric
+
         server.sendall(msg)
 
         wait_file(output)
-        out = open(output).read()
-        assert "timers.noobs.sum|4950" in out
-        assert "timers.noobs.sum_sq|328350" in out
-        assert "timers.noobs.mean|49.500000" in out
-        assert "timers.noobs.lower|0.000000" in out
-        assert "timers.noobs.upper|99.000000" in out
-        assert "timers.noobs.count|100" in out
-        assert "timers.noobs.stdev|29.011492" in out
-        assert "timers.noobs.median|49.000000" in out
-        assert "timers.noobs.p90|90.000000" in out
-        assert "timers.noobs.p95|95.000000" in out
-        assert "timers.noobs.p99|99.000000" in out
-        assert "timers.noobs.rate|4950" in out
-        assert "timers.noobs.sample_rate|100" in out
+        now = time.time()
+
+        test_set = {
+            "timers.noobs1.sum|4950.000000|",
+            "timers.noobs1.sum_sq|328350.000000|",
+            "timers.noobs1.mean|49.500000|",
+            "timers.noobs1.lower|0.000000|",
+            "timers.noobs1.upper|99.000000|",
+            "timers.noobs1.count|100|",
+            "timers.noobs1.rate|4950.000000|",
+            "timers.noobs1.sample_rate|100.000000|",
+            "timers.noobs1.stdev|29.011492|",
+            "timers.noobs1.median|49.000000|",
+            "timers.noobs1.p50|49.000000|",
+            "timers.noobs1.p90|90.000000|",
+            "timers.noobs1.p95|95.000000|",
+            "timers.noobs1.p99|99.000000|",
+            # Tagged metric
+            "timers.noobs2.sum;env=prod|4950.000000|",
+            "timers.noobs2.sum_sq;env=prod|328350.000000|",
+            "timers.noobs2.mean;env=prod|49.500000|",
+            "timers.noobs2.lower;env=prod|0.000000|",
+            "timers.noobs2.upper;env=prod|99.000000|",
+            "timers.noobs2.count;env=prod|100|",
+            "timers.noobs2.rate;env=prod|4950.000000|",
+            "timers.noobs2.sample_rate;env=prod|100.000000|",
+            "timers.noobs2.stdev;env=prod|29.011492|",
+            "timers.noobs2.median;env=prod|49.000000|",
+            "timers.noobs2.p50;env=prod|49.000000|",
+            "timers.noobs2.p90;env=prod|90.000000|",
+            "timers.noobs2.p95;env=prod|95.000000|",
+            "timers.noobs2.p99;env=prod|99.000000|"
+        }
+        times_list = [ now, now - 1 ]
+
+        verify(output, test_set, times_list)
 
     def test_timers_with_rate(self, servers):
         "Tests timers with sampling rate"
         server, _, output = servers
         msg = ""
-        for x in xrange(100):
+        for x in range(100):
             msg += "withrate:%d|ms|@0.5\n" % x
         server.sendall(msg)
 
@@ -240,7 +355,7 @@ class TestInteg(object):
         "Tests adding keys with histograms"
         server, _, output = servers
         msg = ""
-        for x in xrange(100):
+        for x in range(100):
             msg += "has_hist.test:%d|ms\n" % x
         server.sendall(msg)
 
@@ -258,16 +373,28 @@ class TestInteg(object):
         assert "timers.has_hist.test.histogram.bin_>90.00|10" in out
 
     def test_sets(self, servers):
-        "Tests adding kv pairs"
+        "Tests adding sets"
         server, _, output = servers
-        server.sendall("zip:foo|s\n")
-        server.sendall("zip:bar|s\n")
-        server.sendall("zip:baz|s\n")
+        
+        server.sendall("zip1:foo|s\n")
+        server.sendall("zip1:bar|s\n")
+        server.sendall("zip1:baz|s\n")
+
+        server.sendall("zip2;env=prod:foo|s\n") # Tagged metric
+        server.sendall("zip2;env=prod:bar|s\n")
 
         wait_file(output)
         now = time.time()
-        out = open(output).read()
-        assert out in ("sets.zip|3|%d\n" % now, "sets.zip|3|%d\n" % (now - 1))
+
+        now = time.time()
+
+        test_set = {
+            "sets.zip1|3|",
+            "sets.zip2;env=prod|2|",
+        }
+        times_list = [ now, now - 1 ]
+
+        verify(output, test_set, times_list)
 
     def test_double_parsing(self, servers):
         "Tests string to double parsing"
@@ -496,13 +623,15 @@ class TestIntegBindAddress(object):
             assert not self.islistening('1.0.1.0', port), 'should not be listening'
 
     def test_ipv4_used(self):
+        p = None
         try:
             port = random.randrange(10000, 65000)
             p = subprocess.Popen(['nc', '-l', '127.0.0.1', str(port)])
             with self.run('127.0.0.1', port):
                 assert not self.islistening('127.0.0.0', port), 'should not be listening'
         finally:
-            p.kill()
+            if not p is None:
+                p.kill()
 
 
 if __name__ == "__main__":

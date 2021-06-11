@@ -51,7 +51,8 @@ for x in xrange(1, 100):
     VAL_TYPE_MAP["P%02d" % x] = 128 | x
 
 
-def pytest_funcarg__servers(request):
+@pytest.fixture
+def servers(request):
     "Returns a new APIHandler with a filter manager"
     # Create tmpdir and delete after
     tmpdir = tempfile.mkdtemp()
@@ -120,7 +121,8 @@ width=10
     return conn, conn2, output
 
 
-def pytest_funcarg__serversPrefix(request):
+@pytest.fixture
+def serversPrefix(request):
     "Returns a new APIHandler with a filter manager"
     # Create tmpdir and delete after
     tmpdir = tempfile.mkdtemp()
@@ -161,7 +163,7 @@ width=10
             proc.wait()
             shutil.rmtree(tmpdir)
         except:
-            print proc
+            print(proc)
             pass
     request.addfinalizer(cleanup)
 
