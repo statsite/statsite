@@ -58,21 +58,21 @@ stream_cmd = %s
             proc.wait()
             shutil.rmtree(tmpdir)
         except:
-            print proc
+            print(proc)
             pass
     request.addfinalizer(cleanup)
 
     # Make a connection to the server
     connected = False
-    for x in xrange(3):
+    for x in range(3):
         try:
             conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             conn.settimeout(1)
             conn.connect(("localhost", port))
             connected = True
             break
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             time.sleep(0.5)
 
     # Die now
@@ -175,12 +175,12 @@ class TestInteg(object):
         "Tests adding kv pairs"
         server, _, output = servers
         msg = ""
-        for x in xrange(100):
+        for x in range(100):
             msg += format("noobs", "ms", x)
         server.sendall(msg)
         wait_file(output)
         out = open(output).read()
-        print out
+        print(out)
         assert "timers.noobs.sum|4950" in out
         assert "timers.noobs.sum_sq|328350" in out
         assert "timers.noobs.mean|49.500000" in out
@@ -259,12 +259,12 @@ class TestIntegUDP(object):
         "Tests adding kv pairs"
         _, server, output = servers
         msg = ""
-        for x in xrange(100):
+        for x in range(100):
             msg += format("noobs", "ms", x)
         server.sendall(msg)
         wait_file(output)
         out = open(output).read()
-        print out
+        print(out)
         assert "timers.noobs.sum|4950" in out
         assert "timers.noobs.sum_sq|328350" in out
         assert "timers.noobs.mean|49.500000" in out

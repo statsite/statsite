@@ -47,7 +47,7 @@ VAL_TYPE_MAP = {
 }
 
 # Pre-compute all the possible percentiles
-for x in xrange(1, 100):
+for x in range(1, 100):
     VAL_TYPE_MAP["P%02d" % x] = 128 | x
 
 
@@ -92,21 +92,21 @@ width=10
             proc.wait()
             shutil.rmtree(tmpdir)
         except:
-            print proc
+            print(proc)
             pass
     request.addfinalizer(cleanup)
 
     # Make a connection to the server
     connected = False
-    for x in xrange(3):
+    for x in range(3):
         try:
             conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             conn.settimeout(1)
             conn.connect(("localhost", port))
             connected = True
             break
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             time.sleep(0.5)
 
     # Die now
@@ -169,15 +169,15 @@ width=10
 
     # Make a connection to the server
     connected = False
-    for x in xrange(3):
+    for x in range(3):
         try:
             conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             conn.settimeout(1)
             conn.connect(("localhost", port))
             connected = True
             break
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             time.sleep(0.5)
 
     # Die now
@@ -277,7 +277,7 @@ class TestInteg(object):
         "Tests adding kv pairs"
         server, _, output = servers
         msg = ""
-        for x in xrange(100):
+        for x in range(100):
             msg += format("noobs", "ms", x)
         server.sendall(msg)
         wait_file(output)
@@ -305,7 +305,7 @@ class TestInteg(object):
         "Tests streaming of histogram values"
         server, _, output = servers
         msg = ""
-        for x in xrange(100):
+        for x in range(100):
             msg += format("has_hist.test", "ms", x)
         server.sendall(msg)
         wait_file(output)
@@ -385,7 +385,7 @@ class TestIntegPrefix(object):
         "Tests adding kv pairs"
         server, _, output = serversPrefix
         msg = ""
-        for x in xrange(100):
+        for x in range(100):
             msg += format("noobs", "ms", x)
         server.sendall(msg)
         wait_file(output)
@@ -413,7 +413,7 @@ class TestIntegPrefix(object):
         "Tests streaming of histogram values"
         server, _, output = serversPrefix
         msg = ""
-        for x in xrange(100):
+        for x in range(100):
             msg += format("has_hist.test", "ms", x)
         server.sendall(msg)
         wait_file(output)

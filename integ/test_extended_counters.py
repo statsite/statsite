@@ -50,7 +50,7 @@ extended_counters = true
             proc.wait()
             shutil.rmtree(tmpdir)
         except:
-            print proc
+            print(proc)
             pass
     request.addfinalizer(cleanup)
 
@@ -63,8 +63,8 @@ extended_counters = true
             conn.connect(("localhost", port))
             connected = True
             break
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             time.sleep(0.5)
 
     # Die now
@@ -115,7 +115,7 @@ legacy_extended_counters = false
             proc.wait()
             shutil.rmtree(tmpdir)
         except:
-            print proc
+            print(proc)
             pass
     request.addfinalizer(cleanup)
 
@@ -128,8 +128,8 @@ legacy_extended_counters = false
             conn.connect(("localhost", port))
             connected = True
             break
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             time.sleep(0.5)
 
     # Die now

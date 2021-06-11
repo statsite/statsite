@@ -71,8 +71,8 @@ width=10
             conn.connect(("localhost", port))
             connected = True
             break
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             time.sleep(0.5)
 
     # Die now
@@ -258,7 +258,7 @@ class TestInteg(object):
         "Tests adding timing data with the 'h' alias"
         server, _, output = servers
         msg = ""
-        for x in xrange(100):
+        for x in range(100):
             msg += "val:%d|h\n" % x
         server.sendall(msg)
 
@@ -545,7 +545,7 @@ class TestIntegUDP(object):
         "Tests adding kv pairs"
         _, server, output = servers
         msg = ""
-        for x in xrange(100):
+        for x in range(100):
             msg += "noobs:%d|ms\n" % x
         server.sendall(msg)
         wait_file(output)

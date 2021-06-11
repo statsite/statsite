@@ -63,8 +63,8 @@ timers_include = MEAN,STDEV,SUM,SUM_SQ,LOWER,UPPER,SAMPLE_RATE
             conn.connect(("localhost", port))
             connected = True
             break
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             time.sleep(0.5)
 
     # Die now
