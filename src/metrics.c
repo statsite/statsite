@@ -1,7 +1,126 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "metrics.h"
 #include "set.h"
+
+
+static __thread char format_buf[32768];
+
+inline static size_t aligned_size(size_t size) {
+    size_t c = size % 4096;
+    if (c == 0)
+        return size;
+    else
+        return size + 4096 - c;
+}
+
+char *metric_name_format(const char *name, const char *postfix) {
+    size_t name_len = strlen(name);
+    size_t postfix_len = strlen(postfix);
+    size_t len = name_len + postfix_len;
+    const char *tagged = strchr(name, ';');
+
+    /* check for buffer overflow */
+    if (len >= sizeof(format_buf)) {
+        return NULL;
+    }
+    
+    if (tagged) {
+        size_t tag_name_len = tagged - name;
+        memcpy(format_buf, name, tag_name_len);
+        memcpy(format_buf + tag_name_len, postfix, postfix_len);
+        memcpy(format_buf + tag_name_len + postfix_len, tagged, name_len - tag_name_len);
+    } else {
+        memcpy(format_buf, name, name_len);
+        memcpy(format_buf + name_len, postfix, postfix_len);
+    }
+    format_buf[len] = '\0';
+
+    return format_buf;
+}
+
+char *metric_name_format_pcnt(const char *name, const char *postfix, double pcnt) {
+    char *p = format_buf;
+    size_t n;
+    size_t name_len = strlen(name);
+    size_t postfix_len = strlen(postfix);
+    size_t len = name_len + postfix_len + 4;
+    const char *tagged = strchr(name, ';');
+
+    /* check for buffer overflow */
+    if (len >= sizeof(format_buf)) {
+        return NULL;
+    }
+    
+    if (tagged) {
+        size_t tag_name_len = tagged - name;
+        memcpy(p, name, tag_name_len);
+        p += tag_name_len;
+        memcpy(p, postfix, postfix_len);
+
+        p += postfix_len;
+        n = snprintf(p, 4, "%0.0f", pcnt * 100);
+
+        p += n;
+        memcpy(p, tagged, name_len - tag_name_len);
+
+        p[name_len - tag_name_len] = '\0';
+    } else {
+        memcpy(p, name, name_len);
+
+        p += name_len;
+        memcpy(p, postfix, postfix_len);
+
+        p += postfix_len;
+        n = snprintf(p, 4, "%0.0f", pcnt * 100);
+
+        p[n] = '\0';
+    }
+
+    return format_buf;
+}
+
+char *metric_name_format_hist(const char *name, const char *postfix, double hist) {
+    char *p = format_buf;
+    size_t n;
+    size_t name_len = strlen(name);
+    size_t postfix_len = strlen(postfix);
+    size_t len = name_len + postfix_len + 6;
+    const char *tagged = strchr(name, ';');
+
+    /* check for buffer overflow */
+    if (len >= sizeof(format_buf)) {
+        return NULL;
+    }
+    
+    if (tagged) {
+        size_t tag_name_len = tagged - name;
+        memcpy(p, name, tag_name_len);
+        p += tag_name_len;
+        memcpy(p, postfix, postfix_len);
+
+        p += postfix_len;
+        n = snprintf(p, 6, "%0.2f", hist);
+
+        p += n;
+        memcpy(p, tagged, name_len - tag_name_len);
+
+        p[name_len - tag_name_len] = '\0';
+    } else {
+        memcpy(p, name, name_len);
+
+        p += name_len;
+        memcpy(p, postfix, postfix_len);
+
+        p += postfix_len;
+        n = snprintf(p, 6, "%0.2f", hist);
+
+        p[n] = '\0';
+    }
+
+    return format_buf;
+}
 
 static int counter_delete_cb(void *data, const char *key, void *value);
 static int timer_delete_cb(void *data, const char *key, void *value);

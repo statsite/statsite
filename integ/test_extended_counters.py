@@ -15,7 +15,8 @@ except ImportError:
     sys.exit(1)
 
 
-def pytest_funcarg__servers(request):
+@pytest.fixture
+def servers(request):
     "Returns a new APIHandler with a filter manager"
     # Create tmpdir and delete after
     tmpdir = tempfile.mkdtemp()
@@ -49,21 +50,21 @@ extended_counters = true
             proc.wait()
             shutil.rmtree(tmpdir)
         except:
-            print proc
+            print(proc)
             pass
     request.addfinalizer(cleanup)
 
     # Make a connection to the server
     connected = False
-    for x in xrange(3):
+    for x in range(3):
         try:
             conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             conn.settimeout(1)
             conn.connect(("localhost", port))
             connected = True
             break
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             time.sleep(0.5)
 
     # Die now
@@ -78,7 +79,8 @@ extended_counters = true
     return conn, conn2, output
 
 
-def pytest_funcarg__servers_nonlegacy(request):
+@pytest.fixture
+def servers_nonlegacy(request):
     "Returns a new APIHandler with a filter manager"
     # Create tmpdir and delete after
     tmpdir = tempfile.mkdtemp()
@@ -113,21 +115,21 @@ legacy_extended_counters = false
             proc.wait()
             shutil.rmtree(tmpdir)
         except:
-            print proc
+            print(proc)
             pass
     request.addfinalizer(cleanup)
 
     # Make a connection to the server
     connected = False
-    for x in xrange(3):
+    for x in range(3):
         try:
             conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             conn.settimeout(1)
             conn.connect(("localhost", port))
             connected = True
             break
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             time.sleep(0.5)
 
     # Die now

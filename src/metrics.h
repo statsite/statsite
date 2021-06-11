@@ -8,6 +8,10 @@
 #include "hashmap.h"
 #include "set.h"
 
+char *metric_name_format(const char *name, const char *postfix);
+char *metric_name_format_pcnt(const char *name, const char *postfix, double pcnt);
+char *metric_name_format_hist(const char *name, const char *postfix, double hist);
+
 typedef struct key_val {
     char *name;
     double val;
